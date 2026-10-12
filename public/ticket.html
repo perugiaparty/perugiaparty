@@ -64,6 +64,8 @@ h1{font-size:clamp(40px,8vw,64px)}
 .ref{font-family:var(--f-mono);font-size:18px;background:var(--ink);color:var(--cream);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;overflow-wrap:anywhere}
 .ref .copy{color:var(--cream);border-color:#4a423b}
 .copyall{justify-self:start}
+#live-note{position:fixed;left:50%;top:calc(76px + env(safe-area-inset-top,0px));transform:translate(-50%,-20px);opacity:0;pointer-events:none;background:var(--ink);color:var(--cream);font-weight:700;font-size:15px;padding:12px 18px;border-radius:999px;box-shadow:6px 6px 0 var(--red);z-index:50;max-width:calc(100% - 32px);text-align:center;transition:opacity .3s,transform .3s}
+#live-note.show{opacity:1;transform:translate(-50%,0)}
 /* payment fields */
 .fbox{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--cream);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px}
 .fbox .k{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
@@ -225,10 +227,34 @@ function render(d){
 if (!token) {
   empty("No ticket here yet.", "Request a place first. You'll get a personal link that leads back to this page.");
 } else {
-  fetch("/api/ticket?t=" + encodeURIComponent(token), { cache: "no-store" })
-    .then(r => r.json().then(d => ({ ok: r.ok, d })))
-    .then(({ ok, d }) => ok ? render(d) : empty("We couldn't find this ticket.", esc(d.error || "Check that you opened the full link we gave you.")))
-    .catch(() => empty("Couldn't load your ticket.", "Check your connection and refresh the page."));
+  // live updates: check every 20 s while the page is open, and when the guest comes back to it
+  let last = null, busy = false;
+  const STATUS_TEXT = { approved: "You've been accepted. Your payment details are below.", paid: "Payment confirmed. Your ticket and the location are here.", in: "You're checked in. Have a great night.", declined: "Your request was updated.", released: "Your request was updated." };
+  async function check(first){
+    if (busy) return; busy = true;
+    try {
+      const r = await fetch("/api/ticket?t=" + encodeURIComponent(token), { cache: "no-store" });
+      const d = await r.json();
+      if (!r.ok) { if (first) empty("We couldn't find this ticket.", esc(d.error || "Check that you opened the full link we gave you.")); return; }
+      const sig = JSON.stringify(d);
+      if (sig === last) return;
+      const prev = last ? JSON.parse(last).status : null;
+      last = sig;
+      render(d);
+      if (prev && prev !== d.status) { notify(STATUS_TEXT[d.status] || "Your page just updated."); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    } catch (e) {
+      if (first) empty("Couldn't load your ticket.", "Check your connection and refresh the page.");
+    } finally { busy = false; }
+  }
+  function notify(msg){
+    let n = document.getElementById("live-note");
+    if (!n) { n = document.createElement("div"); n.id = "live-note"; n.setAttribute("role", "status"); document.body.appendChild(n); }
+    n.textContent = msg; n.className = "show";
+    clearTimeout(notify.t); notify.t = setTimeout(() => n.className = "", 5000);
+  }
+  check(true);
+  setInterval(() => { if (document.visibilityState === "visible") check(false); }, 20000);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") check(false); });
 }
 </script>
 </body>
