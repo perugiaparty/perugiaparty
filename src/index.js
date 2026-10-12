@@ -83,7 +83,7 @@ async function apiTicket(url, env) {
       reference: `${g.name} ${g.code}`,
       approved_at: g.approved_at,
       date_label: sameEvent ? ev.date_label : null,
-      tiers: sameEvent ? { early: ev.price_early, normal: ev.price_normal, late: ev.price_late } : null,
+      tiers: sameEvent ? { early: ev.price_early, normal: ev.price_normal, late: ev.price_late, early_until: ev.early_until, normal_until: ev.normal_until } : null,
     });
   }
   if (g.status === "paid" || g.status === "in") {

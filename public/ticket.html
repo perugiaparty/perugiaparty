@@ -143,11 +143,14 @@ function render(d){
     const overdue = left != null && left < 0;
     const names = { early: "Early bird", normal: "Normal", late: "Late" };
     const tierName = names[d.ticket] || "Ticket";
+    const day = iso => iso ? new Date(iso).toLocaleDateString("en-GB", { weekday:"short", day:"numeric", month:"short", timeZone:"Europe/Rome" }) : null;
+    const eu = d.tiers && day(d.tiers.early_until), nu = d.tiers && day(d.tiers.normal_until);
     const why = {
-      early: "You were approved early, so you get the lowest price. Prices go up as the party gets closer.",
-      normal: "You were approved at the normal price. The early bird places are gone, and late tickets cost more.",
-      late: "You were approved close to the party, so the late price applies. Places are limited at this point.",
+      early: eu ? `You were approved before ${eu}, so you get the early bird price. Prices go up as the party gets closer.` : "You were approved early, so you get the lowest price. Prices go up as the party gets closer.",
+      normal: nu ? `You were approved ${eu ? "after the early bird period" : "at the normal price"}${nu ? ", before " + nu : ""}, so the normal price applies.` : "You were approved at the normal price. The early bird places are gone, and late tickets cost more.",
+      late: nu ? `You were approved after ${nu}, close to the party, so the late price applies.` : "You were approved close to the party, so the late price applies.",
     }[d.ticket] || "This is the price for your place.";
+    const until = { early: eu ? "until " + eu : "", normal: nu ? "until " + nu : "", late: nu ? "after " + nu : "" };
     const tiers = d.tiers ? ["early","normal","late"].filter(t => d.tiers[t] != null && d.tiers[t] !== "") : [];
     const allText = `Amount: ${euro(d.price)}\nIBAN: ${d.iban || ""}\nBeneficiary: ${d.beneficiary || ""}\nReference: ${d.reference}`;
     P.innerHTML = `<div class="hero-ok"><span class="state" style="background:var(--cream);border-color:var(--cream);color:var(--red)">Accepted</span>
@@ -156,7 +159,7 @@ function render(d){
       <div class="amount"><p class="eyebrow" style="color:var(--muted-dark)">You pay · ${esc(tierName)}</p>
         <p class="big">${euro(d.price)}</p>
         <p class="why">${esc(why)}</p>
-        ${tiers.length > 1 ? `<div class="tiers">${tiers.map(t => `<div class="tier ${t === d.ticket ? "me" : ""}">${t === d.ticket ? `<span class="you">Your price</span>` : ""}<b>${euro(d.tiers[t])}</b>${names[t]}</div>`).join("")}</div>` : ""}
+        ${tiers.length > 1 ? `<div class="tiers">${tiers.map(t => `<div class="tier ${t === d.ticket ? "me" : ""}">${t === d.ticket ? `<span class="you">Your price</span>` : ""}<b>${euro(d.tiers[t])}</b>${names[t]}${until[t] ? `<br><span style="font-size:12px;opacity:.8">${until[t]}</span>` : ""}</div>`).join("")}</div>` : ""}
       </div>
       ${d.deadline ? `<div class="deadline">${overdue ? "The payment deadline has passed. DM us on Instagram if you already paid." : `Pay before <span>${esc(when(d.deadline))}</span>. After that your place goes back to the list.`}</div>` : ""}
       <div class="card">
