@@ -1,6 +1,7 @@
 # PerugiaParty website
 
-Public site for perugiaparty.com, hosted on Cloudflare Pages.
+Public site for perugiaparty.com, deployed on Cloudflare.
 
-- `index.html` is the whole site (no build step).
-- Every push to `main` is published automatically by Cloudflare Pages.
+- `public/index.html` is the whole site (no build step).
+- `wrangler.jsonc` tells Cloudflare to serve the `public` folder.
+- Every push to `main` is published automatically.
