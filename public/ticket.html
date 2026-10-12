@@ -293,7 +293,7 @@ function render(d){
   } else if (d.status === "paid" || d.status === "in") {
     const inside = d.status === "in";
     P.innerHTML = `<div class="hype">
-        <span class="state ${inside ? "in" : "ok"}">${inside ? "✓ Checked in" : "Paid · confirmed"}</span>
+        <span class="state in">${inside ? "✓ Checked in" : "✓ Paid · confirmed"}</span>
         <h1>${inside ? `You made it, <em>${first}</em>.` : `It's official, <em>${first}</em>. You're on the list.`}</h1>
         <p class="lead">${inside ? "Enjoy the night. You're exactly where you should be." : `<b style="color:var(--cream)">${esc(d.event)}</b> is happening and you're in. Your people. Your night.`}</p>
         <div class="count" id="tcount" ${inside ? 'style="display:none"' : ""} hidden></div>
