@@ -38,7 +38,6 @@ async function apiEvent(env) {
     starts_at: ev.starts_at,
     date_label: ev.date_label,
     doors: ev.doors,
-    area: ev.area,
     price: priceRange(ev),
     requests_open: !!ev.requests_open,
   });

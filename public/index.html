@@ -353,11 +353,11 @@ let timer = null;
 function renderNext(ev){
   const el = $("next-card");
   if (!ev || !ev.published) return; // keep the static "announcing soon" card
-  const price = ev.price ? (ev.price.min === ev.price.max ? euro(ev.price.min) : `${euro(ev.price.min)}–${euro(ev.price.max)}`) : null;
-  const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Area", ev.area], ["Tickets", price]].filter(f => f[1]);
+  const price = ev.price ? "From " + euro(ev.price.min) : null;
+  const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]].filter(f => f[1]);
   el.innerHTML = `<div><span class="status"><i></i>${ev.requests_open ? "Requests open" : "Requests open soon"}</span>
       <h3>${esc(ev.name || "Next PerugiaParty")}</h3>
-      <p>Exact location sent after payment is confirmed.${ev.price && ev.price.min !== ev.price.max ? " Price depends on when you're approved." : ""}</p>
+      <p>Exact location sent after payment is confirmed.</p>
       ${facts.length ? `<dl>${facts.map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>` : ""}
       <div class="count" id="count" ${ev.starts_at ? "" : "hidden"} aria-label="Countdown to the party"></div></div>
     ${ev.requests_open ? `<a class="btn" href="#request">Request a place</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram ↗</a>`}`;
@@ -367,7 +367,12 @@ function tick(){
   const c = $("count"); if (!c || !EVENT) return;
   let ms = new Date(EVENT.starts_at).getTime() - Date.now();
   if (!Number.isFinite(ms)) { c.hidden = true; return; }
-  if (ms <= 0) { c.innerHTML = `<div style="min-width:auto;padding:10px 16px"><b style="font-size:22px">It's tonight. See you there.</b></div>`; clearInterval(timer); return; }
+  if (ms <= 0) {
+    // only during the night itself; an old or wrong date hides the countdown
+    if (ms > -12 * 36e5) c.innerHTML = `<div style="min-width:auto;padding:10px 16px"><b style="font-size:22px">The party has started.</b></div>`;
+    else c.hidden = true;
+    clearInterval(timer); return;
+  }
   const d = Math.floor(ms/864e5), h = Math.floor(ms/36e5)%24, m = Math.floor(ms/6e4)%60, s = Math.floor(ms/1e3)%60;
   const p = n => String(n).padStart(2,"0");
   c.innerHTML = [[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]].map(([v,l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
