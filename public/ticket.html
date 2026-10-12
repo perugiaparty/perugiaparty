@@ -64,6 +64,27 @@ h1{font-size:clamp(40px,8vw,64px)}
 .ref{font-family:var(--f-mono);font-size:18px;background:var(--ink);color:var(--cream);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;overflow-wrap:anywhere}
 .ref .copy{color:var(--cream);border-color:#4a423b}
 .copyall{justify-self:start}
+/* payment fields */
+.fbox{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--cream);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px}
+.fbox .k{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.fbox .v{display:block;font-family:var(--f-mono);font-size:17px;font-weight:500;letter-spacing:.03em;color:var(--ink);overflow-wrap:anywhere;margin-top:2px}
+.fbox > div{min-width:0}
+.fbox.dark{background:var(--ink);border-color:var(--ink)}
+.fbox.dark .k{color:var(--muted-dark)}
+.fbox.dark .v{color:var(--cream)}
+.fbox.dark .copy{color:var(--cream);border-color:#4a423b}
+.fbox .copy{flex:none}
+.howto{gap:22px}
+.howto li > div{min-width:0}
+.howto h3{margin-top:8px}
+@media (max-width:520px){
+  .card{padding:18px}
+  .howto li{grid-template-columns:30px 1fr;gap:10px}
+  .howto li::before{width:30px;height:30px;font-size:14px}
+  .howto h3{margin-top:3px;font-size:18px}
+  .fbox{padding:10px 12px}
+  .fbox .v{font-size:15px;letter-spacing:.01em}
+}
 </style>
 </head>
 <body>
@@ -165,14 +186,13 @@ function render(d){
       <div class="card">
         <h2 style="font-size:30px">How to pay</h2>
         <ol class="howto">
-          <li><div><h3>Open your banking app</h3><p>Make a normal bank transfer (bonifico) of exactly <b>${euro(d.price)}</b>.</p></div></li>
-          <li><div><h3>Send it to</h3>
-            <dl style="margin:8px 0 0;display:grid;gap:10px">
-              <div class="row"><dt>IBAN</dt><dd class="mono">${esc(d.iban || "—")}</dd>${d.iban ? copyBtn(d.iban.replace(/\s+/g, "")) : "<span></span>"}</div>
-              <div class="row"><dt>Beneficiary</dt><dd>${esc(d.beneficiary || "—")}</dd>${d.beneficiary ? copyBtn(d.beneficiary) : "<span></span>"}</div>
-            </dl></div></li>
+          <li><div><h3>Open your banking app</h3><p>Make a normal bank transfer (bonifico) of exactly this amount.</p>
+            <div class="fbox"><div><span class="k">Amount</span><span class="v">${euro(d.price)}</span></div>${copyBtn(String(d.price).replace(".", ","))}</div></div></li>
+          <li><div><h3>Send it to</h3><p>Copy these into your transfer.</p>
+            <div class="fbox"><div><span class="k">IBAN</span><span class="v">${esc(d.iban ? d.iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim() : "—")}</span></div>${d.iban ? copyBtn(d.iban.replace(/\s+/g, "")) : ""}</div>
+            <div class="fbox"><div><span class="k">Beneficiary</span><span class="v">${esc(d.beneficiary || "—")}</span></div>${d.beneficiary ? copyBtn(d.beneficiary) : ""}</div></div></li>
           <li><div><h3>Write this in the description</h3><p>Exactly like this, so we can match your payment to you.</p>
-            <div class="ref"><span>${esc(d.reference)}</span>${copyBtn(d.reference)}</div></div></li>
+            <div class="fbox dark"><div><span class="k">Description</span><span class="v">${esc(d.reference)}</span></div>${copyBtn(d.reference)}</div></div></li>
           <li><div><h3>Wait for our confirmation</h3><p>We check payments regularly. Once yours is in, this page shows your QR ticket and the exact location. Keep this link.</p></div></li>
         </ol>
         <button class="btn ink copyall" type="button" data-copy="${esc(allText)}">Copy all payment details</button>
