@@ -3,63 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Private student parties in Perugia. Request your place on the list. 18+.">
-<meta name="theme-color" content="#141210">
 <title>PerugiaParty</title>
+<meta name="description" content="Private student parties in Perugia. House-party vibes, a guest list, and new people to meet. 18+.">
+<meta name="theme-color" content="#141210">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PerugiaParty">
+<meta property="og:title" content="PerugiaParty · Your people. Your night.">
+<meta property="og:description" content="Private student parties in Perugia. Request your place on the list. 18+.">
+<meta property="og:url" content="https://perugiaparty.com/">
+<meta property="og:image" content="https://perugiaparty.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://perugiaparty.com/og-image.png">
+<link rel="icon" href="/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/site.css">
 <style>
-/* Layout: poster-style bands — cream page, one red band, black blocks for contrast; deliberate single look in the brand's red / cream / black */
-:root{
-  --cream:#f4ead7;      /* page ground */
-  --cream-2:#ebdec6;    /* raised cream surface */
-  --ink:#141210;        /* brand black */
-  --ink-2:#262220;      /* raised black */
-  --red:#d3261c;        /* brand red */
-  --red-deep:#a81a12;   /* red on cream for small text */
-  --muted:#6b5f52;      /* secondary text on cream */
-  --muted-dark:#b9ab98; /* secondary text on black */
-  --line:#d8c8ac;       /* hairlines on cream */
-  --f-display:"Bowlby One","Arial Black",Impact,sans-serif;
-  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --f-mono:"DM Mono",ui-monospace,Menlo,Consolas,monospace;
-  color-scheme:light;
-}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
-body{background:var(--cream);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6}
-.wrap{max-width:1080px;margin-inline:auto;padding-inline:20px}
-a{color:inherit}
-:focus-visible{outline:3px solid var(--red);outline-offset:3px;border-radius:4px}
-.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1;margin:0;text-wrap:balance}
-h2{font-size:clamp(36px,6vw,60px)}
-h3{font-size:22px;line-height:1.15}
-p{margin:0}
-
-/* header */
-header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--ink);color:var(--cream)}
-header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:12px}
-.mark{font-family:var(--f-display);font-size:21px;text-decoration:none}
-.mark span{color:var(--red)}
-nav{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
-nav a{text-decoration:none;font-size:15px;color:var(--muted-dark)}
-nav a:hover{color:var(--cream)}
-@media (max-width:640px){header nav a:not(.btn){display:none}}
-.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-body);font-weight:700;font-size:15px;border-radius:999px;padding:12px 22px;border:2px solid var(--red);background:var(--red);color:var(--cream);text-decoration:none;cursor:pointer;transition:transform .15s ease}
-.btn:hover{transform:translateY(-1px);filter:brightness(1.06)}
-.btn.ink{background:var(--ink);border-color:var(--ink);color:var(--cream)}
-.btn.outline{background:transparent;color:var(--ink);border-color:var(--ink)}
-.btn.cream{background:var(--cream);border-color:var(--cream);color:var(--red)}
-header .btn{padding:8px 16px;color:var(--cream)}
-
 /* hero */
 .hero{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:center;padding-block:72px 80px}
 .hero h1{font-size:clamp(56px,10.5vw,120px);letter-spacing:-.01em}
 .hero h1 em{font-style:normal;color:var(--red);display:block}
-.hero .lede{margin-top:24px;max-width:32ch;font-size:20px;color:var(--muted)}
+.hero .lede{margin-top:24px;max-width:34ch;font-size:20px;color:var(--muted)}
 .hero .ctas{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
 .ig-note{margin-top:14px;font-size:15px;color:var(--muted)}
 .ig-note a{color:var(--red-deep);font-weight:700}
@@ -68,88 +35,80 @@ header .btn{padding:8px 16px;color:var(--cream)}
 .chip.red{background:var(--red);border-color:var(--red);color:var(--cream)}
 @media (max-width:840px){.hero{grid-template-columns:1fr;gap:44px;padding-block:48px 64px}}
 
-/* ticket (black) */
-.ticket{position:relative;background:var(--ink);color:var(--cream);border-radius:20px;padding:28px 28px 24px;transform:rotate(-3deg);box-shadow:14px 14px 0 var(--red);max-width:390px;justify-self:center;width:100%}
-.ticket::before,.ticket::after{content:"";position:absolute;top:61%;width:30px;height:30px;border-radius:50%;background:var(--cream)}
+/* ticket */
+.ticket{position:relative;background:var(--ink);color:var(--cream);border-radius:20px;padding:26px 28px 24px;transform:rotate(-3deg);box-shadow:14px 14px 0 var(--red);max-width:390px;justify-self:center;width:100%}
+.ticket::before,.ticket::after{content:"";position:absolute;top:66%;width:30px;height:30px;border-radius:50%;background:var(--cream)}
 .ticket::before{left:-15px}.ticket::after{right:-15px}
-.ticket .row{display:flex;justify-content:space-between;gap:12px;font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-dark)}
+.ticket .logo{width:150px;height:auto}
 .ticket .name{font-family:var(--f-display);font-size:36px;line-height:1;margin:20px 0 6px}
 .ticket .sub{font-size:14px;color:var(--muted-dark)}
 .ticket .perf{border-top:2px dashed #4a423b;margin:28px -28px 20px}
-.ticket .code{font-family:var(--f-mono);font-size:30px;font-weight:500;letter-spacing:.12em}
-.ticket .code b{color:var(--red);font-weight:500}
+.ticket .code{font-family:var(--f-mono);font-size:30px;font-weight:500;letter-spacing:.1em}
+.ticket .code b{color:#ff4a3d;font-weight:500}
 .ticket .tiny{font-family:var(--f-mono);font-size:11px;color:var(--muted-dark);margin-top:6px}
-.stamp{position:absolute;right:20px;top:20px;border:2px solid var(--red);color:var(--red);font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;padding:4px 8px;border-radius:6px;transform:rotate(8deg)}
+.stamp{position:absolute;right:20px;top:22px;border:2px solid #ff4a3d;color:#ff4a3d;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;padding:4px 8px;border-radius:6px;transform:rotate(8deg)}
 
-/* sections */
-.sec{padding-block:80px}
-.sec + .sec{border-top:1.5px solid var(--line)}
-.sec-head{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;margin-bottom:40px}
-.sec-head p{max-width:46ch;color:var(--muted)}
-
-/* red band: next party */
+/* next party (red band) */
 .band-red{background:var(--red);color:var(--cream)}
-.band-red .sec-head p{color:#f6d6c9}
-.band-red h2{color:var(--cream)}
+.band-red .sec-head p{color:#f3d3cc}
 .next{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;background:var(--ink);border-radius:24px;padding:36px}
-.next .status{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream)}
-.next .status i{width:9px;height:9px;border-radius:50%;background:var(--red);box-shadow:0 0 0 4px rgba(211,38,28,.25);animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(211,38,28,0)}}
-.next h3{font-size:clamp(28px,5vw,44px);margin:14px 0 10px}
+.next .status{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.next .status i{width:9px;height:9px;border-radius:50%;background:#ff4a3d;box-shadow:0 0 0 4px rgba(255,74,61,.25);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(255,74,61,0)}}
+.next h3{font-size:clamp(28px,5vw,46px);margin:14px 0 10px}
 .next p{color:var(--muted-dark);max-width:52ch}
 .next dl{display:flex;gap:32px;flex-wrap:wrap;margin:20px 0 0}
 .next dt{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-dark)}
 .next dd{margin:2px 0 0;font-weight:700}
-@media (max-width:720px){.next{grid-template-columns:1fr;padding:26px}}
+.count{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.count div{background:var(--ink-2);border-radius:14px;padding:10px 14px;min-width:76px;text-align:center}
+.count b{display:block;font-family:var(--f-display);font-size:32px;line-height:1;font-variant-numeric:tabular-nums;color:var(--cream)}
+.count span{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
+@media (max-width:720px){.next{grid-template-columns:1fr;padding:26px}.count div{min-width:64px;padding:8px 10px}.count b{font-size:26px}}
 
 /* steps */
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;list-style:none;padding:0;margin:0;counter-reset:s}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;list-style:none;padding:0;margin:0;counter-reset:s}
 .steps li{counter-increment:s;min-width:0}
-.steps li::before{content:"0" counter(s);font-family:var(--f-display);font-size:34px;color:var(--red);line-height:1}
-.steps h3{margin:12px 0 8px}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:var(--red);color:var(--cream);font-family:var(--f-display);font-size:24px;line-height:1}
+.steps h3{margin:16px 0 8px}
 .steps p{color:var(--muted);font-size:15px}
 @media (max-width:860px){.steps{grid-template-columns:repeat(2,1fr);row-gap:36px}}
 @media (max-width:480px){.steps{grid-template-columns:1fr}}
 
 /* request */
-.req{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:start}
+.req{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:start}
 @media (max-width:840px){.req{grid-template-columns:1fr}}
 form{display:grid;gap:16px}
 .field{display:grid;gap:6px;min-width:0}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media (max-width:480px){.two{grid-template-columns:1fr}}
-label{font-size:14px;font-weight:700}
-label small{font-weight:400;color:var(--muted)}
-input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:#fbf5ea;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;width:100%}
-input::placeholder,textarea::placeholder{color:#9a8c7c}
-input:focus,select:focus,textarea:focus{border-color:var(--red);outline:none;box-shadow:0 0 0 3px rgba(211,38,28,.15)}
 textarea{resize:vertical;min-height:88px}
 .check{display:flex;gap:10px;align-items:flex-start;font-size:15px;font-weight:500}
 .check input{width:20px;height:20px;margin-top:3px;accent-color:var(--red);flex:none}
 .err{color:var(--red-deep);font-size:14px;font-weight:700}
-.preview{background:var(--ink);color:var(--cream);border-radius:22px;padding:24px;position:sticky;top:84px}
-.preview .eyebrow{color:var(--muted-dark)}
-.preview pre{font-family:var(--f-mono);font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word;margin:14px 0 20px;min-height:160px;color:var(--cream)}
-.preview .acts{display:flex;gap:10px;flex-wrap:wrap}
-.preview .btn.outline{color:var(--cream);border-color:#4a423b}
-.preview .btn.outline:hover{border-color:var(--cream)}
-.preview .note{font-size:13px;color:var(--muted-dark);margin-top:14px}
-.toast{font-family:var(--f-mono);font-size:13px;color:#ff8a7f;min-height:1.4em;margin-top:10px}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.side{background:var(--ink);color:var(--cream);border-radius:22px;padding:26px;display:grid;gap:14px;position:sticky;top:84px}
+.side h3{font-size:24px}
+.side p,.side li{color:var(--muted-dark);font-size:15px}
+.side ol{margin:0;padding-left:20px;display:grid;gap:6px}
+.side .linkbox{font-family:var(--f-mono);font-size:14px;background:var(--ink-2);border-radius:12px;padding:12px;word-break:break-all;color:var(--cream)}
+.side .acts{display:flex;gap:10px;flex-wrap:wrap}
+.side .btn.outline{color:var(--cream);border-color:#4a423b}
+.privacy{font-size:13px;color:var(--muted)}
 
 /* past nights */
 .nights{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 @media (max-width:840px){.nights{grid-template-columns:1fr}}
-.night{border-radius:22px;padding:26px;min-height:240px;display:flex;flex-direction:column;justify-content:space-between;gap:28px}
+.night{border-radius:22px;padding:26px;min-height:200px;display:flex;flex-direction:column;justify-content:space-between;gap:28px}
 .night .when{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
 .night h3{font-size:32px}
-.night p{font-size:15px;margin-top:8px}
 .night.n1{background:var(--ink);color:var(--cream)}
-.night.n1 .when,.night.n1 p{color:var(--muted-dark)}
-.night.n1 h3{color:var(--red)}
+.night.n1 .when{color:var(--muted-dark)}
+.night.n1 h3{color:#ff4a3d}
 .night.n2{background:var(--red);color:var(--cream)}
-.night.n2 .when,.night.n2 p{color:#f6d6c9}
+.night.n2 .when{color:#f3d3cc}
 .night.n3{background:var(--cream-2);color:var(--ink);border:2px solid var(--ink)}
-.night.n3 .when,.night.n3 p{color:var(--muted)}
+.night.n3 .when{color:var(--muted)}
 
 /* rules */
 .rules{display:grid;grid-template-columns:repeat(3,1fr);gap:32px 36px;list-style:none;padding:0;margin:0}
@@ -168,19 +127,9 @@ summary::-webkit-details-marker{display:none}
 summary::after{content:"+";font-family:var(--f-display);color:var(--red);font-size:22px;line-height:1}
 details[open] summary::after{content:"–"}
 details p{color:var(--muted);margin-top:10px;max-width:62ch}
-
-/* footer (black) */
-footer{background:var(--ink);color:var(--cream)}
-footer .wrap{padding-block:56px 64px;display:flex;justify-content:space-between;gap:28px;flex-wrap:wrap;align-items:end}
-footer .sign{font-family:var(--f-display);font-size:clamp(24px,4.4vw,40px);max-width:20ch;line-height:1.05}
-footer .sign span{color:var(--red)}
-footer .meta{color:var(--muted-dark);font-size:14px}
-footer nav{margin-top:10px}
-footer nav a{font-size:14px}
 </style>
 </head>
 <body>
-
 <header class="top">
   <div class="wrap">
     <a class="mark" href="#top">Perugia<span>Party</span></a>
@@ -189,6 +138,7 @@ footer nav a{font-size:14px}
       <a href="#nights">Past nights</a>
       <a href="#rules">House rules</a>
       <a href="#faq">FAQ</a>
+      <a id="my-ticket" href="/ticket.html" hidden>My ticket</a>
       <a class="btn" href="#request">Request a place</a>
     </nav>
   </div>
@@ -205,11 +155,11 @@ footer nav a{font-size:14px}
           <a class="btn" href="#request">Request a place</a>
           <a class="btn outline" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Instagram ↗</a>
         </div>
-        <p class="ig-note">Requests only go through Instagram. DM us at <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>
+        <p class="ig-note">We check every request on Instagram, so your Instagram handle is required. Questions? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>
       </div>
       <div class="ticket" aria-label="Example guest ticket">
         <span class="stamp">APPROVED</span>
-        <div class="row"><span>PerugiaParty</span></div>
+        <img class="logo" src="/logo.png" alt="PerugiaParty" width="150" height="105">
         <p class="name">Your name</p>
         <p class="sub">Personal ticket · photo ID at the door</p>
         <div class="perf"></div>
@@ -225,7 +175,12 @@ footer nav a{font-size:14px}
         <h2 id="next-h">Next party.</h2>
         <p>Every edition has its own list. Even if you came before, request again.</p>
       </div>
-      <div class="next" id="next-card"></div>
+      <div class="next" id="next-card">
+        <div><span class="status"><i></i>Announcing soon</span>
+          <h3>The next edition is in the works.</h3>
+          <p>Date and theme drop on Instagram first. Follow @perugiaparty so you don't miss when requests open.</p></div>
+        <a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram ↗</a>
+      </div>
     </div>
   </section>
 
@@ -236,61 +191,62 @@ footer nav a{font-size:14px}
         <p>Four steps, from request to the door.</p>
       </div>
       <ol class="steps">
-        <li><h3>Ask on Instagram</h3><p>Requests only go through Instagram. Fill in the form below, copy the message and DM it to @perugiaparty.</p></li>
-        <li><h3>Get approved</h3><p>We review every request. If you're in, you get your price, your PP code and a payment deadline.</p></li>
+        <li><h3>Request a place</h3><p>Fill in the form below with your Instagram. You get a personal link to your ticket page. Save it.</p></li>
+        <li><h3>Get approved</h3><p>We check every request. If you're in, your page shows your price, your PP code and the payment deadline.</p></li>
         <li><h3>Pay</h3><p>Bank transfer with your full name and PP code as the reference. 72 hours for early bird and normal tickets, 24 hours for late ones.</p></li>
-        <li><h3>You're in</h3><p>Once payment is confirmed you get your ticket and the location. Bring the ticket and photo ID.</p></li>
+        <li><h3>You're in</h3><p>Once we confirm your payment, your page shows the location, your QR code and a ticket to download. Bring it with photo ID.</p></li>
       </ol>
     </section>
 
     <section class="sec" id="request" aria-labelledby="req-h">
       <div class="sec-head">
         <h2 id="req-h">Request a place.</h2>
-        <p>Requests only go through Instagram DM. Fill this in, copy the message, and send it to <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>
+        <p>Your Instagram is required: that's how we check every request. Questions? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>
       </div>
       <div class="req">
         <form id="req-form" novalidate>
           <div class="field">
             <label for="f-name">Full name</label>
-            <input id="f-name" autocomplete="name" placeholder="As on your ID" required>
+            <input id="f-name" autocomplete="name" placeholder="As on your ID" maxlength="80" required>
           </div>
           <div class="two">
             <div class="field">
-              <label for="f-ig">Instagram <small>(optional)</small></label>
-              <input id="f-ig" placeholder="@yourhandle" autocomplete="off">
+              <label for="f-ig">Instagram</label>
+              <input id="f-ig" placeholder="@yourhandle" autocomplete="off" autocapitalize="off" maxlength="40" required>
             </div>
             <div class="field">
-              <label for="f-uni">Study at <small>(optional)</small></label>
-              <select id="f-uni">
-                <option value="">Choose</option>
-                <option>Università per Stranieri</option>
-                <option>Università degli Studi di Perugia</option>
-                <option>Erasmus / exchange</option>
-                <option>Not a student</option>
-              </select>
+              <label for="f-phone">WhatsApp <small>(optional)</small></label>
+              <input id="f-phone" type="tel" placeholder="+39 …" autocomplete="tel" maxlength="30">
             </div>
-          </div>
-          <div class="field">
-            <label for="f-ref">Who told you about us? <small>(optional)</small></label>
-            <input id="f-ref" placeholder="A friend's name, Instagram, a past party…">
           </div>
           <div class="field">
             <label for="f-intro">Say hi <small>(optional)</small></label>
-            <textarea id="f-intro" placeholder="Who you are, who you'll know there"></textarea>
+            <textarea id="f-intro" placeholder="Who you are, who you'll know there" maxlength="500"></textarea>
           </div>
+          <div class="hp" aria-hidden="true"><label for="f-website">Website</label><input id="f-website" tabindex="-1" autocomplete="off"></div>
           <label class="check" for="f-age"><input type="checkbox" id="f-age"> I'm 18 or older and will bring photo ID.</label>
-          <label class="check" for="f-rules"><input type="checkbox" id="f-rules"> I've read the house rules.</label>
+          <label class="check" for="f-rules"><input type="checkbox" id="f-rules"> I've read the <a href="#rules">house rules</a>.</label>
           <p class="err" id="f-err" role="alert"></p>
+          <div><button class="btn" type="submit" id="f-send">Send request</button></div>
+          <p class="privacy">We only use your name, Instagram and WhatsApp to run the guest list for this party. DM us anytime to have them deleted.</p>
         </form>
-        <aside class="preview" aria-live="polite">
-          <p class="eyebrow">Your message</p>
-          <pre id="msg"></pre>
-          <div class="acts">
-            <button class="btn" type="button" id="copy">Copy message</button>
-            <a class="btn outline" id="dm" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Open Instagram DM ↗</a>
+        <aside class="side" id="side" aria-live="polite">
+          <div id="side-info">
+            <h3>What happens next</h3>
+            <ol style="margin-top:12px">
+              <li>You get a personal link right after sending.</li>
+              <li>We check your request on Instagram.</li>
+              <li>Your page shows your price and code once you're approved.</li>
+            </ol>
           </div>
-          <p class="toast" id="toast"></p>
-          <p class="note"><b>1.</b> Copy the message &nbsp;<b>2.</b> Open the Instagram DM &nbsp;<b>3.</b> Paste and send. We reply on Instagram.</p>
+          <div id="side-done" hidden>
+            <p class="eyebrow" style="color:var(--muted-dark)">Request sent</p>
+            <h3 style="margin-top:6px">Save your personal link.</h3>
+            <p style="margin-top:8px">This is where your price, code and ticket appear. Keep it private, it's yours only.</p>
+            <p class="linkbox" id="my-link" style="margin-top:12px"></p>
+            <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="copy-link">Copy link</button><a class="btn outline" id="open-link" href="/ticket.html">Open my page</a></div>
+            <p class="toast" id="toast" style="color:#ff8a7f;margin-top:8px"></p>
+          </div>
         </aside>
       </div>
     </section>
@@ -301,9 +257,9 @@ footer nav a{font-size:14px}
         <p><a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">See the real nights on Instagram ↗</a></p>
       </div>
       <div class="nights">
-        <article class="night n1"><p class="when">Past edition</p><div><h3>Alcoholiday</h3></div></article>
-        <article class="night n2"><p class="when">Past edition</p><div><h3>The Final Night</h3></div></article>
-        <article class="night n3"><p class="when">Past edition</p><div><h3>Koningsdag 2026</h3></div></article>
+        <article class="night n1"><p class="when">Past edition</p><h3>Alcoholiday</h3></article>
+        <article class="night n2"><p class="when">Past edition</p><h3>The Final Night</h3></article>
+        <article class="night n3"><p class="when">Past edition</p><h3>Koningsdag 2026</h3></article>
       </div>
     </section>
 
@@ -326,8 +282,9 @@ footer nav a{font-size:14px}
       <div class="sec-head"><h2 id="faq-h">Questions.</h2></div>
       <div class="faq">
         <details><summary>Who can come?</summary><p>Anyone 18 or older. Every edition needs a fresh request and approval, even if you came before. Bring valid photo ID.</p></details>
-        <details><summary>When do I see the price and location?</summary><p>The price comes with your approval. The exact location comes after we confirm your payment.</p></details>
-        <details><summary>How long do I have to pay?</summary><p>72 hours for early bird and normal tickets, 24 hours for late tickets, unless we tell you otherwise. An unpaid place goes back to the list when the deadline passes.</p></details>
+        <details><summary>When do I see the price and location?</summary><p>The price appears on your personal page once you're approved. The exact location appears after we confirm your payment.</p></details>
+        <details><summary>How long do I have to pay?</summary><p>72 hours for early bird and normal tickets, 24 hours for late tickets, unless your page says otherwise. An unpaid place goes back to the list when the deadline passes.</p></details>
+        <details><summary>I lost my personal link.</summary><p>On the same phone, tap "My ticket" at the top of this page. Otherwise DM us on Instagram and we'll send it again.</p></details>
         <details><summary>Can I bring a friend?</summary><p>After you've been to an edition, you can ask to bring one friend per event. They still send their own request and get their own code.</p></details>
         <details><summary>Refunds and transfers?</summary><p>Tickets are personal and can't be passed on. If you cancel, there's no refund. If we cancel, we'll contact you about the arrangements.</p></details>
       </div>
@@ -349,69 +306,79 @@ footer nav a{font-size:14px}
 </footer>
 
 <script>
-/* Next party: set to an object to announce an edition, or null for "announcing soon".
-   e.g. { name:"Halloween", date:"Sat 31 Oct", doors:"22:00", area:"Centro storico", status:"Requests open" } */
-const NEXT = null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const euro = n => "€" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", ",") : Number(n));
+let EVENT = null;
 
-(function renderNext(){
-  const el = document.getElementById('next-card');
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  if (!NEXT) {
-    el.innerHTML = `<div><span class="status"><i></i>Announcing soon</span>
-      <h3>The next edition is in the works.</h3>
-      <p>Date and theme drop on Instagram first. DM us your request now and you'll be on the shortlist when the list opens.</p></div>
-      <a class="btn" href="#request">Request a place</a>`;
-  } else {
-    el.innerHTML = `<div><span class="status"><i></i>${esc(NEXT.status||'Requests open')}</span>
-      <h3>${esc(NEXT.name)}</h3>
-      <p>Location sent after payment is confirmed.</p>
-      <dl><div><dt>Date</dt><dd>${esc(NEXT.date)}</dd></div><div><dt>Doors</dt><dd>${esc(NEXT.doors)}</dd></div><div><dt>Area</dt><dd>${esc(NEXT.area)}</dd></div></dl></div>
-      <a class="btn" href="#request">Request a place</a>`;
-  }
-})();
+/* remembered personal link */
+function savedToken(){ try { return localStorage.getItem("pp_token"); } catch(e){ return null; } }
+function rememberToken(t){ try { localStorage.setItem("pp_token", t); } catch(e){} }
+(function(){ const t = savedToken(); if (t) { const a = $("my-ticket"); a.href = "/ticket.html?t=" + encodeURIComponent(t); a.hidden = false; } })();
 
-(function requestForm(){
-  const $ = id => document.getElementById(id);
-  const fields = ['f-name','f-ig','f-uni','f-ref','f-intro','f-age','f-rules'];
-  const msg = $('msg'), err = $('f-err'), toast = $('toast');
-  function build(){
-    const name = $('f-name').value.trim();
-    const lines = [`Hi PerugiaParty! I'd like to request a place${NEXT ? ' for ' + NEXT.name : ' at the next party'}.`, ''];
-    lines.push('Name: ' + (name || '…'));
-    const ig = $('f-ig').value.trim(); if (ig) lines.push('Instagram: ' + (ig.startsWith('@') ? ig : '@' + ig));
-    const uni = $('f-uni').value; if (uni) lines.push('Study at: ' + uni);
-    const ref = $('f-ref').value.trim(); if (ref) lines.push('Heard from: ' + ref);
-    const intro = $('f-intro').value.trim(); if (intro) lines.push('', intro);
-    lines.push('', ($('f-age').checked ? '✓' : '☐') + ' I am 18+ and will bring photo ID');
-    lines.push(($('f-rules').checked ? '✓' : '☐') + ' I have read the house rules');
-    msg.textContent = lines.join('\n');
-  }
-  function check(){
-    const missing = [];
-    if (!$('f-name').value.trim()) missing.push('your full name');
-    if (!$('f-age').checked) missing.push('the 18+ confirmation');
-    if (!$('f-rules').checked) missing.push('the house rules confirmation');
-    err.textContent = missing.length ? 'Add ' + missing.join(', ') + ' before sending.' : '';
-    return !missing.length;
-  }
-  fields.forEach(id => { $(id).addEventListener('input', () => { build(); if (err.textContent) check(); });
-                         $(id).addEventListener('change', () => { build(); if (err.textContent) check(); }); });
-  $('req-form').addEventListener('submit', e => e.preventDefault());
-  $('copy').addEventListener('click', () => {
-    if (!check()) return;
-    const text = msg.textContent;
-    const done = () => { toast.textContent = 'Copied. Now open the DM and paste it.'; };
-    const fallback = () => {
-      const r = document.createRange(); r.selectNodeContents(msg);
-      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
-      toast.textContent = 'Message selected. Copy it with your keyboard or long-press.';
-    };
-    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
-  });
-  $('dm').addEventListener('click', e => { if (!check()) e.preventDefault(); });
-  build();
-})();
+/* next party + countdown */
+let timer = null;
+function renderNext(ev){
+  const el = $("next-card");
+  if (!ev || !ev.published) return; // keep the static "announcing soon" card
+  const price = ev.price ? (ev.price.min === ev.price.max ? euro(ev.price.min) : `${euro(ev.price.min)}–${euro(ev.price.max)}`) : null;
+  const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Area", ev.area], ["Tickets", price]].filter(f => f[1]);
+  el.innerHTML = `<div><span class="status"><i></i>${ev.requests_open ? "Requests open" : "Requests open soon"}</span>
+      <h3>${esc(ev.name || "Next PerugiaParty")}</h3>
+      <p>Exact location sent after payment is confirmed.${ev.price && ev.price.min !== ev.price.max ? " Price depends on when you're approved." : ""}</p>
+      ${facts.length ? `<dl>${facts.map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>` : ""}
+      <div class="count" id="count" ${ev.starts_at ? "" : "hidden"} aria-label="Countdown to the party"></div></div>
+    ${ev.requests_open ? `<a class="btn" href="#request">Request a place</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram ↗</a>`}`;
+  if (ev.starts_at) { tick(); clearInterval(timer); timer = setInterval(tick, 1000); }
+}
+function tick(){
+  const c = $("count"); if (!c || !EVENT) return;
+  let ms = new Date(EVENT.starts_at).getTime() - Date.now();
+  if (!Number.isFinite(ms)) { c.hidden = true; return; }
+  if (ms <= 0) { c.innerHTML = `<div style="min-width:auto;padding:10px 16px"><b style="font-size:22px">It's tonight. See you there.</b></div>`; clearInterval(timer); return; }
+  const d = Math.floor(ms/864e5), h = Math.floor(ms/36e5)%24, m = Math.floor(ms/6e4)%60, s = Math.floor(ms/1e3)%60;
+  const p = n => String(n).padStart(2,"0");
+  c.innerHTML = [[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]].map(([v,l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
+}
+fetch("/api/event").then(r => r.json()).then(ev => { EVENT = ev; renderNext(ev); }).catch(() => {});
+
+/* request form */
+$("req-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const err = $("f-err"), btn = $("f-send");
+  const body = {
+    name: $("f-name").value.trim(), ig: $("f-ig").value.trim(), phone: $("f-phone").value.trim(),
+    intro: $("f-intro").value.trim(), website: $("f-website").value,
+    age: $("f-age").checked, rules: $("f-rules").checked,
+  };
+  const missing = [];
+  if (body.name.length < 2) missing.push("your full name");
+  if (!body.ig.replace(/^@+/, "")) missing.push("your Instagram");
+  if (!body.age) missing.push("the 18+ confirmation");
+  if (!body.rules) missing.push("the house rules confirmation");
+  if (missing.length) { err.textContent = "Add " + missing.join(", ") + "."; return; }
+  err.textContent = ""; btn.disabled = true; btn.textContent = "Sending…";
+  try {
+    const r = await fetch("/api/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok || !data.token) { err.textContent = data.error || "Couldn't send. Try again in a minute."; return; }
+    rememberToken(data.token);
+    const link = location.origin + "/ticket.html?t=" + data.token;
+    $("my-link").textContent = link; $("open-link").href = link;
+    const mt = $("my-ticket"); mt.href = link; mt.hidden = false;
+    $("side-info").hidden = true; $("side-done").hidden = false;
+    $("req-form").reset();
+    $("side").scrollIntoView({ behavior: "smooth", block: "center" });
+  } catch (x) {
+    err.textContent = "Couldn't reach us. Check your connection and try again.";
+  } finally { btn.disabled = false; btn.textContent = "Send request"; }
+});
+$("copy-link").addEventListener("click", () => {
+  const text = $("my-link").textContent, t = $("toast");
+  const ok = () => t.textContent = "Copied. Save it somewhere safe.";
+  const fb = () => { const r = document.createRange(); r.selectNodeContents($("my-link")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); t.textContent = "Selected. Copy it with your keyboard or long-press."; };
+  try { navigator.clipboard.writeText(text).then(ok, fb); } catch (e) { fb(); }
+});
 </script>
-
 </body>
 </html>

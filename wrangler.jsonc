@@ -1,9 +1,18 @@
 {
   "name": "perugiaparty",
+  "main": "src/index.js",
   "compatibility_date": "2026-09-01",
   "assets": {
-    "directory": "./public"
+    "directory": "./public",
+    "binding": "ASSETS"
   },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "perugiaparty",
+      "database_id": "80e5ed38-3075-4d90-8baa-194c2881b599"
+    }
+  ],
   "routes": [
     { "pattern": "perugiaparty.com", "custom_domain": true },
     { "pattern": "www.perugiaparty.com", "custom_domain": true }

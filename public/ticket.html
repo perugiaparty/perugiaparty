@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>My ticket · PerugiaParty</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#141210">
+<link rel="icon" href="/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/site.css">
+<style>
+main{padding-block:44px 80px}
+.page{max-width:620px;margin-inline:auto;display:grid;gap:20px}
+.state{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;border-radius:999px;padding:5px 12px;background:var(--cream-2);border:1.5px solid var(--ink)}
+.state.ok{background:var(--red);border-color:var(--red);color:var(--cream)}
+h1{font-size:clamp(40px,8vw,64px)}
+.lead{font-size:18px;color:var(--muted);max-width:46ch}
+.card{background:var(--paper);border:1.5px solid var(--line);border-radius:20px;padding:22px;display:grid;gap:14px}
+.row{display:grid;grid-template-columns:130px 1fr auto;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:12px}
+.row:last-child{border-bottom:0;padding-bottom:0}
+.row dt{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.row dd{margin:0;font-weight:700;overflow-wrap:anywhere;min-width:0}
+.row dd.mono{font-family:var(--f-mono);font-weight:500;letter-spacing:.04em}
+.copy{font:inherit;font-size:13px;font-weight:700;border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;cursor:pointer}
+.copy:hover{border-color:var(--ink)}
+@media (max-width:520px){.row{grid-template-columns:1fr auto}.row dt{grid-column:1/-1}}
+.deadline{background:var(--ink);color:var(--cream);border-radius:16px;padding:16px 18px;font-weight:700}
+.deadline span{color:#ff8a7f}
+.ticket{background:var(--ink);color:var(--cream);border-radius:24px;padding:26px;display:grid;gap:18px;justify-items:center;text-align:center;box-shadow:12px 12px 0 var(--red)}
+.ticket .logo{width:170px}
+.ticket .ev{font-family:var(--f-display);font-size:30px;line-height:1.05}
+.ticket .meta{color:var(--muted-dark);font-size:15px}
+.qr{background:var(--cream);padding:14px;border-radius:16px;width:min(260px,70vw)}
+.qr canvas{width:100%;height:auto;display:block;image-rendering:pixelated}
+.ticket .code{font-family:var(--f-mono);font-size:26px;letter-spacing:.1em}
+.ticket .who{font-weight:700;font-size:18px}
+.loc{background:var(--red);color:var(--cream);border-radius:20px;padding:20px 22px;display:grid;gap:6px}
+.loc p{font-size:20px;font-weight:700}
+.loc a{color:var(--cream)}
+.note{font-size:14px;color:var(--muted)}
+.empty{text-align:center;padding:40px 10px;display:grid;gap:14px;justify-items:center}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="/">Perugia<span>Party</span></a>
+    <nav aria-label="Main"><a href="/#faq">FAQ</a><a class="btn" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">DM us</a></nav>
+  </div>
+</header>
+<main class="wrap">
+  <div class="page" id="page"><p class="note">Loading your ticket…</p></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const euro = n => n == null ? "—" : "€" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", ",") : Number(n));
+const when = t => new Date(t).toLocaleString("en-GB", { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" });
+
+const params = new URLSearchParams(location.search);
+let token = params.get("t");
+try { if (token) localStorage.setItem("pp_token", token); else token = localStorage.getItem("pp_token"); } catch(e){}
+
+function copyBtn(value){ return `<button class="copy" type="button" data-copy="${esc(value)}">Copy</button>`; }
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-copy]"); if (!b) return;
+  const v = b.dataset.copy;
+  const done = () => { b.textContent = "Copied"; setTimeout(() => b.textContent = "Copy", 1500); };
+  try { navigator.clipboard.writeText(v).then(done, () => { b.textContent = "Long-press to copy"; }); } catch(x){ b.textContent = "Long-press to copy"; }
+});
+
+function empty(title, text){
+  $("page").innerHTML = `<div class="empty"><h1 style="font-size:40px">${title}</h1><p class="lead">${text}</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><a class="btn" href="/#request">Request a place</a><a class="btn outline" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">DM us</a></div></div>`;
+}
+
+function drawQR(text, canvas){
+  const qr = qrcode(0, "M"); qr.addData(text); qr.make();
+  const n = qr.getModuleCount(), cell = 10, q = 2;
+  canvas.width = canvas.height = (n + q*2) * cell;
+  const x = canvas.getContext("2d");
+  x.fillStyle = "#f7f8ef"; x.fillRect(0, 0, canvas.width, canvas.height);
+  x.fillStyle = "#141210";
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) x.fillRect((c+q)*cell, (r+q)*cell, cell, cell);
+}
+
+function loadImage(src){ return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
+async function downloadTicket(d){
+  try { await document.fonts.ready; } catch(e){}
+  const W = 1080, H = 1620, c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d");
+  x.fillStyle = "#141210"; x.fillRect(0, 0, W, H);
+  x.fillStyle = "#b90000"; x.fillRect(0, 0, W, 18); x.fillRect(0, H-18, W, 18);
+  try { const logo = await loadImage("/logo.png"); const lw = 420, lh = lw * logo.height / logo.width; x.drawImage(logo, (W-lw)/2, 80, lw, lh); } catch(e){}
+  x.textAlign = "center"; x.fillStyle = "#f7f8ef";
+  x.font = `64px "Bowlby One", Impact, sans-serif`; x.fillText(d.event || "PerugiaParty", W/2, 470);
+  x.fillStyle = "#b9b3a4"; x.font = `500 32px "Figtree", sans-serif`;
+  x.fillText([d.date_label, d.doors && "doors " + d.doors].filter(Boolean).join(" · "), W/2, 530);
+  const qc = document.createElement("canvas"); drawQR(d.qr, qc);
+  const box = 560; x.fillStyle = "#f7f8ef"; x.fillRect((W-box)/2 - 20, 590, box + 40, box + 40);
+  x.imageSmoothingEnabled = false; x.drawImage(qc, (W-box)/2, 610, box, box);
+  x.fillStyle = "#f7f8ef"; x.font = `500 60px "DM Mono", monospace`; x.fillText(d.code, W/2, 1310);
+  x.font = `700 46px "Figtree", sans-serif`; x.fillText(d.name, W/2, 1390);
+  x.fillStyle = "#b9b3a4"; x.font = `500 26px "DM Mono", monospace`; x.fillText("PERSONAL TICKET · PHOTO ID AT THE DOOR · 18+", W/2, 1470);
+  const a = document.createElement("a"); a.download = `PerugiaParty-${d.code}.png`; a.href = c.toDataURL("image/png"); document.body.appendChild(a); a.click(); a.remove();
+}
+
+function render(d){
+  const P = $("page"), first = esc(String(d.name || "").split(" ")[0]);
+  if (d.status === "requested") {
+    P.innerHTML = `<span class="state">Request received</span><h1>Thanks, ${first}.</h1>
+      <p class="lead">We're checking your request for <b>${esc(d.event)}</b>. Come back to this page: once you're approved, your price and personal code appear here.</p>
+      <div class="card"><p><b>Save this link.</b> It's your personal page and only works for you.</p><p class="mono" style="font-family:var(--f-mono);overflow-wrap:anywhere">${esc(location.href)}</p><div>${copyBtn(location.href)}</div></div>`;
+  } else if (d.status === "approved") {
+    const left = d.deadline ? d.deadline - Date.now() : null;
+    const overdue = left != null && left < 0;
+    P.innerHTML = `<span class="state ok">Approved</span><h1>You're on the list, ${first}.</h1>
+      <p class="lead">Pay by bank transfer to confirm your place at <b>${esc(d.event)}</b>. Once we see your payment, your ticket and the location appear on this page.</p>
+      ${d.deadline ? `<div class="deadline">${overdue ? "The payment deadline has passed. DM us on Instagram if you already paid." : `Pay before <span>${esc(when(d.deadline))}</span>, or your place goes back to the list.`}</div>` : ""}
+      <dl class="card">
+        <div class="row"><dt>Amount</dt><dd>${euro(d.price)}${d.ticket ? ` <span class="note">(${esc(d.ticket)})</span>` : ""}</dd><span></span></div>
+        <div class="row"><dt>IBAN</dt><dd class="mono">${esc(d.iban || "—")}</dd>${d.iban ? copyBtn(d.iban.replace(/\s+/g, "")) : "<span></span>"}</div>
+        <div class="row"><dt>Beneficiary</dt><dd>${esc(d.beneficiary || "—")}</dd>${d.beneficiary ? copyBtn(d.beneficiary) : "<span></span>"}</div>
+        <div class="row"><dt>Reference</dt><dd class="mono">${esc(d.reference)}</dd>${copyBtn(d.reference)}</div>
+      </dl>
+      <p class="note">Use the reference exactly as shown so we can match your payment. Your code: <b style="font-family:var(--f-mono)">${esc(d.code)}</b></p>`;
+  } else if (d.status === "paid" || d.status === "in") {
+    P.innerHTML = `<span class="state ok">${d.status === "in" ? "Checked in" : "Paid · you're in"}</span><h1>See you there, ${first}.</h1>
+      ${d.location ? `<div class="loc"><span class="eyebrow" style="color:#f3d3cc">Location</span><p>${esc(d.location)}</p><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener">Open in Maps ↗</a></div>` : ""}
+      <div class="ticket">
+        <img class="logo" src="/logo.png" alt="PerugiaParty">
+        <div><p class="ev">${esc(d.event)}</p><p class="meta">${esc([d.date_label, d.doors && "doors " + d.doors].filter(Boolean).join(" · "))}</p></div>
+        <div class="qr"><canvas id="qr" aria-label="Your entry QR code"></canvas></div>
+        <p class="code">${esc(d.code)}</p>
+        <p class="who">${esc(d.name)}</p>
+        <p class="meta">Show this QR and your photo ID at the door.</p>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" type="button" id="dl">Download ticket</button></div>
+      <p class="note">Tickets are personal and can't be passed on. Screenshot or download it in case you have no signal at the door.</p>`;
+    drawQR(d.qr, $("qr"));
+    $("dl").addEventListener("click", () => downloadTicket(d));
+  } else if (d.status === "declined") {
+    empty("Not this time.", "We couldn't give you a place for this edition. Keep an eye on Instagram for the next one.");
+  } else if (d.status === "released") {
+    empty("Your place was released.", "The payment deadline passed, so your place went back to the list. DM us on Instagram if you think this is a mistake.");
+  } else {
+    empty("Something's off.", "We couldn't read this ticket. DM us on Instagram and we'll sort it out.");
+  }
+}
+
+if (!token) {
+  empty("No ticket here yet.", "Request a place first. You'll get a personal link that leads back to this page.");
+} else {
+  fetch("/api/ticket?t=" + encodeURIComponent(token), { cache: "no-store" })
+    .then(r => r.json().then(d => ({ ok: r.ok, d })))
+    .then(({ ok, d }) => ok ? render(d) : empty("We couldn't find this ticket.", esc(d.error || "Check that you opened the full link we gave you.")))
+    .catch(() => empty("Couldn't load your ticket.", "Check your connection and refresh the page."));
+}
+</script>
+</body>
+</html>

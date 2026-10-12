@@ -1,0 +1,69 @@
+/* PerugiaParty — brand red / cream / black, taken from the logo. Single deliberate look. */
+:root{
+  --cream:#f7f8ef;      /* logo cream, page ground */
+  --cream-2:#ecebdc;    /* raised cream surface */
+  --paper:#fdfdf8;      /* inputs */
+  --ink:#141210;        /* brand black */
+  --ink-2:#262220;
+  --red:#b90000;        /* logo red */
+  --red-deep:#8f0000;   /* red for small text on cream */
+  --muted:#5f5a50;      /* secondary text on cream */
+  --muted-dark:#b9b3a4; /* secondary text on black */
+  --line:#dcd9c6;       /* hairlines on cream */
+  --f-display:"Bowlby One","Arial Black",Impact,sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"DM Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6}
+img{max-width:100%;display:block}
+.wrap{max-width:1080px;margin-inline:auto;padding-inline:20px}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--red);outline-offset:3px;border-radius:4px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1;margin:0;text-wrap:balance}
+h2{font-size:clamp(36px,6vw,60px)}
+h3{font-size:22px;line-height:1.15}
+p{margin:0}
+[hidden]{display:none!important}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--ink);color:var(--cream)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:12px}
+.mark{font-family:var(--f-display);font-size:21px;text-decoration:none}
+.mark span{color:var(--red)}
+nav{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+nav a{text-decoration:none;font-size:15px;color:var(--muted-dark)}
+nav a:hover{color:var(--cream)}
+@media (max-width:640px){header nav a:not(.btn){display:none}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--f-body);font-weight:700;font-size:15px;border-radius:999px;padding:12px 22px;border:2px solid var(--red);background:var(--red);color:var(--cream);text-decoration:none;cursor:pointer;transition:transform .15s ease}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:wait;transform:none}
+.btn.ink{background:var(--ink);border-color:var(--ink)}
+.btn.outline{background:transparent;color:var(--ink);border-color:var(--ink)}
+header .btn{padding:8px 16px}
+
+.sec{padding-block:80px}
+.sec + .sec{border-top:1.5px solid var(--line)}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;margin-bottom:40px}
+.sec-head p{max-width:46ch;color:var(--muted)}
+.sec-head p a{color:var(--red-deep);font-weight:700}
+
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;width:100%}
+input::placeholder,textarea::placeholder{color:#9a9585}
+input:focus,select:focus,textarea:focus{border-color:var(--red);outline:none;box-shadow:0 0 0 3px rgba(185,0,0,.14)}
+label{font-size:14px;font-weight:700}
+label small{font-weight:400;color:var(--muted)}
+
+.toast{font-family:var(--f-mono);font-size:13px;min-height:1.4em}
+
+footer{background:var(--ink);color:var(--cream)}
+footer .wrap{padding-block:56px 64px;display:flex;justify-content:space-between;gap:28px;flex-wrap:wrap;align-items:end}
+footer .sign{font-family:var(--f-display);font-size:clamp(24px,4.4vw,40px);max-width:20ch;line-height:1.05}
+footer .sign span{color:var(--red)}
+footer .meta{color:var(--muted-dark);font-size:14px}
+footer nav{margin-top:10px}
+footer nav a{font-size:14px}
