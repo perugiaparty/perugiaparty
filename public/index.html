@@ -36,7 +36,7 @@
 @media (max-width:840px){.hero{grid-template-columns:1fr;gap:44px;padding-block:48px 64px}}
 
 /* ticket */
-.ticket{position:relative;background:var(--ink);color:var(--cream);border-radius:20px;padding:26px 28px 24px;transform:rotate(-3deg);box-shadow:14px 14px 0 var(--red);max-width:390px;justify-self:center;width:100%}
+.ticket{display:block;text-decoration:none;cursor:pointer;position:relative;background:var(--ink);color:var(--cream);border-radius:20px;padding:26px 28px 24px;transform:rotate(-3deg);box-shadow:14px 14px 0 var(--red);max-width:390px;justify-self:center;width:100%}
 .ticket::before,.ticket::after{content:"";position:absolute;top:66%;width:30px;height:30px;border-radius:50%;background:var(--cream)}
 .ticket::before{left:-15px}.ticket::after{right:-15px}
 .ticket .logo{width:150px;height:auto}
@@ -232,7 +232,7 @@ body.locked{overflow:hidden}
         </div>
         <p class="ig-note">We check every request on Instagram, so your Instagram handle is required. Questions? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>
       </div>
-      <div class="ticket" aria-label="Example guest ticket">
+      <a class="ticket" href="#request" aria-label="Request a place: example guest ticket">
         <span class="stamp">APPROVED</span>
         <img class="logo" src="/logo.png" alt="PerugiaParty" width="150" height="105">
         <p class="name">Your name</p>
@@ -240,7 +240,7 @@ body.locked{overflow:hidden}
         <div class="perf"></div>
         <p class="code">PP-<b>H26</b>-7K4M</p>
         <p class="tiny">Example code · yours arrives after approval</p>
-      </div>
+      </a>
     </div>
   </div>
 
