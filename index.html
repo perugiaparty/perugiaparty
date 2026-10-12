@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Private student parties in Perugia. Request your place on the list. 18+.">
+<meta name="theme-color" content="#141210">
+<title>PerugiaParty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: poster-style bands — cream page, one red band, black blocks for contrast; deliberate single look in the brand's red / cream / black */
+:root{
+  --cream:#f4ead7;      /* page ground */
+  --cream-2:#ebdec6;    /* raised cream surface */
+  --ink:#141210;        /* brand black */
+  --ink-2:#262220;      /* raised black */
+  --red:#d3261c;        /* brand red */
+  --red-deep:#a81a12;   /* red on cream for small text */
+  --muted:#6b5f52;      /* secondary text on cream */
+  --muted-dark:#b9ab98; /* secondary text on black */
+  --line:#d8c8ac;       /* hairlines on cream */
+  --f-display:"Bowlby One","Arial Black",Impact,sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"DM Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{background:var(--cream);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6}
+.wrap{max-width:1080px;margin-inline:auto;padding-inline:20px}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--red);outline-offset:3px;border-radius:4px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1;margin:0;text-wrap:balance}
+h2{font-size:clamp(36px,6vw,60px)}
+h3{font-size:22px;line-height:1.15}
+p{margin:0}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--ink);color:var(--cream)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:12px}
+.mark{font-family:var(--f-display);font-size:21px;text-decoration:none}
+.mark span{color:var(--red)}
+nav{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+nav a{text-decoration:none;font-size:15px;color:var(--muted-dark)}
+nav a:hover{color:var(--cream)}
+@media (max-width:640px){header nav a:not(.btn){display:none}}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-body);font-weight:700;font-size:15px;border-radius:999px;padding:12px 22px;border:2px solid var(--red);background:var(--red);color:var(--cream);text-decoration:none;cursor:pointer;transition:transform .15s ease}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.06)}
+.btn.ink{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.btn.outline{background:transparent;color:var(--ink);border-color:var(--ink)}
+.btn.cream{background:var(--cream);border-color:var(--cream);color:var(--red)}
+header .btn{padding:8px 16px;color:var(--cream)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:center;padding-block:72px 80px}
+.hero h1{font-size:clamp(56px,10.5vw,120px);letter-spacing:-.01em}
+.hero h1 em{font-style:normal;color:var(--red);display:block}
+.hero .lede{margin-top:24px;max-width:32ch;font-size:20px;color:var(--muted)}
+.hero .ctas{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;border:1.5px solid var(--ink);border-radius:999px;padding:5px 12px}
+.chip.red{background:var(--red);border-color:var(--red);color:var(--cream)}
+@media (max-width:840px){.hero{grid-template-columns:1fr;gap:44px;padding-block:48px 64px}}
+
+/* ticket (black) */
+.ticket{position:relative;background:var(--ink);color:var(--cream);border-radius:20px;padding:28px 28px 24px;transform:rotate(-3deg);box-shadow:14px 14px 0 var(--red);max-width:390px;justify-self:center;width:100%}
+.ticket::before,.ticket::after{content:"";position:absolute;top:61%;width:30px;height:30px;border-radius:50%;background:var(--cream)}
+.ticket::before{left:-15px}.ticket::after{right:-15px}
+.ticket .row{display:flex;justify-content:space-between;gap:12px;font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-dark)}
+.ticket .name{font-family:var(--f-display);font-size:36px;line-height:1;margin:20px 0 6px}
+.ticket .sub{font-size:14px;color:var(--muted-dark)}
+.ticket .perf{border-top:2px dashed #4a423b;margin:28px -28px 20px}
+.ticket .code{font-family:var(--f-mono);font-size:30px;font-weight:500;letter-spacing:.12em}
+.ticket .code b{color:var(--red);font-weight:500}
+.ticket .tiny{font-family:var(--f-mono);font-size:11px;color:var(--muted-dark);margin-top:6px}
+.stamp{position:absolute;right:20px;top:20px;border:2px solid var(--red);color:var(--red);font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;padding:4px 8px;border-radius:6px;transform:rotate(8deg)}
+
+/* sections */
+.sec{padding-block:80px}
+.sec + .sec{border-top:1.5px solid var(--line)}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;margin-bottom:40px}
+.sec-head p{max-width:46ch;color:var(--muted)}
+
+/* red band: next party */
+.band-red{background:var(--red);color:var(--cream)}
+.band-red .sec-head p{color:#f6d6c9}
+.band-red h2{color:var(--cream)}
+.next{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;background:var(--ink);border-radius:24px;padding:36px}
+.next .status{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream)}
+.next .status i{width:9px;height:9px;border-radius:50%;background:var(--red);box-shadow:0 0 0 4px rgba(211,38,28,.25);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(211,38,28,0)}}
+.next h3{font-size:clamp(28px,5vw,44px);margin:14px 0 10px}
+.next p{color:var(--muted-dark);max-width:52ch}
+.next dl{display:flex;gap:32px;flex-wrap:wrap;margin:20px 0 0}
+.next dt{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-dark)}
+.next dd{margin:2px 0 0;font-weight:700}
+@media (max-width:720px){.next{grid-template-columns:1fr;padding:26px}}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;list-style:none;padding:0;margin:0;counter-reset:s}
+.steps li{counter-increment:s;border-top:3px solid var(--ink);padding-top:18px;min-width:0}
+.steps li::before{content:"0" counter(s);font-family:var(--f-display);font-size:34px;color:var(--red);line-height:1}
+.steps h3{margin:12px 0 8px}
+.steps p{color:var(--muted);font-size:15px}
+@media (max-width:860px){.steps{grid-template-columns:repeat(2,1fr);row-gap:36px}}
+@media (max-width:480px){.steps{grid-template-columns:1fr}}
+
+/* request */
+.req{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:start}
+@media (max-width:840px){.req{grid-template-columns:1fr}}
+form{display:grid;gap:16px}
+.field{display:grid;gap:6px;min-width:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:480px){.two{grid-template-columns:1fr}}
+label{font-size:14px;font-weight:700}
+label small{font-weight:400;color:var(--muted)}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:#fbf5ea;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;width:100%}
+input::placeholder,textarea::placeholder{color:#9a8c7c}
+input:focus,select:focus,textarea:focus{border-color:var(--red);outline:none;box-shadow:0 0 0 3px rgba(211,38,28,.15)}
+textarea{resize:vertical;min-height:88px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:15px;font-weight:500}
+.check input{width:20px;height:20px;margin-top:3px;accent-color:var(--red);flex:none}
+.err{color:var(--red-deep);font-size:14px;font-weight:700}
+.preview{background:var(--ink);color:var(--cream);border-radius:22px;padding:24px;position:sticky;top:84px}
+.preview .eyebrow{color:var(--muted-dark)}
+.preview pre{font-family:var(--f-mono);font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word;margin:14px 0 20px;min-height:160px;color:var(--cream)}
+.preview .acts{display:flex;gap:10px;flex-wrap:wrap}
+.preview .btn.outline{color:var(--cream);border-color:#4a423b}
+.preview .btn.outline:hover{border-color:var(--cream)}
+.preview .note{font-size:13px;color:var(--muted-dark);margin-top:14px}
+.toast{font-family:var(--f-mono);font-size:13px;color:#ff8a7f;min-height:1.4em;margin-top:10px}
+
+/* past nights */
+.nights{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+@media (max-width:840px){.nights{grid-template-columns:1fr}}
+.night{border-radius:22px;padding:26px;min-height:240px;display:flex;flex-direction:column;justify-content:space-between;gap:28px}
+.night .when{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.night h3{font-size:32px}
+.night p{font-size:15px;margin-top:8px}
+.night.n1{background:var(--ink);color:var(--cream)}
+.night.n1 .when,.night.n1 p{color:var(--muted-dark)}
+.night.n1 h3{color:var(--red)}
+.night.n2{background:var(--red);color:var(--cream)}
+.night.n2 .when,.night.n2 p{color:#f6d6c9}
+.night.n3{background:var(--cream-2);color:var(--ink);border:2px solid var(--ink)}
+.night.n3 .when,.night.n3 p{color:var(--muted)}
+
+/* rules */
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:32px 36px;list-style:none;padding:0;margin:0}
+@media (max-width:840px){.rules{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.rules{grid-template-columns:1fr}}
+.rules li{min-width:0;display:grid;grid-template-columns:auto 1fr;gap:14px}
+.rules .x{width:34px;height:34px;border-radius:50%;background:var(--red);color:var(--cream);display:grid;place-items:center;font-family:var(--f-display);font-size:15px}
+.rules h3{font-size:20px;margin-bottom:6px}
+.rules p{color:var(--muted);font-size:15px}
+
+/* faq */
+.faq{max-width:780px}
+details{border-bottom:1.5px solid var(--line);padding:20px 0}
+summary{cursor:pointer;font-weight:700;font-size:18px;list-style:none;display:flex;justify-content:space-between;gap:16px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-family:var(--f-display);color:var(--red);font-size:22px;line-height:1}
+details[open] summary::after{content:"–"}
+details p{color:var(--muted);margin-top:10px;max-width:62ch}
+
+/* footer (black) */
+footer{background:var(--ink);color:var(--cream)}
+footer .wrap{padding-block:56px 64px;display:flex;justify-content:space-between;gap:28px;flex-wrap:wrap;align-items:end}
+footer .sign{font-family:var(--f-display);font-size:clamp(24px,4.4vw,40px);max-width:20ch;line-height:1.05}
+footer .sign span{color:var(--red)}
+footer .meta{color:var(--muted-dark);font-size:14px}
+footer nav{margin-top:10px}
+footer nav a{font-size:14px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="#top">Perugia<span>Party</span></a>
+    <nav aria-label="Main">
+      <a href="#how">How it works</a>
+      <a href="#nights">Past nights</a>
+      <a href="#rules">House rules</a>
+      <a href="#faq">FAQ</a>
+      <a class="btn" href="#request">Request a place</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <div class="chips"><span class="chip red">Invite only</span><span class="chip">Perugia</span><span class="chip">18+</span></div>
+        <h1 style="margin-top:22px">Your people. <em>Your night.</em></h1>
+        <p class="lede">Private student parties in Perugia, with the feel of a house party and a guest list we put together by hand.</p>
+        <div class="ctas">
+          <a class="btn" href="#request">Request a place</a>
+          <a class="btn outline" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Instagram ↗</a>
+        </div>
+      </div>
+      <div class="ticket" aria-label="Example guest ticket">
+        <span class="stamp">APPROVED</span>
+        <div class="row"><span>PerugiaParty</span><span>Admit one</span></div>
+        <p class="name">Your name</p>
+        <p class="sub">Personal ticket · photo ID at the door</p>
+        <div class="perf"></div>
+        <p class="code">PP-<b>H26</b>-7K4M</p>
+        <p class="tiny">Example code · yours arrives after approval</p>
+      </div>
+    </div>
+  </div>
+
+  <section class="band-red" id="next" aria-labelledby="next-h">
+    <div class="wrap sec">
+      <div class="sec-head">
+        <h2 id="next-h">Next party.</h2>
+        <p>Every edition has its own list. Even if you came before, request again.</p>
+      </div>
+      <div class="next" id="next-card"></div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="sec" id="how" aria-labelledby="how-h">
+      <div class="sec-head">
+        <h2 id="how-h">How it works.</h2>
+        <p>Four steps, from request to the door.</p>
+      </div>
+      <ol class="steps">
+        <li><h3>Ask to join</h3><p>Fill in the request below and send it to us on Instagram.</p></li>
+        <li><h3>Get approved</h3><p>We review every request. If you're in, you get your price, your PP code and a payment deadline.</p></li>
+        <li><h3>Pay</h3><p>Bank transfer with your full name and PP code as the reference. 72 hours for early bird and normal tickets, 24 hours for late ones.</p></li>
+        <li><h3>You're in</h3><p>Once payment is confirmed you get your ticket and the location. Bring the ticket and photo ID.</p></li>
+      </ol>
+    </section>
+
+    <section class="sec" id="request" aria-labelledby="req-h">
+      <div class="sec-head">
+        <h2 id="req-h">Request a place.</h2>
+        <p>This form doesn't store anything. It writes your request so you can send it to us in a DM.</p>
+      </div>
+      <div class="req">
+        <form id="req-form" novalidate>
+          <div class="field">
+            <label for="f-name">Full name</label>
+            <input id="f-name" autocomplete="name" placeholder="As on your ID" required>
+          </div>
+          <div class="two">
+            <div class="field">
+              <label for="f-ig">Instagram <small>(optional)</small></label>
+              <input id="f-ig" placeholder="@yourhandle" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="f-uni">Study at <small>(optional)</small></label>
+              <select id="f-uni">
+                <option value="">Choose</option>
+                <option>Università per Stranieri</option>
+                <option>Università degli Studi di Perugia</option>
+                <option>Erasmus / exchange</option>
+                <option>Not a student</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="f-ref">Who told you about us? <small>(optional)</small></label>
+            <input id="f-ref" placeholder="A friend's name, Instagram, a past party…">
+          </div>
+          <div class="field">
+            <label for="f-intro">Say hi <small>(optional)</small></label>
+            <textarea id="f-intro" placeholder="Who you are, who you'll know there"></textarea>
+          </div>
+          <label class="check" for="f-age"><input type="checkbox" id="f-age"> I'm 18 or older and will bring photo ID.</label>
+          <label class="check" for="f-rules"><input type="checkbox" id="f-rules"> I've read the house rules.</label>
+          <p class="err" id="f-err" role="alert"></p>
+        </form>
+        <aside class="preview" aria-live="polite">
+          <p class="eyebrow">Your message</p>
+          <pre id="msg"></pre>
+          <div class="acts">
+            <button class="btn" type="button" id="copy">Copy message</button>
+            <a class="btn outline" id="dm" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Open Instagram DM ↗</a>
+          </div>
+          <p class="toast" id="toast"></p>
+          <p class="note">Copy it, open the DM, paste and send. We reply on Instagram.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="sec" id="nights" aria-labelledby="nights-h">
+      <div class="sec-head">
+        <h2 id="nights-h">Nights you missed.</h2>
+        <p><a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">See the real nights on Instagram ↗</a></p>
+      </div>
+      <div class="nights">
+        <article class="night n1"><p class="when">Past edition</p><div><h3>Alcoholiday</h3><p>Holiday theme, its own drink menu.</p></div></article>
+        <article class="night n2"><p class="when">Past edition</p><div><h3>The Final Night</h3><p>The last one before the break.</p></div></article>
+        <article class="night n3"><p class="when">Past edition</p><div><h3>Koningsdag 2026</h3><p>King's Day, Perugia edition. Orange required.</p></div></article>
+      </div>
+    </section>
+
+    <section class="sec" id="rules" aria-labelledby="rules-h">
+      <div class="sec-head">
+        <h2 id="rules-h">House rules.</h2>
+        <p>Good nights work when everyone is on the same page.</p>
+      </div>
+      <ul class="rules">
+        <li><span class="x" aria-hidden="true">✓</span><div><h3>On the list or not in</h3><p>No list, no entry. Tickets are personal.</p></div></li>
+        <li><span class="x" aria-hidden="true">✓</span><div><h3>Pay before you come</h3><p>Bank transfer with your name and PP code as the reference.</p></div></li>
+        <li><span class="x" aria-hidden="true">✓</span><div><h3>Pace yourself</h3><p>One drink at a time. Don't waste them.</p></div></li>
+        <li><span class="x" aria-hidden="true">✓</span><div><h3>Leave the music alone</h3><p>Respect the vibe and whoever is playing.</p></div></li>
+        <li><span class="x" aria-hidden="true">✓</span><div><h3>No mess</h3><p>Use the bags. Leave the place as you found it.</p></div></li>
+        <li><span class="x" aria-hidden="true">✓</span><div><h3>Respect the staff</h3><p>They're the reason the night happens.</p></div></li>
+      </ul>
+    </section>
+
+    <section class="sec" id="faq" aria-labelledby="faq-h">
+      <div class="sec-head"><h2 id="faq-h">Questions.</h2></div>
+      <div class="faq">
+        <details><summary>Who can come?</summary><p>Anyone 18 or older. Every edition needs a fresh request and approval, even if you came before. Bring valid photo ID.</p></details>
+        <details><summary>When do I see the price and location?</summary><p>The price comes with your approval. The exact location comes after we confirm your payment.</p></details>
+        <details><summary>How long do I have to pay?</summary><p>72 hours for early bird and normal tickets, 24 hours for late tickets, unless we tell you otherwise. An unpaid place goes back to the list when the deadline passes.</p></details>
+        <details><summary>Can I bring a friend?</summary><p>After you've been to an edition, you can ask to bring one friend per event. They still send their own request and get their own code.</p></details>
+        <details><summary>Refunds and transfers?</summary><p>Tickets are personal and can't be passed on. If you cancel, there's no refund. If we cancel, we'll contact you about the arrangements.</p></details>
+        <details><summary>What happens to my data?</summary><p>This page stores nothing. What you send us in a DM stays in Instagram and is used only for the guest list. Ask us anytime to delete it.</p></details>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="sign">Tonight we party. Tomorrow we forget. <span>Later, it's the best night you've ever had.</span></p>
+    <div class="meta">
+      <p>Independent nights · Perugia, Italia</p>
+      <nav aria-label="Footer">
+        <a href="#rules">House rules</a>
+        <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Contact ↗</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Next party: set to an object to announce an edition, or null for "announcing soon".
+   e.g. { name:"Halloween", date:"Sat 31 Oct", doors:"22:00", area:"Centro storico", status:"Requests open" } */
+const NEXT = null;
+
+(function renderNext(){
+  const el = document.getElementById('next-card');
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  if (!NEXT) {
+    el.innerHTML = `<div><span class="status"><i></i>Announcing soon</span>
+      <h3>The next edition is in the works.</h3>
+      <p>Date and theme drop on Instagram first. Send your request now and you'll be on the shortlist when the list opens.</p></div>
+      <a class="btn" href="#request">Request a place</a>`;
+  } else {
+    el.innerHTML = `<div><span class="status"><i></i>${esc(NEXT.status||'Requests open')}</span>
+      <h3>${esc(NEXT.name)}</h3>
+      <p>Location sent after payment is confirmed.</p>
+      <dl><div><dt>Date</dt><dd>${esc(NEXT.date)}</dd></div><div><dt>Doors</dt><dd>${esc(NEXT.doors)}</dd></div><div><dt>Area</dt><dd>${esc(NEXT.area)}</dd></div></dl></div>
+      <a class="btn" href="#request">Request a place</a>`;
+  }
+})();
+
+(function requestForm(){
+  const $ = id => document.getElementById(id);
+  const fields = ['f-name','f-ig','f-uni','f-ref','f-intro','f-age','f-rules'];
+  const msg = $('msg'), err = $('f-err'), toast = $('toast');
+  function build(){
+    const name = $('f-name').value.trim();
+    const lines = [`Hi PerugiaParty! I'd like to request a place${NEXT ? ' for ' + NEXT.name : ' at the next party'}.`, ''];
+    lines.push('Name: ' + (name || '…'));
+    const ig = $('f-ig').value.trim(); if (ig) lines.push('Instagram: ' + (ig.startsWith('@') ? ig : '@' + ig));
+    const uni = $('f-uni').value; if (uni) lines.push('Study at: ' + uni);
+    const ref = $('f-ref').value.trim(); if (ref) lines.push('Heard from: ' + ref);
+    const intro = $('f-intro').value.trim(); if (intro) lines.push('', intro);
+    lines.push('', ($('f-age').checked ? '✓' : '☐') + ' I am 18+ and will bring photo ID');
+    lines.push(($('f-rules').checked ? '✓' : '☐') + ' I have read the house rules');
+    msg.textContent = lines.join('\n');
+  }
+  function check(){
+    const missing = [];
+    if (!$('f-name').value.trim()) missing.push('your full name');
+    if (!$('f-age').checked) missing.push('the 18+ confirmation');
+    if (!$('f-rules').checked) missing.push('the house rules confirmation');
+    err.textContent = missing.length ? 'Add ' + missing.join(', ') + ' before sending.' : '';
+    return !missing.length;
+  }
+  fields.forEach(id => { $(id).addEventListener('input', () => { build(); if (err.textContent) check(); });
+                         $(id).addEventListener('change', () => { build(); if (err.textContent) check(); }); });
+  $('req-form').addEventListener('submit', e => e.preventDefault());
+  $('copy').addEventListener('click', () => {
+    if (!check()) return;
+    const text = msg.textContent;
+    const done = () => { toast.textContent = 'Copied. Now open the DM and paste it.'; };
+    const fallback = () => {
+      const r = document.createRange(); r.selectNodeContents(msg);
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      toast.textContent = 'Message selected. Copy it with your keyboard or long-press.';
+    };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  });
+  $('dm').addEventListener('click', e => { if (!check()) e.preventDefault(); });
+  build();
+})();
+</script>
+
+</body>
+</html>
