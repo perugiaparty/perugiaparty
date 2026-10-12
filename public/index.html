@@ -191,6 +191,19 @@ html,body{overflow-x:clip}
   header.top .btn{padding:7px 14px;font-size:14px}
   footer .wrap{padding-block:44px 52px}
 }
+/* save-your-link popup */
+.saveov{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:rgba(20,18,16,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.savebox{position:relative;background:var(--cream);border-radius:22px;max-width:460px;width:100%;padding:30px 26px 24px;display:grid;gap:14px;box-shadow:10px 10px 0 var(--red);animation:popin .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes popin{0%{transform:scale(.92);opacity:0}100%{transform:none;opacity:1}}
+.savebox h3{font-size:30px}
+.savebox p{color:var(--muted);font-size:15px}
+.savebox .linkbox{font-family:var(--f-mono);font-size:14px;background:var(--ink);color:var(--cream);border-radius:12px;padding:14px;word-break:break-all}
+.savebox .acts{display:grid;gap:10px}
+.savebox .btn{width:100%}
+.savebox .btn.outline{color:var(--ink);border-color:var(--ink)}
+.savebox .btn.done:disabled{opacity:.35;cursor:not-allowed}
+.savebox .hint{font-family:var(--f-mono);font-size:13px;color:var(--red-deep);min-height:1.4em;text-align:center}
+body.locked{overflow:hidden}
 </style>
 </head>
 <body>
@@ -388,6 +401,20 @@ html,body{overflow-x:clip}
   </div>
 </footer>
 
+<div class="saveov" id="saveov" role="dialog" aria-modal="true" aria-labelledby="save-h" hidden>
+  <div class="savebox">
+    <p class="eyebrow">Request sent</p>
+    <h3 id="save-h">Save your personal link.</h3>
+    <p>Your price, code, ticket and the location will appear on this page. It's private, only for you. Copy it before you continue.</p>
+    <p class="linkbox" id="save-link"></p>
+    <div class="acts">
+      <button class="btn" type="button" id="save-copy">Copy my link</button>
+      <button class="btn outline done" type="button" id="save-done" disabled>I saved it, continue</button>
+    </div>
+    <p class="hint" id="save-hint">Copy your link to continue</p>
+  </div>
+</div>
+
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -474,7 +501,7 @@ $("req-form").addEventListener("submit", async e => {
     const st = $("pv-stamp"); st.textContent = "SENT"; st.classList.add("sent"); document.querySelector(".side .mini").classList.add("done");
     $("pv-tiny").textContent = "Waiting for approval · check your link";
     $("req-form").reset();
-    $("side").scrollIntoView({ behavior: "smooth", block: "center" });
+    openSave(link);
   } catch (x) {
     err.textContent = "Couldn't reach us. Check your connection and try again.";
   } finally { btn.disabled = false; btn.textContent = "Send request"; }
@@ -485,6 +512,29 @@ $("copy-link").addEventListener("click", () => {
   const fb = () => { const r = document.createRange(); r.selectNodeContents($("my-link")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); t.textContent = "Selected. Copy it with your keyboard or long-press."; };
   try { navigator.clipboard.writeText(text).then(ok, fb); } catch (e) { fb(); }
 });
+
+/* popup: blurred page, can only close after copying */
+let saveCopied = false;
+function openSave(link){
+  saveCopied = false;
+  $("save-link").textContent = link;
+  $("save-done").disabled = true;
+  $("save-hint").textContent = "Copy your link to continue";
+  $("saveov").hidden = false; document.body.classList.add("locked");
+  $("save-copy").focus();
+}
+function unlockSave(msg){ saveCopied = true; $("save-done").disabled = false; $("save-hint").textContent = msg; $("save-copy").textContent = "Copied ✓"; }
+$("save-copy").addEventListener("click", () => {
+  const text = $("save-link").textContent;
+  const fb = () => { const r = document.createRange(); r.selectNodeContents($("save-link")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); unlockSave("Link selected: copy it with long-press, then continue"); };
+  try { navigator.clipboard.writeText(text).then(() => unlockSave("Copied. Paste it in your notes or chats."), fb); } catch (e) { fb(); }
+});
+$("save-done").addEventListener("click", () => {
+  if (!saveCopied) return;
+  $("saveov").hidden = true; document.body.classList.remove("locked");
+  $("side").scrollIntoView({ behavior: "smooth", block: "center" });
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("saveov").hidden && saveCopied) $("save-done").click(); });
 </script>
 </body>
 </html>
