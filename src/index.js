@@ -100,6 +100,9 @@ async function apiTicket(url, env) {
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
+    if (url.pathname === "/admin" || url.pathname === "/admin/") {
+      return Response.redirect(PANEL_URL, 302); // private panel; only Matt's Claude account can open it
+    }
     if (url.pathname.startsWith("/api/")) {
       try {
         if (url.pathname === "/api/event" && req.method === "GET") return await apiEvent(env);
