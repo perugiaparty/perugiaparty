@@ -128,7 +128,7 @@ h1{font-size:clamp(40px,8vw,64px)}
 <header class="top">
   <div class="wrap">
     <a class="mark" href="/">Perugia<span>Party</span></a>
-    <nav aria-label="Main"><a class="keep" href="/">Home</a><a href="/#rules">House rules</a><a class="keep" href="/#faq">FAQ</a><a class="btn" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">DM us</a></nav>
+    <nav aria-label="Main"><a href="/#rules">House rules</a><a class="keep" href="/#faq">FAQ</a><a class="btn" id="nav-cta" href="/#request">Request a place</a></nav>
   </div>
 </header>
 <main class="wrap">
@@ -146,6 +146,7 @@ const when = t => new Date(t).toLocaleString("en-GB", { weekday:"short", day:"nu
 const params = new URLSearchParams(location.search);
 let token = params.get("t");
 try { if (token) localStorage.setItem("pp_token", token); else token = localStorage.getItem("pp_token"); } catch(e){}
+if (token) { const c = document.getElementById("nav-cta"); c.textContent = "My ticket"; c.href = "/ticket.html?t=" + encodeURIComponent(token); }
 
 function copyBtn(value){ return `<button class="copy" type="button" data-copy="${esc(value)}">Copy</button>`; }
 document.addEventListener("click", e => {
