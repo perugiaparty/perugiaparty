@@ -61,6 +61,8 @@ header .btn{padding:8px 16px;color:var(--cream)}
 .hero h1 em{font-style:normal;color:var(--red);display:block}
 .hero .lede{margin-top:24px;max-width:32ch;font-size:20px;color:var(--muted)}
 .hero .ctas{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
+.ig-note{margin-top:14px;font-size:15px;color:var(--muted)}
+.ig-note a{color:var(--red-deep);font-weight:700}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;border:1.5px solid var(--ink);border-radius:999px;padding:5px 12px}
 .chip.red{background:var(--red);border-color:var(--red);color:var(--cream)}
@@ -102,7 +104,7 @@ header .btn{padding:8px 16px;color:var(--cream)}
 
 /* steps */
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;list-style:none;padding:0;margin:0;counter-reset:s}
-.steps li{counter-increment:s;border-top:3px solid var(--ink);padding-top:18px;min-width:0}
+.steps li{counter-increment:s;min-width:0}
 .steps li::before{content:"0" counter(s);font-family:var(--f-display);font-size:34px;color:var(--red);line-height:1}
 .steps h3{margin:12px 0 8px}
 .steps p{color:var(--muted);font-size:15px}
@@ -198,15 +200,16 @@ footer nav a{font-size:14px}
       <div>
         <div class="chips"><span class="chip red">Invite only</span><span class="chip">Perugia</span><span class="chip">18+</span></div>
         <h1 style="margin-top:22px">Your people. <em>Your night.</em></h1>
-        <p class="lede">Private student parties in Perugia, with the feel of a house party and a guest list we put together by hand.</p>
+        <p class="lede">Private student parties in Perugia. House-party vibes, a guest list, and new people to meet.</p>
         <div class="ctas">
           <a class="btn" href="#request">Request a place</a>
           <a class="btn outline" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Instagram ↗</a>
         </div>
+        <p class="ig-note">Requests only go through Instagram. DM us at <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>
       </div>
       <div class="ticket" aria-label="Example guest ticket">
         <span class="stamp">APPROVED</span>
-        <div class="row"><span>PerugiaParty</span><span>Admit one</span></div>
+        <div class="row"><span>PerugiaParty</span></div>
         <p class="name">Your name</p>
         <p class="sub">Personal ticket · photo ID at the door</p>
         <div class="perf"></div>
@@ -233,7 +236,7 @@ footer nav a{font-size:14px}
         <p>Four steps, from request to the door.</p>
       </div>
       <ol class="steps">
-        <li><h3>Ask to join</h3><p>Fill in the request below and send it to us on Instagram.</p></li>
+        <li><h3>Ask on Instagram</h3><p>Requests only go through Instagram. Fill in the form below, copy the message and DM it to @perugiaparty.</p></li>
         <li><h3>Get approved</h3><p>We review every request. If you're in, you get your price, your PP code and a payment deadline.</p></li>
         <li><h3>Pay</h3><p>Bank transfer with your full name and PP code as the reference. 72 hours for early bird and normal tickets, 24 hours for late ones.</p></li>
         <li><h3>You're in</h3><p>Once payment is confirmed you get your ticket and the location. Bring the ticket and photo ID.</p></li>
@@ -243,7 +246,7 @@ footer nav a{font-size:14px}
     <section class="sec" id="request" aria-labelledby="req-h">
       <div class="sec-head">
         <h2 id="req-h">Request a place.</h2>
-        <p>This form doesn't store anything. It writes your request so you can send it to us in a DM.</p>
+        <p>Requests only go through Instagram DM. Fill this in, copy the message, and send it to <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>
       </div>
       <div class="req">
         <form id="req-form" novalidate>
@@ -287,7 +290,7 @@ footer nav a{font-size:14px}
             <a class="btn outline" id="dm" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Open Instagram DM ↗</a>
           </div>
           <p class="toast" id="toast"></p>
-          <p class="note">Copy it, open the DM, paste and send. We reply on Instagram.</p>
+          <p class="note"><b>1.</b> Copy the message &nbsp;<b>2.</b> Open the Instagram DM &nbsp;<b>3.</b> Paste and send. We reply on Instagram.</p>
         </aside>
       </div>
     </section>
@@ -298,9 +301,9 @@ footer nav a{font-size:14px}
         <p><a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">See the real nights on Instagram ↗</a></p>
       </div>
       <div class="nights">
-        <article class="night n1"><p class="when">Past edition</p><div><h3>Alcoholiday</h3><p>Holiday theme, its own drink menu.</p></div></article>
-        <article class="night n2"><p class="when">Past edition</p><div><h3>The Final Night</h3><p>The last one before the break.</p></div></article>
-        <article class="night n3"><p class="when">Past edition</p><div><h3>Koningsdag 2026</h3><p>King's Day, Perugia edition. Orange required.</p></div></article>
+        <article class="night n1"><p class="when">Past edition</p><div><h3>Alcoholiday</h3></div></article>
+        <article class="night n2"><p class="when">Past edition</p><div><h3>The Final Night</h3></div></article>
+        <article class="night n3"><p class="when">Past edition</p><div><h3>Koningsdag 2026</h3></div></article>
       </div>
     </section>
 
@@ -327,7 +330,6 @@ footer nav a{font-size:14px}
         <details><summary>How long do I have to pay?</summary><p>72 hours for early bird and normal tickets, 24 hours for late tickets, unless we tell you otherwise. An unpaid place goes back to the list when the deadline passes.</p></details>
         <details><summary>Can I bring a friend?</summary><p>After you've been to an edition, you can ask to bring one friend per event. They still send their own request and get their own code.</p></details>
         <details><summary>Refunds and transfers?</summary><p>Tickets are personal and can't be passed on. If you cancel, there's no refund. If we cancel, we'll contact you about the arrangements.</p></details>
-        <details><summary>What happens to my data?</summary><p>This page stores nothing. What you send us in a DM stays in Instagram and is used only for the guest list. Ask us anytime to delete it.</p></details>
       </div>
     </section>
   </div>
@@ -357,7 +359,7 @@ const NEXT = null;
   if (!NEXT) {
     el.innerHTML = `<div><span class="status"><i></i>Announcing soon</span>
       <h3>The next edition is in the works.</h3>
-      <p>Date and theme drop on Instagram first. Send your request now and you'll be on the shortlist when the list opens.</p></div>
+      <p>Date and theme drop on Instagram first. DM us your request now and you'll be on the shortlist when the list opens.</p></div>
       <a class="btn" href="#request">Request a place</a>`;
   } else {
     el.innerHTML = `<div><span class="status"><i></i>${esc(NEXT.status||'Requests open')}</span>
