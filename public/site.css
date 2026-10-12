@@ -1,15 +1,15 @@
 /* PerugiaParty — brand red / cream / black, taken from the logo. Single deliberate look. */
 :root{
-  --cream:#f7f8ef;      /* logo cream, page ground */
-  --cream-2:#ecebdc;    /* raised cream surface */
-  --paper:#fdfdf8;      /* inputs */
+  --cream:#f4ead7;      /* soft cream, page ground */
+  --cream-2:#ebdec6;    /* raised cream surface */
+  --paper:#fbf5ea;      /* inputs */
   --ink:#141210;        /* brand black */
   --ink-2:#262220;
   --red:#b90000;        /* logo red */
   --red-deep:#8f0000;   /* red for small text on cream */
-  --muted:#5f5a50;      /* secondary text on cream */
-  --muted-dark:#b9b3a4; /* secondary text on black */
-  --line:#dcd9c6;       /* hairlines on cream */
+  --muted:#6b5f52;      /* secondary text on cream */
+  --muted-dark:#b9ab98; /* secondary text on black */
+  --line:#d8c8ac;       /* hairlines on cream */
   --f-display:"Bowlby One","Arial Black",Impact,sans-serif;
   --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"DM Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -53,7 +53,7 @@ header .btn{padding:8px 16px}
 .sec-head p a{color:var(--red-deep);font-weight:700}
 
 input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;width:100%}
-input::placeholder,textarea::placeholder{color:#9a9585}
+input::placeholder,textarea::placeholder{color:#9a8c7c}
 input:focus,select:focus,textarea:focus{border-color:var(--red);outline:none;box-shadow:0 0 0 3px rgba(185,0,0,.14)}
 label{font-size:14px;font-weight:700}
 label small{font-weight:400;color:var(--muted)}

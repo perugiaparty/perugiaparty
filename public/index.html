@@ -95,6 +95,25 @@ textarea{resize:vertical;min-height:88px}
 .side .acts{display:flex;gap:10px;flex-wrap:wrap}
 .side .btn.outline{color:var(--cream);border-color:#4a423b}
 .privacy{font-size:13px;color:var(--muted)}
+.mini{position:relative;background:var(--ink-2);border-radius:18px;padding:20px 20px 18px;overflow:hidden}
+.mini::before,.mini::after{content:"";position:absolute;top:63%;width:24px;height:24px;border-radius:50%;background:var(--ink)}
+.mini::before{left:-12px}.mini::after{right:-12px}
+.mini .mlogo{width:120px;height:auto}
+.mini .stamp{top:18px;right:16px}
+.mini .stamp.sent{border-color:#5ad17a;color:#5ad17a}
+.pv-name{font-family:var(--f-display);font-size:28px;line-height:1.05;margin-top:4px;overflow-wrap:anywhere}
+.pv-name.empty,.pv-ig.empty{opacity:.35}
+.pv-ig{font-family:var(--f-mono);font-size:15px;color:#ff8a7f;margin-top:4px;overflow-wrap:anywhere}
+.pv-hi{font-size:14px;color:var(--muted-dark);margin-top:8px;font-style:italic;overflow-wrap:anywhere}
+.mini .perf{border-top:2px dashed #4a423b;margin:18px -20px 14px}
+.pv-checks{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:14px;color:var(--muted-dark)}
+.pv-checks li.on{color:var(--cream)}
+.pv-checks li.on span{color:#5ad17a}
+.pv-code{font-family:var(--f-mono);font-size:22px;letter-spacing:.1em;margin-top:12px;color:var(--cream)}
+.pv-code b{color:#ff4a3d;font-weight:500}
+.mini .tiny{font-family:var(--f-mono);font-size:11px;color:var(--muted-dark);margin-top:4px}
+@keyframes pop{0%{transform:scale(1.4) rotate(8deg);opacity:0}100%{transform:scale(1) rotate(8deg);opacity:1}}
+.stamp.sent{animation:pop .35s ease-out}
 
 /* past nights */
 .nights{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
@@ -134,7 +153,6 @@ details p{color:var(--muted);margin-top:10px;max-width:62ch}
   <div class="wrap">
     <a class="mark" href="#top">Perugia<span>Party</span></a>
     <nav aria-label="Main">
-      <a href="#how">How it works</a>
       <a href="#nights">Past nights</a>
       <a href="#rules">House rules</a>
       <a href="#faq">FAQ</a>
@@ -231,18 +249,31 @@ details p{color:var(--muted);margin-top:10px;max-width:62ch}
           <p class="privacy">We only use your name, Instagram and WhatsApp to run the guest list for this party. DM us anytime to have them deleted.</p>
         </form>
         <aside class="side" id="side" aria-live="polite">
+          <div class="mini" aria-label="Live preview of your request">
+            <span class="stamp" id="pv-stamp">DRAFT</span>
+            <img class="mlogo" src="/logo.png" alt="" width="120" height="84">
+            <p class="eyebrow" style="color:var(--muted-dark);margin-top:14px" id="pv-ev">Guest request</p>
+            <p class="pv-name" id="pv-name">Your name</p>
+            <p class="pv-ig" id="pv-ig">@yourinstagram</p>
+            <p class="pv-hi" id="pv-hi" hidden></p>
+            <div class="perf"></div>
+            <ul class="pv-checks">
+              <li id="pv-age"><span>☐</span> 18+ with photo ID</li>
+              <li id="pv-rules"><span>☐</span> House rules read</li>
+            </ul>
+            <p class="pv-code" id="pv-code">PP-<b>???</b>-????</p>
+            <p class="tiny" id="pv-tiny">Your code arrives after approval</p>
+          </div>
           <div id="side-info">
-            <h3>What happens next</h3>
-            <ol style="margin-top:12px">
-              <li>You get a personal link right after sending.</li>
+            <ol style="margin-top:4px">
+              <li>Send it: you get a personal link straight away.</li>
               <li>We check your request on Instagram.</li>
-              <li>Your page shows your price and code once you're approved.</li>
+              <li>Once approved, your page shows your price and code.</li>
             </ol>
           </div>
           <div id="side-done" hidden>
-            <p class="eyebrow" style="color:var(--muted-dark)">Request sent</p>
-            <h3 style="margin-top:6px">Save your personal link.</h3>
-            <p style="margin-top:8px">This is where your price, code and ticket appear. Keep it private, it's yours only.</p>
+            <h3>Save your personal link.</h3>
+            <p style="margin-top:8px">Your price, code and ticket appear there. Keep it private, it's only for you.</p>
             <p class="linkbox" id="my-link" style="margin-top:12px"></p>
             <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="copy-link">Copy link</button><a class="btn outline" id="open-link" href="/ticket.html">Open my page</a></div>
             <p class="toast" id="toast" style="color:#ff8a7f;margin-top:8px"></p>
@@ -340,7 +371,19 @@ function tick(){
   const p = n => String(n).padStart(2,"0");
   c.innerHTML = [[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]].map(([v,l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
 }
-fetch("/api/event").then(r => r.json()).then(ev => { EVENT = ev; renderNext(ev); }).catch(() => {});
+fetch("/api/event").then(r => r.json()).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); }).catch(() => {});
+
+/* live preview: the request fills in like a ticket being made */
+function preview(){
+  const name = $("f-name").value.trim(), ig = $("f-ig").value.trim().replace(/^@+/, ""), hi = $("f-intro").value.trim();
+  const n = $("pv-name"); n.textContent = name || "Your name"; n.classList.toggle("empty", !name);
+  const i = $("pv-ig"); i.textContent = "@" + (ig || "yourinstagram"); i.classList.toggle("empty", !ig);
+  const h = $("pv-hi"); h.textContent = hi ? "“" + hi.slice(0, 120) + (hi.length > 120 ? "…" : "") + "”" : ""; h.hidden = !hi;
+  for (const [id, box] of [["pv-age","f-age"],["pv-rules","f-rules"]]) { const li = $(id), on = $(box).checked; li.classList.toggle("on", on); li.querySelector("span").textContent = on ? "✓" : "☐"; }
+}
+["f-name","f-ig","f-intro","f-age","f-rules"].forEach(id => { $(id).addEventListener("input", preview); $(id).addEventListener("change", preview); });
+function previewEvent(){ if (EVENT && EVENT.published && EVENT.name) $("pv-ev").textContent = "Guest request · " + EVENT.name; }
+preview();
 
 /* request form */
 $("req-form").addEventListener("submit", async e => {
@@ -367,6 +410,8 @@ $("req-form").addEventListener("submit", async e => {
     $("my-link").textContent = link; $("open-link").href = link;
     const mt = $("my-ticket"); mt.href = link; mt.hidden = false;
     $("side-info").hidden = true; $("side-done").hidden = false;
+    const st = $("pv-stamp"); st.textContent = "SENT"; st.classList.add("sent");
+    $("pv-tiny").textContent = "Waiting for approval · check your link";
     $("req-form").reset();
     $("side").scrollIntoView({ behavior: "smooth", block: "center" });
   } catch (x) {
