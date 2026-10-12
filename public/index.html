@@ -148,6 +148,49 @@ summary::-webkit-details-marker{display:none}
 summary::after{content:"+";font-family:var(--f-display);color:var(--red);font-size:22px;line-height:1}
 details[open] summary::after{content:"–"}
 details p{color:var(--muted);margin-top:10px;max-width:62ch}
+/* motion */
+@keyframes dealIn{0%{transform:translateY(18px) rotate(-9deg);opacity:.2}100%{transform:rotate(-3deg);opacity:1}}
+.ticket{animation:dealIn .7s cubic-bezier(.2,.8,.2,1) backwards}
+.ticket:hover{transform:rotate(-1deg) translateY(-4px);transition:transform .25s ease}
+@keyframes ink{0%{opacity:.35;transform:translateX(-3px)}100%{opacity:1;transform:none}}
+.side .mini .bump{animation:ink .25s ease-out}
+.side .mini{transition:transform .2s ease}
+.side .mini.done{transform:rotate(-1.5deg)}
+.night{transition:transform .2s ease}
+.night:hover{transform:translateY(-4px) rotate(-.6deg)}
+
+/* phones */
+html,body{overflow-x:clip}
+@media (max-width:640px){
+  .hero{padding-block:32px 52px;gap:36px}
+  .hero .lede{font-size:18px}
+  .ticket{max-width:calc(100% - 14px);box-shadow:8px 8px 0 var(--red);padding:22px 22px 20px}
+  .ticket .logo{width:120px;height:auto}
+  .ticket .name{font-size:30px}
+  .ticket .code{font-size:24px}
+  .ticket .perf{margin-inline:-22px}
+  .sec{padding-block:56px}
+  .sec-head{margin-bottom:28px}
+  .next{padding:22px}
+  .next dl{gap:20px}
+  .next .btn{width:100%}
+  .steps{gap:22px}
+  .steps li{display:grid;grid-template-columns:44px 1fr;column-gap:14px;align-items:start}
+  .steps li::before{width:44px;height:44px;font-size:20px;grid-row:span 2}
+  .steps h3{margin:4px 0 4px;font-size:20px}
+  .req{gap:24px}
+  .req .side{order:-1;position:static}
+  .side .mini{box-shadow:6px 6px 0 var(--red);padding:36px 22px 32px}
+  .side .mini,.side .mini *{font-size:16px}
+  .side .mini .perf{margin-inline:-22px}
+  .side .mini .stamp{top:30px;right:18px}
+  #f-send{width:100%}
+  .night{min-height:0;padding:22px;gap:18px}
+  .night h3{font-size:28px}
+  .rules{gap:24px}
+  header.top .btn{padding:7px 14px;font-size:14px}
+  footer .wrap{padding-block:44px 52px}
+}
 </style>
 </head>
 <body>
@@ -388,7 +431,9 @@ function tick(){
 fetch("/api/event").then(r => r.json()).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); }).catch(() => {});
 
 /* live preview: the request fills in like a ticket being made */
-function preview(){
+function bump(el){ el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
+function preview(e){
+  if (e && e.target) { const map = { "f-name":"pv-name", "f-ig":"pv-ig", "f-intro":"pv-hi", "f-age":"pv-age", "f-rules":"pv-rules" }; const t = $(map[e.target.id]); if (t) bump(t); }
   const name = $("f-name").value.trim(), ig = $("f-ig").value.trim().replace(/^@+/, ""), hi = $("f-intro").value.trim();
   const n = $("pv-name"); n.textContent = name || "Your name"; n.classList.toggle("dim", !name);
   const i = $("pv-ig"); i.textContent = "@" + (ig || "yourinstagram"); i.classList.toggle("dim", !ig);
@@ -426,7 +471,7 @@ $("req-form").addEventListener("submit", async e => {
     $("my-link").textContent = link; $("open-link").href = link;
     const mt = $("my-ticket"); mt.href = link; mt.hidden = false;
     $("side-info").hidden = true; $("side-done").hidden = false;
-    const st = $("pv-stamp"); st.textContent = "SENT"; st.classList.add("sent");
+    const st = $("pv-stamp"); st.textContent = "SENT"; st.classList.add("sent"); document.querySelector(".side .mini").classList.add("done");
     $("pv-tiny").textContent = "Waiting for approval · check your link";
     $("req-form").reset();
     $("side").scrollIntoView({ behavior: "smooth", block: "center" });
