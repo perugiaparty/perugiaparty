@@ -42,6 +42,28 @@ h1{font-size:clamp(40px,8vw,64px)}
 .loc a{color:var(--cream)}
 .note{font-size:14px;color:var(--muted)}
 .empty{text-align:center;padding:40px 10px;display:grid;gap:14px;justify-items:center}
+/* accepted landing */
+.hero-ok{background:var(--red);color:var(--cream);border-radius:24px;padding:28px;display:grid;gap:10px}
+.hero-ok h1{color:var(--cream)}
+.hero-ok .state{justify-self:start}
+.hero-ok .lead{color:#f3d3cc}
+.amount{background:var(--ink);color:var(--cream);border-radius:22px;padding:24px;display:grid;gap:6px}
+.amount .big{font-family:var(--f-display);font-size:clamp(48px,11vw,72px);line-height:1;color:var(--cream)}
+.amount .why{color:var(--muted-dark);font-size:15px;max-width:46ch}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.tier{border:1.5px solid #3a3330;border-radius:14px;padding:10px 12px;color:var(--muted-dark);font-size:14px}
+.tier b{display:block;font-family:var(--f-display);font-weight:400;font-size:22px;color:var(--muted-dark)}
+.tier.me{border-color:var(--cream);background:var(--ink-2);color:var(--cream)}
+.tier.me b{color:var(--cream)}
+.tier .you{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#ff8a7f}
+.howto{list-style:none;margin:0;padding:0;counter-reset:h;display:grid;gap:16px}
+.howto li{counter-increment:h;display:grid;grid-template-columns:40px 1fr;gap:14px;align-items:start}
+.howto li::before{content:counter(h);display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--red);color:var(--cream);font-family:var(--f-display);font-size:18px}
+.howto h3{font-size:20px;margin-bottom:4px}
+.howto p{color:var(--muted);font-size:15px}
+.ref{font-family:var(--f-mono);font-size:18px;background:var(--ink);color:var(--cream);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;overflow-wrap:anywhere}
+.ref .copy{color:var(--cream);border-color:#4a423b}
+.copyall{justify-self:start}
 </style>
 </head>
 <body>
@@ -70,7 +92,7 @@ function copyBtn(value){ return `<button class="copy" type="button" data-copy="$
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-copy]"); if (!b) return;
   const v = b.dataset.copy;
-  const done = () => { b.textContent = "Copied"; setTimeout(() => b.textContent = "Copy", 1500); };
+  const label = b.textContent; const done = () => { b.textContent = "Copied"; setTimeout(() => b.textContent = label, 1500); };
   try { navigator.clipboard.writeText(v).then(done, () => { b.textContent = "Long-press to copy"; }); } catch(x){ b.textContent = "Long-press to copy"; }
 });
 
@@ -119,16 +141,40 @@ function render(d){
   } else if (d.status === "approved") {
     const left = d.deadline ? d.deadline - Date.now() : null;
     const overdue = left != null && left < 0;
-    P.innerHTML = `<span class="state ok">Approved</span><h1>You're on the list, ${first}.</h1>
-      <p class="lead">Pay by bank transfer to confirm your place at <b>${esc(d.event)}</b>. Once we see your payment, your ticket and the location appear on this page.</p>
-      ${d.deadline ? `<div class="deadline">${overdue ? "The payment deadline has passed. DM us on Instagram if you already paid." : `Pay before <span>${esc(when(d.deadline))}</span>, or your place goes back to the list.`}</div>` : ""}
-      <dl class="card">
-        <div class="row"><dt>Amount</dt><dd>${euro(d.price)}${d.ticket ? ` <span class="note">(${esc(d.ticket)})</span>` : ""}</dd><span></span></div>
-        <div class="row"><dt>IBAN</dt><dd class="mono">${esc(d.iban || "—")}</dd>${d.iban ? copyBtn(d.iban.replace(/\s+/g, "")) : "<span></span>"}</div>
-        <div class="row"><dt>Beneficiary</dt><dd>${esc(d.beneficiary || "—")}</dd>${d.beneficiary ? copyBtn(d.beneficiary) : "<span></span>"}</div>
-        <div class="row"><dt>Reference</dt><dd class="mono">${esc(d.reference)}</dd>${copyBtn(d.reference)}</div>
-      </dl>
-      <p class="note">Use the reference exactly as shown so we can match your payment. Your code: <b style="font-family:var(--f-mono)">${esc(d.code)}</b></p>`;
+    const names = { early: "Early bird", normal: "Normal", late: "Late" };
+    const tierName = names[d.ticket] || "Ticket";
+    const why = {
+      early: "You were approved early, so you get the lowest price. Prices go up as the party gets closer.",
+      normal: "You were approved at the normal price. The early bird places are gone, and late tickets cost more.",
+      late: "You were approved close to the party, so the late price applies. Places are limited at this point.",
+    }[d.ticket] || "This is the price for your place.";
+    const tiers = d.tiers ? ["early","normal","late"].filter(t => d.tiers[t] != null && d.tiers[t] !== "") : [];
+    const allText = `Amount: ${euro(d.price)}\nIBAN: ${d.iban || ""}\nBeneficiary: ${d.beneficiary || ""}\nReference: ${d.reference}`;
+    P.innerHTML = `<div class="hero-ok"><span class="state" style="background:var(--cream);border-color:var(--cream);color:var(--red)">Accepted</span>
+        <h1>You're in, ${first}.</h1>
+        <p class="lead">You've been accepted for <b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " on " + esc(d.date_label) : ""}. Pay to confirm your place. After that, your ticket and the location unlock right here.</p></div>
+      <div class="amount"><p class="eyebrow" style="color:var(--muted-dark)">You pay · ${esc(tierName)}</p>
+        <p class="big">${euro(d.price)}</p>
+        <p class="why">${esc(why)}</p>
+        ${tiers.length > 1 ? `<div class="tiers">${tiers.map(t => `<div class="tier ${t === d.ticket ? "me" : ""}">${t === d.ticket ? `<span class="you">Your price</span>` : ""}<b>${euro(d.tiers[t])}</b>${names[t]}</div>`).join("")}</div>` : ""}
+      </div>
+      ${d.deadline ? `<div class="deadline">${overdue ? "The payment deadline has passed. DM us on Instagram if you already paid." : `Pay before <span>${esc(when(d.deadline))}</span>. After that your place goes back to the list.`}</div>` : ""}
+      <div class="card">
+        <h2 style="font-size:30px">How to pay</h2>
+        <ol class="howto">
+          <li><div><h3>Open your banking app</h3><p>Make a normal bank transfer (bonifico) of exactly <b>${euro(d.price)}</b>.</p></div></li>
+          <li><div><h3>Send it to</h3>
+            <dl style="margin:8px 0 0;display:grid;gap:10px">
+              <div class="row"><dt>IBAN</dt><dd class="mono">${esc(d.iban || "—")}</dd>${d.iban ? copyBtn(d.iban.replace(/\s+/g, "")) : "<span></span>"}</div>
+              <div class="row"><dt>Beneficiary</dt><dd>${esc(d.beneficiary || "—")}</dd>${d.beneficiary ? copyBtn(d.beneficiary) : "<span></span>"}</div>
+            </dl></div></li>
+          <li><div><h3>Write this in the description</h3><p>Exactly like this, so we can match your payment to you.</p>
+            <div class="ref"><span>${esc(d.reference)}</span>${copyBtn(d.reference)}</div></div></li>
+          <li><div><h3>Wait for our confirmation</h3><p>We check payments regularly. Once yours is in, this page shows your QR ticket and the exact location. Keep this link.</p></div></li>
+        </ol>
+        <button class="btn ink copyall" type="button" data-copy="${esc(allText)}">Copy all payment details</button>
+      </div>
+      <p class="note">Your personal code: <b style="font-family:var(--f-mono)">${esc(d.code)}</b> · Questions? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>`;
   } else if (d.status === "paid" || d.status === "in") {
     P.innerHTML = `<span class="state ok">${d.status === "in" ? "Checked in" : "Paid · you're in"}</span><h1>See you there, ${first}.</h1>
       ${d.location ? `<div class="loc"><span class="eyebrow" style="color:#f3d3cc">Location</span><p>${esc(d.location)}</p><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener">Open in Maps ↗</a></div>` : ""}
