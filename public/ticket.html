@@ -326,6 +326,8 @@ function render(d){
     startCount(d.starts_at);
   } else if (d.status === "declined") {
     empty("Not this time.", "We couldn't give you a place for this edition. Keep an eye on Instagram for the next one.");
+  } else if (d.status === "removed") {
+    empty("Your place was cancelled.", "Your request or ticket for this party has been cancelled. DM us on Instagram if you have questions.");
   } else if (d.status === "released") {
     empty("Your place was released.", "The payment deadline passed, so your place went back to the list. DM us on Instagram if you think this is a mistake.");
   } else {
@@ -338,7 +340,7 @@ if (!token) {
 } else {
   // live updates: check every 20 s while the page is open, and when the guest comes back to it
   let last = null, busy = false;
-  const STATUS_TEXT = { approved: "You've been accepted. Your payment details are below.", paid: "Payment confirmed. Your ticket and the location are here.", in: "You're checked in. Have a great night.", declined: "Your request was updated.", released: "Your request was updated." };
+  const STATUS_TEXT = { approved: "You've been accepted. Your payment details are below.", paid: "Payment confirmed. Your ticket and the location are here.", in: "You're checked in. Have a great night.", declined: "Your request was updated.", released: "Your request was updated.", removed: "Your request was updated." };
   async function check(first){
     if (busy) return; busy = true;
     try {
