@@ -213,8 +213,7 @@ body.locked{overflow:hidden}
     <nav aria-label="Main">
       <a href="#rules">House rules</a>
       <a href="#faq">FAQ</a>
-      <a id="my-ticket" href="/ticket.html" hidden>My ticket</a>
-      <a class="btn" href="#request">Request a place</a>
+      <a class="btn" id="nav-cta" href="#request">Request a place</a>
     </nav>
   </div>
 </header>
@@ -426,7 +425,8 @@ let EVENT = null;
 /* remembered personal link */
 function savedToken(){ try { return localStorage.getItem("pp_token"); } catch(e){ return null; } }
 function rememberToken(t){ try { localStorage.setItem("pp_token", t); } catch(e){} }
-(function(){ const t = savedToken(); if (t) { const a = $("my-ticket"); a.href = "/ticket.html?t=" + encodeURIComponent(t); a.hidden = false; } })();
+function showMyTicket(href){ const a = $("nav-cta"); a.href = href; a.textContent = "My ticket"; }
+(function(){ const t = savedToken(); if (t) showMyTicket("/ticket.html?t=" + encodeURIComponent(t)); })();
 
 /* next party + countdown */
 let timer = null;
@@ -498,7 +498,7 @@ $("req-form").addEventListener("submit", async e => {
     try { localStorage.setItem("pp_me", JSON.stringify({ name: body.name, ig: body.ig, phone: body.phone })); } catch(e){}
     const link = location.origin + "/ticket.html?t=" + data.token;
     $("my-link").textContent = link; $("open-link").href = link;
-    const mt = $("my-ticket"); mt.href = link; mt.hidden = false;
+    showMyTicket(link);
     $("side-info").hidden = true; $("side-done").hidden = false;
     const st = $("pv-stamp"); st.textContent = "SENT"; st.classList.add("sent"); document.querySelector(".side .mini").classList.add("done");
     $("pv-tiny").textContent = "Waiting for approval · check your link";

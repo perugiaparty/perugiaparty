@@ -94,6 +94,7 @@ async function apiTicket(url, env) {
       doors: sameEvent ? ev.doors : null,
       starts_at: sameEvent ? ev.starts_at : null,
       qr: `${PANEL_URL}#${g.code}`,
+      in_at: g.in_at,
     });
   }
   return json(out);
