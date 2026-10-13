@@ -123,6 +123,49 @@ h1{font-size:clamp(40px,8vw,64px)}
   .fbox{padding:10px 12px}
   .fbox .v{font-size:15px;letter-spacing:.01em}
 }
+/* programme */
+.prog{background:var(--ink);color:var(--cream);border-radius:22px;padding:22px 22px 14px}
+.prog-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.prog-head h2{font-size:26px;color:var(--cream)}
+.prog-head .live{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#ff4a3d;display:inline-flex;align-items:center;gap:7px}
+.prog-head .live::before{content:"";width:8px;height:8px;border-radius:50%;background:#ff4a3d;animation:pp-pulse 1.4s ease-in-out infinite}
+@keyframes pp-pulse{50%{opacity:.25}}
+.prog ol{list-style:none;margin:0;padding:0}
+.prog li{display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:center;padding:12px 0;border-top:1px solid #2e2925}
+.prog li:first-child{border-top:0}
+.prog .tm{font-family:var(--f-mono);font-size:15px;color:var(--muted-dark);font-variant-numeric:tabular-nums}
+.prog .tt{font-weight:700;font-size:17px;line-height:1.3}
+.prog li.past{opacity:.4}
+.prog li.now{background:var(--red);border-radius:12px;padding:12px;margin-inline:-12px;border-top-color:transparent}
+.prog li.now + li{border-top-color:transparent}
+.prog li.now .tm{color:#f3d3cc}
+.prog .tag{display:inline-block;margin-left:8px;font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;background:var(--cream);color:var(--red);padding:3px 8px;border-radius:999px;vertical-align:2px}
+/* after the party */
+.thanks{background:var(--red);color:var(--cream);border-radius:24px;padding:28px 24px;display:grid;gap:12px}
+.thanks h1{color:var(--cream);font-size:clamp(38px,9vw,58px)}
+.thanks p{color:#f3d3cc;max-width:44ch}
+.thanks .btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.thanks .btn{width:100%;background:var(--cream);border-color:var(--cream);color:var(--red)}
+.thanks .btn.ghost{background:transparent;color:var(--cream);border-color:rgba(244,234,215,.55)}
+@media (max-width:420px){.thanks .btns{grid-template-columns:1fr}}
+/* next party (one tap for returning guests) */
+.nextc{background:var(--ink);color:var(--cream);border-radius:24px;padding:26px 24px;display:grid;gap:10px;justify-items:start}
+.nextc .kick{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-dark)}
+.nextc h2{font-size:clamp(36px,8vw,52px);color:var(--cream)}
+.nextc .date{color:var(--muted-dark);font-size:17px;margin-top:-4px}
+.nextc .badge{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:#ff4a3d;color:var(--ink);padding:5px 10px;border-radius:999px}
+.nextc .btn{margin-top:6px}
+.nextc .sub{font-size:14px;color:var(--muted-dark)}
+.nextc .sub a{color:var(--cream)}
+.nextc .err{color:#ff8a7f;font-size:14px;font-weight:700}
+/* invite a friend */
+.invite{background:var(--cream-2);border:2px dashed var(--ink);border-radius:22px;padding:22px;display:grid;gap:12px}
+.invite .left{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--red-deep)}
+.invite h2{font-size:30px}
+.invite p{color:var(--muted);font-size:15px}
+.invite .lnk{font-family:var(--f-mono);font-size:14px;background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;overflow-wrap:anywhere}
+.invite .row2{display:flex;gap:8px;flex-wrap:wrap}
+.invite .btn.outline{color:var(--ink);border-color:var(--ink)}
 </style>
 </head>
 <body>
@@ -247,6 +290,82 @@ function startCount(iso){
   clearInterval(countTimer); tick(); countTimer = setInterval(tick, 1000);
 }
 
+const DM = "https://ig.me/m/perugiaparty";
+function romeMinutes(iso){
+  const p = new Intl.DateTimeFormat("en-GB", { timeZone:"Europe/Rome", hour:"2-digit", minute:"2-digit", hourCycle:"h23" }).formatToParts(new Date(iso));
+  return Number(p.find(x => x.type === "hour").value) * 60 + Number(p.find(x => x.type === "minute").value);
+}
+// programme times are local clock times; anything well before the start belongs to the next morning
+function progItems(d){
+  const list = d.program || [], s = new Date(d.starts_at).getTime();
+  if (!list.length) return [];
+  const sm = Number.isFinite(s) ? romeMinutes(d.starts_at) : null;
+  return list.map(it => {
+    const m = /^(\d\d):(\d\d)$/.exec(it.time || ""); let at = null;
+    if (m && sm != null) { let delta = Number(m[1]) * 60 + Number(m[2]) - sm; if (delta < -360) delta += 1440; at = s + delta * 6e4; }
+    return { ...it, at };
+  });
+}
+function programmeHTML(d){
+  const items = progItems(d); if (!items.length) return "";
+  const timed = items.filter(i => i.at != null), now = Date.now();
+  const live = timed.length && now >= timed[0].at - 36e5 && now <= timed[timed.length - 1].at + 3 * 36e5;
+  let cur = -1; if (live) items.forEach((it, i) => { if (it.at != null && it.at <= now) cur = i; });
+  return `<section class="prog" id="prog" aria-label="Programme"><div class="prog-head"><h2>${live ? "Tonight" : "The programme"}</h2>${live ? `<span class="live">Live</span>` : ""}</div>
+    <ol>${items.map((it, i) => `<li class="${i === cur ? "now" : (cur > i ? "past" : "")}"><span class="tm">${esc(it.time || "·")}</span><span class="tt">${esc(it.title)}${i === cur ? `<span class="tag">Now</span>` : ""}</span></li>`).join("")}</ol></section>`;
+}
+function partyOver(d){ const s = new Date(d.starts_at).getTime(); return Number.isFinite(s) && Date.now() > s + 8 * 36e5; }
+function thanksHTML(d, first){
+  return `<div class="thanks"><span class="state" style="background:var(--cream);border-color:var(--cream);color:var(--red)">${esc(d.event)} · that's a wrap</span>
+    <h1>Thanks for coming, ${first}.</h1>
+    <p>Got photos or videos from the night? Send them our way, the best ones end up on our page. And tell us how it was: we read every message.</p>
+    <div class="btns"><a class="btn" href="${DM}" target="_blank" rel="noopener">Send your photos ↗</a><a class="btn ghost" href="${DM}" target="_blank" rel="noopener">Tell us how it was ↗</a></div></div>`;
+}
+function nextHTML(d){
+  const n = d.next; if (!n) return "";
+  let action;
+  if (n.token) action = `<a class="btn" href="/ticket.html?t=${encodeURIComponent(n.token)}">Open my request →</a><p class="sub">You already requested a place for this one.</p>`;
+  else if (n.open) action = `<button class="btn" type="button" id="again">${n.early ? "Use my early access" : "Request my place"} →</button><p class="sub">One tap. We use the same name and Instagram as last time.</p><p class="err" id="again-err" role="alert"></p>`;
+  else action = `<p class="sub">Requests aren't open yet. Follow <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">@perugiaparty</a> so you don't miss it.</p>`;
+  return `<section class="nextc"><span class="kick">Next party</span>${n.early && !n.token ? `<span class="badge">Early access · you came before</span>` : ""}
+    <h2>${esc(n.event)}</h2>${n.date_label ? `<p class="date">${esc(n.date_label)}</p>` : ""}${action}</section>`;
+}
+function inviteHTML(d){
+  const v = d.invite; if (!v) return "";
+  const event = d.next ? d.next.event : d.event;
+  if (v.left <= 0) return `<section class="invite"><span class="left">Invite used</span><h2>Your friend is on it.</h2><p>Your invite for ${esc(event)} has been used. We'll check their request like any other.</p></section>`;
+  return `<section class="invite"><span class="left">${v.left} of ${v.limit} invite${v.limit > 1 ? "s" : ""} left</span>
+    <h2>Bring a friend.</h2>
+    <p>You came before, so you can invite ${v.limit > 1 ? "friends" : "a friend"} to ${esc(event)}. Send them this link. They still need our approval, and we'll see they're with you.</p>
+    <div class="lnk">${esc(v.url)}</div>
+    <div class="row2"><button class="btn ink" type="button" id="inv-share" data-url="${esc(v.url)}" data-ev="${esc(event)}">Send invite</button><button class="btn outline" type="button" data-copy="${esc(v.url)}">Copy link</button></div></section>`;
+}
+function decorate(d){
+  const P = $("page");
+  if (d.next) P.insertAdjacentHTML("afterbegin", nextHTML(d) + inviteHTML(d)); // older ticket: the next party comes first
+  else if (d.invite) P.insertAdjacentHTML("beforeend", inviteHTML(d));
+  const again = $("again");
+  if (again) again.addEventListener("click", async () => {
+    again.disabled = true; again.textContent = "Sending…";
+    try {
+      const r = await fetch("/api/rerequest", { method:"POST", headers:{ "content-type":"application/json" }, body: JSON.stringify({ t: token }) });
+      const x = await r.json().catch(() => ({}));
+      if (!r.ok || !x.token) throw new Error(x.error || "Couldn't send. Try again.");
+      try { localStorage.setItem("pp_token", x.token); } catch(e){}
+      location.href = "/ticket.html?t=" + encodeURIComponent(x.token);
+    } catch (e) { $("again-err").textContent = e.message; again.disabled = false; again.textContent = "Try again"; }
+  });
+  const sh = $("inv-share");
+  if (sh) sh.addEventListener("click", async () => {
+    const url = sh.dataset.url, text = `Come to ${sh.dataset.ev} with me. Request your place with my invite:`;
+    try { if (navigator.share) { await navigator.share({ title: "PerugiaParty", text, url }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+    try { await navigator.clipboard.writeText(text + " " + url); sh.textContent = "Invite copied ✓"; } catch (e) { sh.textContent = "Copy the link above"; }
+    setTimeout(() => sh.textContent = "Send invite", 2500);
+  });
+}
+let LAST = null;
+setInterval(() => { const el = $("prog"); if (el && LAST) el.outerHTML = programmeHTML(LAST) || ""; }, 60000);
+
 function render(d){
   const P = $("page"), first = esc(String(d.name || "").split(" ")[0]);
   if (d.status === "requested") {
@@ -297,14 +416,15 @@ function render(d){
       </div>
       <p class="note">Your personal code: <b style="font-family:var(--f-mono)">${esc(d.code)}</b> · Questions? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>`;
   } else if (d.status === "paid" || d.status === "in") {
-    const inside = d.status === "in";
-    P.innerHTML = `<div class="hype">
+    const inside = d.status === "in", over = partyOver(d);
+    P.innerHTML = `${inside && over ? thanksHTML(d, first) : `<div class="hype">
         <span class="state in">${inside ? "✓ Checked in" : "✓ Paid · confirmed"}</span>
         <h1>${inside ? `You made it, <em>${first}</em>.` : `It's official, <em>${first}</em>. You're on the list.`}</h1>
         <p class="lead">${inside ? "Enjoy the night. You're exactly where you should be." : `<b style="color:var(--cream)">${esc(d.event)}</b> is happening and you're in. Your people. Your night.`}</p>
         <div class="count" id="tcount" ${inside ? 'style="display:none"' : ""} hidden></div>
       </div>
-      ${inside ? `<div class="inbar" role="status"><span class="tick">✓</span><div><b>Checked in</b><span>${d.in_at ? "Entered at " + new Date(d.in_at).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) + ". " : ""}This ticket has been used.</span></div></div>` : ""}
+      ${inside ? `<div class="inbar" role="status"><span class="tick">✓</span><div><b>Checked in</b><span>${d.in_at ? "Entered at " + new Date(d.in_at).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) + ". " : ""}This ticket has been used.</span></div></div>` : ""}`}
+      ${inside && !over ? programmeHTML(d) : ""}
       <div class="cine">
         <span class="holes t" aria-hidden="true"></span><span class="holes b" aria-hidden="true"></span>
         ${inside ? `<span class="instamp">CHECKED IN ✓</span>` : ""}
@@ -316,17 +436,18 @@ function render(d){
         <p class="who">${esc(d.name)}</p>
         <p class="meta">Show this QR and your photo ID at the door</p>
       </div>
-      ${d.location ? `<div class="where"><div><span class="eyebrow" style="color:#f3d3cc">The place</span><p>${esc(d.location)}</p></div><a class="btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener">Directions ↗</a></div>` : ""}
-      <div class="actions">
+      ${d.location && !over ? `<div class="where"><div><span class="eyebrow" style="color:#f3d3cc">The place</span><p>${esc(d.location)}</p></div><a class="btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener">Directions ↗</a></div>` : ""}
+      ${!inside && !over ? programmeHTML(d) : ""}
+      ${over ? "" : `<div class="actions">
         <button class="btn" type="button" id="pdf">Download ticket (PDF)</button>
         <button class="btn ink" type="button" id="share">Tell your friends</button>
         ${d.starts_at ? `<button class="btn outline" type="button" id="cal">Add to calendar</button>` : ""}
         <button class="btn outline" type="button" data-copy="${esc(location.href)}">Copy my ticket link</button>
       </div>
-      <p class="note">Your ticket is personal: one entry, checked at the door. Save the PDF in case there's no signal.</p>`;
+      <p class="note">Your ticket is personal: one entry, checked at the door. Save the PDF in case there's no signal.</p>`}`;
     try { drawQR(d.qr, $("qr")); } catch (e) { $("qr").parentElement.innerHTML = `<p style="color:#111;padding:20px;font-family:var(--f-mono)">${esc(d.code)}</p>`; }
-    $("pdf").addEventListener("click", e => downloadTicket(d, e.currentTarget));
-    $("share").addEventListener("click", e => shareParty(d, e.currentTarget));
+    if ($("pdf")) $("pdf").addEventListener("click", e => downloadTicket(d, e.currentTarget));
+    if ($("share")) $("share").addEventListener("click", e => shareParty(d, e.currentTarget));
     if ($("cal")) $("cal").addEventListener("click", () => addToCalendar(d));
     startCount(d.starts_at);
   } else if (d.status === "declined") {
@@ -338,6 +459,8 @@ function render(d){
   } else {
     empty("Something's off.", "We couldn't read this ticket. DM us on Instagram and we'll sort it out.");
   }
+  LAST = d;
+  decorate(d);
 }
 
 if (!token) {

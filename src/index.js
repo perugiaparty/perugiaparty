@@ -39,10 +39,77 @@ async function soldOut(env, ev) {
   return (await heldPlaces(env, ev.tag)) >= cap;
 }
 
+// ---- people: one record per Instagram handle, shared across editions ----
+const normIg = (ig) => { const h = String(ig || "").trim().replace(/^@+/, "").toLowerCase(); return h ? "@" + h : ""; };
+function returnersOnly(ev) {
+  const t = ev && ev.returners_until ? Date.parse(ev.returners_until) : NaN;
+  return Number.isFinite(t) && Date.now() < t;
+}
+// Came before = ticked by Matt in the admin panel, or checked in at an earlier edition.
+async function isReturner(env, ig, currentTag) {
+  if (!ig) return false;
+  const p = await env.DB.prepare("SELECT came_before FROM people WHERE ig = ?").bind(ig).first();
+  if (p && p.came_before) return true;
+  const r = await env.DB.prepare("SELECT 1 FROM guests WHERE lower(ig) = ? AND status = 'in' AND event <> ? LIMIT 1").bind(ig, currentTag || "").first();
+  return !!r;
+}
+async function upsertPerson(env, ig, name, phone) {
+  if (!ig) return;
+  const now = Date.now();
+  await env.DB.prepare(
+    "INSERT INTO people (ig, name, phone, created_at, updated_at) VALUES (?, ?, ?, ?, ?) " +
+    "ON CONFLICT(ig) DO UPDATE SET name = excluded.name, phone = COALESCE(NULLIF(excluded.phone, ''), people.phone), updated_at = excluded.updated_at"
+  ).bind(ig, name, phone || "", now, now).run();
+}
+function inviteLimit(ev) { const n = Number(ev.invites_per_guest ?? 1); return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 1; }
+async function invitesUsed(env, ev, ig) {
+  const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND invited_by = ? AND status NOT IN ('declined','removed')").bind(ev.tag, ig).first();
+  return r?.n || 0;
+}
+async function inviteFor(env, ev, ig) {
+  const limit = inviteLimit(ev);
+  if (!limit) return null;
+  let p = await env.DB.prepare("SELECT invite_code FROM people WHERE ig = ?").bind(ig).first();
+  if (!p) return null;
+  let code = p.invite_code;
+  for (let i = 0; !code && i < 5; i++) {
+    const c = newToken().slice(0, 8);
+    try { await env.DB.prepare("UPDATE people SET invite_code = ? WHERE ig = ? AND invite_code IS NULL").bind(c, ig).run(); } catch (e) { continue; }
+    code = (await env.DB.prepare("SELECT invite_code FROM people WHERE ig = ?").bind(ig).first())?.invite_code;
+  }
+  if (!code) return null;
+  const used = await invitesUsed(env, ev, ig);
+  return { url: `https://perugiaparty.com/?invite=${code}`, limit, left: Math.max(0, limit - used) };
+}
+async function resolveInvite(env, ev, code) {
+  if (!code || !/^[a-z0-9]{8}$/.test(code)) return null;
+  const p = await env.DB.prepare("SELECT ig, name FROM people WHERE invite_code = ?").bind(code).first();
+  if (!p || !(await isReturner(env, p.ig, ev.tag))) return null;
+  const left = inviteLimit(ev) - (await invitesUsed(env, ev, p.ig));
+  return { ig: p.ig, first: String(p.name || "").split(" ")[0], left };
+}
+function parseProgram(text) {
+  return String(text || "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map((l) => {
+    const m = l.match(/^(\d{1,2})[:.](\d{2})\s*[-–·:]?\s*(.+)$/);
+    return m ? { time: `${m[1].padStart(2, "0")}:${m[2]}`, title: m[3].slice(0, 80) } : { time: "", title: l.slice(0, 80) };
+  }).slice(0, 20);
+}
+
+async function apiInvite(url, env) {
+  const ev = await getEvent(env);
+  if (!ev || !ev.published || !ev.tag) return json({ ok: false });
+  const inv = await resolveInvite(env, ev, url.searchParams.get("c") || "");
+  if (!inv) return json({ ok: false, error: "This invite link isn't valid anymore." });
+  if (inv.left <= 0) return json({ ok: false, error: `${inv.first}'s invite has already been used.` });
+  return json({ ok: true, from: inv.first, ig: inv.ig });
+}
+
 async function apiEvent(env) {
   const ev = await getEvent(env);
   if (!ev || !ev.published) return json({ published: false });
   return json({
+    returners_only: returnersOnly(ev),
+    returners_until: ev.returners_until || null,
     published: true,
     name: ev.name,
     starts_at: ev.starts_at,
@@ -90,10 +157,45 @@ async function apiRequest(req, env) {
   const dup = await env.DB.prepare("SELECT 1 FROM guests WHERE event = ? AND lower(ig) = ? AND status IN ('requested','waitlist','approved','paid','in')")
     .bind(ev.tag, ig).first();
   if (dup) return json({ error: "This Instagram already has a request for this party. Use the personal link you got, or DM us." }, 409);
+  const returning = await isReturner(env, ig, ev.tag);
+  let inviter = null;
+  if (body.invite) {
+    const inv = await resolveInvite(env, ev, String(body.invite));
+    if (inv && inv.left > 0 && inv.ig !== ig) inviter = inv.ig;
+    else if (returnersOnly(ev) && !returning) return json({ error: "This invite link has already been used or isn't valid anymore." }, 409);
+  }
+  if (returnersOnly(ev) && !returning && !inviter) {
+    return json({ error: "Right now only guests who came before, and the friends they invite, can request a place. Requests open for everyone soon." }, 409);
+  }
   const status = (await soldOut(env, ev)) ? "waitlist" : "requested";
   const token = newToken();
-  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-    .bind(token, ev.tag, name, ig, phone, note, status, Date.now()).run();
+  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, invited_by, is_returning) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    .bind(token, ev.tag, name, ig, phone, note, status, Date.now(), inviter, returning ? 1 : 0).run();
+  await upsertPerson(env, ig, name, phone);
+  return json({ ok: true, token, waitlist: status === "waitlist" });
+}
+
+// One tap from an old ticket page: request a place for the current edition with the same details.
+async function apiRerequest(req, env) {
+  let body; try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
+  const t = String(body.t || "");
+  if (!TOKEN_RE.test(t)) return json({ error: "This link isn't valid." }, 404);
+  const g = await env.DB.prepare("SELECT * FROM guests WHERE token = ?").bind(t).first();
+  if (!g) return json({ error: "We couldn't find your details." }, 404);
+  const ev = await getEvent(env);
+  if (!ev || !ev.published || !ev.requests_open || !ev.tag) return json({ error: "Requests aren't open right now." }, 409);
+  if (g.event === ev.tag) return json({ ok: true, token: g.token });
+  const ig = normIg(g.ig);
+  if (!ig) return json({ error: "Request with the form on the homepage." }, 409);
+  const existing = await env.DB.prepare("SELECT token FROM guests WHERE event = ? AND lower(ig) = ? AND status IN ('requested','waitlist','approved','paid','in')").bind(ev.tag, ig).first();
+  if (existing) return json({ ok: true, token: existing.token });
+  const returning = await isReturner(env, ig, ev.tag);
+  if (returnersOnly(ev) && !returning) return json({ error: "Early access is for guests who came before. Requests open for everyone soon." }, 409);
+  const status = (await soldOut(env, ev)) ? "waitlist" : "requested";
+  const token = newToken();
+  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, is_returning) VALUES (?, ?, ?, ?, ?, '', ?, ?, ?)")
+    .bind(token, ev.tag, g.name, ig, g.phone || "", status, Date.now(), returning ? 1 : 0).run();
+  await upsertPerson(env, ig, g.name, g.phone);
   return json({ ok: true, token, waitlist: status === "waitlist" });
 }
 
@@ -124,8 +226,23 @@ async function apiTicket(url, env) {
       starts_at: sameEvent ? ev.starts_at : null,
       qr: `${PANEL_URL}#${g.code}`,
       in_at: g.in_at,
+      program: sameEvent ? parseProgram(ev.program) : [],
     });
   }
+  // returning guests: early access, one-tap request for the next edition, and an invite for a friend
+  const ig = normIg(g.ig);
+  const returner = await isReturner(env, ig, ev.tag);
+  out.returner = returner;
+  if (ev.published && ev.tag && !sameEvent) {
+    const mine = ig ? await env.DB.prepare("SELECT token FROM guests WHERE event = ? AND lower(ig) = ? AND status IN ('requested','waitlist','approved','paid','in')").bind(ev.tag, ig).first() : null;
+    out.next = {
+      event: ev.name, date_label: ev.date_label,
+      open: !!ev.requests_open && (!returnersOnly(ev) || returner),
+      early: returnersOnly(ev) && returner,
+      token: mine ? mine.token : null,
+    };
+  }
+  if (returner && ev.published && ev.requests_open && ev.tag && ig) out.invite = await inviteFor(env, ev, ig);
   return json(out);
 }
 
@@ -239,6 +356,8 @@ export default {
         if (url.pathname === "/api/request" && req.method === "POST") return await apiRequest(req, env);
         if (url.pathname === "/api/ticket" && req.method === "GET") return await apiTicket(url, env);
         if (url.pathname === "/api/poster" && req.method === "GET") return await apiPoster(env);
+        if (url.pathname === "/api/invite" && req.method === "GET") return await apiInvite(url, env);
+        if (url.pathname === "/api/rerequest" && req.method === "POST") return await apiRerequest(req, env);
         if (url.pathname === "/api/door/login" && req.method === "POST") return await apiDoor(req, env, "login");
         if (url.pathname === "/api/door/check" && req.method === "POST") return await apiDoor(req, env, "check");
         if (url.pathname === "/api/door/checkin" && req.method === "POST") return await apiDoor(req, env, "checkin");

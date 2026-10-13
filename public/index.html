@@ -161,6 +161,12 @@ textarea{resize:vertical;min-height:88px}
 .rules h3{font-size:20px;margin-bottom:6px}
 .rules p{color:var(--muted);font-size:15px}
 
+/* invite + early-access note above the form */
+.req-note{display:grid;gap:2px;border-radius:16px;padding:14px 16px 14px 18px;background:var(--ink);color:var(--cream);border-left:6px solid var(--red);margin-bottom:6px}
+.req-note b{font-size:16px}
+.req-note span{font-size:14px;color:var(--muted-dark)}
+.req-note.invite{background:var(--red);border-left-color:var(--ink)}
+.req-note.invite span{color:#f3d3cc}
 /* house rules: full-width dark band */
 .rules-band{background:var(--ink);color:var(--cream);border-bottom:1px solid var(--ink-2)}
 .rules-band .sec{padding-block:72px}
@@ -313,6 +319,7 @@ body.locked{overflow:hidden}
       </div>
       <div class="req">
         <form id="req-form" novalidate>
+          <div class="req-note" id="req-note" hidden></div>
           <div class="field">
             <label for="f-name">Full name</label>
             <input id="f-name" autocomplete="name" placeholder="As on your ID" maxlength="80" required>
@@ -505,8 +512,26 @@ fetch("/api/event").then(r => r.json()).then(ev => { EVENT = ev; renderNext(ev);
 /* sold out -> waitlist wording; optional Cloudflare human check */
 let tsWidget = null;
 function sendLabel(){ return EVENT && EVENT.sold_out ? "Join the waitlist" : "Send request"; }
+/* invites from returning guests (?invite=CODE) and the early-access window */
+const INVITE = (() => { const c = new URLSearchParams(location.search).get("invite"); return c && /^[a-z0-9]{8}$/.test(c) ? c : null; })();
+function reqNote(html, tone){ const n = $("req-note"); n.innerHTML = html; n.className = "req-note" + (tone ? " " + tone : ""); n.hidden = false; }
+async function setupInvite(ev){
+  if (INVITE) {
+    try {
+      const r = await fetch("/api/invite?c=" + INVITE).then(x => x.json());
+      if (r.ok) { reqNote(`<b>${esc(r.from)} invited you.</b><span>Fill in the form below. We'll know you're coming with ${esc(r.from)}.</span>`, "invite"); setTimeout(() => $("req-note").scrollIntoView({ behavior: "smooth", block: "center" }), 400); return; }
+      reqNote(`<b>${esc(r.error || "This invite link isn't valid anymore.")}</b><span>${ev.returners_only ? "Requests open for everyone soon." : "You can still request a place below."}</span>`);
+      return;
+    } catch(e){}
+  }
+  if (ev.returners_only) {
+    const until = ev.returners_until ? new Date(ev.returners_until).toLocaleString("en-GB", { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) : null;
+    reqNote(`<b>Early access for returning guests.</b><span>Came to a PerugiaParty before? Request with the same Instagram as last time.${until ? ` Everyone else can request from ${esc(until)}.` : ""}</span>`, "early");
+  }
+}
 function setupForm(ev){
   if (!ev || !ev.published) return;
+  setupInvite(ev);
   $("f-send").textContent = sendLabel();
   if (ev.sold_out) { const pv = $("pv-tiny"); if (pv) pv.textContent = "Sold out: you'll join the waitlist"; }
   if (ev.turnstile) {
@@ -540,6 +565,7 @@ $("req-form").addEventListener("submit", async e => {
     intro: $("f-intro").value.trim(), website: $("f-website").value,
     turnstile: (window.turnstile && tsWidget !== null) ? turnstile.getResponse(tsWidget) : "",
     age: $("f-age").checked, rules: $("f-rules").checked,
+    invite: INVITE || undefined,
   };
   const missing = [];
   if (body.name.length < 2) missing.push("your full name");
