@@ -70,7 +70,7 @@
 .next .poster{display:block;justify-self:center;width:100%;max-width:250px;margin-block:6px;border-radius:12px;overflow:hidden;transform:rotate(2.5deg);box-shadow:0 22px 44px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06);transition:transform .25s ease}
 .next .poster:hover{transform:rotate(0deg) translateY(-4px)}
 @media (max-width:1000px) and (min-width:721px){.next.has-poster{grid-template-columns:minmax(0,1fr) 210px;gap:40px;padding:40px}.next .poster{max-width:200px}}
-.next .poster img{display:block;width:100%;height:auto;aspect-ratio:9/16;object-fit:cover}
+.next .poster img{display:block;width:100%;height:auto;max-height:520px;object-fit:contain}
 .next .status{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
 .next .status i{width:9px;height:9px;border-radius:50%;background:#ff4a3d;box-shadow:0 0 0 4px rgba(255,74,61,.25);animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{50%{box-shadow:0 0 0 8px rgba(255,74,61,0)}}
