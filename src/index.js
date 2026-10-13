@@ -216,9 +216,11 @@ async function igWebhook(req, env) {
   if (!sameText(sig, "sha256=" + (await hmacHex(ev.ig_app_secret, raw)))) { await igLog(env, "bad-signature", sig.slice(0, 20)); return new Response("Bad signature", { status: 401 }); }
   let body; try { body = JSON.parse(raw); } catch { return new Response("ok"); }
   for (const entry of body.entry || []) {
-    for (const m of entry.messaging || []) {
+    // Meta sends messages either as entry.messaging[] or as entry.changes[{ field: "messages", value }]
+    const items = [...(entry.messaging || []), ...(entry.changes || []).filter((c) => c.field === "messages" && c.value).map((c) => c.value)];
+    for (const m of items) {
       if (!m.message || m.message.is_echo || !m.message.text || !m.sender) continue;
-      try { await igHandleDm(env, ev, m.sender.id, m.message.text); } catch (e) {}
+      try { await igHandleDm(env, ev, String(m.sender.id), m.message.text); } catch (e) { await igLog(env, "handle-error", String(e)); }
     }
   }
   return new Response("ok");
