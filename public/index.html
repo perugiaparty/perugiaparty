@@ -62,15 +62,15 @@
 .next{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;background:var(--ink);border-radius:24px;padding:36px}
 .next .next-main{min-width:0;display:flex;flex-direction:column;align-items:flex-start}
 .next .next-main p{max-width:46ch}
-.next .next-cta{margin-top:30px}
-.next.has-poster{grid-template-columns:minmax(0,1fr) 360px;gap:64px;align-items:center;padding:60px 60px 60px 52px;min-height:620px}
-.next.has-poster h3{margin:18px 0 14px}
-.next.has-poster dl{margin-top:26px;gap:40px}
-.next.has-poster .count{margin-top:28px}
-.next .poster{display:block;justify-self:center;width:100%;max-width:340px;margin-block:4px;border-radius:12px;overflow:hidden;transform:rotate(2.5deg);box-shadow:0 22px 44px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06);transition:transform .25s ease}
+.next .next-cta{margin-top:26px}
+.next.has-poster{grid-template-columns:minmax(0,1fr) 420px;gap:56px;align-items:center;padding:44px 52px 44px 48px}
+.next.has-poster h3{margin:14px 0 12px}
+.next.has-poster dl{margin-top:20px;gap:40px}
+.next.has-poster .count{margin-top:22px}
+.next .poster{display:block;justify-self:center;width:100%;max-width:410px;margin-block:4px;border-radius:12px;overflow:hidden;transform:rotate(2.5deg);box-shadow:0 22px 44px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06);transition:transform .25s ease}
 .next .poster:hover{transform:rotate(0deg) translateY(-4px)}
-@media (max-width:1000px) and (min-width:721px){.next.has-poster{grid-template-columns:minmax(0,1fr) 260px;gap:40px;padding:44px;min-height:0}.next .poster{max-width:250px}}
-.next .poster img{display:block;width:100%;height:auto;max-height:600px;object-fit:contain}
+@media (max-width:1000px) and (min-width:721px){.next.has-poster{grid-template-columns:minmax(0,1fr) 300px;gap:36px;padding:40px}.next .poster{max-width:290px}}
+.next .poster img{display:block;width:100%;height:auto;max-height:560px;object-fit:contain}
 .next .status{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
 .next .status i{width:9px;height:9px;border-radius:50%;background:#ff4a3d;box-shadow:0 0 0 4px rgba(255,74,61,.25);animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{50%{box-shadow:0 0 0 8px rgba(255,74,61,0)}}
