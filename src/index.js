@@ -224,10 +224,10 @@ async function igWebhook(req, env) {
   return new Response("ok");
 }
 // Turn on message webhooks for the @perugiaparty account itself (needed once, retried every 10 minutes until it works).
-async function igEnsureSubscribed(env) {
+async function igEnsureSubscribed(env, force) {
   const ev = await getEvent(env);
   if (!ev || !ev.ig_token || ev.ig_subscribed_at) return;
-  if (new Date().getMinutes() % 2 !== 0) return; // every 2 minutes until it works
+  if (!force && new Date().getMinutes() % 2 !== 0) return; // every 2 minutes until it works
   try {
     const r = await fetch(`${igApi(env)}/me/subscribed_apps?subscribed_fields=messages&access_token=${encodeURIComponent(ev.ig_token)}`, { method: "POST" });
     const t = await r.text();
@@ -541,7 +541,7 @@ function secure(res) {
 
 export default {
   async fetch(req, env, ctx) {
-    if (new URL(req.url).pathname === "/api/event") ctx.waitUntil(igEnsureSubscribed(env).catch(() => {}));
+    if (new URL(req.url).pathname === "/api/event") ctx.waitUntil(igEnsureSubscribed(env, true).catch(() => {}));
     return secure(await route(req, env));
   },
   async scheduled(event, env, ctx) {
