@@ -204,6 +204,7 @@ html,body{overflow-x:clip}
 .savebox{position:relative;background:var(--cream);border-radius:22px;max-width:460px;width:100%;padding:30px 26px 24px;display:grid;gap:14px;box-shadow:10px 10px 0 var(--red);animation:popin .3s cubic-bezier(.2,.8,.2,1)}
 @keyframes popin{0%{transform:scale(.92);opacity:0}100%{transform:none;opacity:1}}
 .savebox h3{font-size:30px}
+.ts{min-height:65px}
 .savebox p{color:var(--muted);font-size:15px}
 .savebox .linkbox{font-family:var(--f-mono);font-size:14px;background:var(--ink);color:var(--cream);border-radius:12px;padding:14px;word-break:break-all}
 .savebox .acts{display:grid;gap:10px}
@@ -309,6 +310,7 @@ body.locked{overflow:hidden}
           <label class="check" for="f-age"><input type="checkbox" id="f-age"> I'm 18 or older and will bring photo ID.</label>
           <label class="check" for="f-rules"><input type="checkbox" id="f-rules"> I've read the <a href="#rules">house rules</a>.</label>
           <p class="err" id="f-err" role="alert"></p>
+          <div id="ts" class="ts" hidden></div>
           <div><button class="btn" type="submit" id="f-send">Send request</button></div>
           <p class="privacy">We only use your name, Instagram and WhatsApp to run the guest list for this party. DM us anytime to have them deleted.</p>
         </form>
@@ -443,12 +445,12 @@ function renderNext(ev){
   if (!ev || !ev.published) return; // keep the static "announcing soon" card
   const price = ev.price ? "From " + euro(ev.price.min) : null;
   const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]].filter(f => f[1]);
-  el.innerHTML = `<div><span class="status"><i></i>${ev.requests_open ? "Requests open" : "Requests open soon"}</span>
+  el.innerHTML = `<div><span class="status"><i></i>${ev.requests_open ? (ev.sold_out ? "Sold out · waitlist open" : "Requests open") : (ev.sold_out ? "Sold out" : "Requests open soon")}</span>
       <h3>${esc(ev.name || "Next PerugiaParty")}</h3>
       <p>Apply below and save your ticket link. Once approved, pay to confirm your place and unlock your ticket and the location.</p>
       ${facts.length ? `<dl>${facts.map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>` : ""}
       <div class="count" id="count" ${ev.starts_at ? "" : "hidden"} aria-label="Countdown to the party"></div></div>
-    ${ev.requests_open ? `<a class="btn" href="#request">Request a place</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram ↗</a>`}`;
+    ${ev.requests_open ? `<a class="btn" href="#request">${ev.sold_out ? "Join the waitlist" : "Request a place"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram ↗</a>`}`;
   if (ev.starts_at) { tick(); clearInterval(timer); timer = setInterval(tick, 1000); }
 }
 function tick(){
@@ -465,7 +467,21 @@ function tick(){
   const p = n => String(n).padStart(2,"0");
   c.innerHTML = [[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]].map(([v,l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
 }
-fetch("/api/event").then(r => r.json()).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); }).catch(() => {});
+fetch("/api/event").then(r => r.json()).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); setupForm(ev); }).catch(() => {});
+
+/* sold out -> waitlist wording; optional Cloudflare human check */
+let tsWidget = null;
+function sendLabel(){ return EVENT && EVENT.sold_out ? "Join the waitlist" : "Send request"; }
+function setupForm(ev){
+  if (!ev || !ev.published) return;
+  $("f-send").textContent = sendLabel();
+  if (ev.sold_out) { const pv = $("pv-tiny"); if (pv) pv.textContent = "Sold out: you'll join the waitlist"; }
+  if (ev.turnstile) {
+    const box = $("ts"); box.hidden = false;
+    window.onTs = () => { try { tsWidget = turnstile.render("#ts", { sitekey: ev.turnstile, theme: "light", size: "flexible" }); } catch(e){} };
+    const sc = document.createElement("script"); sc.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTs&render=explicit"; sc.async = true; document.head.appendChild(sc);
+  }
+}
 
 /* live preview: the request fills in like a ticket being made */
 function bump(el){ el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
@@ -489,6 +505,7 @@ $("req-form").addEventListener("submit", async e => {
   const body = {
     name: $("f-name").value.trim(), ig: $("f-ig").value.trim(), phone: $("f-phone").value.trim(),
     intro: $("f-intro").value.trim(), website: $("f-website").value,
+    turnstile: (window.turnstile && tsWidget !== null) ? turnstile.getResponse(tsWidget) : "",
     age: $("f-age").checked, rules: $("f-rules").checked,
   };
   const missing = [];
@@ -511,10 +528,10 @@ $("req-form").addEventListener("submit", async e => {
     const st = $("pv-stamp"); st.textContent = "SENT"; st.classList.add("sent"); document.querySelector(".side .mini").classList.add("done");
     $("pv-tiny").textContent = "Waiting for approval · check your link";
     $("req-form").reset();
-    openSave(link);
+    openSave(link, data.waitlist);
   } catch (x) {
     err.textContent = "Couldn't reach us. Check your connection and try again.";
-  } finally { btn.disabled = false; btn.textContent = "Send request"; }
+  } finally { btn.disabled = false; btn.textContent = sendLabel(); try { if (window.turnstile && tsWidget !== null) turnstile.reset(tsWidget); } catch(e){} }
 });
 $("copy-link").addEventListener("click", () => {
   const text = $("my-link").textContent, t = $("toast");
@@ -525,8 +542,9 @@ $("copy-link").addEventListener("click", () => {
 
 /* popup: blurred page, can only close after copying */
 let saveCopied = false;
-function openSave(link){
+function openSave(link, waitlist){
   saveCopied = false;
+  $("save-h").textContent = waitlist ? "You're on the waitlist. Save your link." : "Save your personal link.";
   $("save-link").textContent = link;
   $("save-done").disabled = true;
   $("save-hint").textContent = "Copy your link to continue";

@@ -29,6 +29,16 @@ async function getEvent(env) {
   return env.DB.prepare("SELECT * FROM event WHERE id = 1").first();
 }
 
+async function heldPlaces(env, tag) {
+  const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND status IN ('approved','paid','in')").bind(tag).first();
+  return r?.n || 0;
+}
+async function soldOut(env, ev) {
+  const cap = Number(ev.capacity);
+  if (!cap || cap <= 0) return false;
+  return (await heldPlaces(env, ev.tag)) >= cap;
+}
+
 async function apiEvent(env) {
   const ev = await getEvent(env);
   if (!ev || !ev.published) return json({ published: false });
@@ -40,7 +50,23 @@ async function apiEvent(env) {
     doors: ev.doors,
     price: priceRange(ev),
     requests_open: !!ev.requests_open,
+    sold_out: await soldOut(env, ev),
+    turnstile: ev.turnstile_site_key || null,
   });
+}
+
+async function verifyTurnstile(ev, token, req) {
+  if (!ev.turnstile_site_key || !ev.turnstile_secret) return true; // spam check not set up yet
+  if (!token) return false;
+  const form = new FormData();
+  form.append("secret", ev.turnstile_secret);
+  form.append("response", token);
+  const ip = req.headers.get("CF-Connecting-IP"); if (ip) form.append("remoteip", ip);
+  try {
+    const r = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form });
+    const d = await r.json();
+    return !!d.success;
+  } catch { return true; } // never lock real guests out if the check service is down
 }
 
 async function apiRequest(req, env) {
@@ -51,6 +77,7 @@ async function apiRequest(req, env) {
   if (!ev || !ev.published || !ev.requests_open || !ev.tag) {
     return json({ error: "Requests aren't open right now. Follow @perugiaparty on Instagram for the next date." }, 409);
   }
+  if (!(await verifyTurnstile(ev, body.turnstile, req))) return json({ error: "Please complete the human check above the button and try again." }, 400);
   const name = clean(body.name, 80);
   let ig = clean(body.ig, 40).replace(/^@+/, "");
   const phone = clean(body.phone, 30);
@@ -59,13 +86,14 @@ async function apiRequest(req, env) {
   if (!/^[A-Za-z0-9._]{1,30}$/.test(ig)) return json({ error: "Add your Instagram handle, like @yourname." }, 400);
   if (body.age !== true || body.rules !== true) return json({ error: "Confirm you're 18+ and accept the house rules." }, 400);
   ig = "@" + ig.toLowerCase();
-  const dup = await env.DB.prepare("SELECT 1 FROM guests WHERE event = ? AND lower(ig) = ? AND status IN ('requested','approved','paid','in')")
+  const dup = await env.DB.prepare("SELECT 1 FROM guests WHERE event = ? AND lower(ig) = ? AND status IN ('requested','waitlist','approved','paid','in')")
     .bind(ev.tag, ig).first();
   if (dup) return json({ error: "This Instagram already has a request for this party. Use the personal link you got, or DM us." }, 409);
+  const status = (await soldOut(env, ev)) ? "waitlist" : "requested";
   const token = newToken();
-  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at) VALUES (?, ?, ?, ?, ?, ?, 'requested', ?)")
-    .bind(token, ev.tag, name, ig, phone, note, Date.now()).run();
-  return json({ ok: true, token });
+  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+    .bind(token, ev.tag, name, ig, phone, note, status, Date.now()).run();
+  return json({ ok: true, token, waitlist: status === "waitlist" });
 }
 
 async function apiTicket(url, env) {

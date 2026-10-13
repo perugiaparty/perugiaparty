@@ -253,6 +253,10 @@ function render(d){
     P.innerHTML = `<span class="state">Request received</span><h1>Thanks, ${first}.</h1>
       <p class="lead">We're checking your request for <b>${esc(d.event)}</b>. Come back to this page: once you're approved, your price and personal code appear here.</p>
       <div class="card"><p><b>Save this link.</b> It's your personal page and only works for you.</p><p class="mono" style="font-family:var(--f-mono);overflow-wrap:anywhere">${esc(location.href)}</p><div>${copyBtn(location.href)}</div></div>`;
+  } else if (d.status === "waitlist") {
+    P.innerHTML = `<span class="state">Waitlist</span><h1>You're on the waitlist, ${first}.</h1>
+      <p class="lead"><b>${esc(d.event)}</b> is sold out right now. When a place opens up, we go down the waitlist in order. If you get one, this page shows your price and code straight away.</p>
+      <div class="card"><p><b>Keep this link.</b> It's your personal page and only works for you.</p><p style="font-family:var(--f-mono);overflow-wrap:anywhere">${esc(location.href)}</p><div>${copyBtn(location.href)}</div></div>`;
   } else if (d.status === "approved") {
     const left = d.deadline ? d.deadline - Date.now() : null;
     const overdue = left != null && left < 0;
@@ -341,7 +345,7 @@ if (!token) {
 } else {
   // live updates: check every 20 s while the page is open, and when the guest comes back to it
   let last = null, busy = false;
-  const STATUS_TEXT = { approved: "You've been accepted. Your payment details are below.", paid: "Payment confirmed. Your ticket and the location are here.", in: "You're checked in. Have a great night.", declined: "Your request was updated.", released: "Your request was updated.", removed: "Your request was updated." };
+  const STATUS_TEXT = { waitlist: "You're on the waitlist.", approved: "You've been accepted. Your payment details are below.", paid: "Payment confirmed. Your ticket and the location are here.", in: "You're checked in. Have a great night.", declined: "Your request was updated.", released: "Your request was updated.", removed: "Your request was updated." };
   async function check(first){
     if (busy) return; busy = true;
     try {
