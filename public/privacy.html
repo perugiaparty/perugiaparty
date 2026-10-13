@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Privacy · PerugiaParty</title>
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#141210">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-v2.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/site.css">
+<script src="/notify.js" defer></script>
+<style>
+main{padding-block:56px 80px}
+.doc{max-width:720px;margin-inline:auto;display:grid;gap:26px}
+.doc h1{font-size:clamp(44px,9vw,72px)}
+.doc h2{font-size:26px;margin-bottom:8px}
+.doc p,.doc li{color:var(--ink-2)}
+.doc ul{margin:8px 0 0;padding-left:20px;display:grid;gap:6px}
+.doc .card{background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:20px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="/">Perugia<span>Party</span></a>
+    <nav aria-label="Main"><a href="/#rules">House rules</a><a class="keep" href="/#faq">FAQ</a><a class="btn" id="nav-cta" href="/#request">Request a place</a></nav>
+  </div>
+</header>
+<main class="wrap">
+  <article class="doc">
+    <p class="eyebrow">Last updated 13 October 2026</p>
+    <h1>Privacy.</h1>
+    <p>PerugiaParty organises private student parties in Perugia, Italy. This page explains what we collect when you request a place, why, and what you can ask us to do with it. Short version: we only use your details to run the guest list, we never sell them, and you can ask us to delete them at any time.</p>
+
+    <section><h2>What we collect</h2>
+      <ul>
+        <li><b>Your request:</b> full name, Instagram handle, WhatsApp number (optional) and the message you write to us (optional).</li>
+        <li><b>Your ticket:</b> your status (requested, approved, paid, checked in), your ticket code, price, payment deadline and when you were checked in at the door.</li>
+        <li><b>Payment:</b> we see your bank transfer in our own bank account to match it to your code. We don't store bank or card details on this website.</li>
+        <li><b>Instagram messages:</b> when you DM your personal code to @perugiaparty, we receive your Instagram username and the message, to confirm the account is yours and reply to you.</li>
+        <li><b>On your phone:</b> your personal ticket link and the details you typed are saved in your own browser, so you don't have to type them again. We don't use tracking or advertising cookies.</li>
+      </ul>
+    </section>
+
+    <section><h2>Why we use it</h2>
+      <p>To review your request, check that you're 18+ and that the Instagram account is really yours, send you your price and ticket, recognise you at the door, give returning guests priority, and keep the nights safe. We use your Instagram and WhatsApp only to contact you about your request and our parties.</p>
+    </section>
+
+    <section><h2>Who sees it</h2>
+      <p>Only the PerugiaParty team. The website runs on Cloudflare (hosting and database, servers in the EU and worldwide) and Instagram messages go through Meta. They process data for us and don't use it for their own purposes. We never sell or share your details with anyone else.</p>
+    </section>
+
+    <section><h2>How long we keep it</h2>
+      <p>We keep your details for as long as we organise parties, so we can recognise returning guests and give them priority. Ask us and we delete them, usually within a few days. Guest lists of past parties are cleaned up regularly.</p>
+    </section>
+
+    <section><h2>Your rights</h2>
+      <p>Under the GDPR you can ask to see, correct, export or delete your data, and you can object to how we use it. You can also complain to the Italian data protection authority (Garante per la protezione dei dati personali).</p>
+    </section>
+
+    <div class="card"><h2>Contact</h2><p>Send a DM to <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a> on Instagram with "privacy" and what you'd like us to do. We reply as soon as we can.</p></div>
+  </article>
+</main>
+<footer>
+  <div class="wrap">
+    <p class="sign">Tonight we party. Tomorrow we forget. <span>Later, it's the best night you've ever had.</span></p>
+    <div class="meta">
+      <p>Independent nights · Perugia, Italia</p>
+      <nav aria-label="Footer">
+        <a href="/#rules">House rules</a>
+        <a href="/privacy">Privacy</a>
+        <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Contact ↗</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+<script>try { const t = localStorage.getItem("pp_token"); if (t) { const c = document.getElementById("nav-cta"); c.textContent = "My ticket"; c.href = "/ticket.html?t=" + encodeURIComponent(t); } } catch (e) {}</script>
+</body>
+</html>

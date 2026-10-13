@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/site.css">
+<script src="/notify.js" defer></script>
 <style>
 /* Door scanner: dark, one-handed, big verdicts. Built for a phone at night. */
 body{background:var(--ink);color:var(--cream)}
@@ -107,7 +108,7 @@ $("login").addEventListener("submit", async e => {
   e.preventDefault();
   PW = $("pw").value; $("lbtn").disabled = true;
   try { await enter(); try { localStorage.setItem("pp_door_pw", PW); } catch(e){} }
-  catch (x) { if (x.message !== "auth") $("lerr").textContent = x.message; }
+  catch (x) { if (x.message !== "auth") { const m = x.message === "Failed to fetch" ? "No connection. Check the internet on this phone." : x.message; $("lerr").textContent = m; window.ppNotify && ppNotify(m, "error", { title: "Couldn't open the door scanner" }); } }
   finally { $("lbtn").disabled = false; }
 });
 async function enter(){
@@ -127,7 +128,14 @@ async function startCam(){
     scanning = true; loop();
   } catch (e) {
     $("cmsg").hidden = false;
-    $("cmsg").innerHTML = `<div><p>Camera blocked. Allow camera access for perugiaparty.com in your browser settings, or type the code below.</p><button class="btn" type="button" id="start">Try again</button></div>`;
+    const why = {
+      NotAllowedError: "Camera blocked. Allow camera access for perugiaparty.com in your browser settings, then try again.",
+      NotFoundError: "No camera found on this device. Type the codes below instead.",
+      NotReadableError: "Another app is using the camera. Close it, then try again.",
+      OverconstrainedError: "This camera can't be used for scanning. Type the codes below instead.",
+    }[e && e.name] || (navigator.mediaDevices ? "The camera didn't start. Try again, or type the code below." : "This browser can't use the camera. Open perugiaparty.com/door in Safari or Chrome, or type the codes below.");
+    $("cmsg").innerHTML = `<div><p>${why}</p><button class="btn" type="button" id="start">Try again</button></div>`;
+    window.ppNotify && ppNotify(why, "warn", { title: "Camera not available" });
     $("start").addEventListener("click", startCam);
   }
 }
@@ -161,7 +169,7 @@ async function check(text, forceCheckin){
     let d = await api("check", { code: text });
     if (d.found && d.guest.current && d.guest.status === "paid" && auto) d = await api("checkin", { code: text });
     stats(d.stats); show(d, text);
-  } catch (x) { if (x.message !== "auth") show({ error: x.message }, text); }
+  } catch (x) { if (x.message !== "auth") show({ error: x.message === "Failed to fetch" ? "No connection. Check the internet on this phone, then scan again." : x.message }, text); }
   finally { busy = false; }
 }
 function buzz(p){ try { navigator.vibrate && navigator.vibrate(p); } catch(e){} }

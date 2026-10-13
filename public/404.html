@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Page not found · PerugiaParty</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#141210">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-v2.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/site.css">
+<script src="/notify.js" defer></script>
+<style>main{min-height:60vh;display:grid;place-items:center}</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="/">Perugia<span>Party</span></a>
+    <nav aria-label="Main"><a href="/#rules">House rules</a><a class="keep" href="/#faq">FAQ</a><a class="btn" id="nav-cta" href="/#request">Request a place</a></nav>
+  </div>
+</header>
+<main class="wrap">
+  <div class="oops">
+    <p class="big" aria-hidden="true">404</p>
+    <h1>Lost on the way to the party.</h1>
+    <p>This page doesn't exist, or the link got cut off. If someone sent you a ticket link, open the full link again, or log in with your Instagram and code.</p>
+    <div class="acts"><a class="btn" href="/">Go to the homepage</a><a class="btn outline" href="/ticket">My ticket</a></div>
+  </div>
+</main>
+<footer>
+  <div class="wrap">
+    <p class="sign">Tonight we party. Tomorrow we forget. <span>Later, it's the best night you've ever had.</span></p>
+    <div class="meta">
+      <p>Independent nights · Perugia, Italia</p>
+      <nav aria-label="Footer">
+        <a href="/#rules">House rules</a>
+        <a href="/privacy">Privacy</a>
+        <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Contact ↗</a>
+      </nav>
+    </div>
+  </div>
+</footer>
+<script>try { const t = localStorage.getItem("pp_token"); if (t) { const c = document.getElementById("nav-cta"); c.textContent = "My ticket"; c.href = "/ticket.html?t=" + encodeURIComponent(t); } } catch (e) {}</script>
+</body>
+</html>

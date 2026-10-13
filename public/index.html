@@ -29,6 +29,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/site.css">
+<script src="/notify.js" defer></script>
 <style>
 /* hero */
 .hero{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:center;padding-block:72px 80px}
@@ -345,7 +346,7 @@ body.locked{overflow:hidden}
           <p class="err" id="f-err" role="alert"></p>
           <div id="ts" class="ts" hidden></div>
           <div><button class="btn" type="submit" id="f-send">Send request</button></div>
-          <p class="privacy">We only use your name, Instagram and WhatsApp to run the guest list for this party. DM us anytime to have them deleted.</p>
+          <p class="privacy">We only use your name, Instagram and WhatsApp to run our guest lists. DM us anytime to have them deleted. <a href="/privacy">Privacy</a></p>
         </form>
         <aside class="side" id="side" aria-live="polite">
           <div class="mini" aria-label="Live preview of your request">
@@ -443,6 +444,7 @@ body.locked{overflow:hidden}
       <p>Independent nights · Perugia, Italia</p>
       <nav aria-label="Footer">
         <a href="#rules">House rules</a>
+        <a href="/privacy">Privacy</a>
         <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Contact ↗</a>
       </nav>
     </div>
@@ -508,7 +510,8 @@ function tick(){
   const p = n => String(n).padStart(2,"0");
   c.innerHTML = [[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]].map(([v,l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
 }
-fetch("/api/event").then(r => r.json()).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); setupForm(ev); }).catch(() => {});
+fetch("/api/event").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); setupForm(ev); })
+  .catch(() => { if (window.ppNotify) ppNotify("We couldn't load the next party right now. Refresh the page in a moment.", "warn", { title: "Party info not loaded", action: { label: "Refresh", onClick: () => location.reload() } }); });
 
 /* sold out -> waitlist wording; optional Cloudflare human check */
 let tsWidget = null;
@@ -558,6 +561,7 @@ function previewEvent(){ if (EVENT && EVENT.published && EVENT.name) $("pv-ev").
 preview();
 
 /* request form */
+function fieldErr(id){ const el = $(id); if (!el) return; if (window.ppFieldError) ppFieldError(el); else el.setAttribute("aria-invalid", "true"); }
 $("req-form").addEventListener("submit", async e => {
   e.preventDefault();
   const err = $("f-err"), btn = $("f-send");
@@ -568,17 +572,27 @@ $("req-form").addEventListener("submit", async e => {
     age: $("f-age").checked, rules: $("f-rules").checked,
     invite: INVITE || undefined,
   };
-  const missing = [];
-  if (body.name.length < 2) missing.push("your full name");
-  if (!body.ig.replace(/^@+/, "")) missing.push("your Instagram");
-  if (!body.age) missing.push("the 18+ confirmation");
-  if (!body.rules) missing.push("the house rules confirmation");
-  if (missing.length) { err.textContent = "Add " + missing.join(", ") + "."; return; }
+  const missing = [], bad = [];
+  const igClean = body.ig.replace(/^@+/, "");
+  if (body.name.length < 2) { missing.push("your full name"); bad.push("f-name"); }
+  if (!igClean) { missing.push("your Instagram"); bad.push("f-ig"); }
+  else if (!/^[A-Za-z0-9._]{1,30}$/.test(igClean)) { err.textContent = "That Instagram handle has characters Instagram doesn't allow. Use letters, numbers, dots and underscores."; fieldErr("f-ig"); return; }
+  if (!body.age) { missing.push("the 18+ confirmation"); bad.push("f-age"); }
+  if (!body.rules) { missing.push("the house rules confirmation"); bad.push("f-rules"); }
+  if (missing.length) { err.textContent = "Add " + missing.join(", ") + "."; bad.forEach(fieldErr); $(bad[0]).focus(); return; }
   err.textContent = ""; btn.disabled = true; btn.textContent = "Sending…";
   try {
     const r = await fetch("/api/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
     const data = await r.json().catch(() => ({}));
-    if (!r.ok || !data.token) { err.textContent = data.error || "Couldn't send. Try again in a minute."; return; }
+    if (!r.ok || !data.token) {
+      const msg = window.ppErrorText ? ppErrorText(r.status, data) : (data.error || "Couldn't send. Try again in a minute.");
+      err.textContent = msg;
+      if (/name/i.test(msg)) fieldErr("f-name");
+      if (/instagram/i.test(msg) && r.status === 400) fieldErr("f-ig");
+      if (/18\+|house rules/i.test(msg)) { fieldErr("f-age"); fieldErr("f-rules"); }
+      if (window.ppNotify) ppNotify(msg, r.status >= 500 ? "error" : "warn", { title: r.status === 409 ? "Can't send this request" : r.status >= 500 ? "Something went wrong" : "Check your request" });
+      return;
+    }
     rememberToken(data.token);
     try { localStorage.setItem("pp_me", JSON.stringify({ name: body.name, ig: body.ig, phone: body.phone })); } catch(e){}
     const link = location.origin + "/ticket.html?t=" + data.token;
@@ -591,12 +605,13 @@ $("req-form").addEventListener("submit", async e => {
     openSave(link, data.waitlist);
   } catch (x) {
     err.textContent = "Couldn't reach us. Check your connection and try again.";
+    if (window.ppNotify) ppNotify("Your request wasn't sent. Check your connection and try again.", "error", { title: "No connection", action: { label: "Try again", onClick: () => $("req-form").requestSubmit() } });
   } finally { btn.disabled = false; btn.textContent = sendLabel(); try { if (window.turnstile && tsWidget !== null) turnstile.reset(tsWidget); } catch(e){} }
 });
 $("copy-link").addEventListener("click", () => {
   const text = $("my-link").textContent, t = $("toast");
   const ok = () => t.textContent = "Copied. Save it somewhere safe.";
-  const fb = () => { const r = document.createRange(); r.selectNodeContents($("my-link")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); t.textContent = "Selected. Copy it with your keyboard or long-press."; };
+  const fb = () => { const r = document.createRange(); r.selectNodeContents($("my-link")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); t.textContent = "Selected. Copy it with your keyboard or long-press."; if (window.ppNotify) ppNotify("Your phone didn't let us copy automatically. The link is selected: long-press to copy it.", "warn", { title: "Copy it yourself" }); };
   try { navigator.clipboard.writeText(text).then(ok, fb); } catch (e) { fb(); }
 });
 

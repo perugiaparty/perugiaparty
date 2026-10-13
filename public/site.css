@@ -65,6 +65,31 @@ label small{font-weight:400;color:var(--muted)}
 
 .toast{font-family:var(--f-mono);font-size:13px;min-height:1.4em}
 
+/* notifications (notify.js) */
+.pp-notes{position:fixed;left:50%;top:calc(72px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:100;display:grid;gap:10px;width:min(520px,calc(100% - 24px));pointer-events:none}
+.pp-note{pointer-events:auto;display:flex;align-items:flex-start;gap:12px;background:var(--ink);color:var(--cream);border-radius:16px;padding:14px 12px 14px 14px;box-shadow:0 14px 40px rgba(20,18,16,.28);border-left:6px solid var(--muted-dark);opacity:0;transform:translateY(-10px);transition:opacity .25s,transform .25s}
+.pp-note.in{opacity:1;transform:none}
+.pp-note-icon{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px;background:var(--muted-dark);color:var(--ink)}
+.pp-note-text{flex:1;min-width:0;display:grid;gap:2px}
+.pp-note-text b{font-size:15px}
+.pp-note-text span{font-size:14px;color:var(--muted-dark);overflow-wrap:break-word}
+.pp-note-x{flex:none;background:transparent;border:0;color:var(--muted-dark);font-size:22px;line-height:1;padding:2px 4px;cursor:pointer}
+.pp-note-x:hover{color:var(--cream)}
+.pp-note-act{flex:none;align-self:center;font:inherit;font-size:13px;font-weight:700;background:var(--cream);color:var(--ink);border:0;border-radius:999px;padding:6px 12px;cursor:pointer}
+.pp-note.error{border-left-color:#ff4a3d}.pp-note.error .pp-note-icon{background:#ff4a3d;color:var(--ink)}
+.pp-note.warn{border-left-color:#f2b84b}.pp-note.warn .pp-note-icon{background:#f2b84b;color:var(--ink)}
+.pp-note.ok{border-left-color:#3ddc84}.pp-note.ok .pp-note-icon{background:#3ddc84;color:var(--ink)}
+/* form fields with a problem */
+.has-error input,.has-error textarea,input.has-error,input[aria-invalid="true"],textarea[aria-invalid="true"]{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(185,0,0,.14)}
+.check.has-error{color:var(--red-deep)}
+.check.has-error input{outline:2px solid var(--red);outline-offset:2px}
+/* full error states inside a page */
+.oops{display:grid;gap:14px;justify-items:center;text-align:center;padding:48px 8px}
+.oops .big{font-family:var(--f-display);font-size:clamp(84px,24vw,150px);line-height:.9;color:var(--red)}
+.oops h1{font-size:clamp(34px,8vw,56px)}
+.oops p{color:var(--muted);max-width:42ch}
+.oops .acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+
 footer{background:var(--ink);color:var(--cream)}
 footer .wrap{padding-block:56px 64px;display:flex;justify-content:space-between;gap:28px;flex-wrap:wrap;align-items:end}
 footer .sign{font-family:var(--f-display);font-size:clamp(24px,4.4vw,40px);max-width:20ch;line-height:1.05}
