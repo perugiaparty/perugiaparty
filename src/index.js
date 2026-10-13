@@ -567,8 +567,9 @@ async function igStatusDms(env) {
       approved: `You've been accepted`,
       paid: `✓ Payment received, ${first}. You're on the list!\nLink: ${link}`,
     }[g.status];
-    await env.DB.prepare("UPDATE guests SET ig_sent = ? WHERE token = ?").bind(g.status, g.token).run();
-    if (text) await igSend(env, ev, g.igsid, text);
+    // claim it first so two runs at once never send twice
+    const c = await env.DB.prepare("UPDATE guests SET ig_sent = ? WHERE token = ? AND (ig_sent IS NULL OR ig_sent <> ?)").bind(g.status, g.token, g.status).run();
+    if (text && c.meta && c.meta.changes) await igSend(env, ev, g.igsid, text);
   }
 }
 
@@ -600,7 +601,9 @@ export default {
     const path = new URL(req.url).pathname;
     if (path === "/api/event") ctx.waitUntil(igEnsureSubscribed(env, true).catch(() => {}));
     // backup for the minute timer: guests' pages poll every 20 s, so notifications still go out
-    if (path === "/api/event" || path === "/api/ticket") ctx.waitUntil(tickIfDue(env).catch(() => {}));
+    if (path === "/api/event" || path === "/api/ticket" || path === "/api/ig/webhook") ctx.waitUntil(tickIfDue(env).catch(() => {}));
+    // the admin panel pings this right after Approve / Paid, so the Instagram message goes out straight away
+    if (path === "/api/nudge") { ctx.waitUntil(igStatusDms(env).catch(() => {})); return secure(new Response(null, { status: 204, headers: { "cache-control": "no-store", "access-control-allow-origin": "*" } })); }
     return secure(await route(req, env));
   },
   async scheduled(event, env, ctx) {
