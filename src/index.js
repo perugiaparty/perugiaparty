@@ -233,7 +233,7 @@ async function igHandleDm(env, ev, igsid, text) {
     ].join("\n"));
   } else {
     await env.DB.prepare("UPDATE guests SET ig_mismatch = ? WHERE token = ?").bind(normIg(username), g.token).run();
-    await igSend(env, ev, igsid, "This code belongs to another Instagram account. Request with your own at perugiaparty.com and send us that code.");
+    await igSend(env, ev, igsid, "This code belongs to another account");
   }
 }
 async function igWebhook(req, env) {
