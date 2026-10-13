@@ -202,20 +202,11 @@ async function igHandleDm(env, ev, igsid, text) {
   if (normIg(username) === normIg(g.ig)) {
     const already = Number(g.verified) === 1;
     await markVerified(env, g, igsid);
-    const returner = await isReturner(env, normIg(g.ig), g.event);
-    const status = {
-      requested: returner ? "Welcome back, you're first in line. We'll message you here once you're approved." : "We'll message you here once you're approved.",
-      waitlist: "You're on the waitlist. We'll message you if a place opens.",
-      approved: "You're approved 🎉 Pay via your page to confirm your place.",
-      paid: "You're on the list 🎉 Ticket and location are on your page.",
-      in: "You're on the list 🎉",
-    }[g.status] || "Your page shows your latest status.";
     await igSend(env, ev, igsid, [
-      `✓ ${already ? "You're confirmed" : "Confirmed"}, ${first}`,
-      status,
+      `✓ Confirmed, ${first}! Your request is verified.`,
       ``,
-      `🎟 https://perugiaparty.com/ticket.html?t=${g.token}`,
-      `🔑 ${g.vcode} (log in at perugiaparty.com/ticket)`,
+      `Your page: https://perugiaparty.com/ticket.html?t=${g.token}`,
+      `Your code: ${g.vcode}`,
     ].join("\n"));
   } else {
     await env.DB.prepare("UPDATE guests SET ig_mismatch = ? WHERE token = ?").bind(normIg(username), g.token).run();
