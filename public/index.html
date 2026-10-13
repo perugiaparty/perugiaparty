@@ -165,6 +165,13 @@ textarea{resize:vertical;min-height:88px}
 .rules h3{font-size:20px;margin-bottom:6px}
 .rules p{color:var(--muted);font-size:15px}
 
+/* add to home screen, shown after requesting */
+.appbox{margin-top:18px;display:grid;grid-template-columns:48px 1fr;gap:6px 14px;align-items:center;background:var(--ink);color:var(--cream);border-radius:18px;padding:16px}
+.appbox .ic{grid-row:span 2;width:48px;height:48px;border-radius:12px;background:var(--ink-2) url(/icon-192.png) center/cover}
+.appbox b{font-size:16px}
+.appbox span{font-size:14px;color:var(--muted-dark)}
+.appbox ol{grid-column:1/-1;margin:6px 0 0;padding-left:20px;font-size:14px;color:var(--cream);display:grid;gap:2px}
+.appbox .btn{grid-column:1/-1;margin-top:6px;width:100%}
 /* invite + early-access note above the form */
 .req-note{display:grid;gap:2px;border-radius:16px;padding:14px 16px 14px 18px;background:var(--ink);color:var(--cream);border-left:6px solid var(--red);margin-bottom:6px}
 .req-note b{font-size:16px}
@@ -399,6 +406,7 @@ body.locked{overflow:hidden}
             <p class="linkbox codebox" id="my-link" style="margin-top:12px"></p>
             <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="copy-link">Copy code</button><a class="btn outline" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Open Instagram DM ↗</a></div>
             <p class="toast" id="toast" style="color:var(--red-deep)!important;margin-top:8px"></p>
+            <div class="appbox" id="appbox" hidden></div>
           </div>
         </aside>
       </div>
@@ -487,6 +495,22 @@ let EVENT = null;
 function savedToken(){ try { return localStorage.getItem("pp_token"); } catch(e){ return null; } }
 function rememberToken(t){ try { localStorage.setItem("pp_token", t); } catch(e){} }
 function showMyTicket(href){ const a = $("nav-cta"); a.href = href; a.textContent = "My ticket"; }
+/* "add to home screen": the app gets a ping when you're approved */
+let installEvt = null;
+addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; renderAppBox(); });
+function renderAppBox(){
+  const box = $("appbox"); if (!box || $("side-done").hidden) return;
+  if (matchMedia("(display-mode: standalone)").matches || navigator.standalone) { box.hidden = true; return; }
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  let body;
+  if (installEvt) body = `<button class="btn" type="button" id="app-add">Add to home screen</button>`;
+  else if (ios) body = `<ol><li>Tap <b>Share</b> in Safari</li><li>Choose <b>Add to Home Screen</b></li><li>Open it and tap <b>Turn on</b> for notifications</li></ol>`;
+  else body = `<ol><li>Open your browser menu</li><li>Tap <b>Add to Home screen</b> or <b>Install app</b></li></ol>`;
+  box.innerHTML = `<span class="ic" aria-hidden="true"></span><b>Add PerugiaParty to your home screen</b><span>Your ticket in one tap, and a notification the moment you're approved.</span>${body}`;
+  box.hidden = false;
+  const add = $("app-add");
+  if (add) add.addEventListener("click", async () => { const e = installEvt; installEvt = null; e.prompt(); try { await e.userChoice; } catch(x){} renderAppBox(); });
+}
 (function(){ const t = savedToken(); if (t) showMyTicket("/ticket.html?t=" + encodeURIComponent(t)); })();
 
 /* next party + countdown */
@@ -611,7 +635,7 @@ $("req-form").addEventListener("submit", async e => {
     const handle = data.ig || ("@" + body.ig.replace(/^@+/, "").toLowerCase());
     $("my-link").textContent = data.vcode || ""; $("my-ig").textContent = handle;
     showMyTicket(link);
-    $("side-info").hidden = true; $("side-done").hidden = false;
+    $("side-info").hidden = true; $("side-done").hidden = false; renderAppBox();
     const st = $("pv-stamp"); st.textContent = "SENT"; st.classList.add("sent"); document.querySelector(".side .mini").classList.add("done");
     $("pv-tiny").textContent = "DM your code to @perugiaparty";
     $("req-form").reset();
