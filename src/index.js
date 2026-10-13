@@ -25,6 +25,23 @@ function priceRange(ev) {
   return { min: Math.min(...p), max: Math.max(...p) };
 }
 
+// ---- rate limits: stop bots and code-guessing (counts per IP, stored as a hash, never the IP itself) ----
+const LIMITS = { request: [6, 600], rerequest: [6, 600], login: [8, 600], invite: [40, 600], door: [20, 600] };
+async function tooMany(req, env, name) {
+  const [max, win] = LIMITS[name] || [30, 600];
+  const ip = req.headers.get("CF-Connecting-IP") || "local";
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("pp-rl|" + ip));
+  const k = name + ":" + Array.from(new Uint8Array(buf).slice(0, 10), (b) => b.toString(16).padStart(2, "0")).join("");
+  const now = Date.now();
+  try {
+    const r = await env.DB.prepare(
+      "INSERT INTO hits (k, n, reset) VALUES (?, 1, ?) ON CONFLICT(k) DO UPDATE SET n = CASE WHEN hits.reset < ? THEN 1 ELSE hits.n + 1 END, reset = CASE WHEN hits.reset < ? THEN ? ELSE hits.reset END RETURNING n"
+    ).bind(k, now + win * 1000, now, now, now + win * 1000).first();
+    return r && r.n > max;
+  } catch (e) { return false; } // never lock real guests out because of the counter
+}
+const slowDown = () => json({ error: "Too many tries. Wait a few minutes and try again." }, 429);
+
 async function getEvent(env) {
   return env.DB.prepare("SELECT * FROM event WHERE id = 1").first();
 }
@@ -454,8 +471,35 @@ async function apiPoster(env) {
   return new Response(bin, { headers: { "content-type": m[1], "cache-control": "public, max-age=31536000, immutable" } });
 }
 
+// Security headers on every response the site sends.
+const SECURITY = {
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "X-Frame-Options": "DENY",
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Permissions-Policy": "camera=(self), microphone=(), geolocation=(), payment=(), usb=()",
+  "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests",
+};
+function secure(res) {
+  if (!res || res.status === 101) return res;
+  const out = new Response(res.body, res);
+  for (const [k, v] of Object.entries(SECURITY)) if (!out.headers.has(k)) out.headers.set(k, v);
+  return out;
+}
+
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
+    return secure(await route(req, env));
+  },
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(refreshIgToken(env));
+    ctx.waitUntil(env.DB.prepare("DELETE FROM hits WHERE reset < ?").bind(Date.now()).run().catch(() => {}));
+  },
+};
+
+async function route(req, env) {
+  {
     const url = new URL(req.url);
     if (url.hostname === "www.perugiaparty.com") {
       url.hostname = "perugiaparty.com";
@@ -467,6 +511,11 @@ export default {
     if (url.pathname.startsWith("/api/")) {
       try {
         if (url.pathname === "/api/event" && req.method === "GET") return await apiEvent(env);
+        if (req.method === "POST" && url.pathname === "/api/request" && (await tooMany(req, env, "request"))) return slowDown();
+        if (req.method === "POST" && url.pathname === "/api/rerequest" && (await tooMany(req, env, "rerequest"))) return slowDown();
+        if (req.method === "POST" && url.pathname === "/api/login" && (await tooMany(req, env, "login"))) return slowDown();
+        if (req.method === "POST" && url.pathname === "/api/door/login" && (await tooMany(req, env, "door"))) return slowDown();
+        if (url.pathname === "/api/invite" && (await tooMany(req, env, "invite"))) return slowDown();
         if (url.pathname === "/api/request" && req.method === "POST") return await apiRequest(req, env);
         if (url.pathname === "/api/ticket" && req.method === "GET") return await apiTicket(url, env);
         if (url.pathname === "/api/poster" && req.method === "GET") return await apiPoster(env);
@@ -485,8 +534,5 @@ export default {
     }
     if (url.pathname === "/" || url.pathname === "/index.html") return homepage(req, env);
     return env.ASSETS.fetch(req);
-  },
-  async scheduled(event, env, ctx) {
-    ctx.waitUntil(refreshIgToken(env));
-  },
-};
+  }
+}
