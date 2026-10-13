@@ -541,9 +541,11 @@ function secure(res) {
 
 export default {
   async fetch(req, env, ctx) {
+    if (new URL(req.url).pathname === "/api/event") ctx.waitUntil(igEnsureSubscribed(env).catch(() => {}));
     return secure(await route(req, env));
   },
   async scheduled(event, env, ctx) {
+    if (new Date().getMinutes() === 0) ctx.waitUntil(igLog(env, "cron", event.cron));
     if (event.cron === "* * * * *") { ctx.waitUntil(pushTick(env, getEvent, parseProgram)); ctx.waitUntil(igEnsureSubscribed(env)); return; }
     ctx.waitUntil(refreshIgToken(env));
     ctx.waitUntil(env.DB.prepare("DELETE FROM hits WHERE reset < ?").bind(Date.now()).run().catch(() => {}));
