@@ -85,6 +85,7 @@
 .count div{background:var(--ink-2);border-radius:14px;padding:10px 14px;min-width:76px;text-align:center}
 .count b{display:block;font-family:var(--f-display);font-size:32px;line-height:1;font-variant-numeric:tabular-nums;color:var(--cream)}
 .count span{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
+@media (max-width:420px){.count{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.count div{min-width:0!important;padding:8px 2px!important}.count b{font-size:22px!important}.count span{font-size:9px}}
 @media (max-width:720px){.next,.next.has-poster{grid-template-columns:1fr;padding:26px;min-height:0}.next .poster{order:-1;justify-self:center;max-width:280px;margin-bottom:8px;transform:rotate(-2deg)}.count div{min-width:64px;padding:8px 10px}.count b{font-size:26px}}
 
 /* steps */

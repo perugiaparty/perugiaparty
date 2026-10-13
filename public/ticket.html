@@ -14,7 +14,9 @@
 <link rel="stylesheet" href="/site.css">
 <style>
 main{padding-block:44px 80px}
-.page{max-width:620px;margin-inline:auto;display:grid;gap:20px}
+.page{max-width:620px;margin-inline:auto;display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+.page > *{min-width:0}
+.page h1,.page h2{overflow-wrap:normal}
 .state{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;border-radius:999px;padding:5px 12px;background:var(--cream-2);border:1.5px solid var(--ink)}
 .state.ok{background:var(--red);border-color:var(--red);color:var(--cream)}
 h1{font-size:clamp(40px,8vw,64px)}
@@ -56,7 +58,9 @@ h1{font-size:clamp(40px,8vw,64px)}
 .tier b{display:block;font-family:var(--f-display);font-weight:400;font-size:22px;color:var(--muted-dark)}
 .tier.me{border-color:var(--cream);background:var(--ink-2);color:var(--cream)}
 .tier.me b{color:var(--cream)}
-.tier .you{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#ff8a7f}
+.tier .tn,.tier .tu{display:block}
+.tier .tu{font-size:12px;opacity:.8}
+.tier .you{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#ff8a7f}
 .howto{list-style:none;margin:0;padding:0;counter-reset:h;display:grid;gap:16px}
 .howto li{counter-increment:h;display:grid;grid-template-columns:40px 1fr;gap:14px;align-items:start}
 .howto li::before{content:counter(h);display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--red);color:var(--cream);font-family:var(--f-display);font-size:18px}
@@ -151,7 +155,7 @@ h1{font-size:clamp(40px,8vw,64px)}
 /* next party (one tap for returning guests) */
 .nextc{background:var(--ink);color:var(--cream);border-radius:24px;padding:26px 24px;display:grid;gap:10px;justify-items:start}
 .nextc .kick{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-dark)}
-.nextc h2{font-size:clamp(36px,8vw,52px);color:var(--cream)}
+.nextc h2{font-size:clamp(30px,8vw,52px);color:var(--cream);justify-self:stretch}
 .nextc .date{color:var(--muted-dark);font-size:17px;margin-top:-4px}
 .nextc .badge{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:#ff4a3d;color:var(--ink);padding:5px 10px;border-radius:999px}
 .nextc .btn{margin-top:6px}
@@ -187,6 +191,25 @@ h1{font-size:clamp(40px,8vw,64px)}
 .login{max-width:440px;display:grid;gap:14px}
 .login label{display:grid;gap:6px}
 .login .err{color:var(--red-deep);font-size:14px;font-weight:700;min-height:1.2em}
+/* every card is a one-column grid that never grows wider than the screen */
+.hero-ok,.amount,.hype,.cine,.thanks,.nextc,.invite,.verify,.card,.prog{grid-template-columns:minmax(0,1fr)}
+/* small phones */
+.vcode span{white-space:nowrap;min-width:0;font-size:clamp(20px,6.4vw,32px)}
+.badge,.state{white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.fbox .v{overflow-wrap:break-word}
+@media (max-width:400px){
+  .tiers{grid-template-columns:1fr;gap:6px}
+  .tier{display:grid;grid-template-columns:64px 1fr auto;grid-template-areas:"p n y" "p u y";align-items:center;column-gap:10px;padding:8px 12px}
+  .tier b{grid-area:p;font-size:22px}
+  .tier .tn{grid-area:n}
+  .tier .tu{grid-area:u}
+  .tier .you{display:none}
+  .tier{grid-template-columns:64px 1fr}
+  .fbox .v{font-size:14px;letter-spacing:0}
+  .prog-head h2{font-size:22px}
+  .cine .instamp{font-size:20px;padding:8px 12px;border-width:4px}
+  .verify,.nextc,.thanks,.invite,.hype,.hero-ok{padding-inline:18px}
+}
 </style>
 </head>
 <body>
@@ -337,7 +360,7 @@ function programmeHTML(d){
 }
 function partyOver(d){ const s = new Date(d.starts_at).getTime(); return Number.isFinite(s) && Date.now() > s + 8 * 36e5; }
 function thanksHTML(d, first){
-  return `<div class="thanks"><span class="state" style="background:var(--cream);border-color:var(--cream);color:var(--red)">${esc(d.event)} · that's a wrap</span>
+  return `<div class="thanks"><span class="state" style="background:var(--cream);border-color:var(--cream);color:var(--red)">That's a wrap</span>
     <h1>Thanks for coming, ${first}.</h1>
     <p>Got photos or videos from the night? Send them our way, the best ones end up on our page. And tell us how it was: we read every message.</p>
     <div class="btns"><a class="btn" href="${DM}" target="_blank" rel="noopener">Send your photos ↗</a><a class="btn ghost" href="${DM}" target="_blank" rel="noopener">Tell us how it was ↗</a></div></div>`;
@@ -348,7 +371,7 @@ function nextHTML(d){
   if (n.token) action = `<a class="btn" href="/ticket.html?t=${encodeURIComponent(n.token)}">Open my request →</a><p class="sub">You already requested a place for this one.</p>`;
   else if (n.open) action = `<button class="btn" type="button" id="again">${n.early ? "Use my early access" : "Request my place"} →</button><p class="sub">${n.early ? "Early access is open for returning guests only. " : d.returner ? "Returning guests are first in line. " : ""}One tap. We use the same name and Instagram as last time.</p><p class="err" id="again-err" role="alert"></p>`;
   else action = `<p class="sub">Requests aren't open yet. Follow <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">@perugiaparty</a> so you don't miss it.</p>`;
-  return `<section class="nextc"><span class="kick">Next party</span>${d.returner && !n.token ? `<span class="badge">★ Priority · you came before</span>` : ""}
+  return `<section class="nextc"><span class="kick">Next party</span>${d.returner && !n.token ? `<span class="badge">★ Priority guest</span>` : ""}
     <h2>${esc(n.event)}</h2>${n.date_label ? `<p class="date">${esc(n.date_label)}</p>` : ""}${action}</section>`;
 }
 function inviteHTML(d){
@@ -364,7 +387,7 @@ function inviteHTML(d){
 function verifyHTML(d){
   const handle = esc(d.ig || "your Instagram");
   if (d.verified) return `<div class="verified"><span>✓ Instagram confirmed</span><span style="font-weight:500">Your login code:</span><code>${esc(d.vcode)}</code></div>`;
-  return `<section class="verify" id="verify"><span class="kick">Last step · confirm it's you</span>
+  return `<section class="verify" id="verify"><span class="kick">Last step</span>
     <h2>Send us your code on Instagram.</h2>
     <p>DM this code to <b>@perugiaparty</b> from <b>${handle}</b>. It proves the account is yours${d.returner ? " and unlocks your priority as a returning guest" : ""}. ${d.ig_auto ? "You get an automatic reply within a minute." : "We confirm it as soon as we see it."}</p>
     <div class="vcode"><span>${esc(d.vcode)}</span>${copyBtn(d.vcode)}</div>
@@ -430,6 +453,15 @@ function decorate(d){
     setTimeout(() => sh.textContent = "Send invite", 2500);
   });
 }
+// long party names: shrink a heading until its longest word fits, never break inside a word
+function fitHeadings(){
+  document.querySelectorAll(".page h1, .page h2").forEach(h => {
+    h.style.fontSize = "";
+    let size = parseFloat(getComputedStyle(h).fontSize), guard = 0;
+    while (h.scrollWidth > h.clientWidth + 1 && size > 18 && guard++ < 30) { size *= 0.94; h.style.fontSize = size + "px"; }
+  });
+}
+addEventListener("resize", () => { clearTimeout(fitHeadings.t); fitHeadings.t = setTimeout(fitHeadings, 120); });
 let LAST = null;
 setInterval(() => { const el = $("prog"); if (el && LAST) el.outerHTML = programmeHTML(LAST) || ""; }, 60000);
 
@@ -464,7 +496,7 @@ function render(d){
       <div class="amount"><p class="eyebrow" style="color:var(--muted-dark)">You pay · ${esc(tierName)}</p>
         <p class="big">${euro(d.price)}</p>
         <p class="why">${esc(why)}</p>
-        ${tiers.length > 1 ? `<div class="tiers">${tiers.map(t => `<div class="tier ${t === d.ticket ? "me" : ""}">${t === d.ticket ? `<span class="you">Your price</span>` : ""}<b>${euro(d.tiers[t])}</b>${names[t]}${until[t] ? `<br><span style="font-size:12px;opacity:.8">${until[t]}</span>` : ""}</div>`).join("")}</div>` : ""}
+        ${tiers.length > 1 ? `<div class="tiers">${tiers.map(t => `<div class="tier ${t === d.ticket ? "me" : ""}">${t === d.ticket ? `<span class="you">Your price</span>` : ""}<b>${euro(d.tiers[t])}</b><span class="tn">${names[t]}</span>${until[t] ? `<span class="tu">${until[t]}</span>` : ""}</div>`).join("")}</div>` : ""}
       </div>
       ${d.deadline ? `<div class="deadline">${overdue ? "The payment deadline has passed. DM us on Instagram if you already paid." : `Pay before <span>${esc(when(d.deadline))}</span>. After that your place goes back to the list.`}</div>` : ""}
       <div class="card">
@@ -528,6 +560,8 @@ function render(d){
   }
   LAST = d;
   decorate(d);
+  fitHeadings();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeadings);
 }
 
 if (!token) {
