@@ -635,7 +635,7 @@ $("req-form").addEventListener("submit", async e => {
     const handle = data.ig || ("@" + body.ig.replace(/^@+/, "").toLowerCase());
     $("my-link").textContent = data.vcode || ""; $("my-ig").textContent = handle;
     showMyTicket(link);
-    $("side-info").hidden = true; $("side-done").hidden = false; renderAppBox();
+    $("side-info").hidden = true; $("side-done").hidden = false;
     const st = $("pv-stamp"); st.textContent = "SENT"; st.classList.add("sent"); document.querySelector(".side .mini").classList.add("done");
     $("pv-tiny").textContent = "DM your code to @perugiaparty";
     $("req-form").reset();

@@ -473,11 +473,12 @@ async function pushSubscribe(test){
 }
 function pushIsOn(){ try { return APP.push && Notification.permission === "granted" && localStorage.getItem("pp_push") === token; } catch(e){ return false; } }
 function appHTML(d){
-  if (["declined","removed","released"].includes(d.status) || (d.status === "in" && partyOver(d))) return "";
-  const what = d.status === "approved" ? "when your payment is confirmed" : d.status === "paid" || d.status === "in" ? "for the programme on the night" : "the moment you're approved";
+  // only once they've paid: the ticket is what's worth keeping on the home screen
+  if (!["paid","in"].includes(d.status) || partyOver(d)) return "";
+  const what = "for the programme on the night";
   if (pushIsOn()) return `<div class="appc on" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>🔔 Notifications on</b><span>We'll tell you ${what}.</span></div></div>`;
   if (APP.push && Notification.permission === "denied") return `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Notifications are blocked</b><span>Allow them for perugiaparty.com in your browser settings to hear ${what}.</span></div></div>`;
-  if (APP.ios && !APP.standalone) return `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Get the app and a ping ${what}</b>
+  if (APP.ios && !APP.standalone) return `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Put your ticket on your home screen</b><span>One tap at the door, works without signal, and a ping for the programme.</span>
     <ol class="steps"><li>Tap <b>Share</b> (the square with an arrow) in Safari</li><li>Choose <b>Add to Home Screen</b></li><li>Open PerugiaParty from your home screen and tap <b>Turn on</b></li></ol></div></div>`;
   if (!APP.push) return APP.installEvt ? `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Get the PerugiaParty app</b><span>Your ticket on your home screen, also without signal.</span></div><button class="btn ink" type="button" id="app-install">Install</button></div>` : "";
   return `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Get a notification ${what}</b><span>${APP.standalone ? "One tap. You can turn it off any time." : "Works best from the app on your home screen."}</span></div>
