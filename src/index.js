@@ -223,6 +223,19 @@ async function igWebhook(req, env) {
   }
   return new Response("ok");
 }
+// Turn on message webhooks for the @perugiaparty account itself (needed once, retried every 10 minutes until it works).
+async function igEnsureSubscribed(env) {
+  const ev = await getEvent(env);
+  if (!ev || !ev.ig_token || ev.ig_subscribed_at) return;
+  if (new Date().getMinutes() % 10 !== 0) return;
+  try {
+    const r = await fetch(`${igApi(env)}/me/subscribed_apps?subscribed_fields=messages&access_token=${encodeURIComponent(ev.ig_token)}`, { method: "POST" });
+    const t = await r.text();
+    await igLog(env, r.ok ? "subscribe-ok" : "subscribe-fail", t.slice(0, 300));
+    if (r.ok && /"success"\s*:\s*true/.test(t)) await env.DB.prepare("UPDATE event SET ig_subscribed_at = ? WHERE id = 1").bind(Date.now()).run();
+  } catch (e) { await igLog(env, "subscribe-error", String(e)); }
+}
+
 // Instagram tokens last 60 days: refresh every few weeks.
 async function refreshIgToken(env) {
   const ev = await getEvent(env);
@@ -531,7 +544,7 @@ export default {
     return secure(await route(req, env));
   },
   async scheduled(event, env, ctx) {
-    if (event.cron === "* * * * *") { ctx.waitUntil(pushTick(env, getEvent, parseProgram)); return; }
+    if (event.cron === "* * * * *") { ctx.waitUntil(pushTick(env, getEvent, parseProgram)); ctx.waitUntil(igEnsureSubscribed(env)); return; }
     ctx.waitUntil(refreshIgToken(env));
     ctx.waitUntil(env.DB.prepare("DELETE FROM hits WHERE reset < ?").bind(Date.now()).run().catch(() => {}));
   },
