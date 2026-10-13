@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>PerugiaParty · Soon</title>
-<meta name="description" content="Private student parties in Perugia. Something new is coming.">
+<title>PerugiaParty · Next party coming soon</title>
+<meta name="description" content="Private student parties in Perugia. The next party is coming soon. Follow @perugiaparty to be the first to know.">
 <meta name="theme-color" content="#141210">
 <link rel="canonical" href="https://perugiaparty.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PerugiaParty">
-<meta property="og:title" content="PerugiaParty · Soon">
-<meta property="og:description" content="Something new is coming.">
+<meta property="og:title" content="PerugiaParty · Next party coming soon">
+<meta property="og:description" content="Follow @perugiaparty to be the first to know.">
 <meta property="og:url" content="https://perugiaparty.com/">
 <meta property="og:image" content="https://perugiaparty.com/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -23,50 +23,78 @@
 <link rel="stylesheet" href="/site.css?v=20261013f">
 <style>
 html,body{height:100%}
-body{min-height:100svh;display:flex;flex-direction:column;color:#f4ead7;overflow-x:hidden;
-  background:radial-gradient(120% 80% at 50% 45%,#221d1a 0%,#161311 55%,#0d0b0a 100%) #161311}
-/* film grain, same feel as the statement stories */
-body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-.bar{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;max-width:1080px;margin-inline:auto;padding:calc(18px + env(safe-area-inset-top,0px)) 20px 18px}
-.bar .mark{font-family:var(--f-display);font-size:19px;color:#f4ead7;text-decoration:none}
+body{background:var(--ink);color:var(--cream);display:flex;flex-direction:column;min-height:100svh;overflow-x:hidden}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:calc(14px + env(safe-area-inset-top,0px)) 20px 14px;max-width:1080px;width:100%;margin-inline:auto}
+.bar .mark{font-family:var(--f-display);font-size:21px;text-decoration:none;color:var(--cream)}
 .bar .mark span{color:#ff4a3d}
-.bar .mine{font-size:14px;font-weight:700;color:#f4ead7;text-decoration:none;border:1.5px solid #3a332d;border-radius:999px;padding:8px 16px}
-.bar .mine:hover{border-color:#f4ead7}
-main{position:relative;flex:1;display:grid;place-items:center;padding:20px 28px 48px}
-.box{display:grid;justify-items:center;text-align:center;gap:clamp(28px,5vw,40px);max-width:640px}
-.k{display:flex;align-items:center;gap:22px;font-weight:700;font-size:clamp(15px,2vw,18px);letter-spacing:.24em;text-transform:uppercase;padding-left:.24em}
-.k::before,.k::after{content:"";width:clamp(40px,7vw,64px);height:2px;background:#ff4a3d}
-h1{font-family:var(--f-body);font-weight:500;font-size:clamp(28px,5.4vw,46px);line-height:1.25;letter-spacing:-.005em;text-wrap:balance}
-.sub{font-size:clamp(15px,2vw,18px);line-height:1.5;color:#a8998a;max-width:36ch;text-wrap:balance}
-.ig{font-family:var(--f-mono);font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:#a8998a;text-decoration:none;border-bottom:1px solid #3a332d;padding-bottom:4px}
-.ig:hover{color:#f4ead7;border-color:#ff4a3d}
-.box>*{opacity:0;transform:translateY(8px);animation:in .9s ease forwards}
-.box>*:nth-child(2){animation-delay:.15s}.box>*:nth-child(3){animation-delay:.3s}.box>*:nth-child(4){animation-delay:.45s}
-@keyframes in{to{opacity:1;transform:none}}
-.foot{position:relative;text-align:center;padding:16px 20px calc(18px + env(safe-area-inset-bottom,0px));font-family:var(--f-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5e544b}
-.foot a{color:inherit;text-decoration:none}
-.foot a:hover{color:#a8998a}
+.bar a.mine{font-size:14px;font-weight:700;color:var(--cream);text-decoration:none;border:1.5px solid #4a423b;border-radius:999px;padding:8px 16px;white-space:nowrap}
+.bar a.mine:hover{border-color:var(--cream)}
+html{overflow-x:hidden}
+main{flex:1;display:grid;place-items:center;padding:24px 20px 40px;position:relative;overflow:hidden}
+.glow{position:absolute;inset:auto 50% 10% auto;width:min(720px,140vw);aspect-ratio:1;transform:translateX(50%);background:radial-gradient(closest-side,rgba(185,0,0,.38),transparent 70%);pointer-events:none;filter:blur(10px)}
+.box{position:relative;max-width:760px;width:100%;display:grid;justify-items:center;text-align:center;gap:22px}
+.logo{width:min(240px,58vw);height:auto;transform:rotate(-4deg);filter:drop-shadow(0 18px 40px rgba(0,0,0,.5))}
+.kick{font-family:var(--f-mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-dark);display:inline-flex;align-items:center;gap:10px}
+.kick i{width:8px;height:8px;border-radius:50%;background:#ff4a3d;box-shadow:0 0 0 0 rgba(255,74,61,.6);animation:pulse 1.8s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(255,74,61,0)}100%{box-shadow:0 0 0 0 rgba(255,74,61,0)}}
+h1{font-size:clamp(48px,11vw,112px);line-height:.95;letter-spacing:-.01em}
+h1 em{font-style:normal;color:#ff4a3d}
+.lede{font-size:clamp(17px,2.4vw,20px);color:var(--muted-dark);max-width:38ch;line-height:1.5}
+.ev{display:grid;gap:14px;justify-items:center;margin-top:4px;width:100%}
+.ev .nm{font-family:var(--f-display);font-size:clamp(26px,5vw,38px);line-height:1}
+.ev .dt{font-family:var(--f-mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-dark)}
+.cd{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:min(420px,100%)}
+.cd div{background:var(--ink-2);border-radius:16px;padding:14px 4px 10px;display:grid;gap:2px}
+.cd b{font-family:var(--f-display);font-weight:400;font-size:clamp(28px,7vw,40px);line-height:1}
+.cd span{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;color:var(--muted-dark)}
+.acts{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.acts .btn{padding:14px 26px;font-size:16px}
+.acts .btn.ghost{background:transparent;border-color:#4a423b;color:var(--cream)}
+.acts .btn.ghost:hover{border-color:var(--cream)}
+.foot{display:flex;justify-content:center;gap:18px;padding:18px 20px calc(18px + env(safe-area-inset-bottom,0px));font-size:13px;color:var(--muted-dark)}
+.foot a{color:var(--muted-dark);text-decoration:none}
+.foot a:hover{color:var(--cream)}
+@media (max-width:480px){.acts{width:100%}.acts .btn{flex:1 1 100%}.box{gap:18px}}
 </style>
 </head>
 <body>
 <div class="bar">
-  <span class="mark">Perugia<span>Party</span></span>
+  <a class="mark" href="/">Perugia<span>Party</span></a>
   <a class="mine" href="/ticket">My ticket</a>
 </div>
 <main>
+  <div class="glow" aria-hidden="true"></div>
   <div class="box">
-    <div class="k">Soon</div>
-    <h1 id="title">Something new is coming.</h1>
-    <p class="sub" id="text" hidden></p>
-    <a class="ig" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">@perugiaparty</a>
+    <span class="kick"><i aria-hidden="true"></i>Perugia · 18+</span>
+    <h1 id="title">Next party<br><em>coming soon.</em></h1>
+    <p class="lede" id="text">We're cooking up the next night. Follow us on Instagram and you'll be the first to know.</p>
+    <div class="ev" id="ev" hidden></div>
+    <div class="acts">
+      <a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow @perugiaparty</a>
+    </div>
   </div>
 </main>
-<div class="foot"><a href="/privacy">Privacy</a></div>
+<div class="foot"><span>© PerugiaParty</span><a href="/privacy">Privacy</a></div>
 <script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 fetch("/api/event", { cache: "no-store" }).then(r => r.json()).then(ev => {
-  if (ev.splash_title) { document.getElementById("title").textContent = ev.splash_title; document.title = "PerugiaParty · " + ev.splash_title; }
-  if (ev.splash_text) { const t = document.getElementById("text"); t.textContent = ev.splash_text; t.hidden = false; }
+  if (ev.splash_title) {
+    // last word in red, like the homepage
+    const t = String(ev.splash_title).trim(), i = t.lastIndexOf(" ");
+    $("title").innerHTML = i > 0 ? `${esc(t.slice(0, i))}<br><em>${esc(t.slice(i + 1))}</em>` : `<em>${esc(t)}</em>`;
+    document.title = "PerugiaParty · " + t;
+  }
+  if (ev.splash_text) $("text").textContent = ev.splash_text;
+  // if a party is already announced, show its name, date and a countdown
+  const start = ev.published && ev.starts_at ? new Date(ev.starts_at).getTime() : 0;
+  if (!start || start < Date.now()) return;
+  $("ev").hidden = false;
+  $("ev").innerHTML = `<div class="nm">${esc(ev.name)}</div>${ev.date_label ? `<div class="dt">${esc(ev.date_label)}</div>` : ""}
+    <div class="cd" aria-label="Countdown"><div><b id="d">0</b><span>DAYS</span></div><div><b id="h">00</b><span>HOURS</span></div><div><b id="m">00</b><span>MIN</span></div><div><b id="s">00</b><span>SEC</span></div></div>`;
+  const pad = n => String(n).padStart(2, "0");
+  const tick = () => { let x = Math.max(0, Math.floor((start - Date.now()) / 1000)); $("d").textContent = Math.floor(x / 86400); x %= 86400; $("h").textContent = pad(Math.floor(x / 3600)); x %= 3600; $("m").textContent = pad(Math.floor(x / 60)); $("s").textContent = pad(x % 60); };
+  tick(); setInterval(tick, 1000);
 }).catch(() => {});
 </script>
 </body>
