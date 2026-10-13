@@ -522,6 +522,12 @@ function manifest(url) {
   }), { headers: { "content-type": "application/manifest+json", "cache-control": "no-store" } });
 }
 
+async function tickIfDue(env) {
+  const now = Date.now();
+  const r = await env.DB.prepare("UPDATE event SET tick_at = ? WHERE id = 1 AND (tick_at IS NULL OR tick_at < ?)").bind(now, now - 55000).run();
+  if (r.meta && r.meta.changes) await pushTick(env, getEvent, parseProgram);
+}
+
 // Security headers on every response the site sends.
 const SECURITY = {
   "X-Content-Type-Options": "nosniff",
@@ -541,12 +547,15 @@ function secure(res) {
 
 export default {
   async fetch(req, env, ctx) {
-    if (new URL(req.url).pathname === "/api/event") ctx.waitUntil(igEnsureSubscribed(env, true).catch(() => {}));
+    const path = new URL(req.url).pathname;
+    if (path === "/api/event") ctx.waitUntil(igEnsureSubscribed(env, true).catch(() => {}));
+    // backup for the minute timer: guests' pages poll every 20 s, so notifications still go out
+    if (path === "/api/event" || path === "/api/ticket") ctx.waitUntil(tickIfDue(env).catch(() => {}));
     return secure(await route(req, env));
   },
   async scheduled(event, env, ctx) {
     if (new Date().getMinutes() === 0) ctx.waitUntil(igLog(env, "cron", event.cron));
-    if (event.cron === "* * * * *") { ctx.waitUntil(pushTick(env, getEvent, parseProgram)); ctx.waitUntil(igEnsureSubscribed(env)); return; }
+    if (event.cron === "* * * * *") { ctx.waitUntil(tickIfDue(env)); ctx.waitUntil(igEnsureSubscribed(env)); return; }
     ctx.waitUntil(refreshIgToken(env));
     ctx.waitUntil(env.DB.prepare("DELETE FROM hits WHERE reset < ?").bind(Date.now()).run().catch(() => {}));
   },
