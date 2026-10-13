@@ -499,7 +499,7 @@ function renderNext(ev){
   const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]].filter(f => f[1]);
   const cta = ev.requests_open ? `<a class="btn" href="#request">${ev.sold_out ? "Join the waitlist" : "Request a place"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram ↗</a>`;
   el.classList.toggle("has-poster", !!ev.poster);
-  el.innerHTML = `<div class="next-main"><p class="kicker">Next party</p><span class="status"><i></i>${ev.requests_open ? (ev.sold_out ? "Sold out · waitlist open" : "Requests open") : (ev.sold_out ? "Sold out" : "Requests open soon")}</span>
+  el.innerHTML = `<div class="next-main"><span class="status"><i></i>${ev.requests_open ? (ev.sold_out ? "Sold out · waitlist open" : "Requests open") : (ev.sold_out ? "Sold out" : "Requests open soon")}</span>
       <h3>${esc(ev.name || "Next PerugiaParty")}</h3>
       <p>Apply below and save your ticket link. Once approved, pay to confirm your place and unlock your ticket and the location.</p>
       ${facts.length ? `<dl>${facts.map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>` : ""}
