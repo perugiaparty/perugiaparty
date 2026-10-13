@@ -222,7 +222,18 @@ html,body{overflow-x:clip}
   .steps li::before{width:44px;height:44px;font-size:20px;grid-row:span 2}
   .steps h3{margin:4px 0 4px;font-size:20px}
   .req{gap:24px}
-  .req .side{order:-1;position:static}
+  .req .side{position:static}
+  /* phones: the form comes first; the live preview ticket and the duplicate steps are for bigger screens */
+  .side .mini,#side-info{display:none}
+  .hero{gap:56px}
+  .hero .ticket{margin-top:8px}
+  .next .poster{max-width:220px;margin-bottom:14px}
+  .next-sec{padding-block:40px}
+  .count{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:20px;width:100%;justify-self:stretch}
+  .count div{min-width:0!important;padding:12px 0!important;border-radius:14px}
+  .count b{font-size:26px!important}
+  .count span{font-size:10px;letter-spacing:.12em}
+  .next dl{margin-top:4px}
   .side .mini{box-shadow:6px 6px 0 var(--red);padding:36px 22px 32px}
   .side .mini,.side .mini *{font-size:16px}
   .side .mini .perf{margin-inline:-22px}
@@ -397,9 +408,9 @@ body.locked{overflow:hidden}
         <p><a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">See the real nights on Instagram ↗</a></p>
       </div>
       <div class="nights">
-        <article class="night n1"><p class="when">Past edition</p><h3>Alcoholiday</h3></article>
-        <article class="night n2"><p class="when">Past edition</p><h3>The Final Night</h3></article>
-        <article class="night n3"><p class="when">Past edition</p><h3>Koningsdag 2026</h3></article>
+        <article class="night n1"><p class="when">Past edition</p><h3>Alcoholiday ’26</h3></article>
+        <article class="night n2"><p class="when">Past edition</p><h3>The Final Night ’26</h3></article>
+        <article class="night n3"><p class="when">Past edition</p><h3>Koningsdag ’26</h3></article>
       </div>
     </section>
 
