@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /t/
 Disallow: /ticket
 Disallow: /door
 Disallow: /admin
