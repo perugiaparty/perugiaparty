@@ -84,6 +84,12 @@ function newVcode(tag) {
   const b = crypto.getRandomValues(new Uint8Array(6));
   return `${tag || "PP"}-${Array.from(b, (x) => VC_ALPH[x % VC_ALPH.length]).join("")}`;
 }
+async function isBlocked(env, ig) {
+  if (!ig) return false;
+  const p = await env.DB.prepare("SELECT blocked FROM people WHERE ig = ?").bind(ig).first();
+  return !!(p && Number(p.blocked));
+}
+const BLOCKED_MSG = "We can't accept a request from this Instagram. DM @perugiaparty if you think this is a mistake.";
 async function personVerified(env, ig) {
   if (!ig) return false;
   const p = await env.DB.prepare("SELECT verified FROM people WHERE ig = ?").bind(ig).first();
@@ -123,7 +129,7 @@ async function inviteFor(env, ev, ig) {
 async function resolveInvite(env, ev, code) {
   if (!code || !/^[a-z0-9]{8}$/.test(code)) return null;
   const p = await env.DB.prepare("SELECT ig, name FROM people WHERE invite_code = ?").bind(code).first();
-  if (!p || !(await isReturner(env, p.ig, ev.tag)) || !(await personVerified(env, p.ig))) return null;
+  if (!p || (await isBlocked(env, p.ig)) || !(await isReturner(env, p.ig, ev.tag)) || !(await personVerified(env, p.ig))) return null;
   const left = inviteLimit(ev) - (await invitesUsed(env, ev, p.ig));
   return { ig: p.ig, first: String(p.name || "").split(" ")[0], left };
 }
@@ -275,6 +281,7 @@ async function apiRequest(req, env) {
   if (!/^[A-Za-z0-9._]{1,30}$/.test(ig)) return json({ error: "Add your Instagram handle, like @yourname." }, 400);
   if (body.age !== true || body.rules !== true) return json({ error: "Confirm you're 18+ and accept the house rules." }, 400);
   ig = "@" + ig.toLowerCase();
+  if (await isBlocked(env, ig)) { await sleep(400); return json({ error: BLOCKED_MSG }, 403); }
   // an unconfirmed request doesn't lock the handle: whoever proves the account by DM keeps it
   const dup = await env.DB.prepare("SELECT 1 FROM guests WHERE event = ? AND lower(ig) = ? AND verified = 1 AND status IN ('requested','waitlist','approved','paid','in')")
     .bind(ev.tag, ig).first();
@@ -309,6 +316,7 @@ async function apiRerequest(req, env) {
   if (g.event === ev.tag) return json({ ok: true, token: g.token });
   const ig = normIg(g.ig);
   if (!ig) return json({ error: "Request with the form on the homepage." }, 409);
+  if (await isBlocked(env, ig)) return json({ error: BLOCKED_MSG }, 403);
   const proven = g.status === "in" || Number(g.verified) === 1;
   const existing = await env.DB.prepare("SELECT token, verified FROM guests WHERE event = ? AND lower(ig) = ? AND status IN ('requested','waitlist','approved','paid','in') ORDER BY verified DESC LIMIT 1").bind(ev.tag, ig).first();
   if (existing && Number(existing.verified) === 1) return json({ ok: true, token: existing.token });

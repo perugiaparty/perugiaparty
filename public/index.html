@@ -590,7 +590,7 @@ $("req-form").addEventListener("submit", async e => {
       if (/name/i.test(msg)) fieldErr("f-name");
       if (/instagram/i.test(msg) && r.status === 400) fieldErr("f-ig");
       if (/18\+|house rules/i.test(msg)) { fieldErr("f-age"); fieldErr("f-rules"); }
-      if (window.ppNotify) ppNotify(r.status === 409 ? "Request not sent · see below" : r.status >= 500 ? "Server error · try again" : "Check your request", r.status >= 500 ? "error" : "warn");
+      if (window.ppNotify) ppNotify(r.status === 409 || r.status === 403 ? "Request not sent · see below" : r.status >= 500 ? "Server error · try again" : "Check your request", r.status >= 500 ? "error" : "warn");
       return;
     }
     rememberToken(data.token);
