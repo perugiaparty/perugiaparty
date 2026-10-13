@@ -67,7 +67,7 @@ function statusMessage(g, ev) {
   const first = String(g.name || "").split(" ")[0];
   const party = g.event === ev.tag ? ev.name : g.event;
   switch (g.status) {
-    case "approved": return { title: `You're in, ${first}! 🎉`, body: `Pay to confirm your place for ${party}. Your price and code are ready.` };
+    case "approved": return { title: "You've been accepted", body: "" };
     case "paid": return { title: "Payment confirmed ✓", body: `Your ticket and the location for ${party} are unlocked.` };
     case "waitlist": return { title: "You're on the waitlist", body: `${party} is full right now. We'll tell you when a place opens.` };
     case "declined": return { title: "About your request", body: `We couldn't give you a place for ${party} this time.` };

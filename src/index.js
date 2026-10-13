@@ -564,7 +564,7 @@ async function igStatusDms(env) {
     const first = String(g.name || "").split(" ")[0];
     const link = shortUrl(await shortFor(env, g), g.token);
     const text = g.ig_sent == null ? null : {
-      approved: `🎉 You've been accepted, ${first}!\nLink: ${link}`,
+      approved: `You've been accepted`,
       paid: `✓ Payment received, ${first}. You're on the list!\nLink: ${link}`,
     }[g.status];
     await env.DB.prepare("UPDATE guests SET ig_sent = ? WHERE token = ?").bind(g.status, g.token).run();
