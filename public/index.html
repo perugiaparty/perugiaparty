@@ -22,6 +22,8 @@
 <meta name="twitter:image" content="https://perugiaparty.com/og-image.png">
 <link rel="icon" type="image/png" sizes="48x48" href="/favicon-v2.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="PerugiaParty">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preload" href="/logo.png" as="image">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"PerugiaParty","url":"https://perugiaparty.com/","logo":"https://perugiaparty.com/logo.png","description":"Private student parties in Perugia. House-party vibes, a guest list, and new people to meet.","areaServed":{"@type":"City","name":"Perugia"},"sameAs":["https://www.instagram.com/perugiaparty/"]}</script>
@@ -639,5 +641,6 @@ $("save-done").addEventListener("click", () => {
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("saveov").hidden && saveCopied) $("save-done").click(); });
 </script>
+<script>if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));</script>
 </body>
 </html>

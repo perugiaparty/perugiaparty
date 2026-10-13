@@ -1,3 +1,4 @@
+import { pushTick, apiPush } from "./push.js";
 // PerugiaParty site worker: serves the static site and a small JSON API.
 // Guests only ever see their own record, looked up by a long random token.
 // All organizer actions happen in the private admin panel, never through this API.
@@ -479,6 +480,23 @@ async function apiPoster(env) {
   return new Response(bin, { headers: { "content-type": m[1], "cache-control": "public, max-age=31536000, immutable" } });
 }
 
+// Installable app: the start page is the guest's own ticket when the manifest is requested from it.
+function manifest(url) {
+  const t = url.searchParams.get("t");
+  const start = t && TOKEN_RE.test(t) ? `/ticket.html?t=${t}&app=1` : "/ticket?app=1";
+  return new Response(JSON.stringify({
+    name: "PerugiaParty", short_name: "PerugiaParty", id: "/ticket",
+    description: "Your PerugiaParty ticket, status and the programme on the night.",
+    start_url: start, scope: "/", display: "standalone", orientation: "portrait",
+    background_color: "#141210", theme_color: "#141210",
+    icons: [
+      { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      { src: "/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+    ],
+  }), { headers: { "content-type": "application/manifest+json", "cache-control": "no-store" } });
+}
+
 // Security headers on every response the site sends.
 const SECURITY = {
   "X-Content-Type-Options": "nosniff",
@@ -487,7 +505,7 @@ const SECURITY = {
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
   "Cross-Origin-Opener-Policy": "same-origin",
   "Permissions-Policy": "camera=(self), microphone=(), geolocation=(), payment=(), usb=()",
-  "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests",
+  "Content-Security-Policy": "default-src 'self'; worker-src 'self'; manifest-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests",
 };
 function secure(res) {
   if (!res || res.status === 101) return res;
@@ -501,6 +519,7 @@ export default {
     return secure(await route(req, env));
   },
   async scheduled(event, env, ctx) {
+    if (event.cron === "* * * * *") { ctx.waitUntil(pushTick(env, getEvent, parseProgram)); return; }
     ctx.waitUntil(refreshIgToken(env));
     ctx.waitUntil(env.DB.prepare("DELETE FROM hits WHERE reset < ?").bind(Date.now()).run().catch(() => {}));
   },
@@ -530,6 +549,9 @@ async function route(req, env) {
         if (url.pathname === "/api/invite" && req.method === "GET") return await apiInvite(url, env);
         if (url.pathname === "/api/rerequest" && req.method === "POST") return await apiRerequest(req, env);
         if (url.pathname === "/api/login" && req.method === "POST") return await apiLogin(req, env);
+        if (url.pathname === "/api/push/key" && req.method === "GET") return await apiPush(req, env, url, getEvent, TOKEN_RE, json);
+        if ((url.pathname === "/api/push/subscribe" || url.pathname === "/api/push/unsubscribe") && req.method === "POST") return await apiPush(req, env, url, getEvent, TOKEN_RE, json);
+        if (url.pathname === "/manifest.webmanifest") return manifest(url);
         if (url.pathname === "/api/ig/webhook" && req.method === "GET") return await igWebhookVerify(url, env);
         if (url.pathname === "/api/ig/webhook" && req.method === "POST") return await igWebhook(req, env);
         if (url.pathname === "/api/door/login" && req.method === "POST") return await apiDoor(req, env, "login");

@@ -8,6 +8,11 @@
 <meta name="theme-color" content="#141210">
 <link rel="icon" type="image/png" sizes="48x48" href="/favicon-v2.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" id="mf" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PerugiaParty">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
@@ -211,6 +216,17 @@ h1{font-size:clamp(40px,8vw,64px)}
   .cine .instamp{font-size:20px;padding:8px 12px;border-width:4px}
   .verify,.nextc,.thanks,.invite,.hype,.hero-ok{padding-inline:18px}
 }
+/* app + notifications */
+.appc{display:flex;gap:14px;align-items:center;background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:14px 16px}
+.appc .ic{flex:none;width:44px;height:44px;border-radius:12px;background:var(--ink) url(/icon-192.png) center/cover}
+.appc .tx{flex:1;min-width:0;display:grid;gap:2px}
+.appc .tx b{font-size:15px}
+.appc .tx span{font-size:13px;color:var(--muted)}
+.appc .btn{flex:none;padding:9px 16px;font-size:14px}
+.appc.on{background:#dcefdc;border-color:#bfe0c3}
+.appc.on .tx b{color:#1f7a3d}
+.appc .steps{font-size:13px;color:var(--ink-2);margin:4px 0 0;padding-left:18px}
+@media (max-width:420px){.appc{flex-wrap:wrap}.appc .btn{width:100%}}
 </style>
 </head>
 <body>
@@ -224,7 +240,7 @@ h1{font-size:clamp(40px,8vw,64px)}
   <div class="page" id="page"><p class="note">Loading your ticket…</p></div>
 </main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="/vendor/qrcode.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -434,6 +450,61 @@ function loginView(msg){
     }
   });
 }
+/* ---------- app: install + push notifications ---------- */
+const APP = {
+  standalone: matchMedia("(display-mode: standalone)").matches || navigator.standalone === true,
+  ios: /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1),
+  push: "serviceWorker" in navigator && "PushManager" in window && "Notification" in window,
+  installEvt: null,
+};
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
+addEventListener("beforeinstallprompt", e => { e.preventDefault(); APP.installEvt = e; if (LAST) renderApp(LAST); });
+if (token) $("mf").href = "/manifest.webmanifest?t=" + encodeURIComponent(token);
+const b64ToBytes = s => { s = s.replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; return Uint8Array.from(atob(s), c => c.charCodeAt(0)); };
+async function pushSubscribe(test){
+  const reg = await navigator.serviceWorker.ready;
+  const { key } = await fetch("/api/push/key").then(r => r.json());
+  if (!key) throw new Error("Notifications aren't available yet.");
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(key) });
+  const r = await fetch("/api/push/subscribe", { method:"POST", headers:{ "content-type":"application/json" }, body: JSON.stringify({ t: token, sub: sub.toJSON(), test: !!test }) });
+  if (!r.ok) throw new Error("Couldn't turn on notifications.");
+  try { localStorage.setItem("pp_push", token); } catch(e){}
+}
+function pushIsOn(){ try { return APP.push && Notification.permission === "granted" && localStorage.getItem("pp_push") === token; } catch(e){ return false; } }
+function appHTML(d){
+  if (["declined","removed","released"].includes(d.status) || (d.status === "in" && partyOver(d))) return "";
+  const what = d.status === "approved" ? "when your payment is confirmed" : d.status === "paid" || d.status === "in" ? "for the programme on the night" : "the moment you're approved";
+  if (pushIsOn()) return `<div class="appc on" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>🔔 Notifications on</b><span>We'll tell you ${what}.</span></div></div>`;
+  if (APP.push && Notification.permission === "denied") return `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Notifications are blocked</b><span>Allow them for perugiaparty.com in your browser settings to hear ${what}.</span></div></div>`;
+  if (APP.ios && !APP.standalone) return `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Get the app and a ping ${what}</b>
+    <ol class="steps"><li>Tap <b>Share</b> (the square with an arrow) in Safari</li><li>Choose <b>Add to Home Screen</b></li><li>Open PerugiaParty from your home screen and tap <b>Turn on</b></li></ol></div></div>`;
+  if (!APP.push) return APP.installEvt ? `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Get the PerugiaParty app</b><span>Your ticket on your home screen, also without signal.</span></div><button class="btn ink" type="button" id="app-install">Install</button></div>` : "";
+  return `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Get a notification ${what}</b><span>${APP.standalone ? "One tap. You can turn it off any time." : "Works best from the app on your home screen."}</span></div>
+    ${APP.installEvt && !APP.standalone ? `<button class="btn outline" type="button" id="app-install">Install</button>` : ""}<button class="btn ink" type="button" id="push-on">Turn on</button></div>`;
+}
+function renderApp(d){
+  const old = $("appc"), html = appHTML(d);
+  if (old) old.outerHTML = html || ""; else if (html) { const P = $("page"), first = P.querySelector(".verify, .verified, .hero-ok, .hype, h1"); (first || P.firstElementChild || P).insertAdjacentHTML("afterend", html); }
+  const on = $("push-on");
+  if (on) on.addEventListener("click", async () => {
+    on.disabled = true; on.textContent = "…";
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm !== "granted") throw new Error(perm === "denied" ? "Notifications blocked" : "Notifications not allowed");
+      await pushSubscribe(true);
+      note("Notifications on", "ok");
+    } catch (e) { note(e.message && e.message.length < 40 ? e.message : "Couldn't turn on notifications", "error"); }
+    renderApp(d);
+  });
+  const ins = $("app-install");
+  if (ins) ins.addEventListener("click", async () => { const e = APP.installEvt; if (!e) return; APP.installEvt = null; e.prompt(); try { await e.userChoice; } catch(x){} renderApp(d); });
+}
+// a new ticket on a phone that already allowed notifications: move them over quietly
+function keepPushOnThisTicket(){
+  try { if (APP.push && Notification.permission === "granted" && localStorage.getItem("pp_push") && localStorage.getItem("pp_push") !== token) pushSubscribe(false).then(() => LAST && renderApp(LAST)).catch(() => {}); } catch(e){}
+}
+
 function prioHTML(title, text){ return `<div class="prio" role="note"><span class="star" aria-hidden="true">★</span><div><b>${title}</b><span>${text}</span></div></div>`; }
 function decorate(d){
   const P = $("page");
@@ -574,6 +645,7 @@ function render(d){
   }
   LAST = d;
   decorate(d);
+  renderApp(d);
   fitHeadings();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeadings);
 }
@@ -607,6 +679,7 @@ if (!token) {
     clearTimeout(notify.t); notify.t = setTimeout(() => n.className = "", 5000);
   }
   check(true);
+  keepPushOnThisTicket();
   setInterval(() => { if (document.visibilityState === "visible") check(false); }, 20000);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") check(false); });
 }
