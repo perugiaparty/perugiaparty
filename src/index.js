@@ -565,7 +565,7 @@ async function igStatusDms(env) {
     const link = shortUrl(await shortFor(env, g), g.token);
     const text = g.ig_sent == null ? null : {
       approved: `You've been accepted`,
-      paid: `✓ Payment received, ${first}. You're on the list!\nLink: ${link}`,
+      paid: `Payment confirmed`,
     }[g.status];
     // claim it first so two runs at once never send twice
     const c = await env.DB.prepare("UPDATE guests SET ig_sent = ? WHERE token = ? AND (ig_sent IS NULL OR ig_sent <> ?)").bind(g.status, g.token, g.status).run();
