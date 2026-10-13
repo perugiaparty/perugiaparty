@@ -166,6 +166,11 @@ h1{font-size:clamp(40px,8vw,64px)}
 .invite .lnk{font-family:var(--f-mono);font-size:14px;background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;overflow-wrap:anywhere}
 .invite .row2{display:flex;gap:8px;flex-wrap:wrap}
 .invite .btn.outline{color:var(--ink);border-color:var(--ink)}
+/* priority for returning guests */
+.prio{display:flex;gap:14px;align-items:center;background:var(--ink);color:var(--cream);border-radius:18px;padding:16px 18px}
+.prio .star{flex:none;width:46px;height:46px;border-radius:50%;background:#ff4a3d;color:var(--ink);display:grid;place-items:center;font-family:var(--f-display);font-size:22px}
+.prio b{display:block;font-family:var(--f-display);font-weight:400;font-size:20px;line-height:1.1}
+.prio span{font-size:14px;color:var(--muted-dark)}
 </style>
 </head>
 <body>
@@ -325,9 +330,9 @@ function nextHTML(d){
   const n = d.next; if (!n) return "";
   let action;
   if (n.token) action = `<a class="btn" href="/ticket.html?t=${encodeURIComponent(n.token)}">Open my request →</a><p class="sub">You already requested a place for this one.</p>`;
-  else if (n.open) action = `<button class="btn" type="button" id="again">${n.early ? "Use my early access" : "Request my place"} →</button><p class="sub">One tap. We use the same name and Instagram as last time.</p><p class="err" id="again-err" role="alert"></p>`;
+  else if (n.open) action = `<button class="btn" type="button" id="again">${n.early ? "Use my early access" : "Request my place"} →</button><p class="sub">${n.early ? "Early access is open for returning guests only. " : d.returner ? "Returning guests are first in line. " : ""}One tap. We use the same name and Instagram as last time.</p><p class="err" id="again-err" role="alert"></p>`;
   else action = `<p class="sub">Requests aren't open yet. Follow <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">@perugiaparty</a> so you don't miss it.</p>`;
-  return `<section class="nextc"><span class="kick">Next party</span>${n.early && !n.token ? `<span class="badge">Early access · you came before</span>` : ""}
+  return `<section class="nextc"><span class="kick">Next party</span>${d.returner && !n.token ? `<span class="badge">★ Priority · you came before</span>` : ""}
     <h2>${esc(n.event)}</h2>${n.date_label ? `<p class="date">${esc(n.date_label)}</p>` : ""}${action}</section>`;
 }
 function inviteHTML(d){
@@ -340,8 +345,13 @@ function inviteHTML(d){
     <div class="lnk">${esc(v.url)}</div>
     <div class="row2"><button class="btn ink" type="button" id="inv-share" data-url="${esc(v.url)}" data-ev="${esc(event)}">Send invite</button><button class="btn outline" type="button" data-copy="${esc(v.url)}">Copy link</button></div></section>`;
 }
+function prioHTML(title, text){ return `<div class="prio" role="note"><span class="star" aria-hidden="true">★</span><div><b>${title}</b><span>${text}</span></div></div>`; }
 function decorate(d){
   const P = $("page");
+  if (d.returner && !d.next && (d.status === "requested" || d.status === "waitlist")) {
+    const h = P.querySelector("h1");
+    if (h) h.insertAdjacentHTML("afterend", prioHTML("Priority · you came before", d.status === "waitlist" ? "Returning guests are first in line when a place opens up." : "Returning guests are first in line. We look at your request before new ones."));
+  }
   if (d.next) P.insertAdjacentHTML("afterbegin", nextHTML(d) + inviteHTML(d)); // older ticket: the next party comes first
   else if (d.invite) P.insertAdjacentHTML("beforeend", inviteHTML(d));
   const again = $("again");

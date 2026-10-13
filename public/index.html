@@ -526,7 +526,7 @@ async function setupInvite(ev){
   }
   if (ev.returners_only) {
     const until = ev.returners_until ? new Date(ev.returners_until).toLocaleString("en-GB", { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) : null;
-    reqNote(`<b>Early access for returning guests.</b><span>Came to a PerugiaParty before? Request with the same Instagram as last time.${until ? ` Everyone else can request from ${esc(until)}.` : ""}</span>`, "early");
+    reqNote(`<b>★ Early access for returning guests.</b><span>Came to a PerugiaParty before? You get priority. Request with the same Instagram as last time.${until ? ` Everyone else can request from ${esc(until)}.` : ""}</span>`, "early");
   }
 }
 function setupForm(ev){
