@@ -298,11 +298,11 @@ async function apiRequest(req, env) {
     return json({ error: "Right now only guests who came before, and the friends they invite, can request a place. Requests open for everyone soon." }, 409);
   }
   const status = (await soldOut(env, ev)) ? "waitlist" : "requested";
-  const token = newToken();
+  const token = newToken(), vcode = newVcode(ev.tag);
   await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, invited_by, is_returning, vcode, verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)")
-    .bind(token, ev.tag, name, ig, phone, note, status, Date.now(), inviter, returning ? 1 : 0, newVcode(ev.tag)).run();
+    .bind(token, ev.tag, name, ig, phone, note, status, Date.now(), inviter, returning ? 1 : 0, vcode).run();
   await upsertPerson(env, ig, name, phone);
-  return json({ ok: true, token, waitlist: status === "waitlist" });
+  return json({ ok: true, token, vcode, ig, waitlist: status === "waitlist" });
 }
 
 // One tap from an old ticket page: request a place for the current edition with the same details.

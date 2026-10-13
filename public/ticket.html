@@ -555,11 +555,11 @@ function render(d){
   if (d.status === "requested") {
     P.innerHTML = `<span class="state">Request received</span><h1>Thanks, ${first}.</h1>
       <p class="lead">We're checking your request for <b>${esc(d.event)}</b>. Come back to this page: once you're approved, your price and ticket code appear here.</p>
-      <div class="card"><p><b>Save this link.</b> It's your personal page and only works for you.</p><p class="mono" style="font-family:var(--f-mono);overflow-wrap:anywhere">${esc(location.href)}</p><div>${copyBtn(location.href)}</div></div>`;
+      ${d.verified ? `<div class="card"><p><b>Your personal page.</b> We sent this link to your Instagram DMs too, so you can always find it there.</p><p class="mono" style="font-family:var(--f-mono);overflow-wrap:anywhere">${esc(location.href)}</p><div>${copyBtn(location.href)}</div></div>` : ""}`;
   } else if (d.status === "waitlist") {
     P.innerHTML = `<span class="state">Waitlist</span><h1>You're on the waitlist, ${first}.</h1>
       <p class="lead"><b>${esc(d.event)}</b> is sold out right now. When a place opens up, we go down the waitlist in order. If you get one, this page shows your price and code straight away.</p>
-      <div class="card"><p><b>Keep this link.</b> It's your personal page and only works for you.</p><p style="font-family:var(--f-mono);overflow-wrap:anywhere">${esc(location.href)}</p><div>${copyBtn(location.href)}</div></div>`;
+      ${d.verified ? `<div class="card"><p><b>Your personal page.</b> We sent this link to your Instagram DMs too.</p><p style="font-family:var(--f-mono);overflow-wrap:anywhere">${esc(location.href)}</p><div>${copyBtn(location.href)}</div></div>` : ""}`;
   } else if (d.status === "approved") {
     const left = d.deadline ? d.deadline - Date.now() : null;
     const overdue = left != null && left < 0;
