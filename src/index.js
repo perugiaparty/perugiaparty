@@ -230,7 +230,6 @@ async function igHandleDm(env, ev, igsid, text) {
       `✓ Confirmed, ${first}! Your request is verified.`,
       ``,
       `Link: ${shortUrl(await shortFor(env, g), g.token)}`,
-      `🔑 Code: ${g.vcode}`,
     ].join("\n"));
   } else {
     await env.DB.prepare("UPDATE guests SET ig_mismatch = ? WHERE token = ?").bind(normIg(username), g.token).run();
