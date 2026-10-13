@@ -227,7 +227,7 @@ async function igWebhook(req, env) {
 async function igEnsureSubscribed(env) {
   const ev = await getEvent(env);
   if (!ev || !ev.ig_token || ev.ig_subscribed_at) return;
-  if (new Date().getMinutes() % 10 !== 0) return;
+  if (new Date().getMinutes() % 2 !== 0) return; // every 2 minutes until it works
   try {
     const r = await fetch(`${igApi(env)}/me/subscribed_apps?subscribed_fields=messages&access_token=${encodeURIComponent(ev.ig_token)}`, { method: "POST" });
     const t = await r.text();
