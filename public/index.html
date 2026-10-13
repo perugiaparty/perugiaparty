@@ -60,6 +60,8 @@
 .band-red{background:var(--red);color:var(--cream)}
 .band-red .sec-head p{color:#f3d3cc}
 .next{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;background:var(--ink);border-radius:24px;padding:36px}
+.next-sec{padding-block:48px}
+.next .kicker{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-dark);margin-bottom:10px}
 .next .next-main{min-width:0;display:flex;flex-direction:column;align-items:flex-start}
 .next .next-main p{max-width:46ch}
 .next .next-cta{margin-top:26px}
@@ -67,10 +69,10 @@
 .next.has-poster h3{margin:14px 0 12px}
 .next.has-poster dl{margin-top:20px;gap:40px}
 .next.has-poster .count{margin-top:22px}
-.next .poster{display:block;justify-self:center;width:100%;max-width:410px;margin-block:4px;border-radius:12px;overflow:hidden;transform:rotate(2.5deg);box-shadow:0 22px 44px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06);transition:transform .25s ease}
+.next .poster{display:block;justify-self:center;width:fit-content;max-width:min(410px,100%);margin-block:4px;border-radius:12px;overflow:hidden;transform:rotate(2.5deg);box-shadow:0 22px 44px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06);transition:transform .25s ease}
 .next .poster:hover{transform:rotate(0deg) translateY(-4px)}
 @media (max-width:1000px) and (min-width:721px){.next.has-poster{grid-template-columns:minmax(0,1fr) 300px;gap:36px;padding:40px}.next .poster{max-width:290px}}
-.next .poster img{display:block;width:100%;height:auto;max-height:560px;object-fit:contain}
+.next .poster img{display:block;width:auto;max-width:100%;height:auto;max-height:560px}
 .next .status{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
 .next .status i{width:9px;height:9px;border-radius:50%;background:#ff4a3d;box-shadow:0 0 0 4px rgba(255,74,61,.25);animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{50%{box-shadow:0 0 0 8px rgba(255,74,61,0)}}
@@ -181,6 +183,7 @@ details p{color:var(--muted);margin-top:10px;max-width:62ch}
 /* phones */
 html,body{overflow-x:clip}
 @media (max-width:640px){
+  .next-sec{padding-block:32px}
   .hero{padding-block:32px 52px;gap:36px}
   .hero .lede{font-size:18px}
   .ticket{max-width:calc(100% - 14px);box-shadow:8px 8px 0 var(--red);padding:22px 22px 20px}
@@ -263,10 +266,10 @@ body.locked{overflow:hidden}
     </div>
   </div>
 
-  <section class="band-red" id="next" aria-labelledby="next-h">
-    <div class="wrap sec">
-      <div class="sec-head">
-        <h2 id="next-h">Next party.</h2>
+  <section class="band-red" id="next" aria-label="Next party">
+    <div class="wrap sec next-sec">
+      <div class="sec-head" id="next-head">
+        <h2>Next party.</h2>
         <p>Every edition has its own list. Even if you came before, request again.</p>
       </div>
       <div class="next" id="next-card">
@@ -453,12 +456,13 @@ function showMyTicket(href){ const a = $("nav-cta"); a.href = href; a.textConten
 let timer = null;
 function renderNext(ev){
   const el = $("next-card");
-  if (!ev || !ev.published) return; // keep the static "announcing soon" card
+  if (!ev || !ev.published) return; // keep the static heading and "announcing soon" card
+  const head = $("next-head"); if (head) head.hidden = true;
   const price = ev.price ? "From " + euro(ev.price.min) : null;
   const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]].filter(f => f[1]);
   const cta = ev.requests_open ? `<a class="btn" href="#request">${ev.sold_out ? "Join the waitlist" : "Request a place"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram ↗</a>`;
   el.classList.toggle("has-poster", !!ev.poster);
-  el.innerHTML = `<div class="next-main"><span class="status"><i></i>${ev.requests_open ? (ev.sold_out ? "Sold out · waitlist open" : "Requests open") : (ev.sold_out ? "Sold out" : "Requests open soon")}</span>
+  el.innerHTML = `<div class="next-main"><p class="kicker">Next party</p><span class="status"><i></i>${ev.requests_open ? (ev.sold_out ? "Sold out · waitlist open" : "Requests open") : (ev.sold_out ? "Sold out" : "Requests open soon")}</span>
       <h3>${esc(ev.name || "Next PerugiaParty")}</h3>
       <p>Apply below and save your ticket link. Once approved, pay to confirm your place and unlock your ticket and the location.</p>
       ${facts.length ? `<dl>${facts.map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>` : ""}
