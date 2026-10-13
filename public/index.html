@@ -30,8 +30,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="/site.css">
-<script src="/notify.js" defer></script>
+<link rel="stylesheet" href="/site.css?v=20261013c">
+<script src="/notify.js?v=20261013c" defer></script>
 <style>
 /* hero */
 .hero{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:center;padding-block:72px 80px}
@@ -252,7 +252,7 @@ html,body{overflow-x:clip}
 .savebox h3{font-size:30px}
 .ts{min-height:65px}
 .savebox p{color:var(--muted);font-size:15px}
-.codebox{font-size:clamp(24px,7vw,32px)!important;letter-spacing:.08em;text-align:center;word-break:normal!important;white-space:nowrap}
+.codebox{cursor:copy;font-size:clamp(24px,7vw,32px)!important;letter-spacing:.08em;text-align:center;word-break:normal!important;white-space:nowrap}
 .savebox .linkbox{font-family:var(--f-mono);font-size:14px;background:var(--ink);color:var(--cream);border-radius:12px;padding:14px;word-break:break-all}
 .savebox .acts{display:grid;gap:10px}
 .savebox .btn{width:100%}
@@ -393,8 +393,8 @@ body.locked{overflow:hidden}
             </ol>
           </div>
           <div id="side-done" hidden>
-            <h3>Last step: DM your code.</h3>
-            <p style="margin-top:8px">Send this code to <b>@perugiaparty</b> on Instagram from <b id="my-ig">your account</b>. We reply with your personal link, so it's always in your DMs.</p>
+            <h3>Last step: DM us this code.</h3>
+            <p style="margin-top:8px">Send it to <b>@perugiaparty</b> from <b id="my-ig">your Instagram</b>. We reply with your link.</p>
             <p class="linkbox codebox" id="my-link" style="margin-top:12px"></p>
             <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="copy-link">Copy code</button><a class="btn outline" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Open Instagram DM ↗</a></div>
             <p class="toast" id="toast" style="color:var(--red-deep)!important;margin-top:8px"></p>
@@ -467,16 +467,12 @@ body.locked{overflow:hidden}
 
 <div class="saveov" id="saveov" role="dialog" aria-modal="true" aria-labelledby="save-h" hidden>
   <div class="savebox">
-    <p class="eyebrow">Request sent · last step</p>
-    <h3 id="save-h">DM us your code.</h3>
-    <p>Send this code to <b>@perugiaparty</b> on Instagram from <b id="save-ig">your account</b>. That confirms the account is yours, and we reply with your personal link, so you always have it in your DMs.</p>
+    <p class="eyebrow">Last step</p>
+    <h3 id="save-h">DM us this code.</h3>
     <p class="linkbox codebox" id="save-link"></p>
-    <div class="acts">
-      <button class="btn" type="button" id="save-copy">Copy code</button>
-      <a class="btn outline" id="save-dm" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Open Instagram DM ↗</a>
-    </div>
-    <button class="btn outline done" type="button" id="save-done" disabled style="width:100%;margin-top:10px">I sent it</button>
-    <p class="hint" id="save-hint">Copy your code to continue</p>
+    <p>Send it to <b>@perugiaparty</b> from <b id="save-ig">your Instagram</b>. We reply with your link.</p>
+    <a class="btn" id="save-copy" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener" style="width:100%">Copy & open Instagram ↗</a>
+    <button class="btn outline done" type="button" id="save-done" disabled style="width:100%;margin-top:8px">Done</button>
   </div>
 </div>
 
@@ -635,20 +631,20 @@ $("copy-link").addEventListener("click", () => {
 let saveCopied = false;
 function openSave(code, handle, waitlist){
   saveCopied = false;
-  $("save-h").textContent = waitlist ? "You're on the waitlist. DM us your code." : "DM us your code.";
+  $("save-h").textContent = waitlist ? "Waitlist. DM us this code." : "DM us this code.";
   $("save-link").textContent = code || "";
-  $("save-ig").textContent = handle || "your account";
+  $("save-ig").textContent = handle || "your Instagram";
   $("save-done").disabled = true;
-  $("save-hint").textContent = "Copy your code to continue";
   $("saveov").hidden = false; document.body.classList.add("locked");
   $("save-copy").focus();
 }
-function unlockSave(msg){ saveCopied = true; $("save-done").disabled = false; $("save-hint").textContent = msg; $("save-copy").textContent = "Copied ✓"; $("save-copy").classList.add("outline"); $("save-dm").classList.remove("outline"); }
+function unlockSave(){ saveCopied = true; $("save-done").disabled = false; $("save-copy").textContent = "Copied ✓ · open Instagram ↗"; }
 $("save-copy").addEventListener("click", () => {
   const text = $("save-link").textContent;
-  const fb = () => { const r = document.createRange(); r.selectNodeContents($("save-link")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); unlockSave("Code selected: copy it with long-press, then DM it to us"); };
-  try { navigator.clipboard.writeText(text).then(() => unlockSave("Copied. Now open Instagram and paste it in a DM to @perugiaparty."), fb); } catch (e) { fb(); }
+  try { navigator.clipboard.writeText(text).then(unlockSave, unlockSave); } catch (e) { unlockSave(); }
+  if (window.ppNotify) ppNotify("Code copied · paste it in the DM", "ok");
 });
+$("save-link").addEventListener("click", () => { const r = document.createRange(); r.selectNodeContents($("save-link")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); try { navigator.clipboard.writeText($("save-link").textContent).then(unlockSave, () => {}); } catch (e) {} });
 $("save-done").addEventListener("click", () => {
   if (!saveCopied) return;
   $("saveov").hidden = true; document.body.classList.remove("locked");

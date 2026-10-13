@@ -1,5 +1,5 @@
 // PerugiaParty app: works offline at the door and shows notifications.
-const CACHE = "pp-v1";
+const CACHE = "pp-v2";
 const SHELL = ["/ticket.html", "/site.css", "/notify.js", "/vendor/qrcode.js", "/logo.png", "/icon-192.png"];
 
 self.addEventListener("install", (e) => {
