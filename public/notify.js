@@ -30,7 +30,7 @@
     n.setAttribute("role", type === "error" ? "alert" : "status");
     const t = document.createElement("div"); t.className = "pp-note-text";
     t.textContent = message; t.title = message; // one short line; the full sentence shows on hover
-    const i = document.createElement("span"); i.className = "pp-note-icon"; i.setAttribute("aria-hidden", "true"); i.textContent = ICON[type] || "i";
+    const i = document.createElement("span"); i.className = "pp-note-icon"; i.setAttribute("aria-hidden", "true"); i.textContent = ICON[type] ?? "";
     const x = document.createElement("button"); x.type = "button"; x.className = "pp-note-x"; x.setAttribute("aria-label", "Close"); x.textContent = "×";
     x.addEventListener("click", () => close(n));
     if (i.textContent) n.append(i); n.append(t);
