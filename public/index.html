@@ -472,7 +472,7 @@ body.locked{overflow:hidden}
     <h3 id="save-h">DM us this code.</h3>
     <p class="linkbox codebox" id="save-link"></p>
     <p>Send it to <b>@perugiaparty</b> from <b id="save-ig">your Instagram</b>. We reply with your link.</p>
-    <a class="btn" id="save-copy" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener" style="width:100%">Copy & open Instagram ↗</a>
+    <a class="btn" id="save-copy" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener" style="width:100%">Copy and open Instagram</a>
     <button class="btn outline done" type="button" id="save-done" disabled style="width:100%;margin-top:8px">Done</button>
   </div>
 </div>
@@ -639,7 +639,7 @@ function openSave(code, handle, waitlist){
   $("saveov").hidden = false; document.body.classList.add("locked");
   $("save-copy").focus();
 }
-function unlockSave(){ saveCopied = true; $("save-done").disabled = false; $("save-copy").textContent = "Copied ✓ · open Instagram ↗"; }
+function unlockSave(){ saveCopied = true; $("save-done").disabled = false; $("save-copy").textContent = "Copied, open Instagram"; }
 $("save-copy").addEventListener("click", () => {
   const text = $("save-link").textContent;
   try { navigator.clipboard.writeText(text).then(unlockSave, unlockSave); } catch (e) { unlockSave(); }
