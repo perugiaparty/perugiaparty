@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>PerugiaParty · Next party coming soon</title>
-<meta name="description" content="Private student parties in Perugia. The next party is coming soon. Follow @perugiaparty to be the first to know.">
+<title>PerugiaParty · Coming soon</title>
+<meta name="description" content="Private student parties in Perugia. Coming soon.">
 <meta name="theme-color" content="#141210">
 <link rel="canonical" href="https://perugiaparty.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PerugiaParty">
-<meta property="og:title" content="PerugiaParty · Next party coming soon">
+<meta property="og:title" content="PerugiaParty · Coming soon">
 <meta property="og:description" content="Follow @perugiaparty to be the first to know.">
 <meta property="og:url" content="https://perugiaparty.com/">
 <meta property="og:image" content="https://perugiaparty.com/og-image.png">
@@ -37,7 +37,7 @@ main{flex:1;display:grid;place-items:center;padding:24px 20px 40px;position:rela
 .kick{font-family:var(--f-mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-dark);display:inline-flex;align-items:center;gap:10px}
 .kick i{width:8px;height:8px;border-radius:50%;background:#ff4a3d;box-shadow:0 0 0 0 rgba(255,74,61,.6);animation:pulse 1.8s infinite}
 @keyframes pulse{70%{box-shadow:0 0 0 10px rgba(255,74,61,0)}100%{box-shadow:0 0 0 0 rgba(255,74,61,0)}}
-h1{font-size:clamp(48px,11vw,112px);line-height:.95;letter-spacing:-.01em}
+h1{font-size:clamp(64px,16vw,150px);line-height:.92;letter-spacing:-.01em}
 h1 em{font-style:normal;color:#ff4a3d}
 .lede{font-size:clamp(17px,2.4vw,20px);color:var(--muted-dark);max-width:38ch;line-height:1.5}
 .ev{display:grid;gap:14px;justify-items:center;margin-top:4px;width:100%}
@@ -66,9 +66,8 @@ h1 em{font-style:normal;color:#ff4a3d}
   <div class="glow" aria-hidden="true"></div>
   <div class="box">
     <span class="kick"><i aria-hidden="true"></i>Perugia · 18+</span>
-    <h1 id="title">Next party<br><em>coming soon.</em></h1>
-    <p class="lede" id="text">We're cooking up the next night. Follow us on Instagram and you'll be the first to know.</p>
-    <div class="ev" id="ev" hidden></div>
+    <h1 id="title">Coming<br><em>soon.</em></h1>
+    <p class="lede" id="text" hidden></p>
     <div class="acts">
       <a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow @perugiaparty</a>
     </div>
@@ -85,16 +84,7 @@ fetch("/api/event", { cache: "no-store" }).then(r => r.json()).then(ev => {
     $("title").innerHTML = i > 0 ? `${esc(t.slice(0, i))}<br><em>${esc(t.slice(i + 1))}</em>` : `<em>${esc(t)}</em>`;
     document.title = "PerugiaParty · " + t;
   }
-  if (ev.splash_text) $("text").textContent = ev.splash_text;
-  // if a party is already announced, show its name, date and a countdown
-  const start = ev.published && ev.starts_at ? new Date(ev.starts_at).getTime() : 0;
-  if (!start || start < Date.now()) return;
-  $("ev").hidden = false;
-  $("ev").innerHTML = `<div class="nm">${esc(ev.name)}</div>${ev.date_label ? `<div class="dt">${esc(ev.date_label)}</div>` : ""}
-    <div class="cd" aria-label="Countdown"><div><b id="d">0</b><span>DAYS</span></div><div><b id="h">00</b><span>HOURS</span></div><div><b id="m">00</b><span>MIN</span></div><div><b id="s">00</b><span>SEC</span></div></div>`;
-  const pad = n => String(n).padStart(2, "0");
-  const tick = () => { let x = Math.max(0, Math.floor((start - Date.now()) / 1000)); $("d").textContent = Math.floor(x / 86400); x %= 86400; $("h").textContent = pad(Math.floor(x / 3600)); x %= 3600; $("m").textContent = pad(Math.floor(x / 60)); $("s").textContent = pad(x % 60); };
-  tick(); setInterval(tick, 1000);
+  if (ev.splash_text) { $("text").textContent = ev.splash_text; $("text").hidden = false; }
 }).catch(() => {});
 </script>
 </body>
