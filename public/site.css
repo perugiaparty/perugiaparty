@@ -33,7 +33,7 @@ p{margin:0}
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--ink);color:var(--cream)}
 header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:12px}
 .mark{font-family:var(--f-display);font-size:21px;text-decoration:none}
-.mark span{color:var(--red)}
+.mark span{color:#ff4a3d} /* readable red on black */
 nav{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
 nav a{text-decoration:none;font-size:15px;color:var(--muted-dark)}
 nav a:hover{color:var(--cream)}
@@ -64,7 +64,7 @@ label small{font-weight:400;color:var(--muted)}
 footer{background:var(--ink);color:var(--cream)}
 footer .wrap{padding-block:56px 64px;display:flex;justify-content:space-between;gap:28px;flex-wrap:wrap;align-items:end}
 footer .sign{font-family:var(--f-display);font-size:clamp(24px,4.4vw,40px);max-width:20ch;line-height:1.05}
-footer .sign span{color:var(--red)}
+footer .sign span{color:#ff4a3d}
 footer .meta{color:var(--muted-dark);font-size:14px}
 footer nav{margin-top:10px}
 footer nav a{font-size:14px}
