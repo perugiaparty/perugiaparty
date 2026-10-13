@@ -227,7 +227,7 @@ async function igHandleDm(env, ev, igsid, text) {
     const already = Number(g.verified) === 1;
     await markVerified(env, g, igsid);
     await igSend(env, ev, igsid, [
-      `✓ Confirmed, ${first}! Your request is verified.`,
+      `Confirmed, ${first}! Your request is verified.`,
       ``,
       `Link: ${shortUrl(await shortFor(env, g), g.token)}`,
     ].join("\n"));

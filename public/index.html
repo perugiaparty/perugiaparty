@@ -30,8 +30,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="/site.css?v=20261013e">
-<script src="/notify.js?v=20261013e" defer></script>
+<link rel="stylesheet" href="/site.css?v=20261013f">
+<script src="/notify.js?v=20261013f" defer></script>
 <style>
 /* hero */
 .hero{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:center;padding-block:72px 80px}
@@ -448,12 +448,12 @@ body.locked{overflow:hidden}
         <p>Good nights work when everyone is on the same page.</p>
       </div>
       <ul class="rules">
-        <li><span class="x" aria-hidden="true">✓</span><div><h3>On the list or not in</h3><p>No list, no entry. Tickets are personal.</p></div></li>
-        <li><span class="x" aria-hidden="true">✓</span><div><h3>Pay before you come</h3><p>Bank transfer with your name and PP code as the reference.</p></div></li>
-        <li><span class="x" aria-hidden="true">✓</span><div><h3>Pace yourself</h3><p>One drink at a time. Don't waste them.</p></div></li>
-        <li><span class="x" aria-hidden="true">✓</span><div><h3>Leave the music alone</h3><p>Respect the vibe and whoever is playing.</p></div></li>
-        <li><span class="x" aria-hidden="true">✓</span><div><h3>No mess</h3><p>Use the bags. Leave the place as you found it.</p></div></li>
-        <li><span class="x" aria-hidden="true">✓</span><div><h3>Respect the staff</h3><p>They're the reason the night happens.</p></div></li>
+        <li><span class="x" aria-hidden="true">1</span><div><h3>On the list or not in</h3><p>No list, no entry. Tickets are personal.</p></div></li>
+        <li><span class="x" aria-hidden="true">2</span><div><h3>Pay before you come</h3><p>Bank transfer with your name and PP code as the reference.</p></div></li>
+        <li><span class="x" aria-hidden="true">3</span><div><h3>Pace yourself</h3><p>One drink at a time. Don't waste them.</p></div></li>
+        <li><span class="x" aria-hidden="true">4</span><div><h3>Leave the music alone</h3><p>Respect the vibe and whoever is playing.</p></div></li>
+        <li><span class="x" aria-hidden="true">5</span><div><h3>No mess</h3><p>Use the bags. Leave the place as you found it.</p></div></li>
+        <li><span class="x" aria-hidden="true">6</span><div><h3>Respect the staff</h3><p>They're the reason the night happens.</p></div></li>
       </ul>
       </div>
     </div>
@@ -589,7 +589,7 @@ function preview(e){
   const n = $("pv-name"); n.textContent = name || "Your name"; n.classList.toggle("dim", !name);
   const i = $("pv-ig"); i.textContent = "@" + (ig || "yourinstagram"); i.classList.toggle("dim", !ig);
   const h = $("pv-hi"); h.textContent = hi ? "“" + hi.slice(0, 120) + (hi.length > 120 ? "…" : "") + "”" : ""; h.hidden = !hi;
-  for (const [id, box] of [["pv-age","f-age"],["pv-rules","f-rules"]]) { const li = $(id), on = $(box).checked; li.classList.toggle("on", on); li.querySelector("span").textContent = on ? "✓" : "☐"; }
+  for (const [id, box] of [["pv-age","f-age"],["pv-rules","f-rules"]]) { const li = $(id), on = $(box).checked; li.classList.toggle("on", on); li.querySelector("span").textContent = on ? "■" : "☐"; }
 }
 ["f-name","f-ig","f-intro","f-age","f-rules"].forEach(id => { $(id).addEventListener("input", preview); $(id).addEventListener("change", preview); });
 function previewEvent(){ if (EVENT && EVENT.published && EVENT.name) $("pv-ev").textContent = "Guest request · " + EVENT.name; }

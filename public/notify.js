@@ -1,7 +1,7 @@
 // PerugiaParty notifications: one look for every error, warning and success message on the site.
 // ppNotify("Short message", "error" | "warn" | "ok" | "info", { timeout, action: { label, onClick } }) · one row, keep it to a few words
 (function () {
-  const ICON = { error: "!", warn: "!", ok: "✓", info: "✓" };
+  const ICON = { error: "!", warn: "!", ok: "", info: "" };
   const TITLE = { error: "Something went wrong", warn: "Heads up", ok: "Done", info: "Good to know" };
   let box = null;
   function root() {
@@ -33,7 +33,7 @@
     const i = document.createElement("span"); i.className = "pp-note-icon"; i.setAttribute("aria-hidden", "true"); i.textContent = ICON[type] || "i";
     const x = document.createElement("button"); x.type = "button"; x.className = "pp-note-x"; x.setAttribute("aria-label", "Close"); x.textContent = "×";
     x.addEventListener("click", () => close(n));
-    n.append(i, t);
+    if (i.textContent) n.append(i); n.append(t);
     if (opts.action) {
       const a = document.createElement("button"); a.type = "button"; a.className = "pp-note-act"; a.textContent = opts.action.label;
       a.addEventListener("click", () => { close(n); opts.action.onClick && opts.action.onClick(); });
