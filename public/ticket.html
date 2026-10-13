@@ -473,33 +473,31 @@ async function pushSubscribe(test){
 }
 function pushIsOn(){ try { return APP.push && Notification.permission === "granted" && localStorage.getItem("pp_push") === token; } catch(e){ return false; } }
 function appHTML(d){
-  // only once they've paid: the ticket is what's worth keeping on the home screen
-  if (!["paid","in"].includes(d.status) || partyOver(d)) return "";
-  const what = "for the programme on the night";
-  if (pushIsOn()) return `<div class="appc on" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>🔔 Notifications on</b><span>We'll tell you ${what}.</span></div></div>`;
-  if (APP.push && Notification.permission === "denied") return `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Notifications are blocked</b><span>Allow them for perugiaparty.com in your browser settings to hear ${what}.</span></div></div>`;
-  if (APP.ios && !APP.standalone) return `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Put your ticket on your home screen</b><span>One tap at the door, works without signal, and a ping for the programme.</span>
-    <ol class="steps"><li>Tap <b>Share</b> (the square with an arrow) in Safari</li><li>Choose <b>Add to Home Screen</b></li><li>Open PerugiaParty from your home screen and tap <b>Turn on</b></li></ol></div></div>`;
-  if (!APP.push) return APP.installEvt ? `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Get the PerugiaParty app</b><span>Your ticket on your home screen, also without signal.</span></div><button class="btn ink" type="button" id="app-install">Install</button></div>` : "";
-  return `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Get a notification ${what}</b><span>${APP.standalone ? "One tap. You can turn it off any time." : "Works best from the app on your home screen."}</span></div>
-    ${APP.installEvt && !APP.standalone ? `<button class="btn outline" type="button" id="app-install">Install</button>` : ""}<button class="btn ink" type="button" id="push-on">Turn on</button></div>`;
+  // only once they've paid, and not on iPhone (installing there takes too many steps)
+  if (!["paid","in"].includes(d.status) || partyOver(d) || APP.ios) return "";
+  if (pushIsOn()) return `<div class="appc on" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>🔔 You're all set</b><span>We'll ping you for the programme on the night.</span></div></div>`;
+  if (!APP.push && !APP.installEvt) return "";
+  if (APP.push && Notification.permission === "denied" && !APP.installEvt) return "";
+  const label = APP.installEvt && !APP.standalone ? "Add to home screen" : "Turn on notifications";
+  return `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Keep your ticket one tap away</b><span>Works without signal, with a ping for the programme.</span></div>
+    <button class="btn ink" type="button" id="app-go">${label}</button></div>`;
 }
 function renderApp(d){
   const old = $("appc"), html = appHTML(d);
   if (old) old.outerHTML = html || ""; else if (html) { const P = $("page"), first = P.querySelector(".verify, .verified, .hero-ok, .hype, h1"); (first || P.firstElementChild || P).insertAdjacentHTML("afterend", html); }
-  const on = $("push-on");
-  if (on) on.addEventListener("click", async () => {
-    on.disabled = true; on.textContent = "…";
+  const go = $("app-go");
+  if (go) go.addEventListener("click", async () => {
+    go.disabled = true;
     try {
-      const perm = await Notification.requestPermission();
-      if (perm !== "granted") throw new Error(perm === "denied" ? "Notifications blocked" : "Notifications not allowed");
-      await pushSubscribe(true);
-      note("Notifications on", "ok");
-    } catch (e) { note(e.message && e.message.length < 40 ? e.message : "Couldn't turn on notifications", "error"); }
+      // one button: install the app if the phone offers it, then switch on notifications
+      if (APP.installEvt && !APP.standalone) { const e = APP.installEvt; APP.installEvt = null; e.prompt(); try { await e.userChoice; } catch(x){} }
+      if (APP.push && Notification.permission !== "denied") {
+        const perm = await Notification.requestPermission();
+        if (perm === "granted") { await pushSubscribe(true); note("You're all set", "ok"); }
+      }
+    } catch (e) { note("Couldn't turn on notifications", "error"); }
     renderApp(d);
   });
-  const ins = $("app-install");
-  if (ins) ins.addEventListener("click", async () => { const e = APP.installEvt; if (!e) return; APP.installEvt = null; e.prompt(); try { await e.userChoice; } catch(x){} renderApp(d); });
 }
 // a new ticket on a phone that already allowed notifications: move them over quietly
 function keepPushOnThisTicket(){
