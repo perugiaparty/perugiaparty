@@ -7,3 +7,4 @@ Disallow: /door
 Disallow: /admin
 
 Sitemap: https://perugiaparty.com/sitemap.xml
+Disallow: /soon

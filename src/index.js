@@ -290,7 +290,8 @@ async function apiInvite(url, env) {
 
 async function apiEvent(env) {
   const ev = await getEvent(env);
-  if (!ev || !ev.published) return json({ published: false });
+  const splash = ev && Number(ev.splash) === 1 ? { splash: true, splash_title: ev.splash_title || "", splash_text: ev.splash_text || "" } : { splash: false };
+  if (!ev || !ev.published) return json({ published: false, ...splash });
   return json({
     returners_only: returnersOnly(ev),
     returners_until: ev.returners_until || null,
@@ -304,6 +305,7 @@ async function apiEvent(env) {
     sold_out: await soldOut(env, ev),
     poster: ev.poster ? (String(ev.poster).startsWith("data:") ? `/api/poster?v=${ev.updated_at || 0}` : ev.poster) : null,
     turnstile: ev.turnstile_site_key || null,
+    ...splash,
   });
 }
 
@@ -519,6 +521,17 @@ function eventJsonLd(ev) {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 async function homepage(req, env) {
+  // "Coming soon" switch in the admin panel: show the holding screen instead of the homepage.
+  // The homepage itself stays untouched underneath; ?preview shows it anyway.
+  const u = new URL(req.url);
+  if (!u.searchParams.has("preview")) {
+    let ev0 = null; try { ev0 = await getEvent(env); } catch (e) {}
+    if (ev0 && Number(ev0.splash) === 1) {
+      const soon = await env.ASSETS.fetch(new Request(new URL("/soon", u), req));
+      const h = new Headers(soon.headers); h.set("cache-control", "no-store");
+      return new Response(soon.body, { status: 200, headers: h });
+    }
+  }
   const res = await env.ASSETS.fetch(req);
   if (!res.ok || !(res.headers.get("content-type") || "").includes("text/html")) return res;
   let ld = null;
