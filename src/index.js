@@ -200,11 +200,38 @@ async function igHandleDm(env, ev, igsid, text) {
   if (!username) return;
   const first = String(g.name || "").split(" ")[0];
   if (normIg(username) === normIg(g.ig)) {
+    const already = Number(g.verified) === 1;
     await markVerified(env, g, igsid);
-    await igSend(env, ev, igsid, `✓ Confirmed, ${first}! Your request is verified.\n\nYour login code: ${g.vcode}\nCheck your status anytime at perugiaparty.com/ticket with your Instagram + this code, or open your page:\nhttps://perugiaparty.com/ticket.html?t=${g.token}`);
+    const party = g.event === ev.tag && ev.name ? ev.name : "the party";
+    const when = g.event === ev.tag && ev.date_label ? ` on ${ev.date_label}` : "";
+    const returner = await isReturner(env, normIg(g.ig), g.event);
+    const status = {
+      requested: returner ? "Welcome back! You came before, so your request is first in line. We'll let you know here as soon as you're approved." : "We check every request by hand. As soon as you're approved, you'll hear from us here and your page shows your price.",
+      waitlist: "The party is full right now, so you're on the waitlist. If a place opens up, you'll hear from us here.",
+      approved: "You're already approved 🎉 Open your page to see your price and pay to confirm your place.",
+      paid: "You're on the list 🎉 Your ticket and the location are on your page.",
+      in: "You're on the list 🎉",
+    }[g.status] || "Your page always shows your latest status.";
+    await igSend(env, ev, igsid, [
+      `${already ? "You're confirmed" : "Confirmed"}, ${first} ✓`,
+      ``,
+      `Your request for ${party}${when} is in. ${status}`,
+      ``,
+      `🎟 Your personal page`,
+      `https://perugiaparty.com/ticket.html?t=${g.token}`,
+      ``,
+      `🔑 Login code: ${g.vcode}`,
+      `Lost the link? Log in at perugiaparty.com/ticket with your Instagram and this code.`,
+      ``,
+      `Keep this chat, everything you need is here. See you soon 🖤`,
+    ].join("\n"));
   } else {
     await env.DB.prepare("UPDATE guests SET ig_mismatch = ? WHERE token = ?").bind(normIg(username), g.token).run();
-    await igSend(env, ev, igsid, "This code belongs to a request made with a different Instagram account, so we can't confirm it from here. Request a place with your own Instagram on perugiaparty.com.");
+    await igSend(env, ev, igsid, [
+      `Hey! This code belongs to a request made with a different Instagram account, so we can't confirm it from here.`,
+      ``,
+      `Want to come? Request your place at perugiaparty.com with your own Instagram, then send us the new code from this account.`,
+    ].join("\n"));
   }
 }
 async function igWebhook(req, env) {
