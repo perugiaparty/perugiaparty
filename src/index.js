@@ -61,6 +61,28 @@ async function upsertPerson(env, ig, name, phone) {
     "ON CONFLICT(ig) DO UPDATE SET name = excluded.name, phone = COALESCE(NULLIF(excluded.phone, ''), people.phone), updated_at = excluded.updated_at"
   ).bind(ig, name, phone || "", now, now).run();
 }
+// Personal verify + login code, like "H26-K7M4QX". Guests DM it to @perugiaparty to prove the Instagram is theirs.
+const VC_ALPH = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+function newVcode(tag) {
+  const b = crypto.getRandomValues(new Uint8Array(6));
+  return `${tag || "PP"}-${Array.from(b, (x) => VC_ALPH[x % VC_ALPH.length]).join("")}`;
+}
+async function personVerified(env, ig) {
+  if (!ig) return false;
+  const p = await env.DB.prepare("SELECT verified FROM people WHERE ig = ?").bind(ig).first();
+  return !!(p && Number(p.verified));
+}
+// Someone proved the account: other unconfirmed requests with that Instagram for this party were made by someone else.
+async function dropUnconfirmed(env, tag, ig, keepToken) {
+  await env.DB.prepare("UPDATE guests SET removed_from = status, status = 'removed', removed_reason = 'Used this Instagram without confirming it. The real owner confirmed by DM.', removed_at = ? WHERE event = ? AND lower(ig) = ? AND verified = 0 AND token <> ? AND status IN ('requested','waitlist','approved')")
+    .bind(Date.now(), tag, ig, keepToken || "").run();
+}
+async function markVerified(env, g, igsid) {
+  const ig = normIg(g.ig), now = Date.now();
+  if (ig) await dropUnconfirmed(env, g.event, ig, g.token);
+  await env.DB.prepare("UPDATE guests SET verified = 1, verified_at = ?, ig_mismatch = NULL WHERE token = ?").bind(now, g.token).run();
+  if (ig) await env.DB.prepare("UPDATE people SET verified = 1, igsid = COALESCE(?, igsid), updated_at = ? WHERE ig = ?").bind(igsid || null, now, ig).run();
+}
 function inviteLimit(ev) { const n = Number(ev.invites_per_guest ?? 1); return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 1; }
 async function invitesUsed(env, ev, ig) {
   const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND invited_by = ? AND status NOT IN ('declined','removed')").bind(ev.tag, ig).first();
@@ -84,7 +106,7 @@ async function inviteFor(env, ev, ig) {
 async function resolveInvite(env, ev, code) {
   if (!code || !/^[a-z0-9]{8}$/.test(code)) return null;
   const p = await env.DB.prepare("SELECT ig, name FROM people WHERE invite_code = ?").bind(code).first();
-  if (!p || !(await isReturner(env, p.ig, ev.tag))) return null;
+  if (!p || !(await isReturner(env, p.ig, ev.tag)) || !(await personVerified(env, p.ig))) return null;
   const left = inviteLimit(ev) - (await invitesUsed(env, ev, p.ig));
   return { ig: p.ig, first: String(p.name || "").split(" ")[0], left };
 }
@@ -93,6 +115,88 @@ function parseProgram(text) {
     const m = l.match(/^(\d{1,2})[:.](\d{2})\s*[-–·:]?\s*(.+)$/);
     return m ? { time: `${m[1].padStart(2, "0")}:${m[2]}`, title: m[3].slice(0, 80) } : { time: "", title: l.slice(0, 80) };
   }).slice(0, 20);
+}
+
+// Log in on any phone with Instagram + personal code.
+async function apiLogin(req, env) {
+  let body; try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
+  const ig = normIg(clean(body.ig, 40));
+  const code = String(body.code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (!ig || code.length < 7) { await sleep(500); return json({ error: "Add your Instagram and your code." }, 400); }
+  const g = await env.DB.prepare("SELECT token FROM guests WHERE lower(ig) = ? AND replace(vcode, '-', '') = ? ORDER BY created_at DESC LIMIT 1").bind(ig, code).first();
+  if (!g) { await sleep(800); return json({ error: "That Instagram and code don't match. Check the code in your DMs from @perugiaparty." }, 404); }
+  return json({ ok: true, token: g.token });
+}
+
+// ---- Instagram: guests DM their code, we confirm the account is theirs and reply automatically ----
+const igApi = (env) => env.IG_API || "https://graph.instagram.com/v23.0"; // overridable for local tests
+async function hmacHex(secret, text) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(sig), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+function sameText(a, b) { if (a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0; }
+async function igWebhookVerify(url, env) {
+  const ev = await getEvent(env);
+  const ok = ev && ev.ig_verify_token && url.searchParams.get("hub.mode") === "subscribe" && url.searchParams.get("hub.verify_token") === ev.ig_verify_token;
+  return ok ? new Response(url.searchParams.get("hub.challenge") || "", { status: 200 }) : new Response("Forbidden", { status: 403 });
+}
+async function igSend(env, ev, recipient, text) {
+  try {
+    await fetch(`${igApi(env)}/me/messages`, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${ev.ig_token}` }, body: JSON.stringify({ recipient: { id: recipient }, message: { text } }) });
+  } catch (e) {}
+}
+async function igUsername(env, ev, igsid) {
+  try {
+    const r = await fetch(`${igApi(env)}/${encodeURIComponent(igsid)}?fields=username&access_token=${encodeURIComponent(ev.ig_token)}`);
+    const d = await r.json();
+    return d && d.username ? String(d.username) : null;
+  } catch (e) { return null; }
+}
+async function igHandleDm(env, ev, igsid, text) {
+  const found = [...String(text).toUpperCase().matchAll(/(?<![A-Z0-9])([A-Z0-9]{1,5})[-\s]?([A-HJ-NP-Z2-9]{6})(?![A-Z0-9])/g)];
+  let g = null;
+  for (const m of found) {
+    g = await env.DB.prepare("SELECT * FROM guests WHERE vcode = ?").bind(`${m[1]}-${m[2]}`).first();
+    if (g) break;
+  }
+  if (!g) return; // not a code: Matt answers this DM himself
+  const username = await igUsername(env, ev, igsid);
+  if (!username) return;
+  const first = String(g.name || "").split(" ")[0];
+  if (normIg(username) === normIg(g.ig)) {
+    await markVerified(env, g, igsid);
+    await igSend(env, ev, igsid, `✓ Confirmed, ${first}! Your request is verified.\n\nYour login code: ${g.vcode}\nCheck your status anytime at perugiaparty.com/ticket with your Instagram + this code, or open your page:\nhttps://perugiaparty.com/ticket.html?t=${g.token}`);
+  } else {
+    await env.DB.prepare("UPDATE guests SET ig_mismatch = ? WHERE token = ?").bind(normIg(username), g.token).run();
+    await igSend(env, ev, igsid, "This code belongs to a request made with a different Instagram account, so we can't confirm it from here. Request a place with your own Instagram on perugiaparty.com.");
+  }
+}
+async function igWebhook(req, env) {
+  const raw = await req.text();
+  const ev = await getEvent(env);
+  if (!ev || !ev.ig_app_secret || !ev.ig_token) return new Response("Not set up", { status: 503 });
+  const sig = req.headers.get("x-hub-signature-256") || "";
+  if (!sameText(sig, "sha256=" + (await hmacHex(ev.ig_app_secret, raw)))) return new Response("Bad signature", { status: 401 });
+  let body; try { body = JSON.parse(raw); } catch { return new Response("ok"); }
+  for (const entry of body.entry || []) {
+    for (const m of entry.messaging || []) {
+      if (!m.message || m.message.is_echo || !m.message.text || !m.sender) continue;
+      try { await igHandleDm(env, ev, m.sender.id, m.message.text); } catch (e) {}
+    }
+  }
+  return new Response("ok");
+}
+// Instagram tokens last 60 days: refresh every few weeks.
+async function refreshIgToken(env) {
+  const ev = await getEvent(env);
+  if (!ev || !ev.ig_token) return;
+  if (ev.ig_token_at && Date.now() - Number(ev.ig_token_at) < 20 * 864e5) return;
+  try {
+    const r = await fetch(`https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=${encodeURIComponent(ev.ig_token)}`);
+    const d = await r.json();
+    if (d && d.access_token) await env.DB.prepare("UPDATE event SET ig_token = ?, ig_token_at = ? WHERE id = 1").bind(d.access_token, Date.now()).run();
+  } catch (e) {}
 }
 
 async function apiInvite(url, env) {
@@ -154,9 +258,10 @@ async function apiRequest(req, env) {
   if (!/^[A-Za-z0-9._]{1,30}$/.test(ig)) return json({ error: "Add your Instagram handle, like @yourname." }, 400);
   if (body.age !== true || body.rules !== true) return json({ error: "Confirm you're 18+ and accept the house rules." }, 400);
   ig = "@" + ig.toLowerCase();
-  const dup = await env.DB.prepare("SELECT 1 FROM guests WHERE event = ? AND lower(ig) = ? AND status IN ('requested','waitlist','approved','paid','in')")
+  // an unconfirmed request doesn't lock the handle: whoever proves the account by DM keeps it
+  const dup = await env.DB.prepare("SELECT 1 FROM guests WHERE event = ? AND lower(ig) = ? AND verified = 1 AND status IN ('requested','waitlist','approved','paid','in')")
     .bind(ev.tag, ig).first();
-  if (dup) return json({ error: "This Instagram already has a request for this party. Use the personal link you got, or DM us." }, 409);
+  if (dup) return json({ error: "This Instagram already has a confirmed request for this party. Log in with your code at perugiaparty.com/ticket, or DM us." }, 409);
   const returning = await isReturner(env, ig, ev.tag);
   let inviter = null;
   if (body.invite) {
@@ -169,8 +274,8 @@ async function apiRequest(req, env) {
   }
   const status = (await soldOut(env, ev)) ? "waitlist" : "requested";
   const token = newToken();
-  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, invited_by, is_returning) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-    .bind(token, ev.tag, name, ig, phone, note, status, Date.now(), inviter, returning ? 1 : 0).run();
+  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, invited_by, is_returning, vcode, verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)")
+    .bind(token, ev.tag, name, ig, phone, note, status, Date.now(), inviter, returning ? 1 : 0, newVcode(ev.tag)).run();
   await upsertPerson(env, ig, name, phone);
   return json({ ok: true, token, waitlist: status === "waitlist" });
 }
@@ -187,14 +292,19 @@ async function apiRerequest(req, env) {
   if (g.event === ev.tag) return json({ ok: true, token: g.token });
   const ig = normIg(g.ig);
   if (!ig) return json({ error: "Request with the form on the homepage." }, 409);
-  const existing = await env.DB.prepare("SELECT token FROM guests WHERE event = ? AND lower(ig) = ? AND status IN ('requested','waitlist','approved','paid','in')").bind(ev.tag, ig).first();
-  if (existing) return json({ ok: true, token: existing.token });
+  const proven = g.status === "in" || Number(g.verified) === 1;
+  const existing = await env.DB.prepare("SELECT token, verified FROM guests WHERE event = ? AND lower(ig) = ? AND status IN ('requested','waitlist','approved','paid','in') ORDER BY verified DESC LIMIT 1").bind(ev.tag, ig).first();
+  if (existing && Number(existing.verified) === 1) return json({ ok: true, token: existing.token });
+  if (existing && !proven) return json({ ok: true, token: existing.token });
   const returning = await isReturner(env, ig, ev.tag);
   if (returnersOnly(ev) && !returning) return json({ error: "Early access is for guests who came before. Requests open for everyone soon." }, 409);
   const status = (await soldOut(env, ev)) ? "waitlist" : "requested";
   const token = newToken();
-  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, is_returning) VALUES (?, ?, ?, ?, ?, '', ?, ?, ?)")
-    .bind(token, ev.tag, g.name, ig, g.phone || "", status, Date.now(), returning ? 1 : 0).run();
+  // the old personal link proves it's them when that ticket was used at the door or confirmed by DM
+  if (proven) await dropUnconfirmed(env, ev.tag, ig, null);
+  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, is_returning, vcode, verified, verified_at) VALUES (?, ?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?)")
+    .bind(token, ev.tag, g.name, ig, g.phone || "", status, Date.now(), returning ? 1 : 0, newVcode(ev.tag), proven ? 1 : 0, proven ? Date.now() : null).run();
+  if (proven) await env.DB.prepare("UPDATE people SET verified = 1 WHERE ig = ?").bind(ig).run();
   await upsertPerson(env, ig, g.name, g.phone);
   return json({ ok: true, token, waitlist: status === "waitlist" });
 }
@@ -206,7 +316,8 @@ async function apiTicket(url, env) {
   if (!g) return json({ error: "We couldn't find this request." }, 404);
   const ev = (await getEvent(env)) || {};
   const sameEvent = ev.tag === g.event;
-  const out = { status: g.status, name: g.name, event: sameEvent ? ev.name : g.event };
+  if (!g.vcode) { g.vcode = newVcode(g.event); await env.DB.prepare("UPDATE guests SET vcode = ? WHERE token = ? AND vcode IS NULL").bind(g.vcode, g.token).run(); }
+  const out = { status: g.status, name: g.name, event: sameEvent ? ev.name : g.event, ig: g.ig, vcode: g.vcode, verified: Number(g.verified) === 1, mismatch: !!g.ig_mismatch, ig_auto: !!(ev.ig_token && ev.ig_app_secret) };
   if (g.status === "approved") {
     Object.assign(out, {
       code: g.code, price: g.price, ticket: g.ticket, deadline: g.deadline,
@@ -232,9 +343,11 @@ async function apiTicket(url, env) {
   // returning guests: early access, one-tap request for the next edition, and an invite for a friend
   const ig = normIg(g.ig);
   const returner = await isReturner(env, ig, ev.tag);
+  const trusted = out.verified; // only this request's own proof counts, never someone else's earlier confirmation
   out.returner = returner;
+  out.priority = returner && trusted;
   if (ev.published && ev.tag && !sameEvent) {
-    const mine = ig ? await env.DB.prepare("SELECT token FROM guests WHERE event = ? AND lower(ig) = ? AND status IN ('requested','waitlist','approved','paid','in')").bind(ev.tag, ig).first() : null;
+    const mine = ig ? await env.DB.prepare("SELECT token FROM guests WHERE event = ? AND lower(ig) = ? AND verified = 1 AND status IN ('requested','waitlist','approved','paid','in')").bind(ev.tag, ig).first() : null;
     out.next = {
       event: ev.name, date_label: ev.date_label,
       open: !!ev.requests_open && (!returnersOnly(ev) || returner),
@@ -242,7 +355,8 @@ async function apiTicket(url, env) {
       token: mine ? mine.token : null,
     };
   }
-  if (returner && ev.published && ev.requests_open && ev.tag && ig) out.invite = await inviteFor(env, ev, ig);
+  // invite link only for confirmed returning guests whose place for this party is approved
+  if (returner && trusted && sameEvent && ["approved", "paid", "in"].includes(g.status) && ev.published && ig) out.invite = await inviteFor(env, ev, ig);
   return json(out);
 }
 
@@ -358,6 +472,9 @@ export default {
         if (url.pathname === "/api/poster" && req.method === "GET") return await apiPoster(env);
         if (url.pathname === "/api/invite" && req.method === "GET") return await apiInvite(url, env);
         if (url.pathname === "/api/rerequest" && req.method === "POST") return await apiRerequest(req, env);
+        if (url.pathname === "/api/login" && req.method === "POST") return await apiLogin(req, env);
+        if (url.pathname === "/api/ig/webhook" && req.method === "GET") return await igWebhookVerify(url, env);
+        if (url.pathname === "/api/ig/webhook" && req.method === "POST") return await igWebhook(req, env);
         if (url.pathname === "/api/door/login" && req.method === "POST") return await apiDoor(req, env, "login");
         if (url.pathname === "/api/door/check" && req.method === "POST") return await apiDoor(req, env, "check");
         if (url.pathname === "/api/door/checkin" && req.method === "POST") return await apiDoor(req, env, "checkin");
@@ -368,5 +485,8 @@ export default {
     }
     if (url.pathname === "/" || url.pathname === "/index.html") return homepage(req, env);
     return env.ASSETS.fetch(req);
+  },
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(refreshIgToken(env));
   },
 };

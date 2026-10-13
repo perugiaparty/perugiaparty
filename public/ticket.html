@@ -171,6 +171,22 @@ h1{font-size:clamp(40px,8vw,64px)}
 .prio .star{flex:none;width:46px;height:46px;border-radius:50%;background:#ff4a3d;color:var(--ink);display:grid;place-items:center;font-family:var(--f-display);font-size:22px}
 .prio b{display:block;font-family:var(--f-display);font-weight:400;font-size:20px;line-height:1.1}
 .prio span{font-size:14px;color:var(--muted-dark)}
+/* confirm it's you (Instagram DM) */
+.verify{background:var(--ink);color:var(--cream);border-radius:22px;padding:24px 22px;display:grid;gap:12px;border:2px solid #ff4a3d}
+.verify .kick{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#ff4a3d}
+.verify h2{font-size:clamp(28px,6.5vw,38px);color:var(--cream)}
+.verify p{color:var(--muted-dark);font-size:15px}
+.verify p b{color:var(--cream)}
+.vcode{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--cream);color:var(--ink);border-radius:14px;padding:12px 14px}
+.vcode span{font-family:var(--f-mono);font-size:clamp(24px,7vw,32px);font-weight:500;letter-spacing:.08em}
+.vcode .copy{border-color:var(--ink)}
+.verify .warn{background:#3a1512;color:#ffb4ab;border-radius:12px;padding:10px 12px;font-size:14px}
+.verified{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#dcefdc;color:#1f7a3d;border-radius:14px;padding:10px 14px;font-size:14px;font-weight:700}
+.verified code{font-family:var(--f-mono);font-weight:500;color:var(--ink);background:#fff;border-radius:8px;padding:2px 8px}
+/* log in with Instagram + code */
+.login{max-width:440px;display:grid;gap:14px}
+.login label{display:grid;gap:6px}
+.login .err{color:var(--red-deep);font-size:14px;font-weight:700;min-height:1.2em}
 </style>
 </head>
 <body>
@@ -345,10 +361,51 @@ function inviteHTML(d){
     <div class="lnk">${esc(v.url)}</div>
     <div class="row2"><button class="btn ink" type="button" id="inv-share" data-url="${esc(v.url)}" data-ev="${esc(event)}">Send invite</button><button class="btn outline" type="button" data-copy="${esc(v.url)}">Copy link</button></div></section>`;
 }
+function verifyHTML(d){
+  const handle = esc(d.ig || "your Instagram");
+  if (d.verified) return `<div class="verified"><span>✓ Instagram confirmed</span><span style="font-weight:500">Your login code:</span><code>${esc(d.vcode)}</code></div>`;
+  return `<section class="verify" id="verify"><span class="kick">Last step · confirm it's you</span>
+    <h2>Send us your code on Instagram.</h2>
+    <p>DM this code to <b>@perugiaparty</b> from <b>${handle}</b>. It proves the account is yours${d.returner ? " and unlocks your priority as a returning guest" : ""}. ${d.ig_auto ? "You get an automatic reply within a minute." : "We confirm it as soon as we see it."}</p>
+    <div class="vcode"><span>${esc(d.vcode)}</span>${copyBtn(d.vcode)}</div>
+    ${d.mismatch ? `<p class="warn">We got this code from a different Instagram account. Send it from <b>${handle}</b>, the account in your request.</p>` : ""}
+    <a class="btn" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener" style="justify-self:start">Open Instagram DM ↗</a>
+    <p style="font-size:13px">Keep the code: with it you can log in at perugiaparty.com/ticket on any phone.</p></section>`;
+}
+function loginView(msg){
+  $("page").innerHTML = `<span class="state">My ticket</span><h1>Log in.</h1>
+    <p class="lead">Use your Instagram and the personal code you got when you requested a place, like <span style="font-family:var(--f-mono)">H26-K7M4QX</span>.</p>
+    <form class="card login" id="login" novalidate>
+      <label for="l-ig">Instagram<input id="l-ig" placeholder="@yourhandle" autocapitalize="off" autocomplete="username" maxlength="40"></label>
+      <label for="l-code">Personal code<input id="l-code" placeholder="H26-XXXXXX" autocapitalize="characters" autocomplete="one-time-code" maxlength="20" style="font-family:var(--f-mono);letter-spacing:.06em"></label>
+      <p class="err" id="l-err" role="alert">${esc(msg || "")}</p>
+      <button class="btn" type="submit" id="l-go">Log in</button>
+    </form>
+    <p class="note">No request yet? <a href="/#request">Request a place</a>. Lost your code? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>`;
+  try { const m = JSON.parse(localStorage.getItem("pp_me") || "null"); if (m && m.ig) $("l-ig").value = m.ig; } catch(e){}
+  $("login").addEventListener("submit", async e => {
+    e.preventDefault();
+    const ig = $("l-ig").value.trim(), code = $("l-code").value.trim(), err = $("l-err"), go = $("l-go");
+    if (!ig || code.replace(/[^a-z0-9]/gi, "").length < 7) { err.textContent = "Add your Instagram and your full code."; return; }
+    go.disabled = true; go.textContent = "Checking…";
+    try {
+      const r = await fetch("/api/login", { method:"POST", headers:{ "content-type":"application/json" }, body: JSON.stringify({ ig, code }) });
+      const x = await r.json().catch(() => ({}));
+      if (!r.ok || !x.token) throw new Error(x.error || "That didn't work. Try again.");
+      try { localStorage.setItem("pp_token", x.token); } catch(e){}
+      location.href = "/ticket.html?t=" + encodeURIComponent(x.token);
+    } catch (e) { err.textContent = e.message; go.disabled = false; go.textContent = "Log in"; }
+  });
+}
 function prioHTML(title, text){ return `<div class="prio" role="note"><span class="star" aria-hidden="true">★</span><div><b>${title}</b><span>${text}</span></div></div>`; }
 function decorate(d){
   const P = $("page");
-  if (d.returner && !d.next && (d.status === "requested" || d.status === "waitlist")) {
+  const pre = d.status === "requested" || d.status === "waitlist" || d.status === "approved";
+  if (!d.next && pre && d.vcode) {
+    const h = P.querySelector(".hero-ok") || P.querySelector("h1");
+    if (h) h.insertAdjacentHTML("afterend", verifyHTML(d));
+  }
+  if (d.priority && !d.next && (d.status === "requested" || d.status === "waitlist")) {
     const h = P.querySelector("h1");
     if (h) h.insertAdjacentHTML("afterend", prioHTML("Priority · you came before", d.status === "waitlist" ? "Returning guests are first in line when a place opens up." : "Returning guests are first in line. We look at your request before new ones."));
   }
@@ -380,7 +437,7 @@ function render(d){
   const P = $("page"), first = esc(String(d.name || "").split(" ")[0]);
   if (d.status === "requested") {
     P.innerHTML = `<span class="state">Request received</span><h1>Thanks, ${first}.</h1>
-      <p class="lead">We're checking your request for <b>${esc(d.event)}</b>. Come back to this page: once you're approved, your price and personal code appear here.</p>
+      <p class="lead">We're checking your request for <b>${esc(d.event)}</b>. Come back to this page: once you're approved, your price and ticket code appear here.</p>
       <div class="card"><p><b>Save this link.</b> It's your personal page and only works for you.</p><p class="mono" style="font-family:var(--f-mono);overflow-wrap:anywhere">${esc(location.href)}</p><div>${copyBtn(location.href)}</div></div>`;
   } else if (d.status === "waitlist") {
     P.innerHTML = `<span class="state">Waitlist</span><h1>You're on the waitlist, ${first}.</h1>
@@ -474,7 +531,7 @@ function render(d){
 }
 
 if (!token) {
-  empty("No ticket here yet.", "Request a place first. You'll get a personal link that leads back to this page.");
+  loginView();
 } else {
   // live updates: check every 20 s while the page is open, and when the guest comes back to it
   let last = null, busy = false;
@@ -484,7 +541,7 @@ if (!token) {
     try {
       const r = await fetch("/api/ticket?t=" + encodeURIComponent(token), { cache: "no-store" });
       const d = await r.json();
-      if (!r.ok) { if (first) empty("We couldn't find this ticket.", esc(d.error || "Check that you opened the full link we gave you.")); return; }
+      if (!r.ok) { if (first) { try { localStorage.removeItem("pp_token"); } catch(e){} loginView("We couldn't find that ticket link. Log in with your Instagram and code instead."); } return; }
       const sig = JSON.stringify(d);
       if (sig === last) return;
       const prev = last ? JSON.parse(last).status : null;
