@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/site.css?v=20261013e">
-<script src="/notify.js?v=20261013c" defer></script>
+<script src="/notify.js?v=20261013e" defer></script>
 <style>
 main{padding-block:44px 80px}
 .page{max-width:620px;margin-inline:auto;display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
@@ -110,8 +110,6 @@ h1{font-size:clamp(40px,8vw,64px)}
 .actions .btn{width:100%}
 .actions .btn.outline{color:var(--ink);border-color:var(--ink)}
 @media (max-width:420px){.actions{grid-template-columns:1fr}}
-#live-note{position:fixed;left:50%;top:calc(76px + env(safe-area-inset-top,0px));transform:translate(-50%,-20px);opacity:0;pointer-events:none;background:var(--ink);color:var(--cream);font-weight:700;font-size:15px;padding:12px 18px;border-radius:999px;box-shadow:6px 6px 0 var(--red);z-index:50;max-width:calc(100% - 32px);text-align:center;transition:opacity .3s,transform .3s}
-#live-note.show{opacity:1;transform:translate(-50%,0)}
 /* payment fields */
 .fbox{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--cream);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px}
 .fbox .k{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
@@ -654,7 +652,7 @@ if (!token) {
 } else {
   // live updates: check every 20 s while the page is open, and when the guest comes back to it
   let last = null, busy = false;
-  const STATUS_TEXT = { waitlist: "You're on the waitlist.", approved: "You've been accepted. Your payment details are below.", paid: "Payment confirmed. Your ticket and the location are here.", in: "You're checked in. Have a great night.", declined: "Your request was updated.", released: "Your request was updated.", removed: "Your request was updated." };
+  const STATUS_TEXT = { waitlist: ["You're on the waitlist", "warn"], approved: ["You've been accepted", "ok"], paid: ["Payment confirmed", "ok"], in: ["You're checked in", "ok"], declined: ["Your request was updated", "warn"], released: ["Your request was updated", "warn"], removed: ["Your request was updated", "warn"] };
   async function check(first){
     if (busy) return; busy = true;
     try {
@@ -666,16 +664,10 @@ if (!token) {
       const prev = last ? JSON.parse(last).status : null;
       last = sig;
       render(d);
-      if (prev && prev !== d.status) { notify(STATUS_TEXT[d.status] || "Your page just updated."); window.scrollTo({ top: 0, behavior: "smooth" }); }
+      if (prev && prev !== d.status) { const [m, t] = STATUS_TEXT[d.status] || ["Your page just updated", "ok"]; note(m, t); window.scrollTo({ top: 0, behavior: "smooth" }); }
     } catch (e) {
       if (first) oops("Couldn't load your ticket.", navigator.onLine === false ? "You're offline. Connect to the internet and try again." : "We couldn't reach the server. Check your connection and try again.", () => { $("page").innerHTML = `<p class="note">Loading your ticket…</p>`; check(true); });
     } finally { busy = false; }
-  }
-  function notify(msg){
-    let n = document.getElementById("live-note");
-    if (!n) { n = document.createElement("div"); n.id = "live-note"; n.setAttribute("role", "status"); document.body.appendChild(n); }
-    n.textContent = msg; n.className = "show";
-    clearTimeout(notify.t); notify.t = setTimeout(() => n.className = "", 5000);
   }
   check(true);
   keepPushOnThisTicket();
