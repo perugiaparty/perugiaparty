@@ -161,13 +161,16 @@ textarea{resize:vertical;min-height:88px}
 .rules h3{font-size:20px;margin-bottom:6px}
 .rules p{color:var(--muted);font-size:15px}
 
-/* house rules on red */
-.rules-band .sec-head p{color:#f3d3cc}
-.rules-band h2{color:var(--cream)}
-.rules-band .rules h3{color:var(--cream)}
-.rules-band .rules p{color:#f3d3cc}
-.rules-band .rules .x{background:var(--cream);color:var(--red)}
-
+/* house rules: black card on red, same look as the Next party card */
+.rules-band .sec{padding-block:48px}
+.rules-card{background:var(--ink);border-radius:24px;padding:40px 44px}
+.rules-card .sec-head{margin-bottom:32px}
+.rules-card .sec-head h2{color:var(--cream)}
+.rules-card .sec-head p{color:var(--muted-dark)}
+.rules-card .rules h3{color:var(--cream)}
+.rules-card .rules p{color:var(--muted-dark)}
+.rules-card .rules .x{background:var(--red);color:var(--cream)}
+@media (max-width:640px){.rules-band .sec{padding-block:32px}.rules-card{padding:26px 22px}}
 /* faq */
 .faq{max-width:780px}
 details{border-bottom:1.5px solid var(--line);padding:20px 0}
@@ -391,6 +394,7 @@ body.locked{overflow:hidden}
   </div>
   <section class="band-red rules-band" id="rules" aria-labelledby="rules-h">
     <div class="wrap sec">
+      <div class="rules-card">
       <div class="sec-head">
         <h2 id="rules-h">House rules.</h2>
         <p>Good nights work when everyone is on the same page.</p>
@@ -403,6 +407,7 @@ body.locked{overflow:hidden}
         <li><span class="x" aria-hidden="true">✓</span><div><h3>No mess</h3><p>Use the bags. Leave the place as you found it.</p></div></li>
         <li><span class="x" aria-hidden="true">✓</span><div><h3>Respect the staff</h3><p>They're the reason the night happens.</p></div></li>
       </ul>
+      </div>
     </div>
   </section>
   <div class="wrap">
