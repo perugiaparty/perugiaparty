@@ -2,3 +2,15 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
+
+/*.png
+  Cache-Control: public, max-age=604800
+
+/site.css
+  Cache-Control: public, max-age=3600
+
+/ticket*
+  X-Robots-Tag: noindex, nofollow
+
+/door*
+  X-Robots-Tag: noindex, nofollow

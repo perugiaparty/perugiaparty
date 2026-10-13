@@ -154,9 +154,44 @@ async function apiDoor(req, env, action) {
   return json({ found: true, guest: doorView(g, ev), stats: await doorStats(env, ev.tag) });
 }
 
+// Search engines: describe the next party as a schema.org Event inside the homepage HTML.
+function eventJsonLd(ev) {
+  if (!ev || !ev.published || !ev.name || !ev.starts_at) return null;
+  const start = new Date(ev.starts_at);
+  if (!(start > new Date())) return null;
+  const price = priceRange(ev);
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: `${ev.name} · PerugiaParty`,
+    startDate: start.toISOString(),
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    description: "Private student party in Perugia. Request your place on the guest list. 18+.",
+    image: ["https://perugiaparty.com/og-image.png"],
+    location: { "@type": "Place", name: "Perugia", address: { "@type": "PostalAddress", addressLocality: "Perugia", addressRegion: "Umbria", addressCountry: "IT" } },
+    organizer: { "@type": "Organization", name: "PerugiaParty", url: "https://perugiaparty.com/" },
+    typicalAgeRange: "18-",
+  };
+  if (price) data.offers = { "@type": "Offer", price: String(price.min), priceCurrency: "EUR", url: "https://perugiaparty.com/#request", availability: ev.requests_open ? "https://schema.org/InStock" : "https://schema.org/PreOrder" };
+  return JSON.stringify(data).replace(/</g, "\\u003c");
+}
+async function homepage(req, env) {
+  const res = await env.ASSETS.fetch(req);
+  if (!res.ok || !(res.headers.get("content-type") || "").includes("text/html")) return res;
+  let ld = null;
+  try { ld = eventJsonLd(await getEvent(env)); } catch (e) {}
+  if (!ld) return res;
+  return new HTMLRewriter().on("head", { element(el) { el.append(`<script type="application/ld+json">${ld}</script>`, { html: true }); } }).transform(res);
+}
+
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
+    if (url.hostname === "www.perugiaparty.com") {
+      url.hostname = "perugiaparty.com";
+      return Response.redirect(url.toString(), 301); // one address for search engines
+    }
     if (url.pathname === "/admin" || url.pathname === "/admin/") {
       return Response.redirect(PANEL_URL, 302); // private panel; only Matt's Claude account can open it
     }
@@ -173,6 +208,7 @@ export default {
         return json({ error: "Something went wrong on our side. Try again in a minute." }, 500);
       }
     }
+    if (url.pathname === "/" || url.pathname === "/index.html") return homepage(req, env);
     return env.ASSETS.fetch(req);
   },
 };

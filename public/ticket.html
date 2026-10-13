@@ -4,9 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>My ticket · PerugiaParty</title>
-<meta name="robots" content="noindex">
+<meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#141210">
-<link rel="icon" href="/logo.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
@@ -136,7 +137,6 @@ h1{font-size:clamp(40px,8vw,64px)}
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -199,6 +199,7 @@ async function downloadTicket(d, btn){
   try {
     const c = await ticketCanvas(d);
     const img = c.toDataURL("image/jpeg", 0.92);
+    if (!window.jspdf) await new Promise(res => { const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"; sc.onload = res; sc.onerror = res; document.head.appendChild(sc); });
     const { jsPDF } = window.jspdf || {};
     const name = `PerugiaParty-${d.code}`;
     if (jsPDF) {
@@ -303,7 +304,7 @@ function render(d){
       <div class="cine">
         <span class="holes t" aria-hidden="true"></span><span class="holes b" aria-hidden="true"></span>
         ${inside ? `<span class="instamp">CHECKED IN ✓</span>` : ""}
-        <img class="logo" src="/logo.png" alt="PerugiaParty">
+        <img class="logo" src="/logo.png" alt="PerugiaParty" width="150" height="106" decoding="async">
         <div><p class="ev">${esc(d.event)}</p><p class="meta">${esc([d.date_label, d.doors && "doors " + d.doors].filter(Boolean).join(" · "))}</p></div>
         <div class="perf" aria-hidden="true"></div>
         <div class="qr"><canvas id="qr" aria-label="Your entry QR code"></canvas></div>
