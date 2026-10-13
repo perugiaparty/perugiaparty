@@ -27,7 +27,7 @@ function priceRange(ev) {
 }
 
 // ---- rate limits: stop bots and code-guessing (counts per IP, stored as a hash, never the IP itself) ----
-const LIMITS = { request: [6, 600], rerequest: [6, 600], login: [8, 600], invite: [40, 600], door: [20, 600] };
+const LIMITS = { short: [30, 600], request: [6, 600], rerequest: [6, 600], login: [8, 600], invite: [40, 600], door: [20, 600] };
 async function tooMany(req, env, name) {
   const [max, win] = LIMITS[name] || [30, 600];
   const ip = req.headers.get("CF-Connecting-IP") || "local";
@@ -106,6 +106,26 @@ async function markVerified(env, g, igsid) {
   if (ig) await dropUnconfirmed(env, g.event, ig, g.token);
   await env.DB.prepare("UPDATE guests SET verified = 1, verified_at = ?, ig_mismatch = NULL WHERE token = ?").bind(now, g.token).run();
   if (ig) await env.DB.prepare("UPDATE people SET verified = 1, igsid = COALESCE(?, igsid), updated_at = ? WHERE ig = ?").bind(igsid || null, now, ig).run();
+}
+// Short personal links: perugiaparty.com/t/k7m4qxp2ab (10 characters, rate-limited against guessing)
+const SHORT_RE = /^[a-z2-9]{10}$/;
+async function shortFor(env, g) {
+  if (g.short) return g.short;
+  for (let i = 0; i < 5; i++) {
+    const c = newToken().slice(0, 10);
+    try { const r = await env.DB.prepare("UPDATE guests SET short = ? WHERE token = ? AND short IS NULL").bind(c, g.token).run(); if (r.meta && r.meta.changes) { g.short = c; return c; } } catch (e) { continue; }
+    const again = await env.DB.prepare("SELECT short FROM guests WHERE token = ?").bind(g.token).first();
+    if (again && again.short) { g.short = again.short; return again.short; }
+  }
+  return null;
+}
+const shortUrl = (code, token) => code ? `https://perugiaparty.com/t/${code}` : `https://perugiaparty.com/ticket.html?t=${token}`;
+async function shortRedirect(url, env) {
+  const c = url.pathname.slice(3).toLowerCase().replace(/\/$/, "");
+  if (!SHORT_RE.test(c)) return null;
+  const g = await env.DB.prepare("SELECT token FROM guests WHERE short = ?").bind(c).first();
+  if (!g) return null;
+  return new Response(null, { status: 302, headers: { location: `/ticket.html?t=${g.token}`, "cache-control": "no-store" } });
 }
 function inviteLimit(ev) { const n = Number(ev.invites_per_guest ?? 1); return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 1; }
 async function invitesUsed(env, ev, ig) {
@@ -205,7 +225,7 @@ async function igHandleDm(env, ev, igsid, text) {
     await igSend(env, ev, igsid, [
       `✓ Confirmed, ${first}! Your request is verified.`,
       ``,
-      `Link: https://perugiaparty.com/ticket.html?t=${g.token}`,
+      `Link: ${shortUrl(await shortFor(env, g), g.token)}`,
       `🔑 Code: ${g.vcode}`,
     ].join("\n"));
   } else {
@@ -376,7 +396,7 @@ async function apiTicket(url, env) {
   const ev = (await getEvent(env)) || {};
   const sameEvent = ev.tag === g.event;
   if (!g.vcode) { g.vcode = newVcode(g.event); await env.DB.prepare("UPDATE guests SET vcode = ? WHERE token = ? AND vcode IS NULL").bind(g.vcode, g.token).run(); }
-  const out = { status: g.status, name: g.name, event: sameEvent ? ev.name : g.event, ig: g.ig, vcode: g.vcode, verified: Number(g.verified) === 1, mismatch: !!g.ig_mismatch, ig_auto: !!(ev.ig_token && ev.ig_app_secret) };
+  const out = { status: g.status, name: g.name, event: sameEvent ? ev.name : g.event, ig: g.ig, vcode: g.vcode, link: shortUrl(await shortFor(env, g), g.token), verified: Number(g.verified) === 1, mismatch: !!g.ig_mismatch, ig_auto: !!(ev.ig_token && ev.ig_app_secret) };
   if (g.status === "approved") {
     Object.assign(out, {
       code: g.code, price: g.price, ticket: g.ticket, deadline: g.deadline,
@@ -575,6 +595,12 @@ async function route(req, env) {
     if (url.hostname === "www.perugiaparty.com") {
       url.hostname = "perugiaparty.com";
       return Response.redirect(url.toString(), 301); // one address for search engines
+    }
+    if (url.pathname.startsWith("/t/")) {
+      if (await tooMany(req, env, "short")) return slowDown();
+      const r = await shortRedirect(url, env);
+      if (r) return r;
+      return env.ASSETS.fetch(new Request(new URL("/404-not-found", url), req));
     }
     if (url.pathname === "/admin" || url.pathname === "/admin/") {
       return Response.redirect(PANEL_URL, 302); // private panel; only Matt's Claude account can open it

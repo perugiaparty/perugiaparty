@@ -340,7 +340,7 @@ function addToCalendar(d){
   const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//PerugiaParty//EN","BEGIN:VEVENT",
     "UID:" + d.code + "@perugiaparty.com","DTSTAMP:" + f(new Date()),"DTSTART:" + f(start),"DTEND:" + f(end),
     "SUMMARY:" + esc2(d.event + " · PerugiaParty"),"LOCATION:" + esc2(d.location),
-    "DESCRIPTION:" + esc2("Your ticket: " + location.href + " · Bring photo ID."),"END:VEVENT","END:VCALENDAR"].join("\r\n");
+    "DESCRIPTION:" + esc2("Your ticket: " + (d.link || location.href) + " · Bring photo ID."),"END:VEVENT","END:VCALENDAR"].join("\r\n");
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" })); a.download = "PerugiaParty.ics";
   document.body.appendChild(a); a.click(); a.remove();
 }
@@ -555,11 +555,11 @@ function render(d){
   if (d.status === "requested") {
     P.innerHTML = `<span class="state">Request received</span><h1>Thanks, ${first}.</h1>
       <p class="lead">We're checking your request for <b>${esc(d.event)}</b>. Come back to this page: once you're approved, your price and ticket code appear here.</p>
-      ${d.verified ? `<div class="card"><p><b>Your personal page.</b> We sent this link to your Instagram DMs too, so you can always find it there.</p><p class="mono" style="font-family:var(--f-mono);overflow-wrap:anywhere">${esc(location.href)}</p><div>${copyBtn(location.href)}</div></div>` : ""}`;
+      ${d.verified ? `<div class="card"><p><b>Your personal page.</b> We sent this link to your Instagram DMs too, so you can always find it there.</p><p class="mono" style="font-family:var(--f-mono);overflow-wrap:anywhere">${esc(d.link || location.href)}</p><div>${copyBtn(d.link || location.href)}</div></div>` : ""}`;
   } else if (d.status === "waitlist") {
     P.innerHTML = `<span class="state">Waitlist</span><h1>You're on the waitlist, ${first}.</h1>
       <p class="lead"><b>${esc(d.event)}</b> is sold out right now. When a place opens up, we go down the waitlist in order. If you get one, this page shows your price and code straight away.</p>
-      ${d.verified ? `<div class="card"><p><b>Your personal page.</b> We sent this link to your Instagram DMs too.</p><p style="font-family:var(--f-mono);overflow-wrap:anywhere">${esc(location.href)}</p><div>${copyBtn(location.href)}</div></div>` : ""}`;
+      ${d.verified ? `<div class="card"><p><b>Your personal page.</b> We sent this link to your Instagram DMs too.</p><p style="font-family:var(--f-mono);overflow-wrap:anywhere">${esc(d.link || location.href)}</p><div>${copyBtn(d.link || location.href)}</div></div>` : ""}`;
   } else if (d.status === "approved") {
     const left = d.deadline ? d.deadline - Date.now() : null;
     const overdue = left != null && left < 0;
@@ -626,7 +626,7 @@ function render(d){
         <button class="btn" type="button" id="pdf">Download ticket (PDF)</button>
         <button class="btn ink" type="button" id="share">Tell your friends</button>
         ${d.starts_at ? `<button class="btn outline" type="button" id="cal">Add to calendar</button>` : ""}
-        <button class="btn outline" type="button" data-copy="${esc(location.href)}">Copy my ticket link</button>
+        <button class="btn outline" type="button" data-copy="${esc(d.link || location.href)}">Copy my ticket link</button>
       </div>
       <p class="note">Your ticket is personal: one entry, checked at the door. Save the PDF in case there's no signal.</p>`}`;
     try { drawQR(d.qr, $("qr")); } catch (e) { $("qr").parentElement.innerHTML = `<p style="color:#111;padding:20px;font-family:var(--f-mono)">${esc(d.code)}</p>`; }
