@@ -241,7 +241,7 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-copy]"); if (!b) return;
   const v = b.dataset.copy;
   const label = b.textContent; const done = () => { b.textContent = "Copied"; setTimeout(() => b.textContent = label, 1500); };
-  const fail = () => { b.textContent = "Long-press to copy"; note("Your phone didn't let us copy automatically. Long-press the text to copy it.", "warn", { title: "Copy it yourself" }); };
+  const fail = () => { b.textContent = "Long-press to copy"; note("Long-press to copy", "warn"); };
   try { navigator.clipboard.writeText(v).then(done, fail); } catch(x){ fail(); }
 });
 
@@ -306,7 +306,7 @@ async function downloadTicket(d, btn){
       const a = document.createElement("a"); a.download = name + ".png"; a.href = img; document.body.appendChild(a); a.click(); a.remove();
     }
     btn.textContent = "Saved ✓";
-  } catch (e) { btn.textContent = "Couldn't make the PDF. Try again"; note("We couldn't make your PDF. Take a screenshot of your QR code instead, it works the same at the door.", "error", { title: "PDF not saved" }); }
+  } catch (e) { btn.textContent = "Couldn't make the PDF. Try again"; note("PDF failed · screenshot your QR", "error"); }
   setTimeout(() => { btn.disabled = false; btn.textContent = label; }, 2500);
 }
 async function shareParty(d, btn){
@@ -430,7 +430,7 @@ function loginView(msg){
       const m = e.message === "Failed to fetch" ? "No connection. Check your internet and try again." : e.message;
       err.textContent = m; go.disabled = false; go.textContent = "Log in";
       if (/match/i.test(m) && window.ppFieldError) { ppFieldError($("l-ig")); ppFieldError($("l-code")); }
-      note(m, "error", { title: "Couldn't log you in" });
+      note(/connection/i.test(m) ? "No connection" : "Wrong Instagram or code", "error");
     }
   });
 }
@@ -457,7 +457,7 @@ function decorate(d){
       if (!r.ok || !x.token) throw new Error(x.error || "Couldn't send. Try again.");
       try { localStorage.setItem("pp_token", x.token); } catch(e){}
       location.href = "/ticket.html?t=" + encodeURIComponent(x.token);
-    } catch (e) { const m = e.message === "Failed to fetch" ? "No connection. Check your internet and try again." : e.message; $("again-err").textContent = m; note(m, "error", { title: "Request not sent" }); again.disabled = false; again.textContent = "Try again"; }
+    } catch (e) { const m = e.message === "Failed to fetch" ? "No connection. Check your internet and try again." : e.message; $("again-err").textContent = m; note(/connection/i.test(m) ? "No connection · not sent" : "Request not sent · see below", "error"); again.disabled = false; again.textContent = "Try again"; }
   });
   const sh = $("inv-share");
   if (sh) sh.addEventListener("click", async () => {

@@ -65,20 +65,18 @@ label small{font-weight:400;color:var(--muted)}
 
 .toast{font-family:var(--f-mono);font-size:13px;min-height:1.4em}
 
-/* notifications (notify.js) */
-.pp-notes{position:fixed;left:50%;top:calc(72px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:100;display:grid;gap:10px;width:min(520px,calc(100% - 24px));pointer-events:none}
-.pp-note{pointer-events:auto;display:flex;align-items:flex-start;gap:12px;background:var(--ink);color:var(--cream);border-radius:16px;padding:14px 12px 14px 14px;box-shadow:0 14px 40px rgba(20,18,16,.28);border-left:6px solid var(--muted-dark);opacity:0;transform:translateY(-10px);transition:opacity .25s,transform .25s}
+/* notifications (notify.js): one compact row */
+.pp-notes{position:fixed;left:50%;top:calc(70px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:100;display:grid;justify-items:center;gap:8px;width:min(480px,calc(100% - 24px));pointer-events:none}
+.pp-note{pointer-events:auto;display:flex;align-items:center;gap:10px;max-width:100%;background:var(--ink);color:var(--cream);border-radius:999px;padding:7px 6px 7px 8px;box-shadow:0 10px 30px rgba(20,18,16,.28);opacity:0;transform:translateY(-8px);transition:opacity .2s,transform .2s}
 .pp-note.in{opacity:1;transform:none}
-.pp-note-icon{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px;background:var(--muted-dark);color:var(--ink)}
-.pp-note-text{flex:1;min-width:0;display:grid;gap:2px}
-.pp-note-text b{font-size:15px}
-.pp-note-text span{font-size:14px;color:var(--muted-dark);overflow-wrap:break-word}
-.pp-note-x{flex:none;background:transparent;border:0;color:var(--muted-dark);font-size:22px;line-height:1;padding:2px 4px;cursor:pointer}
+.pp-note-icon{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;line-height:1;background:var(--muted-dark);color:var(--ink)}
+.pp-note-text{min-width:0;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp-note-act{flex:none;font:inherit;font-size:13px;font-weight:700;background:var(--cream);color:var(--ink);border:0;border-radius:999px;padding:4px 11px;cursor:pointer}
+.pp-note-x{flex:none;background:transparent;border:0;color:var(--muted-dark);font-size:18px;line-height:1;width:24px;height:24px;cursor:pointer;border-radius:50%}
 .pp-note-x:hover{color:var(--cream)}
-.pp-note-act{flex:none;align-self:center;font:inherit;font-size:13px;font-weight:700;background:var(--cream);color:var(--ink);border:0;border-radius:999px;padding:6px 12px;cursor:pointer}
-.pp-note.error{border-left-color:#ff4a3d}.pp-note.error .pp-note-icon{background:#ff4a3d;color:var(--ink)}
-.pp-note.warn{border-left-color:#f2b84b}.pp-note.warn .pp-note-icon{background:#f2b84b;color:var(--ink)}
-.pp-note.ok{border-left-color:#3ddc84}.pp-note.ok .pp-note-icon{background:#3ddc84;color:var(--ink)}
+.pp-note.error .pp-note-icon{background:#ff4a3d}
+.pp-note.warn .pp-note-icon{background:#f2b84b}
+.pp-note.ok .pp-note-icon{background:#3ddc84}
 /* form fields with a problem */
 .has-error input,.has-error textarea,input.has-error,input[aria-invalid="true"],textarea[aria-invalid="true"]{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(185,0,0,.14)}
 .check.has-error{color:var(--red-deep)}

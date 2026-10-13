@@ -511,7 +511,7 @@ function tick(){
   c.innerHTML = [[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]].map(([v,l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
 }
 fetch("/api/event").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); setupForm(ev); })
-  .catch(() => { if (window.ppNotify) ppNotify("We couldn't load the next party right now. Refresh the page in a moment.", "warn", { title: "Party info not loaded", action: { label: "Refresh", onClick: () => location.reload() } }); });
+  .catch(() => { if (window.ppNotify) ppNotify("Party info didn't load", "warn", { action: { label: "Refresh", onClick: () => location.reload() } }); });
 
 /* sold out -> waitlist wording; optional Cloudflare human check */
 let tsWidget = null;
@@ -579,7 +579,7 @@ $("req-form").addEventListener("submit", async e => {
   else if (!/^[A-Za-z0-9._]{1,30}$/.test(igClean)) { err.textContent = "That Instagram handle has characters Instagram doesn't allow. Use letters, numbers, dots and underscores."; fieldErr("f-ig"); return; }
   if (!body.age) { missing.push("the 18+ confirmation"); bad.push("f-age"); }
   if (!body.rules) { missing.push("the house rules confirmation"); bad.push("f-rules"); }
-  if (missing.length) { err.textContent = "Add " + missing.join(", ") + "."; bad.forEach(fieldErr); $(bad[0]).focus(); return; }
+  if (missing.length) { err.textContent = "Add " + missing.join(", ") + "."; bad.forEach(fieldErr); $(bad[0]).focus(); if (window.ppNotify) ppNotify(missing.length === 1 ? "Add " + missing[0] : "Fill in the red fields", "warn"); return; }
   err.textContent = ""; btn.disabled = true; btn.textContent = "Sending…";
   try {
     const r = await fetch("/api/request", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
@@ -590,7 +590,7 @@ $("req-form").addEventListener("submit", async e => {
       if (/name/i.test(msg)) fieldErr("f-name");
       if (/instagram/i.test(msg) && r.status === 400) fieldErr("f-ig");
       if (/18\+|house rules/i.test(msg)) { fieldErr("f-age"); fieldErr("f-rules"); }
-      if (window.ppNotify) ppNotify(msg, r.status >= 500 ? "error" : "warn", { title: r.status === 409 ? "Can't send this request" : r.status >= 500 ? "Something went wrong" : "Check your request" });
+      if (window.ppNotify) ppNotify(r.status === 409 ? "Request not sent · see below" : r.status >= 500 ? "Server error · try again" : "Check your request", r.status >= 500 ? "error" : "warn");
       return;
     }
     rememberToken(data.token);
@@ -605,13 +605,13 @@ $("req-form").addEventListener("submit", async e => {
     openSave(link, data.waitlist);
   } catch (x) {
     err.textContent = "Couldn't reach us. Check your connection and try again.";
-    if (window.ppNotify) ppNotify("Your request wasn't sent. Check your connection and try again.", "error", { title: "No connection", action: { label: "Try again", onClick: () => $("req-form").requestSubmit() } });
+    if (window.ppNotify) ppNotify("No connection · not sent", "error", { action: { label: "Retry", onClick: () => $("req-form").requestSubmit() } });
   } finally { btn.disabled = false; btn.textContent = sendLabel(); try { if (window.turnstile && tsWidget !== null) turnstile.reset(tsWidget); } catch(e){} }
 });
 $("copy-link").addEventListener("click", () => {
   const text = $("my-link").textContent, t = $("toast");
   const ok = () => t.textContent = "Copied. Save it somewhere safe.";
-  const fb = () => { const r = document.createRange(); r.selectNodeContents($("my-link")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); t.textContent = "Selected. Copy it with your keyboard or long-press."; if (window.ppNotify) ppNotify("Your phone didn't let us copy automatically. The link is selected: long-press to copy it.", "warn", { title: "Copy it yourself" }); };
+  const fb = () => { const r = document.createRange(); r.selectNodeContents($("my-link")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); t.textContent = "Selected. Copy it with your keyboard or long-press."; if (window.ppNotify) ppNotify("Long-press to copy", "warn"); };
   try { navigator.clipboard.writeText(text).then(ok, fb); } catch (e) { fb(); }
 });
 

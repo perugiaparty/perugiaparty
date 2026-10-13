@@ -1,5 +1,5 @@
 // PerugiaParty notifications: one look for every error, warning and success message on the site.
-// ppNotify("Message", "error" | "warn" | "ok" | "info", { title, timeout, action: { label, onClick } })
+// ppNotify("Short message", "error" | "warn" | "ok" | "info", { timeout, action: { label, onClick } }) · one row, keep it to a few words
 (function () {
   const ICON = { error: "!", warn: "!", ok: "✓", info: "i" };
   const TITLE = { error: "Something went wrong", warn: "Heads up", ok: "Done", info: "Good to know" };
@@ -29,9 +29,7 @@
     n.dataset.key = key;
     n.setAttribute("role", type === "error" ? "alert" : "status");
     const t = document.createElement("div"); t.className = "pp-note-text";
-    const b = document.createElement("b"); b.textContent = opts.title || TITLE[type] || "";
-    const s = document.createElement("span"); s.textContent = message;
-    t.append(b, s);
+    t.textContent = message; t.title = message; // one short line; the full sentence shows on hover
     const i = document.createElement("span"); i.className = "pp-note-icon"; i.setAttribute("aria-hidden", "true"); i.textContent = ICON[type] || "i";
     const x = document.createElement("button"); x.type = "button"; x.className = "pp-note-x"; x.setAttribute("aria-label", "Close"); x.textContent = "×";
     x.addEventListener("click", () => close(n));
@@ -44,7 +42,7 @@
     n.append(x);
     r.appendChild(n);
     requestAnimationFrame(() => n.classList.add("in"));
-    if (opts.timeout !== 0) n._t = setTimeout(() => close(n), opts.timeout ?? (type === "error" ? 8000 : 5000));
+    if (opts.timeout !== 0) n._t = setTimeout(() => close(n), opts.timeout ?? (type === "error" ? 6000 : 4000));
     return n;
   };
   window.ppCloseNotes = () => box && [...box.children].forEach(close);
@@ -74,6 +72,6 @@
   };
 
   let offlineNote = null;
-  addEventListener("offline", () => { offlineNote = ppNotify("You're offline. We'll keep trying when you're back.", "warn", { title: "No connection", timeout: 0 }); });
-  addEventListener("online", () => { if (offlineNote) close(offlineNote); offlineNote = null; ppNotify("You're back online.", "ok", { title: "Connected", timeout: 3000 }); });
+  addEventListener("offline", () => { offlineNote = ppNotify("You're offline", "warn", { timeout: 0 }); });
+  addEventListener("online", () => { if (offlineNote) close(offlineNote); offlineNote = null; ppNotify("Back online", "ok", { timeout: 2500 }); });
 })();

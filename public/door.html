@@ -108,7 +108,7 @@ $("login").addEventListener("submit", async e => {
   e.preventDefault();
   PW = $("pw").value; $("lbtn").disabled = true;
   try { await enter(); try { localStorage.setItem("pp_door_pw", PW); } catch(e){} }
-  catch (x) { if (x.message !== "auth") { const m = x.message === "Failed to fetch" ? "No connection. Check the internet on this phone." : x.message; $("lerr").textContent = m; window.ppNotify && ppNotify(m, "error", { title: "Couldn't open the door scanner" }); } }
+  catch (x) { if (x.message !== "auth") { const m = x.message === "Failed to fetch" ? "No connection. Check the internet on this phone." : x.message; $("lerr").textContent = m; window.ppNotify && ppNotify(/connection/i.test(m) ? "No connection" : "Couldn't open scanner", "error"); } }
   finally { $("lbtn").disabled = false; }
 });
 async function enter(){
@@ -135,7 +135,7 @@ async function startCam(){
       OverconstrainedError: "This camera can't be used for scanning. Type the codes below instead.",
     }[e && e.name] || (navigator.mediaDevices ? "The camera didn't start. Try again, or type the code below." : "This browser can't use the camera. Open perugiaparty.com/door in Safari or Chrome, or type the codes below.");
     $("cmsg").innerHTML = `<div><p>${why}</p><button class="btn" type="button" id="start">Try again</button></div>`;
-    window.ppNotify && ppNotify(why, "warn", { title: "Camera not available" });
+    window.ppNotify && ppNotify("Camera not available", "warn");
     $("start").addEventListener("click", startCam);
   }
 }
