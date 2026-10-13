@@ -205,8 +205,8 @@ async function igHandleDm(env, ev, igsid, text) {
     await igSend(env, ev, igsid, [
       `✓ Confirmed, ${first}! Your request is verified.`,
       ``,
-      `Your page: https://perugiaparty.com/ticket.html?t=${g.token}`,
-      `Your code: ${g.vcode}`,
+      `Link: https://perugiaparty.com/ticket.html?t=${g.token}`,
+      `🔑 Code: ${g.vcode}`,
     ].join("\n"));
   } else {
     await env.DB.prepare("UPDATE guests SET ig_mismatch = ? WHERE token = ?").bind(normIg(username), g.token).run();
