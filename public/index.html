@@ -60,6 +60,12 @@
 .band-red{background:var(--red);color:var(--cream)}
 .band-red .sec-head p{color:#f3d3cc}
 .next{display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center;background:var(--ink);border-radius:24px;padding:36px}
+.next .next-main{min-width:0}
+.next .next-cta{margin-top:24px}
+.next.has-poster{grid-template-columns:1fr minmax(0,300px);align-items:center;gap:36px}
+.next .poster{display:block;justify-self:end;width:100%;max-width:300px;border-radius:14px;overflow:hidden;transform:rotate(2.5deg);box-shadow:10px 10px 0 var(--red),0 20px 40px rgba(0,0,0,.45);transition:transform .25s ease}
+.next .poster:hover{transform:rotate(0deg) translateY(-4px)}
+.next .poster img{display:block;width:100%;height:auto;aspect-ratio:9/16;object-fit:cover}
 .next .status{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
 .next .status i{width:9px;height:9px;border-radius:50%;background:#ff4a3d;box-shadow:0 0 0 4px rgba(255,74,61,.25);animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{50%{box-shadow:0 0 0 8px rgba(255,74,61,0)}}
@@ -72,7 +78,7 @@
 .count div{background:var(--ink-2);border-radius:14px;padding:10px 14px;min-width:76px;text-align:center}
 .count b{display:block;font-family:var(--f-display);font-size:32px;line-height:1;font-variant-numeric:tabular-nums;color:var(--cream)}
 .count span{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
-@media (max-width:720px){.next{grid-template-columns:1fr;padding:26px}.count div{min-width:64px;padding:8px 10px}.count b{font-size:26px}}
+@media (max-width:720px){.next,.next.has-poster{grid-template-columns:1fr;padding:26px}.next .poster{order:-1;justify-self:center;max-width:240px;transform:rotate(-2deg)}.count div{min-width:64px;padding:8px 10px}.count b{font-size:26px}}
 
 /* steps */
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;list-style:none;padding:0;margin:0;counter-reset:s}
@@ -445,12 +451,15 @@ function renderNext(ev){
   if (!ev || !ev.published) return; // keep the static "announcing soon" card
   const price = ev.price ? "From " + euro(ev.price.min) : null;
   const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]].filter(f => f[1]);
-  el.innerHTML = `<div><span class="status"><i></i>${ev.requests_open ? (ev.sold_out ? "Sold out · waitlist open" : "Requests open") : (ev.sold_out ? "Sold out" : "Requests open soon")}</span>
+  const cta = ev.requests_open ? `<a class="btn" href="#request">${ev.sold_out ? "Join the waitlist" : "Request a place"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram ↗</a>`;
+  el.classList.toggle("has-poster", !!ev.poster);
+  el.innerHTML = `<div class="next-main"><span class="status"><i></i>${ev.requests_open ? (ev.sold_out ? "Sold out · waitlist open" : "Requests open") : (ev.sold_out ? "Sold out" : "Requests open soon")}</span>
       <h3>${esc(ev.name || "Next PerugiaParty")}</h3>
       <p>Apply below and save your ticket link. Once approved, pay to confirm your place and unlock your ticket and the location.</p>
       ${facts.length ? `<dl>${facts.map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>` : ""}
-      <div class="count" id="count" ${ev.starts_at ? "" : "hidden"} aria-label="Countdown to the party"></div></div>
-    ${ev.requests_open ? `<a class="btn" href="#request">${ev.sold_out ? "Join the waitlist" : "Request a place"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram ↗</a>`}`;
+      <div class="count" id="count" ${ev.starts_at ? "" : "hidden"} aria-label="Countdown to the party"></div>
+      ${ev.poster ? `<div class="next-cta">${cta}</div>` : ""}</div>
+    ${ev.poster ? `<a class="poster" href="${ev.requests_open ? "#request" : "https://www.instagram.com/perugiaparty/"}" aria-label="${esc(ev.name || "Party")} poster"><img src="${esc(ev.poster)}" alt="${esc(ev.name || "Party")} poster" loading="lazy" decoding="async"></a>` : cta}`;
   if (ev.starts_at) { tick(); clearInterval(timer); timer = setInterval(tick, 1000); }
 }
 function tick(){

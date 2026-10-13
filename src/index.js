@@ -51,6 +51,7 @@ async function apiEvent(env) {
     price: priceRange(ev),
     requests_open: !!ev.requests_open,
     sold_out: await soldOut(env, ev),
+    poster: ev.poster ? (String(ev.poster).startsWith("data:") ? `/api/poster?v=${ev.updated_at || 0}` : ev.poster) : null,
     turnstile: ev.turnstile_site_key || null,
   });
 }
@@ -213,6 +214,15 @@ async function homepage(req, env) {
   return new HTMLRewriter().on("head", { element(el) { el.append(`<script type="application/ld+json">${ld}</script>`, { html: true }); } }).transform(res);
 }
 
+// Poster uploaded from the admin panel, stored in the database as a data URL.
+async function apiPoster(env) {
+  const ev = await getEvent(env);
+  const m = ev && typeof ev.poster === "string" && ev.poster.match(/^data:(image\/(?:jpeg|png|webp));base64,(.+)$/);
+  if (!m) return new Response("Not found", { status: 404 });
+  const bin = Uint8Array.from(atob(m[2]), (c) => c.charCodeAt(0));
+  return new Response(bin, { headers: { "content-type": m[1], "cache-control": "public, max-age=31536000, immutable" } });
+}
+
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
@@ -228,6 +238,7 @@ export default {
         if (url.pathname === "/api/event" && req.method === "GET") return await apiEvent(env);
         if (url.pathname === "/api/request" && req.method === "POST") return await apiRequest(req, env);
         if (url.pathname === "/api/ticket" && req.method === "GET") return await apiTicket(url, env);
+        if (url.pathname === "/api/poster" && req.method === "GET") return await apiPoster(env);
         if (url.pathname === "/api/door/login" && req.method === "POST") return await apiDoor(req, env, "login");
         if (url.pathname === "/api/door/check" && req.method === "POST") return await apiDoor(req, env, "check");
         if (url.pathname === "/api/door/checkin" && req.method === "POST") return await apiDoor(req, env, "checkin");
