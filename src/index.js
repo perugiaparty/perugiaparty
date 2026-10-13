@@ -214,9 +214,13 @@ async function igHandleDm(env, ev, igsid, text) {
     g = await env.DB.prepare("SELECT * FROM guests WHERE vcode = ?").bind(`${m[1]}-${m[2]}`).first();
     if (g) break;
   }
-  if (!g) { await igLog(env, "no-code", String(text).slice(0, 80)); return; } // not a code: Matt answers this DM himself
+  if (!g) { // not a code: Matt answers this DM himself
+    await env.DB.prepare("UPDATE people SET last_dm_at = ? WHERE igsid = ?").bind(Date.now(), igsid).run();
+    await igLog(env, "no-code", String(text).slice(0, 80)); return;
+  }
   const username = await igUsername(env, ev, igsid);
   await igLog(env, "dm", `code=${g.vcode} sender=${igsid} username=${username}`);
+  if (username) await env.DB.prepare("UPDATE people SET igsid = ?, last_dm_at = ? WHERE ig = ?").bind(igsid, Date.now(), normIg(username)).run();
   if (!username) return;
   const first = String(g.name || "").split(" ")[0];
   if (normIg(username) === normIg(g.ig)) {
@@ -550,10 +554,29 @@ function manifest(url) {
   }), { headers: { "content-type": "application/manifest+json", "cache-control": "no-store" } });
 }
 
+// When Matt approves or marks someone paid in the admin panel, tell them on Instagram.
+async function igStatusDms(env) {
+  const ev = await getEvent(env);
+  if (!ev || !ev.ig_token) return;
+  const rows = (await env.DB.prepare(
+    "SELECT g.*, p.igsid, p.last_dm_at FROM guests g JOIN people p ON p.ig = lower(g.ig) WHERE p.igsid IS NOT NULL AND g.verified = 1 AND (g.ig_sent IS NULL OR g.ig_sent <> g.status) LIMIT 20"
+  ).all()).results || [];
+  for (const g of rows) {
+    const first = String(g.name || "").split(" ")[0];
+    const link = shortUrl(await shortFor(env, g), g.token);
+    const text = g.ig_sent == null ? null : {
+      approved: `🎉 You've been accepted, ${first}!\nLink: ${link}`,
+      paid: `✓ Payment received, ${first}. You're on the list!\nLink: ${link}`,
+    }[g.status];
+    await env.DB.prepare("UPDATE guests SET ig_sent = ? WHERE token = ?").bind(g.status, g.token).run();
+    if (text) await igSend(env, ev, g.igsid, text);
+  }
+}
+
 async function tickIfDue(env) {
   const now = Date.now();
   const r = await env.DB.prepare("UPDATE event SET tick_at = ? WHERE id = 1 AND (tick_at IS NULL OR tick_at < ?)").bind(now, now - 55000).run();
-  if (r.meta && r.meta.changes) await pushTick(env, getEvent, parseProgram);
+  if (r.meta && r.meta.changes) { await pushTick(env, getEvent, parseProgram); await igStatusDms(env); }
 }
 
 // Security headers on every response the site sends.

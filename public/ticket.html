@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="/site.css?v=20261013d">
+<link rel="stylesheet" href="/site.css?v=20261013e">
 <script src="/notify.js?v=20261013c" defer></script>
 <style>
 main{padding-block:44px 80px}
@@ -619,7 +619,7 @@ function render(d){
         <p class="who">${esc(d.name)}</p>
         <p class="meta">Show this QR and your photo ID at the door</p>
       </div>
-      ${d.location && !over ? `<div class="where"><div><span class="eyebrow" style="color:#f3d3cc">The place</span><p>${esc(d.location)}</p></div><a class="btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener">Directions ↗</a></div>` : ""}
+      ${d.location && !over ? `<div class="where"><div><span class="eyebrow" style="color:#f3d3cc">The place</span><p><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px">${esc(d.location)}</a></p></div><a class="btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener">Open in Google Maps</a></div>` : ""}
       ${!inside && !over ? programmeHTML(d) : ""}
       ${over ? "" : `<div class="actions">
         <button class="btn" type="button" id="pdf">Download ticket (PDF)</button>

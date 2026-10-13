@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="/site.css?v=20261013d">
+<link rel="stylesheet" href="/site.css?v=20261013e">
 <script src="/notify.js?v=20261013c" defer></script>
 <style>
 /* Door scanner: dark, one-handed, big verdicts. Built for a phone at night. */
@@ -181,7 +181,7 @@ function show(d, text){
   else {
     const g = d.guest;
     if (!g.current) html = `<div class="icon">✕</div><p class="big">Wrong party</p><p class="who">${esc(g.name)}</p><p class="sub">This ticket is for ${esc(g.event)}.</p><div class="row">${next}</div>`;
-    else if (g.status === "in" && d.fresh) { cls = "go"; html = `<div class="icon">✓</div><p class="big">Let in</p><p class="who">${esc(g.name)}</p><p class="code">${esc(g.code)}</p>${g.sign ? `<p class="sign">Give: ${esc(g.sign)}</p>` : ""}<p class="sub">Check their photo ID matches the name.</p><div class="row"><button class="btn light" type="button" data-next>Next guest</button></div>`; }
+    else if (g.status === "in" && d.fresh) { cls = "go"; window.ppNotify && ppNotify("You checked in", "ok"); html = `<div class="icon">✓</div><p class="big">Let in</p><p class="who">${esc(g.name)}</p><p class="code">${esc(g.code)}</p>${g.sign ? `<p class="sign">Give: ${esc(g.sign)}</p>` : ""}<p class="sub">Check their photo ID matches the name.</p><div class="row"><button class="btn light" type="button" data-next>Next guest</button></div>`; }
     else if (g.status === "in") html = `<div class="icon">✕</div><p class="big">Already inside</p><p class="who">${esc(g.name)}</p><p class="sub">This ticket was used at ${esc(hhmm(g.in_at))}. Don't let in twice.</p><p class="code">${esc(g.code)}</p><div class="row">${next}</div>`;
     else if (g.status === "paid") { cls = "hold"; html = `<p class="sub" style="font-family:var(--f-mono);letter-spacing:.1em;text-transform:uppercase">Paid · ${esc(euro(g.price))}</p><p class="who" style="font-size:30px">${esc(g.name)}</p><p class="code">${esc(g.code)}</p><p class="sub">Check their photo ID, then let them in.</p><div class="row"><button class="btn" type="button" data-in="${esc(g.code)}">Let in</button><button class="btn ghost" type="button" data-next>Cancel</button></div>`; }
     else if (g.status === "approved") html = `<div class="icon">✕</div><p class="big">Not paid</p><p class="who">${esc(g.name)}</p><p class="sub">Approved, but the payment of ${esc(euro(g.price))} hasn't been confirmed. Check in the admin panel.</p><div class="row">${next}</div>`;

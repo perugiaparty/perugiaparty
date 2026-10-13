@@ -74,9 +74,14 @@ label small{font-weight:400;color:var(--muted)}
 .pp-note-act{flex:none;font:inherit;font-size:13px;font-weight:700;background:var(--cream);color:var(--ink);border:0;border-radius:999px;padding:4px 11px;cursor:pointer}
 .pp-note-x{flex:none;background:transparent;border:0;color:var(--muted-dark);font-size:18px;line-height:1;width:24px;height:24px;cursor:pointer;border-radius:50%}
 .pp-note-x:hover{color:var(--cream)}
-.pp-note.error .pp-note-icon{background:#ff4a3d}
-.pp-note.warn .pp-note-icon{background:#f2b84b}
-.pp-note.ok .pp-note-icon{background:#3ddc84}
+/* one colour per kind: green = done, red = error, yellow = check something */
+.pp-note.ok,.pp-note.info{background:#1f9d55;color:#fff}
+.pp-note.error{background:#d32f2f;color:#fff}
+.pp-note.warn{background:#f2b84b;color:#141210}
+.pp-note .pp-note-icon{background:rgba(255,255,255,.25);color:inherit}
+.pp-note.warn .pp-note-icon{background:rgba(20,18,16,.15)}
+.pp-note .pp-note-x{color:inherit;opacity:.75}.pp-note .pp-note-x:hover{color:inherit;opacity:1}
+.pp-note .pp-note-act{background:rgba(255,255,255,.92);color:#141210}
 /* form fields with a problem */
 .has-error input,.has-error textarea,input.has-error,input[aria-invalid="true"],textarea[aria-invalid="true"]{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(185,0,0,.14)}
 .check.has-error{color:var(--red-deep)}

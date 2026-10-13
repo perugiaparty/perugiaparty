@@ -1,7 +1,7 @@
 // PerugiaParty notifications: one look for every error, warning and success message on the site.
 // ppNotify("Short message", "error" | "warn" | "ok" | "info", { timeout, action: { label, onClick } }) · one row, keep it to a few words
 (function () {
-  const ICON = { error: "!", warn: "!", ok: "✓", info: "i" };
+  const ICON = { error: "!", warn: "!", ok: "✓", info: "✓" };
   const TITLE = { error: "Something went wrong", warn: "Heads up", ok: "Done", info: "Good to know" };
   let box = null;
   function root() {
