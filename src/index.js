@@ -160,20 +160,30 @@ async function hmacHex(secret, text) {
   return Array.from(new Uint8Array(sig), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 function sameText(a, b) { if (a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0; }
+// Small diagnostics log for the Instagram connection (kept to the last 200 lines).
+async function igLog(env, kind, detail) {
+  try {
+    await env.DB.prepare("INSERT INTO ig_log (at, kind, detail) VALUES (?, ?, ?)").bind(Date.now(), kind, String(detail || "").slice(0, 500)).run();
+    await env.DB.prepare("DELETE FROM ig_log WHERE id < (SELECT MAX(id) - 200 FROM ig_log)").run();
+  } catch (e) {}
+}
 async function igWebhookVerify(url, env) {
   const ev = await getEvent(env);
   const ok = ev && ev.ig_verify_token && url.searchParams.get("hub.mode") === "subscribe" && url.searchParams.get("hub.verify_token") === ev.ig_verify_token;
+  await igLog(env, ok ? "verify-ok" : "verify-fail", `mode=${url.searchParams.get("hub.mode")} token_match=${!!ok}`);
   return ok ? new Response(url.searchParams.get("hub.challenge") || "", { status: 200 }) : new Response("Forbidden", { status: 403 });
 }
 async function igSend(env, ev, recipient, text) {
   try {
-    await fetch(`${igApi(env)}/me/messages`, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${ev.ig_token}` }, body: JSON.stringify({ recipient: { id: recipient }, message: { text } }) });
-  } catch (e) {}
+    const r = await fetch(`${igApi(env)}/me/messages`, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${ev.ig_token}` }, body: JSON.stringify({ recipient: { id: recipient }, message: { text } }) });
+    await igLog(env, r.ok ? "reply-ok" : "reply-fail", r.ok ? "" : (await r.text()).slice(0, 300));
+  } catch (e) { await igLog(env, "reply-error", String(e)); }
 }
 async function igUsername(env, ev, igsid) {
   try {
     const r = await fetch(`${igApi(env)}/${encodeURIComponent(igsid)}?fields=username&access_token=${encodeURIComponent(ev.ig_token)}`);
     const d = await r.json();
+    if (!d || !d.username) await igLog(env, "username-fail", JSON.stringify(d).slice(0, 300));
     return d && d.username ? String(d.username) : null;
   } catch (e) { return null; }
 }
@@ -184,8 +194,9 @@ async function igHandleDm(env, ev, igsid, text) {
     g = await env.DB.prepare("SELECT * FROM guests WHERE vcode = ?").bind(`${m[1]}-${m[2]}`).first();
     if (g) break;
   }
-  if (!g) return; // not a code: Matt answers this DM himself
+  if (!g) { await igLog(env, "no-code", String(text).slice(0, 80)); return; } // not a code: Matt answers this DM himself
   const username = await igUsername(env, ev, igsid);
+  await igLog(env, "dm", `code=${g.vcode} sender=${igsid} username=${username}`);
   if (!username) return;
   const first = String(g.name || "").split(" ")[0];
   if (normIg(username) === normIg(g.ig)) {
@@ -199,9 +210,10 @@ async function igHandleDm(env, ev, igsid, text) {
 async function igWebhook(req, env) {
   const raw = await req.text();
   const ev = await getEvent(env);
-  if (!ev || !ev.ig_app_secret || !ev.ig_token) return new Response("Not set up", { status: 503 });
+  await igLog(env, "post", raw.slice(0, 400));
+  if (!ev || !ev.ig_app_secret || !ev.ig_token) { await igLog(env, "not-set-up", ""); return new Response("Not set up", { status: 503 }); }
   const sig = req.headers.get("x-hub-signature-256") || "";
-  if (!sameText(sig, "sha256=" + (await hmacHex(ev.ig_app_secret, raw)))) return new Response("Bad signature", { status: 401 });
+  if (!sameText(sig, "sha256=" + (await hmacHex(ev.ig_app_secret, raw)))) { await igLog(env, "bad-signature", sig.slice(0, 20)); return new Response("Bad signature", { status: 401 }); }
   let body; try { body = JSON.parse(raw); } catch { return new Response("ok"); }
   for (const entry of body.entry || []) {
     for (const m of entry.messaging || []) {
