@@ -303,8 +303,8 @@ async function apiEvent(env) {
     price: priceRange(ev),
     requests_open: !!ev.requests_open,
     sold_out: await soldOut(env, ev),
-    // real number of requests for this party; the site only shows it from 13 up
-    signed_up: ((await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND status IN ('requested','waitlist','approved','paid','in')").bind(ev.tag).first()) || {}).n || 0,
+    // real number of places left for this party
+    spots_left: Number(ev.capacity) > 0 ? Math.max(0, Number(ev.capacity) - (await heldPlaces(env, ev.tag))) : null,
     poster: ev.poster ? (String(ev.poster).startsWith("data:") ? `/api/poster?v=${ev.updated_at || 0}` : ev.poster) : null,
     turnstile: ev.turnstile_site_key || null,
     ...splash,

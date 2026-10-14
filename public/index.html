@@ -601,11 +601,13 @@ function previewEvent(){ if (EVENT && EVENT.published && EVENT.name) $("pv-ev").
 preview();
 
 /* request form */
-// small social-proof line next to the button: only real numbers, only once there are at least 13
+// small live line next to the button, real numbers only
 function showSigned(ev){
-  const el = $("f-signed"), n = Number(ev && ev.signed_up) || 0;
-  if (!el || !ev.published || n < 13) return;
-  el.innerHTML = `<i aria-hidden="true"></i>${n} people already requested`;
+  const el = $("f-signed"); if (!el || !ev || !ev.published) return;
+  const parts = [];
+  if (ev.spots_left != null) parts.push(ev.spots_left > 0 ? `${ev.spots_left} spots left` : "Full · waitlist open");
+  if (!parts.length) return;
+  el.innerHTML = `<i aria-hidden="true"></i>${parts.join(" · ")}`;
   el.hidden = false;
 }
 function fieldErr(id){ const el = $(id); if (!el) return; if (window.ppFieldError) ppFieldError(el); else el.setAttribute("aria-invalid", "true"); }
