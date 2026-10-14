@@ -367,11 +367,7 @@ body.locked{overflow:hidden}
             <label for="f-intro">Say hi <small>(optional)</small></label>
             <textarea id="f-intro" placeholder="Who you are, who you'll know there" maxlength="500"></textarea>
           </div>
-          <div class="field">
-            <label for="f-with">Coming with a friend? <small>(their Instagram, optional)</small></label>
-            <input id="f-with" placeholder="@theirhandle" autocomplete="off" autocapitalize="off" maxlength="40">
-            <p class="pair-hint" id="f-pair" hidden></p>
-          </div>
+
           <div class="hp" aria-hidden="true"><label for="f-website">Website</label><input id="f-website" tabindex="-1" autocomplete="off"></div>
           <label class="check" for="f-age"><input type="checkbox" id="f-age"> I'm 18 or older and will bring photo ID.</label>
           <label class="check" for="f-rules"><input type="checkbox" id="f-rules"> I've read the <a href="#rules">house rules</a>.</label>
@@ -556,7 +552,7 @@ function tick(){
   const p = n => String(n).padStart(2,"0");
   c.innerHTML = [[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]].map(([v,l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
 }
-fetch("/api/event").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); setupForm(ev); pairHint(ev); })
+fetch("/api/event").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); setupForm(ev); })
   .catch(() => { if (window.ppNotify) ppNotify("Party info didn't load", "warn", { action: { label: "Refresh", onClick: () => location.reload() } }); });
 
 /* sold out -> waitlist wording; optional Cloudflare human check */
@@ -643,7 +639,6 @@ $("req-form").addEventListener("submit", async e => {
     turnstile: (window.turnstile && tsWidget !== null) ? turnstile.getResponse(tsWidget) : "",
     age: $("f-age").checked, rules: $("f-rules").checked,
     invite: INVITE || undefined,
-    with: $("f-with").value.trim() || undefined,
   };
   const missing = [], bad = [];
   const igClean = body.ig.replace(/^@+/, "");
