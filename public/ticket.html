@@ -173,6 +173,7 @@ h1{font-size:clamp(40px,8vw,64px)}
 .invite p{color:var(--muted);font-size:15px}
 .invite .lnk{font-family:var(--f-mono);font-size:14px;background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;overflow-wrap:anywhere}
 .invite .row2{display:flex;gap:8px;flex-wrap:wrap}
+.invite .dots{display:flex;gap:6px}.invite .dots i{flex:1;max-width:56px;height:8px;border-radius:99px;background:var(--paper);border:1.5px solid var(--ink)}.invite .dots i.on{background:var(--red)}
 .invite .btn.outline{color:var(--ink);border-color:var(--ink)}
 /* priority for returning guests */
 .prio{display:flex;gap:14px;align-items:center;background:var(--ink);color:var(--cream);border-radius:18px;padding:16px 18px}
@@ -406,6 +407,18 @@ function inviteHTML(d){
     <div class="lnk">${esc(v.url)}</div>
     <div class="row2"><button class="btn ink" type="button" id="inv-share" data-url="${esc(v.url)}" data-ev="${esc(event)}">Send invite</button><button class="btn outline" type="button" data-copy="${esc(v.url)}">Copy link</button></div></section>`;
 }
+function refHTML(d){
+  const r = d.ref; if (!r) return "";
+  const money = r.refund ? `€${Number(r.refund).toLocaleString("it-IT")}` : "your ticket money";
+  const dots = Array.from({ length: r.need }, (_, i) => `<i class="${i < r.done ? "on" : ""}"></i>`).join("");
+  const share = `<div class="lnk">${esc(r.url)}</div>
+    <div class="row2"><button class="btn ink" type="button" id="inv-share" data-url="${esc(r.url)}" data-ev="${esc(d.event)}">Send to friends</button><button class="btn outline" type="button" data-copy="${esc(r.url)}">Copy link</button></div>`;
+  if (r.earned) return `<section class="invite"><span class="left">${r.need} of ${r.need} new friends</span><div class="dots">${dots}</div><h2>Your ticket is on us.</h2><p>${r.need} friends who'd never been to PerugiaParty paid for their place. You get ${money} back after the party. You can still send your link to more friends.</p>${share}</section>`;
+  if (r.full) return `<section class="invite"><span class="left">Free tickets all taken</span><h2>Bring your friends anyway.</h2><p>All free tickets for this party have been earned. Your friends can still request a place with your link.</p>${share}</section>`;
+  return `<section class="invite"><span class="left">${r.done} of ${r.need} new friends</span><div class="dots">${dots}</div>
+    <h2>Bring ${r.need} new friends, get your ticket back.</h2>
+    <p>Send your link to friends who've never been to PerugiaParty. When ${r.need} of them have paid, you get ${money} back after the party.</p>${share}</section>`;
+}
 function verifyHTML(d){
   const handle = esc(d.ig || "your Instagram");
   if (d.verified) return `<div class="verified"><span>Instagram confirmed</span><span style="font-weight:500">Your login code:</span><code>${esc(d.vcode)}</code></div>`;
@@ -515,6 +528,7 @@ function decorate(d){
     if (h) h.insertAdjacentHTML("afterend", prioHTML("Priority · you came before", d.status === "waitlist" ? "Returning guests are first in line when a place opens up." : "Returning guests are first in line. We look at your request before new ones."));
   }
   if (d.next) P.insertAdjacentHTML("afterbegin", nextHTML(d) + inviteHTML(d)); // older ticket: the next party comes first
+  else if (d.ref) P.insertAdjacentHTML("beforeend", refHTML(d));
   else if (d.invite) P.insertAdjacentHTML("beforeend", inviteHTML(d));
   const again = $("again");
   if (again) again.addEventListener("click", async () => {
@@ -529,10 +543,11 @@ function decorate(d){
   });
   const sh = $("inv-share");
   if (sh) sh.addEventListener("click", async () => {
-    const url = sh.dataset.url, text = `Come to ${sh.dataset.ev} with me. Request your place with my invite:`;
+    const label = sh.dataset.label || (sh.dataset.label = sh.textContent);
+    const url = sh.dataset.url, text = `Come to ${sh.dataset.ev} with me. Request your place with my link:`;
     try { if (navigator.share) { await navigator.share({ title: "PerugiaParty", text, url }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
     try { await navigator.clipboard.writeText(text + " " + url); sh.textContent = "Invite copied"; } catch (e) { sh.textContent = "Copy the link above"; }
-    setTimeout(() => sh.textContent = "Send invite", 2500);
+    setTimeout(() => sh.textContent = label, 2500);
   });
 }
 // long party names: shrink a heading until its longest word fits, never break inside a word

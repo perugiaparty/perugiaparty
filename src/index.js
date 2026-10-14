@@ -157,9 +157,7 @@ async function invitesUsed(env, ev, ig) {
   const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND invited_by = ? AND status NOT IN ('declined','removed')").bind(ev.tag, ig).first();
   return r?.n || 0;
 }
-async function inviteFor(env, ev, ig) {
-  const limit = inviteLimit(ev);
-  if (!limit) return null;
+async function inviteCode(env, ig) {
   let p = await env.DB.prepare("SELECT invite_code FROM people WHERE ig = ?").bind(ig).first();
   if (!p) return null;
   let code = p.invite_code;
@@ -168,16 +166,44 @@ async function inviteFor(env, ev, ig) {
     try { await env.DB.prepare("UPDATE people SET invite_code = ? WHERE ig = ? AND invite_code IS NULL").bind(c, ig).run(); } catch (e) { continue; }
     code = (await env.DB.prepare("SELECT invite_code FROM people WHERE ig = ?").bind(ig).first())?.invite_code;
   }
+  return code || null;
+}
+async function inviteFor(env, ev, ig) {
+  const limit = inviteLimit(ev);
+  if (!limit) return null;
+  const code = await inviteCode(env, ig);
   if (!code) return null;
   const used = await invitesUsed(env, ev, ig);
   return { url: `https://perugiaparty.com/?invite=${code}`, limit, left: Math.max(0, limit - used) };
 }
+// ---- bring new friends: when N friends who never came before have paid, your ticket is free ----
+const refOn = (ev) => Number(ev.ref_on) === 1 && Number(ev.ref_need) > 0;
+async function refStats(env, ev) {
+  const rows = (await env.DB.prepare("SELECT ig, invited_by FROM guests WHERE event = ? AND invited_by IS NOT NULL AND status IN ('paid','in')").bind(ev.tag).all()).results || [];
+  const seen = new Set(), per = {};
+  for (const r of rows) {
+    const f = normIg(r.ig);
+    if (!f || seen.has(f) || f === r.invited_by) continue;
+    seen.add(f);
+    if (await isReturner(env, f, ev.tag)) continue; // only friends who never came before count
+    per[r.invited_by] = (per[r.invited_by] || 0) + 1;
+  }
+  const need = Number(ev.ref_need);
+  return { per, need, earned: Object.values(per).filter((n) => n >= need).length, max: Number(ev.ref_max) > 0 ? Number(ev.ref_max) : null };
+}
+async function hasPlace(env, ev, ig) {
+  return !!(await env.DB.prepare("SELECT 1 FROM guests WHERE event = ? AND lower(ig) = ? AND status IN ('approved','paid','in') LIMIT 1").bind(ev.tag, ig).first());
+}
 async function resolveInvite(env, ev, code) {
   if (!code || !/^[a-z0-9]{8}$/.test(code)) return null;
   const p = await env.DB.prepare("SELECT ig, name FROM people WHERE invite_code = ?").bind(code).first();
-  if (!p || (await isBlocked(env, p.ig)) || !(await isReturner(env, p.ig, ev.tag)) || !(await personVerified(env, p.ig))) return null;
+  if (!p || (await isBlocked(env, p.ig)) || !(await personVerified(env, p.ig))) return null;
+  const first = String(p.name || "").split(" ")[0];
+  // "bring friends" links work for anyone with a place, once early access is over
+  if (refOn(ev) && !returnersOnly(ev) && (await hasPlace(env, ev, p.ig))) return { ig: p.ig, first, left: 999, ref: true };
+  if (!(await isReturner(env, p.ig, ev.tag))) return null;
   const left = inviteLimit(ev) - (await invitesUsed(env, ev, p.ig));
-  return { ig: p.ig, first: String(p.name || "").split(" ")[0], left };
+  return { ig: p.ig, first, left };
 }
 function parseProgram(text) {
   return String(text || "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean).map((l) => {
@@ -469,7 +495,14 @@ async function apiTicket(url, env) {
     };
   }
   // invite link only for confirmed returning guests whose place for this party is approved
-  if (returner && trusted && sameEvent && ["approved", "paid", "in"].includes(g.status) && ev.published && ig) out.invite = await inviteFor(env, ev, ig);
+  const placed = trusted && sameEvent && ["approved", "paid", "in"].includes(g.status) && ev.published && ig;
+  if (placed && refOn(ev) && !returnersOnly(ev)) {
+    const code = await inviteCode(env, ig);
+    if (code) {
+      const st = await refStats(env, ev), done = st.per[ig] || 0;
+      out.ref = { url: `https://perugiaparty.com/?invite=${code}`, need: st.need, done: Math.min(done, st.need), earned: done >= st.need, full: done < st.need && st.max != null && st.earned >= st.max, refund: g.price ?? null };
+    }
+  } else if (placed && returner) out.invite = await inviteFor(env, ev, ig);
   return json(out);
 }
 
