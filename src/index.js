@@ -584,10 +584,11 @@ function eventJsonLd(ev) {
 }
 async function homepage(req, env) {
   // "Coming soon" switch in the admin panel: show the holding screen instead of the homepage.
-  // The homepage itself stays untouched underneath; ?preview shows it anyway.
+  // Only the secret preview link from the admin panel works (?preview=<key>).
   const u = new URL(req.url);
-  if (!u.searchParams.has("preview")) {
-    let ev0 = null; try { ev0 = await getEvent(env); } catch (e) {}
+  let ev0 = null; try { ev0 = await getEvent(env); } catch (e) {}
+  const pv = u.searchParams.get("preview");
+  if (!(ev0 && ev0.preview_key && pv && pv === ev0.preview_key)) {
     if (ev0 && Number(ev0.splash) === 1) {
       const soon = await env.ASSETS.fetch(new Request(new URL("/soon", u), req));
       const h = new Headers(soon.headers); h.set("cache-control", "no-store");
