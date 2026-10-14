@@ -268,6 +268,10 @@ html,body{overflow-x:clip}
 .savebox .btn.done:disabled{opacity:.35;cursor:not-allowed}
 .savebox .hint{font-family:var(--f-mono);font-size:13px;color:var(--red-deep);min-height:1.4em;text-align:center}
 body.locked{overflow:hidden}
+.send-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.signed{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;color:var(--muted)}
+.signed i{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 0 0 rgba(185,0,0,.5);animation:sgp 1.8s infinite}
+@keyframes sgp{70%{box-shadow:0 0 0 7px rgba(185,0,0,0)}100%{box-shadow:0 0 0 0 rgba(185,0,0,0)}}
 </style>
 </head>
 <body>
@@ -367,7 +371,7 @@ body.locked{overflow:hidden}
           <label class="check" for="f-rules"><input type="checkbox" id="f-rules"> I've read the <a href="#rules">house rules</a>.</label>
           <p class="err" id="f-err" role="alert"></p>
           <div id="ts" class="ts" hidden></div>
-          <div><button class="btn" type="submit" id="f-send">Send request</button></div>
+          <div class="send-row"><button class="btn" type="submit" id="f-send">Send request</button><span class="signed" id="f-signed" hidden></span></div>
           <p class="privacy">We only use your name, Instagram and WhatsApp to run our guest lists. DM us anytime to have them deleted. <a href="/privacy">Privacy</a></p>
         </form>
         <aside class="side" id="side" aria-live="polite">
@@ -546,7 +550,7 @@ function tick(){
   const p = n => String(n).padStart(2,"0");
   c.innerHTML = [[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]].map(([v,l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
 }
-fetch("/api/event").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); setupForm(ev); })
+fetch("/api/event").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); setupForm(ev); showSigned(ev); })
   .catch(() => { if (window.ppNotify) ppNotify("Party info didn't load", "warn", { action: { label: "Refresh", onClick: () => location.reload() } }); });
 
 /* sold out -> waitlist wording; optional Cloudflare human check */
@@ -597,6 +601,13 @@ function previewEvent(){ if (EVENT && EVENT.published && EVENT.name) $("pv-ev").
 preview();
 
 /* request form */
+// small social-proof line next to the button: only real numbers, only once there are at least 13
+function showSigned(ev){
+  const el = $("f-signed"), n = Number(ev && ev.signed_up) || 0;
+  if (!el || !ev.published || n < 13) return;
+  el.innerHTML = `<i aria-hidden="true"></i>${n} people already requested`;
+  el.hidden = false;
+}
 function fieldErr(id){ const el = $(id); if (!el) return; if (window.ppFieldError) ppFieldError(el); else el.setAttribute("aria-invalid", "true"); }
 $("req-form").addEventListener("submit", async e => {
   e.preventDefault();
