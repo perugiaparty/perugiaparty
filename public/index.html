@@ -371,7 +371,7 @@ body.locked{overflow:hidden}
           <label class="check" for="f-rules"><input type="checkbox" id="f-rules"> I've read the <a href="#rules">house rules</a>.</label>
           <p class="err" id="f-err" role="alert"></p>
           <div id="ts" class="ts" hidden></div>
-          <div class="send-row"><button class="btn" type="submit" id="f-send">Send request</button><span class="signed" id="f-signed" hidden></span></div>
+          <div class="send-row"><button class="btn" type="submit" id="f-send">Send request</button></div>
           <p class="privacy">We only use your name, Instagram and WhatsApp to run our guest lists. DM us anytime to have them deleted. <a href="/privacy">Privacy</a></p>
         </form>
         <aside class="side" id="side" aria-live="polite">
@@ -527,7 +527,7 @@ function renderNext(ev){
   const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]].filter(f => f[1]);
   const cta = ev.requests_open ? `<a class="btn" href="#request">${ev.sold_out ? "Join the waitlist" : "Request a place"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram ↗</a>`;
   el.classList.toggle("has-poster", !!ev.poster);
-  el.innerHTML = `<div class="next-main"><span class="status"><i></i>${ev.requests_open ? (ev.sold_out ? "Sold out · waitlist open" : "Requests open") : (ev.sold_out ? "Sold out" : "Requests open soon")}</span>
+  el.innerHTML = `<div class="next-main"><span class="status"><i></i>${statusLine(ev)}</span>
       <h3>${esc(ev.name || "Next PerugiaParty")}</h3>
       <p>Apply below and save your ticket link. Once approved, pay to confirm your place and unlock your ticket and the location.</p>
       ${facts.length ? `<dl>${facts.map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>` : ""}
@@ -550,7 +550,7 @@ function tick(){
   const p = n => String(n).padStart(2,"0");
   c.innerHTML = [[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]].map(([v,l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
 }
-fetch("/api/event").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); setupForm(ev); showSigned(ev); })
+fetch("/api/event").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); setupForm(ev); })
   .catch(() => { if (window.ppNotify) ppNotify("Party info didn't load", "warn", { action: { label: "Refresh", onClick: () => location.reload() } }); });
 
 /* sold out -> waitlist wording; optional Cloudflare human check */
@@ -602,6 +602,15 @@ preview();
 
 /* request form */
 // small live line next to the button, real numbers only
+// top-left status of the party: "13 signed up · 137 spots left"
+function statusLine(ev){
+  if (ev.sold_out) return ev.requests_open ? "Sold out · waitlist open" : "Sold out";
+  if (!ev.requests_open) return "Requests open soon";
+  const parts = [];
+  if (ev.signed_up > 0) parts.push(`${ev.signed_up} signed up`);
+  if (ev.spots_left != null) parts.push(`${ev.spots_left} spots left`);
+  return parts.length ? parts.join(" · ") : "Requests open";
+}
 function showSigned(ev){
   const el = $("f-signed"); if (!el || !ev || !ev.published) return;
   const parts = [];
