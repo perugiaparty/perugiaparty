@@ -630,6 +630,7 @@ function manifest(url) {
 }
 
 // When Matt approves or marks someone paid in the admin panel, tell them on Instagram.
+const ordinal = (n) => n + (["th", "st", "nd", "rd"][((n % 100) - 20) % 10] || ["th", "st", "nd", "rd"][n % 100] || "th");
 async function igStatusDms(env) {
   const ev = await getEvent(env);
   if (!ev || !ev.ig_token) return;
@@ -639,13 +640,23 @@ async function igStatusDms(env) {
   for (const g of rows) {
     const first = String(g.name || "").split(" ")[0];
     const link = shortUrl(await shortFor(env, g), g.token);
+    const free = g.status === "paid" && Number(g.price) === 0 && g.ig_sent !== "paid";
     const text = g.ig_sent == null ? null : {
       approved: `You've been accepted`,
-      paid: `Payment confirmed`,
+      paid: free ? `You're in. Free entry` : `Payment confirmed`,
     }[g.status];
     // claim it first so two runs at once never send twice
     const c = await env.DB.prepare("UPDATE guests SET ig_sent = ? WHERE token = ? AND (ig_sent IS NULL OR ig_sent <> ?)").bind(g.status, g.token, g.status).run();
-    if (text && c.meta && c.meta.changes) await igSend(env, ev, g.igsid, text);
+    if (text && c.meta && c.meta.changes) {
+      await igSend(env, ev, g.igsid, text);
+      // returning guests get reminded of the free-pair offer with their own link
+      const n = Number(ev.pair_free) || 0;
+      const pairs = n > 0 ? ((await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND invited_by IS NOT NULL AND status NOT IN ('declined','removed','released')").bind(ev.tag).first()) || {}).n || 0 : 0;
+      if (g.status === "approved" && n > 0 && pairs < n && g.event === ev.tag && (await isReturner(env, normIg(g.ig), ev.tag))) {
+        const code = await inviteCode(env, normIg(g.ig));
+        if (code) await igSend(env, ev, g.igsid, `Bring a friend who's never been to PerugiaParty. The ${ordinal(n)} pair to sign up together gets in free, both of you.\n\nSend them your link: https://perugiaparty.com/?invite=${code}`);
+      }
+    }
   }
 }
 
