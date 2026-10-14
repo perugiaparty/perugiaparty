@@ -605,6 +605,7 @@ preview();
 function showSigned(ev){
   const el = $("f-signed"); if (!el || !ev || !ev.published) return;
   const parts = [];
+  if (ev.signed_up > 0) parts.push(`${ev.signed_up} signed up`);
   if (ev.spots_left != null) parts.push(ev.spots_left > 0 ? `${ev.spots_left} spots left` : "Full · waitlist open");
   if (!parts.length) return;
   el.innerHTML = `<i aria-hidden="true"></i>${parts.join(" · ")}`;

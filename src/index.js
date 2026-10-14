@@ -63,7 +63,7 @@ function dateTier(ev) {
 async function spotsLeft(env, ev) {
   const order = ["early", "normal", "late"];
   const hasCaps = order.some((t) => Number(ev["cap_" + t]) > 0);
-  const total = Number(ev.capacity) > 0 ? Math.max(0, Number(ev.capacity) - (await heldPlaces(env, ev.tag))) : null;
+  const total = Number(ev.capacity) > 0 ? Math.max(0, Number(ev.capacity) - (await heldPlaces(env, ev.tag)) - Math.max(0, Number(ev.offline_going) || 0)) : null;
   if (!hasCaps) return total;
   const rows = (await env.DB.prepare("SELECT ticket, COUNT(*) AS n FROM guests WHERE event = ? AND status IN ('approved','paid','in') GROUP BY ticket").bind(ev.tag).all()).results || [];
   const used = Object.fromEntries(rows.map((r) => [r.ticket, r.n]));
@@ -79,7 +79,7 @@ async function spotsLeft(env, ev) {
 async function soldOut(env, ev) {
   const cap = Number(ev.capacity);
   if (!cap || cap <= 0) return false;
-  return (await heldPlaces(env, ev.tag)) >= cap;
+  return (await heldPlaces(env, ev.tag)) + Math.max(0, Number(ev.offline_going) || 0) >= cap;
 }
 
 // ---- people: one record per Instagram handle, shared across editions ----
@@ -330,6 +330,8 @@ async function apiEvent(env) {
     sold_out: await soldOut(env, ev),
     // real number of places left at the current price (tier name is never sent)
     spots_left: await spotsLeft(env, ev),
+    // people already coming (set in admin) + everyone who signed up on the website
+    signed_up: Math.max(0, Number(ev.offline_going) || 0) + (((await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND status IN ('requested','waitlist','approved','paid','in')").bind(ev.tag).first()) || {}).n || 0),
     poster: ev.poster ? (String(ev.poster).startsWith("data:") ? `/api/poster?v=${ev.updated_at || 0}` : ev.poster) : null,
     turnstile: ev.turnstile_site_key || null,
     ...splash,
