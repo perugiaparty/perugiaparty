@@ -354,6 +354,7 @@ async function apiEvent(env) {
     price: priceRange(ev),
     requests_open: !!ev.requests_open,
     sold_out: await soldOut(env, ev),
+    pair_free: Number(ev.pair_free) || 0,
     // real number of places left at the current price (tier name is never sent)
     spots_left: await spotsLeft(env, ev),
     // people already coming (set in admin) + everyone who signed up on the website
@@ -391,6 +392,8 @@ async function apiRequest(req, env) {
   let ig = clean(body.ig, 40).replace(/^@+/, "");
   const phone = clean(body.phone, 30);
   const note = clean(body.intro, 500);
+  let withIg = clean(body.with, 40).replace(/^@+/, "").toLowerCase();
+  withIg = /^[a-z0-9._]{1,30}$/.test(withIg) ? "@" + withIg : null;
   if (name.length < 2) return json({ error: "Add your full name." }, 400);
   if (!/^[A-Za-z0-9._]{1,30}$/.test(ig)) return json({ error: "Add your Instagram handle, like @yourname." }, 400);
   if (body.age !== true || body.rules !== true) return json({ error: "Confirm you're 18+ and accept the house rules." }, 400);
@@ -412,8 +415,9 @@ async function apiRequest(req, env) {
   }
   const status = (await soldOut(env, ev)) ? "waitlist" : "requested";
   const token = newToken(), vcode = newVcode(ev.tag);
-  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, invited_by, is_returning, vcode, verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)")
-    .bind(token, ev.tag, name, ig, phone, note, status, Date.now(), inviter, returning ? 1 : 0, vcode).run();
+  if (withIg === ig) withIg = null;
+  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, invited_by, is_returning, vcode, verified, with_ig) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)")
+    .bind(token, ev.tag, name, ig, phone, note, status, Date.now(), inviter, returning ? 1 : 0, vcode, withIg).run();
   await upsertPerson(env, ig, name, phone);
   return json({ ok: true, token, vcode, ig, waitlist: status === "waitlist" });
 }
@@ -651,10 +655,9 @@ async function igStatusDms(env) {
       await igSend(env, ev, g.igsid, text);
       // returning guests get reminded of the free-pair offer with their own link
       const n = Number(ev.pair_free) || 0;
-      const pairs = n > 0 ? ((await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND invited_by IS NOT NULL AND status NOT IN ('declined','removed','released')").bind(ev.tag).first()) || {}).n || 0 : 0;
+      const pairs = n > 0 ? ((await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND (invited_by IS NOT NULL OR with_ig IS NOT NULL) AND status NOT IN ('declined','removed','released')").bind(ev.tag).first()) || {}).n || 0 : 0;
       if (g.status === "approved" && n > 0 && pairs < n && g.event === ev.tag && (await isReturner(env, normIg(g.ig), ev.tag))) {
-        const code = await inviteCode(env, normIg(g.ig));
-        if (code) await igSend(env, ev, g.igsid, `Bring a friend who's never been to PerugiaParty. The ${ordinal(n)} pair to sign up together gets in free, both of you.\n\nSend them your link: https://perugiaparty.com/?invite=${code}`);
+        await igSend(env, ev, g.igsid, `Bring a friend who's never been to PerugiaParty. The ${ordinal(n)} pair gets in free, both of you.\n\nThey request a place on perugiaparty.com and fill in ${normIg(g.ig)} as their friend.`);
       }
     }
   }

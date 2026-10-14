@@ -176,6 +176,7 @@ textarea{resize:vertical;min-height:88px}
 .req-note{display:grid;gap:2px;border-radius:16px;padding:14px 16px 14px 18px;background:var(--ink);color:var(--cream);border-left:6px solid var(--red);margin-bottom:6px}
 .req-note b{font-size:16px}
 .req-note span{font-size:14px;color:var(--muted-dark)}
+.pair-hint{font-size:14px;color:var(--muted);margin-top:6px}.pair-hint b{color:var(--red,#b90000)}
 .req-note.invite{background:var(--red);border-left-color:var(--ink)}
 .req-note.invite span{color:#f3d3cc}
 /* house rules: full-width dark band */
@@ -366,6 +367,11 @@ body.locked{overflow:hidden}
             <label for="f-intro">Say hi <small>(optional)</small></label>
             <textarea id="f-intro" placeholder="Who you are, who you'll know there" maxlength="500"></textarea>
           </div>
+          <div class="field">
+            <label for="f-with">Coming with a friend? <small>(their Instagram, optional)</small></label>
+            <input id="f-with" placeholder="@theirhandle" autocomplete="off" autocapitalize="off" maxlength="40">
+            <p class="pair-hint" id="f-pair" hidden></p>
+          </div>
           <div class="hp" aria-hidden="true"><label for="f-website">Website</label><input id="f-website" tabindex="-1" autocomplete="off"></div>
           <label class="check" for="f-age"><input type="checkbox" id="f-age"> I'm 18 or older and will bring photo ID.</label>
           <label class="check" for="f-rules"><input type="checkbox" id="f-rules"> I've read the <a href="#rules">house rules</a>.</label>
@@ -550,7 +556,7 @@ function tick(){
   const p = n => String(n).padStart(2,"0");
   c.innerHTML = [[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]].map(([v,l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
 }
-fetch("/api/event").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); setupForm(ev); })
+fetch("/api/event").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); setupForm(ev); pairHint(ev); })
   .catch(() => { if (window.ppNotify) ppNotify("Party info didn't load", "warn", { action: { label: "Refresh", onClick: () => location.reload() } }); });
 
 /* sold out -> waitlist wording; optional Cloudflare human check */
@@ -602,6 +608,13 @@ preview();
 
 /* request form */
 // small live line next to the button, real numbers only
+// free pair: one sentence under the friend field
+function pairHint(ev){
+  const n = Number(ev && ev.pair_free) || 0, el = $("f-pair"); if (!el || !n) return;
+  const ord = n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : n + "th";
+  el.innerHTML = `Been before and your friend never has? The <b>${ord} pair</b> gets in free, both of you.`;
+  el.hidden = false;
+}
 // top-left status of the party: "13 signed up · 137 spots left"
 function statusLine(ev){
   if (ev.sold_out) return ev.requests_open ? "Sold out · waitlist open" : "Sold out";
@@ -630,6 +643,7 @@ $("req-form").addEventListener("submit", async e => {
     turnstile: (window.turnstile && tsWidget !== null) ? turnstile.getResponse(tsWidget) : "",
     age: $("f-age").checked, rules: $("f-rules").checked,
     invite: INVITE || undefined,
+    with: $("f-with").value.trim() || undefined,
   };
   const missing = [], bad = [];
   const igClean = body.ig.replace(/^@+/, "");
