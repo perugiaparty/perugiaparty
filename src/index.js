@@ -51,6 +51,31 @@ async function heldPlaces(env, tag) {
   const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND status IN ('approved','paid','in')").bind(tag).first();
   return r?.n || 0;
 }
+// Tier that applies right now by date (same rule as the admin Approve button).
+function dateTier(ev) {
+  const now = Date.now(), eu = ev.early_until ? Date.parse(ev.early_until) : NaN, nu = ev.normal_until ? Date.parse(ev.normal_until) : NaN;
+  if (Number.isFinite(eu) && now < eu) return "early";
+  if (Number.isFinite(nu) && now >= nu) return "late";
+  return "normal";
+}
+// Places left in the current ticket round. When a round has its own limit and is full,
+// the next round counts. Without round limits, falls back to the overall guest limit.
+async function spotsLeft(env, ev) {
+  const order = ["early", "normal", "late"];
+  const hasCaps = order.some((t) => Number(ev["cap_" + t]) > 0);
+  const total = Number(ev.capacity) > 0 ? Math.max(0, Number(ev.capacity) - (await heldPlaces(env, ev.tag))) : null;
+  if (!hasCaps) return total;
+  const rows = (await env.DB.prepare("SELECT ticket, COUNT(*) AS n FROM guests WHERE event = ? AND status IN ('approved','paid','in') GROUP BY ticket").bind(ev.tag).all()).results || [];
+  const used = Object.fromEntries(rows.map((r) => [r.ticket, r.n]));
+  for (const t of order.slice(order.indexOf(dateTier(ev)))) {
+    if (ev["price_" + t] == null || ev["price_" + t] === "") continue;
+    const cap = Number(ev["cap_" + t]);
+    if (!(cap > 0)) return total; // this round has no limit
+    const left = cap - (used[t] || 0);
+    if (left > 0) return total == null ? left : Math.min(left, total);
+  }
+  return 0;
+}
 async function soldOut(env, ev) {
   const cap = Number(ev.capacity);
   if (!cap || cap <= 0) return false;
@@ -303,8 +328,8 @@ async function apiEvent(env) {
     price: priceRange(ev),
     requests_open: !!ev.requests_open,
     sold_out: await soldOut(env, ev),
-    // real number of places left for this party
-    spots_left: Number(ev.capacity) > 0 ? Math.max(0, Number(ev.capacity) - (await heldPlaces(env, ev.tag))) : null,
+    // real number of places left at the current price (tier name is never sent)
+    spots_left: await spotsLeft(env, ev),
     poster: ev.poster ? (String(ev.poster).startsWith("data:") ? `/api/poster?v=${ev.updated_at || 0}` : ev.poster) : null,
     turnstile: ev.turnstile_site_key || null,
     ...splash,
