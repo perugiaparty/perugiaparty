@@ -276,6 +276,9 @@ body.locked{overflow:hidden}
 .signed{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;color:var(--muted)}
 .signed i{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 0 0 rgba(185,0,0,.5);animation:sgp 1.8s infinite}
 @keyframes sgp{70%{box-shadow:0 0 0 7px rgba(185,0,0,0)}100%{box-shadow:0 0 0 0 rgba(185,0,0,0)}}
+.hero-meta{display:flex;align-items:center;gap:10px;margin:0;font-family:var(--f-mono);font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);cursor:default;user-select:none}
+.hero-meta .hm-red{color:var(--red-deep);font-weight:500}
+.hero-meta .hm-red:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:9px;vertical-align:2px}
 </style>
 </head>
 <body>
@@ -294,7 +297,7 @@ body.locked{overflow:hidden}
   <div class="wrap">
     <div class="hero">
       <div>
-        <div class="chips"><span class="chip red">Invite only</span><span class="chip hide-phone">Perugia</span><span class="chip">18+</span></div>
+        <p class="hero-meta"><span class="hm-red">Invite only</span><span aria-hidden="true">·</span>Perugia<span aria-hidden="true">·</span>18+</p>
         <h1 style="margin-top:22px">Your people. <em>Your night.</em></h1>
         <p class="lede">Private student parties in Perugia. House-party vibes, a guest list, and new people to meet.</p>
         <div class="ctas">
