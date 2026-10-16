@@ -777,7 +777,9 @@ async function route(req, env) {
         return json({ error: "Something went wrong on our side. Try again in a minute." }, 500);
       }
     }
-    if (url.pathname === "/" || url.pathname === "/index.html") return homepage(req, env);
+    // one address per page for Google: /index.html is the same page as /
+    if (url.pathname === "/index.html") return Response.redirect(url.origin + "/" + url.search, 301);
+    if (url.pathname === "/") return homepage(req, env);
     return env.ASSETS.fetch(req);
   }
 }

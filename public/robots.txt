@@ -5,6 +5,6 @@ Disallow: /t/
 Disallow: /ticket
 Disallow: /door
 Disallow: /admin
+Disallow: /soon
 
 Sitemap: https://perugiaparty.com/sitemap.xml
-Disallow: /soon
