@@ -655,7 +655,7 @@ $("req-form").addEventListener("submit", async e => {
       if (/name/i.test(msg)) fieldErr("f-name");
       if (/instagram/i.test(msg) && r.status === 400) fieldErr("f-ig");
       if (/18\+|house rules/i.test(msg)) { fieldErr("f-age"); fieldErr("f-rules"); }
-      if (window.ppNotify) ppNotify(r.status === 409 || r.status === 403 ? "Request not sent · see below" : r.status >= 500 ? "Server error · try again" : "Check your request", r.status >= 500 ? "error" : "warn");
+      if (window.ppNotify) ppNotify(r.status === 409 || r.status === 403 ? "Not sent · see below" : r.status >= 500 ? "Server error · try again" : "Check your request", r.status >= 500 ? "error" : "warn");
       return;
     }
     rememberToken(data.token);
@@ -672,7 +672,7 @@ $("req-form").addEventListener("submit", async e => {
     openSave(data.vcode, handle, data.waitlist);
   } catch (x) {
     err.textContent = "Couldn't reach us. Check your connection and try again.";
-    if (window.ppNotify) ppNotify("No connection · not sent", "error", { action: { label: "Retry", onClick: () => $("req-form").requestSubmit() } });
+    if (window.ppNotify) ppNotify("Offline · not sent", "error", { action: { label: "Retry", onClick: () => $("req-form").requestSubmit() } });
   } finally { btn.disabled = false; btn.textContent = sendLabel(); try { if (window.turnstile && tsWidget !== null) turnstile.reset(tsWidget); } catch(e){} }
 });
 $("copy-link").addEventListener("click", () => {
@@ -700,7 +700,7 @@ function unlockSave(){ saveCopied = true; $("save-done").disabled = false; $("sa
 $("save-copy").addEventListener("click", () => {
   const text = $("save-link").textContent;
   try { navigator.clipboard.writeText(text).then(unlockSave, unlockSave); } catch (e) { unlockSave(); }
-  if (window.ppNotify) ppNotify("Code is in the chat · just press send", "ok");
+  if (window.ppNotify) ppNotify("Code ready · press send", "ok");
 });
 $("dm-link").addEventListener("click", () => { try { navigator.clipboard.writeText($("my-link").textContent); } catch (e) {} });
 $("save-link").addEventListener("click", () => { const r = document.createRange(); r.selectNodeContents($("save-link")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); try { navigator.clipboard.writeText($("save-link").textContent).then(unlockSave, () => {}); } catch (e) {} });

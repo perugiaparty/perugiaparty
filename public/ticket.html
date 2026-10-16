@@ -76,6 +76,37 @@ h1{font-size:clamp(40px,8vw,64px)}
 .ref .copy{color:var(--cream);border-color:#4a423b}
 .copyall{justify-self:start}
 .state{justify-self:start}
+/* one theme: pills take their colour from the card they sit on */
+.page > .state,.card .state{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.rq .state,.hype .state,.pay .state{background:var(--red);border-color:var(--red);color:var(--cream)}
+.hero-ok .state,.hype.paid .state,.thanks .state,.where .state{background:var(--cream);border-color:var(--cream);color:var(--red)}
+.wl-tag{justify-self:start;background:var(--cream);color:var(--red);font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:4px 10px}
+/* paid */
+.hype.paid{background:var(--red)}
+.hype.paid h1{color:var(--cream);padding-right:70px}
+.hype.paid .lead{color:#f3d3cc}
+.hype.paid .lead b{color:var(--cream)}
+.hype.paid .count div{background:rgba(20,18,16,.22)}
+.hype.paid .count span{color:#f3d3cc}
+.rq-stamp.paid-stamp{color:var(--cream);border-color:var(--cream);font-size:16px;animation-delay:.25s}
+.cine.shine{overflow:hidden}
+.cine.shine::after{content:"";position:absolute;inset:-40% -60%;background:linear-gradient(105deg,transparent 42%,rgba(255,255,255,.14) 50%,transparent 58%);transform:translateX(-60%);animation:shine 3.2s 1s ease-in-out infinite;pointer-events:none}
+@keyframes shine{0%{transform:translateX(-60%)}55%,100%{transform:translateX(60%)}}
+.page .where{background:var(--ink)}
+.page .where .eyebrow.unl{color:#ff8a7f}
+.page .where .btn{background:var(--red);border-color:var(--red);color:var(--cream)}
+.page .actions{grid-template-columns:1fr 1fr}
+.actions .btn.wide{grid-column:1/-1}
+.unlock{position:fixed;inset:0;z-index:998;background:var(--red);color:var(--cream);display:grid;place-items:center;text-align:center;padding:24px;cursor:pointer;animation:unIn .35s ease-out both}
+.unlock.out{animation:unOut .45s ease-in forwards}
+.unlock-in{display:grid;gap:14px;justify-items:center}
+.unlock-k{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;background:var(--cream);color:var(--red);border-radius:999px;padding:5px 12px;animation:pop .4s .15s both}
+.unlock-h{font-family:var(--f-display);font-size:clamp(64px,20vw,120px);line-height:.9;margin:0;animation:bigIn .6s .25s cubic-bezier(.2,1.5,.4,1) both}
+.unlock-t{font-size:14px;color:#f3d3cc;animation:unIn .4s 1s both}
+@keyframes unIn{from{opacity:0}to{opacity:1}}
+@keyframes unOut{to{opacity:0;transform:translateY(-30px)}}
+@keyframes bigIn{from{opacity:0;transform:scale(.4) rotate(-6deg)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.unlock,.unlock *,.cine.shine::after{animation:none!important}}
 /* how to pay */
 .pay{position:relative;background:var(--ink);color:var(--cream);border-radius:24px;padding:22px 18px 18px;display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
 .pay .eyebrow{color:var(--muted-dark)}
@@ -90,8 +121,8 @@ h1{font-size:clamp(40px,8vw,64px)}
 .prow .pv{grid-area:v;font-family:var(--f-mono);font-size:16px;font-weight:500;color:var(--cream);overflow-wrap:anywhere;line-height:1.3}
 .prow .pill{grid-area:p;font-size:12px;font-weight:700;border:1.5px solid #4a423b;border-radius:999px;padding:5px 11px;color:var(--cream);white-space:nowrap}
 .prow.key .pk{color:#ff8a7f}
-.prow.got{border-color:#2f8f55;background:#16241b}
-.prow.got .pill{border-color:#2f8f55;color:#9be0b4}
+.prow.got{border-color:var(--red);background:#2a1513}
+.prow.got .pill{border-color:var(--red);background:var(--red);color:var(--cream)}
 .prow.off{cursor:default;opacity:.6}
 .pay-all{width:100%;margin-top:4px}
 .pay-faq{background:var(--paper);border:1.5px solid var(--line);border-radius:20px;padding:18px}
@@ -160,12 +191,12 @@ h1{font-size:clamp(40px,8vw,64px)}
 .where{background:var(--red);color:var(--cream);border-radius:20px;padding:20px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
 .where p{font-size:20px;font-weight:700;margin-top:2px}
 .where .btn{background:var(--cream);border-color:var(--cream);color:var(--red)}
-.inbar{background:#1f7a3d;color:#fff;border-radius:20px;padding:20px 22px;display:flex;align-items:center;gap:14px}
-.inbar .tick{flex:none;width:52px;height:52px;border-radius:50%;background:#fff;color:#1f7a3d;display:grid;place-items:center;font-size:30px;font-weight:700;line-height:1}
+.inbar{background:var(--ink);color:var(--cream);border:2px solid var(--red);border-radius:20px;padding:20px 22px;display:flex;align-items:center;gap:14px}
+.inbar .tick{flex:none;width:52px;height:52px;border-radius:50%;background:var(--red);color:var(--cream);display:grid;place-items:center;font-size:30px;font-weight:700;line-height:1}
 .inbar b{display:block;font-family:var(--f-display);font-weight:400;font-size:28px;line-height:1.05}
 .inbar span{font-size:15px;opacity:.9}
-.cine .instamp{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);border:5px solid #3ddc84;color:#3ddc84;background:rgba(17,17,17,.85);font-family:var(--f-mono);font-size:28px;font-weight:500;letter-spacing:.14em;padding:10px 18px;border-radius:12px;white-space:nowrap;z-index:2}
-.state.in{background:#1f7a3d;border-color:#1f7a3d;color:#fff}
+.cine .instamp{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);border:5px solid #ff4a3d;color:#ff4a3d;background:rgba(17,17,17,.85);font-family:var(--f-mono);font-size:28px;font-weight:500;letter-spacing:.14em;padding:10px 18px;border-radius:12px;white-space:nowrap;z-index:2}
+
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .actions .btn{width:100%}
 .actions .btn.outline{color:var(--ink);border-color:var(--ink)}
@@ -249,7 +280,7 @@ h1{font-size:clamp(40px,8vw,64px)}
 .vcode{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--cream);color:var(--ink);border-radius:14px;padding:12px 14px}
 .vcode span{font-family:var(--f-mono);font-size:clamp(24px,7vw,32px);font-weight:500;letter-spacing:.08em}
 .vcode .copy{border-color:var(--ink)}
-.verify .warn{background:#3a1512;color:#ffb4ab;border-radius:12px;padding:10px 12px;font-size:14px}
+.verify .warn{background:var(--red);color:var(--cream);border-radius:12px;padding:10px 12px;font-size:14px}
 .verified{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#dcefdc;color:#1f7a3d;border-radius:14px;padding:10px 14px;font-size:14px;font-weight:700}
 .verified code{font-family:var(--f-mono);font-weight:500;color:var(--ink);background:#fff;border-radius:8px;padding:2px 8px}
 /* log in with Instagram + code */
@@ -282,8 +313,8 @@ h1{font-size:clamp(40px,8vw,64px)}
 .appc .tx b{font-size:15px}
 .appc .tx span{font-size:13px;color:var(--muted)}
 .appc .btn{flex:none;padding:9px 16px;font-size:14px}
-.appc.on{background:#dcefdc;border-color:#bfe0c3}
-.appc.on .tx b{color:#1f7a3d}
+.appc.on{background:var(--cream-2);border-color:var(--ink)}
+.appc.on .tx b{color:var(--red)}
 .appc .steps{font-size:13px;color:var(--ink-2);margin:4px 0 0;padding-left:18px}
 @media (max-width:420px){.appc{flex-wrap:wrap}.appc .btn{width:100%}}
 </style>
@@ -320,7 +351,7 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-copy]"); if (!b) return;
   const v = b.dataset.copy;
   const pill = b.querySelector(".pill");
-  if (pill) { const done = () => { b.classList.add("got"); pill.textContent = "Copied"; note && note("Copied · paste it in your banking app", "ok"); setTimeout(() => pill.textContent = "Copy", 1800); };
+  if (pill) { const done = () => { b.classList.add("got"); pill.textContent = "Copied"; note && note("Copied", "ok"); setTimeout(() => pill.textContent = "Copy", 1800); };
     try { navigator.clipboard.writeText(v).then(done, () => note("Long-press to copy", "warn")); } catch(x){ note("Long-press to copy", "warn"); } return; }
   const label = b.textContent; const done = () => { b.textContent = "Copied"; setTimeout(() => b.textContent = label, 1500); };
   const fail = () => { b.textContent = "Long-press to copy"; note("Long-press to copy", "warn"); };
@@ -388,7 +419,7 @@ async function downloadTicket(d, btn){
       const a = document.createElement("a"); a.download = name + ".png"; a.href = img; document.body.appendChild(a); a.click(); a.remove();
     }
     btn.textContent = "Saved";
-  } catch (e) { btn.textContent = "Couldn't make the PDF. Try again"; note("PDF failed · screenshot your QR", "error"); }
+  } catch (e) { btn.textContent = "Couldn't make the PDF. Try again"; note("PDF failed · screenshot it", "error"); }
   setTimeout(() => { btn.disabled = false; btn.textContent = label; }, 2500);
 }
 async function shareParty(d, btn){
@@ -450,7 +481,7 @@ function programmeHTML(d){
 }
 function partyOver(d){ const s = new Date(d.starts_at).getTime(); return Number.isFinite(s) && Date.now() > s + 8 * 36e5; }
 function thanksHTML(d, first){
-  return `<div class="thanks"><span class="state" style="background:var(--cream);border-color:var(--cream);color:var(--red)">That's a wrap</span>
+  return `<div class="thanks"><span class="state">That's a wrap</span>
     <h1>Thanks for coming, ${first}.</h1>
     <p>Got photos or videos from the night? Send them our way, the best ones end up on our page. And tell us how it was: we read every message.</p>
     <div class="btns"><a class="btn" href="${DM}" target="_blank" rel="noopener">Send your photos ↗</a><a class="btn ghost" href="${DM}" target="_blank" rel="noopener">Tell us how it was ↗</a></div></div>`;
@@ -573,7 +604,7 @@ function renderApp(d){
         const perm = await Notification.requestPermission();
         if (perm === "granted") { await pushSubscribe(true); note("You're all set", "ok"); }
       }
-    } catch (e) { note("Couldn't turn on notifications", "error"); }
+    } catch (e) { note("Notifications blocked", "error"); }
     renderApp(d);
   });
 }
@@ -630,12 +661,12 @@ let LAST = null;
 setInterval(() => { const el = $("prog"); if (el && LAST) el.outerHTML = programmeHTML(LAST) || ""; }, 60000);
 
 // a short confetti burst the first time someone sees their request
-function celebrate(d){
+function celebrate(d, count){
   const key = "pp_cheer_" + (d.vcode || ""); try { if (localStorage.getItem(key)) return; localStorage.setItem(key, "1"); } catch(e){}
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const box = document.createElement("div"); box.className = "confetti"; box.setAttribute("aria-hidden", "true");
   const cols = ["#b90000", "#ff4a3d", "#141210", "#f4ead7", "#8f0000"];
-  for (let i = 0; i < 70; i++) {
+  for (let i = 0; i < (count || 70); i++) {
     const c = document.createElement("i");
     c.style.left = (Math.random() * 100) + "%"; c.style.background = cols[i % cols.length];
     c.style.setProperty("--dx", (Math.random() * 160 - 80) + "px"); c.style.setProperty("--r", (Math.random() * 720 - 360) + "deg");
@@ -643,13 +674,23 @@ function celebrate(d){
     if (i % 3 === 0) c.style.borderRadius = "50%";
     box.appendChild(c);
   }
-  document.body.appendChild(box); setTimeout(() => box.remove(), 3600);
+  document.body.appendChild(box); setTimeout(() => box.remove(), 4200);
   try { navigator.vibrate && navigator.vibrate([30, 40, 30]); } catch(e){}
 }
 // progress bar shown on every step: Request → Review → Pay → Ticket → Party
 function stepsHTML(stage, cls){
   const names = ["Request", "Review", "Pay", "Ticket", "Party"];
   return `<ol class="rq-steps ${cls || ""}" aria-label="Your progress">${names.map((n, i) => `<li class="${i < stage ? "done" : i === stage ? "now" : ""}"${i === stage ? ' aria-current="step"' : ""}><i></i><span>${n}</span></li>`).join("")}</ol>`;
+}
+// the moment the payment lands: full-screen "You're going" then the ticket
+function unlocked(d, first){
+  const key = "pp_paid_" + (d.code || ""); try { if (localStorage.getItem(key)) return; localStorage.setItem(key, "1"); } catch(e){ return; }
+  const o = document.createElement("div"); o.className = "unlock"; o.setAttribute("role", "status");
+  o.innerHTML = `<div class="unlock-in"><span class="unlock-k">Payment received</span><p class="unlock-h">You're<br>going.</p><span class="unlock-t">Tap to see your ticket</span></div>`;
+  const close = () => { o.classList.add("out"); setTimeout(() => o.remove(), 450); };
+  o.addEventListener("click", close); setTimeout(close, 3200);
+  document.body.appendChild(o);
+  celebrate({ vcode: "paid-" + (d.code || "") }, 120);
 }
 function render(d){
   const P = $("page"), first = esc(String(d.name || "").split(" ")[0]);
@@ -659,7 +700,7 @@ function render(d){
     P.innerHTML = `<div class="rq"><span class="rq-stamp" aria-hidden="true">Received</span>
         <span class="state">Request sent</span>
         <h1>You're on the list, ${first}.</h1>
-        ${wl ? `<span class="wl-tag">Sold out · you're on the waitlist</span>` : ""}
+        ${wl ? `<span class="wl-tag">Waitlist</span>` : ""}
         <p class="lead">${!d.verified ? `One more step: send us your code on Instagram, then we look at your request for <b>${esc(d.event)}</b>.`
           : wl ? `<b>${esc(d.event)}</b> is full right now. When a place opens up, we go down the list in order and this page shows your price.`
           : `We're looking at your request for <b>${esc(d.event)}</b>. Once you're approved, this page shows your price and ticket.`}</p>
@@ -681,7 +722,7 @@ function render(d){
     }[d.ticket] || "This is the price for your place.";
     const tiers = d.tiers ? ["early","normal","late"].filter(t => d.tiers[t] != null && d.tiers[t] !== "") : [];
     const allText = `Amount: ${euro(d.price)}\nIBAN: ${d.iban || ""}\nBeneficiary: ${d.beneficiary || ""}\nReference: ${d.reference}`;
-    P.innerHTML = `<div class="hero-ok"><span class="state" style="background:var(--cream);border-color:var(--cream);color:var(--red)">Accepted</span>
+    P.innerHTML = `<div class="hero-ok"><span class="state">Accepted</span>
         <h1>You're in, ${first}.</h1>
         <p class="lead">You've been accepted for <b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " on " + esc(d.date_label) : ""}. Pay below to lock in your place.</p>
         ${stepsHTML(2, "on-red")}</div>
@@ -694,7 +735,7 @@ function render(d){
           ${payRow("IBAN", d.iban ? d.iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim() : "—", d.iban ? d.iban.replace(/\s+/g, "") : "")}
           ${payRow("Name", d.beneficiary || "—", d.beneficiary || "")}
           ${payRow("Amount", euro(d.price), String(d.price).replace(".", ","))}
-          ${payRow("Description · exact", d.reference, d.reference, true)}
+          ${payRow("Description", d.reference, d.reference, true)}
         </div>
         <button class="btn pay-all" type="button" data-copy="${esc(allText)}">Copy all</button>
       </section>
@@ -711,16 +752,17 @@ function render(d){
       <p class="note">Something else? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>`;
   } else if (d.status === "paid" || d.status === "in") {
     const inside = d.status === "in", over = partyOver(d);
-    P.innerHTML = `${inside && over ? thanksHTML(d, first) : `<div class="hype">
-        <span class="state in">${inside ? "Checked in" : "Paid · confirmed"}</span>
-        <h1>${inside ? `You made it, <em>${first}</em>.` : `It's official, <em>${first}</em>. You're on the list.`}</h1>
-        <p class="lead">${inside ? "Enjoy the night. You're exactly where you should be." : `<b style="color:var(--cream)">${esc(d.event)}</b> is happening and you're in. Your people. Your night.`}</p>
+    P.innerHTML = `${inside && over ? thanksHTML(d, first) : `<div class="hype ${inside ? "" : "paid"}">
+        ${inside ? "" : `<span class="rq-stamp paid-stamp" aria-hidden="true">Paid</span>`}
+        ${inside ? `<span class="state">Checked in</span>` : ""}
+        <h1>${inside ? `You made it, <em>${first}</em>.` : `You're going, ${first}.`}</h1>
+        <p class="lead">${inside ? "Enjoy the night." : `See you at <b>${esc(d.event)}</b>${d.date_label ? ", " + esc(d.date_label) : ""}. Your ticket and the place are unlocked below.`}</p>
         <div class="count" id="tcount" ${inside ? 'style="display:none"' : ""} hidden></div>
-        ${stepsHTML(inside ? 5 : 4)}
+        ${stepsHTML(inside ? 5 : 4, inside ? "" : "on-red")}
       </div>
       ${inside ? `<div class="inbar" role="status"><div><b>Checked in</b><span>${d.in_at ? "Entered at " + new Date(d.in_at).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) + ". " : ""}This ticket has been used.</span></div></div>` : ""}`}
       ${inside && !over ? programmeHTML(d) : ""}
-      <div class="cine">
+      <div class="cine${inside ? "" : " shine"}">
         <span class="holes t" aria-hidden="true"></span><span class="holes b" aria-hidden="true"></span>
         ${inside ? `<span class="instamp">CHECKED IN</span>` : ""}
         <img class="logo" src="/logo.png" alt="PerugiaParty" width="150" height="106" decoding="async">
@@ -731,15 +773,15 @@ function render(d){
         <p class="who">${esc(d.name)}</p>
         <p class="meta">Show this QR and your photo ID at the door</p>
       </div>
-      ${d.location && !over ? `<div class="where"><div><span class="eyebrow" style="color:#f3d3cc">The place</span><p><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px">${esc(d.location)}</a></p></div><a class="btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener">Open in Google Maps</a></div>` : ""}
+      ${d.location && !over ? `<div class="where"><div><span class="eyebrow unl">Unlocked · the place</span><p><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px">${esc(d.location)}</a></p></div><a class="btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener">Open in Google Maps</a></div>` : ""}
       ${!inside && !over ? programmeHTML(d) : ""}
       ${over ? "" : `<div class="actions">
-        <button class="btn" type="button" id="pdf">Download ticket (PDF)</button>
-        <button class="btn ink" type="button" id="share">Tell your friends</button>
-        ${d.starts_at ? `<button class="btn outline" type="button" id="cal">Add to calendar</button>` : ""}
-        <button class="btn outline" type="button" data-copy="${esc(d.link || location.href)}">Copy my ticket link</button>
+        <button class="btn wide" type="button" id="pdf">Save ticket (PDF)</button>
+        ${d.starts_at ? `<button class="btn outline" type="button" id="cal">Calendar</button>` : ""}
+        <button class="btn outline" type="button" id="share">Tell friends</button>
       </div>
-      <p class="note">Your ticket is personal: one entry, checked at the door. Save the PDF in case there's no signal.</p>`}`;
+      <p class="note">One entry, checked at the door with your photo ID. Save the PDF in case there's no signal.</p>`}`;
+    if (!inside && !over) unlocked(d, first);
     try { drawQR(d.qr, $("qr")); } catch (e) { $("qr").parentElement.innerHTML = `<p style="color:#111;padding:20px;font-family:var(--f-mono)">${esc(d.code)}</p>`; }
     if ($("pdf")) $("pdf").addEventListener("click", e => downloadTicket(d, e.currentTarget));
     if ($("share")) $("share").addEventListener("click", e => shareParty(d, e.currentTarget));

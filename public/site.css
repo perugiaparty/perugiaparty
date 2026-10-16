@@ -74,10 +74,15 @@ label small{font-weight:400;color:var(--muted)}
 .pp-note-act{flex:none;font:inherit;font-size:13px;font-weight:700;background:var(--cream);color:var(--ink);border:0;border-radius:999px;padding:4px 11px;cursor:pointer}
 .pp-note-x{flex:none;background:transparent;border:0;color:var(--muted-dark);font-size:18px;line-height:1;width:24px;height:24px;cursor:pointer;border-radius:50%}
 .pp-note-x:hover{color:var(--cream)}
-/* one colour per kind: green = done, red = error, yellow = check something */
-.pp-note.ok,.pp-note.info{background:#1f9d55;color:#fff}
-.pp-note.error{background:#d32f2f;color:#fff}
-.pp-note.warn{background:#f2b84b;color:#141210}
+/* brand colours only: black = done, red = error, cream = check something */
+.pp-note.ok,.pp-note.info{background:var(--ink);color:var(--cream)}
+.pp-note.ok .pp-note-icon,.pp-note.info .pp-note-icon{background:var(--red);color:var(--cream)}
+.pp-note.error{background:var(--red);color:var(--cream)}
+.pp-note.error .pp-note-icon{background:var(--cream);color:var(--red)}
+.pp-note.warn{background:var(--cream);color:var(--ink);border:2px solid var(--ink)}
+.pp-note.warn .pp-note-icon{background:var(--ink);color:var(--cream)}
+.pp-note.error .pp-note-x,.pp-note.ok .pp-note-x{color:inherit;opacity:.7}
+.pp-note.warn .pp-note-x{color:var(--ink)}
 .pp-note .pp-note-icon{background:rgba(255,255,255,.25);color:inherit}
 .pp-note.warn .pp-note-icon{background:rgba(20,18,16,.15)}
 .pp-note .pp-note-x{color:inherit;opacity:.75}.pp-note .pp-note-x:hover{color:inherit;opacity:1}
