@@ -92,6 +92,14 @@ h1{font-size:clamp(40px,8vw,64px)}
 .rq-steps li.done:nth-child(2) i{animation-delay:.15s}
 .rq-steps li.now i{border-color:#ff4a3d;animation:pulse 1.6s infinite}
 .rq-steps li.done,.rq-steps li.now{color:var(--cream)}
+.rq-steps.on-red li{color:#f3d3cc}
+.rq-steps.on-red li.done,.rq-steps.on-red li.now{color:var(--cream)}
+.rq-steps.on-red li::before{background:rgba(244,234,215,.3)}
+.rq-steps.on-red li.done::before,.rq-steps.on-red li.now::before{background:var(--cream)}
+.rq-steps.on-red i{background:var(--red);border-color:rgba(244,234,215,.45)}
+.rq-steps.on-red li.done i{background:var(--cream);border-color:var(--cream)}
+.rq-steps.on-red li.now i{border-color:var(--cream);animation:pulseC 1.6s infinite}
+@keyframes pulseC{0%{box-shadow:0 0 0 0 rgba(244,234,215,.7)}70%{box-shadow:0 0 0 10px rgba(244,234,215,0)}100%{box-shadow:0 0 0 0 rgba(244,234,215,0)}}
 @keyframes rqIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes stamp{from{opacity:0;transform:rotate(12deg) scale(2.2)}to{opacity:1;transform:rotate(12deg) scale(1)}}
 @keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
@@ -519,7 +527,7 @@ function appHTML(d){
 }
 function renderApp(d){
   const old = $("appc"), html = appHTML(d);
-  if (old) old.outerHTML = html || ""; else if (html) { const P = $("page"), first = P.querySelector(".verify, .verified, .hero-ok, .hype, h1"); (first || P.firstElementChild || P).insertAdjacentHTML("afterend", html); }
+  if (old) old.outerHTML = html || ""; else if (html) { const P = $("page"), first = P.querySelector(".verify, .verified, .rq, .hero-ok, .hype, h1"); (first || P.firstElementChild || P).insertAdjacentHTML("afterend", html); }
   const go = $("app-go");
   if (go) go.addEventListener("click", async () => {
     go.disabled = true;
@@ -603,23 +611,29 @@ function celebrate(d){
   document.body.appendChild(box); setTimeout(() => box.remove(), 3600);
   try { navigator.vibrate && navigator.vibrate([30, 40, 30]); } catch(e){}
 }
+// progress bar shown on every step: Request → Review → Pay → Ticket → Party
+function stepsHTML(stage, waitlist, cls){
+  const names = ["Request", waitlist ? "Waitlist" : "Review", "Pay", "Ticket", "Party"];
+  return `<ol class="rq-steps ${cls || ""}" aria-label="Your progress">${names.map((n, i) => `<li class="${i < stage ? "done" : i === stage ? "now" : ""}"${i === stage ? ' aria-current="step"' : ""}><i></i><span>${n}</span></li>`).join("")}</ol>`;
+}
 function render(d){
   const P = $("page"), first = esc(String(d.name || "").split(" ")[0]);
   if (d.status === "requested") {
-    const st = [["Request", 1], ["Instagram", d.verified ? 1 : 0], ["Review", 2], ["Pay", 0], ["Ticket", 0]];
-    if (!d.verified) st[2][1] = 0, st[1][1] = 2;
     P.innerHTML = `<div class="rq"><span class="rq-stamp" aria-hidden="true">Received</span>
         <span class="state">Request sent</span>
         <h1>You're on the list, ${first}.</h1>
         <p class="lead">${d.verified ? `We're looking at your request for <b>${esc(d.event)}</b>. Once you're approved, this page shows your price and ticket.` : `One more step: send us your code on Instagram, then we look at your request for <b>${esc(d.event)}</b>.`}</p>
-        <ol class="rq-steps">${st.map(([n, v]) => `<li class="${v === 1 ? "done" : v === 2 ? "now" : ""}"><i></i><span>${n}</span></li>`).join("")}</ol>
+        ${stepsHTML(1)}
       </div>
       ${d.verified ? `<div class="card"><p><b>Save this page.</b> The link is in your Instagram DMs too.</p><div>${copyBtn(d.link || location.href)}</div></div>` : ""}`;
     celebrate(d);
   } else if (d.status === "waitlist") {
-    P.innerHTML = `<span class="state">Waitlist</span><h1>You're on the waitlist, ${first}.</h1>
-      <p class="lead"><b>${esc(d.event)}</b> is sold out right now. When a place opens up, we go down the waitlist in order. If you get one, this page shows your price and code straight away.</p>
-      ${d.verified ? `<div class="card"><p><b>Your personal page.</b> We sent this link to your Instagram DMs too.</p><p style="font-family:var(--f-mono);overflow-wrap:anywhere">${esc(d.link || location.href)}</p><div>${copyBtn(d.link || location.href)}</div></div>` : ""}`;
+    P.innerHTML = `<div class="rq"><span class="state">Waitlist</span>
+        <h1>You're on the waitlist, ${first}.</h1>
+        <p class="lead"><b>${esc(d.event)}</b> is sold out right now. When a place opens up, we go down the waitlist in order. If you get one, this page shows your price straight away.</p>
+        ${stepsHTML(1, true)}
+      </div>
+      ${d.verified ? `<div class="card"><p><b>Save this page.</b> The link is in your Instagram DMs too.</p><div>${copyBtn(d.link || location.href)}</div></div>` : ""}`;
   } else if (d.status === "approved") {
     const left = d.deadline ? d.deadline - Date.now() : null;
     const overdue = left != null && left < 0;
@@ -637,7 +651,8 @@ function render(d){
     const allText = `Amount: ${euro(d.price)}\nIBAN: ${d.iban || ""}\nBeneficiary: ${d.beneficiary || ""}\nReference: ${d.reference}`;
     P.innerHTML = `<div class="hero-ok"><span class="state" style="background:var(--cream);border-color:var(--cream);color:var(--red)">Accepted</span>
         <h1>You're in, ${first}.</h1>
-        <p class="lead">You've been accepted for <b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " on " + esc(d.date_label) : ""}. Pay to confirm your place. After that, your ticket and the location unlock right here.</p></div>
+        <p class="lead">You've been accepted for <b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " on " + esc(d.date_label) : ""}. Pay to confirm your place. After that, your ticket and the location unlock right here.</p>
+        ${stepsHTML(2, false, "on-red")}</div>
       <div class="amount"><p class="eyebrow" style="color:var(--muted-dark)">You pay · ${esc(tierName)}</p>
         <p class="big">${euro(d.price)}</p>
         <p class="why">${esc(why)}</p>
@@ -666,6 +681,7 @@ function render(d){
         <h1>${inside ? `You made it, <em>${first}</em>.` : `It's official, <em>${first}</em>. You're on the list.`}</h1>
         <p class="lead">${inside ? "Enjoy the night. You're exactly where you should be." : `<b style="color:var(--cream)">${esc(d.event)}</b> is happening and you're in. Your people. Your night.`}</p>
         <div class="count" id="tcount" ${inside ? 'style="display:none"' : ""} hidden></div>
+        ${stepsHTML(inside ? 5 : 4)}
       </div>
       ${inside ? `<div class="inbar" role="status"><div><b>Checked in</b><span>${d.in_at ? "Entered at " + new Date(d.in_at).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) + ". " : ""}This ticket has been used.</span></div></div>` : ""}`}
       ${inside && !over ? programmeHTML(d) : ""}
