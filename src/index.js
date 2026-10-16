@@ -275,7 +275,21 @@ async function igHandleDm(env, ev, igsid, text) {
   if (!username) return;
   const first = String(g.name || "").split(" ")[0];
   if (normIg(username) === normIg(g.ig)) {
-    const already = Number(g.verified) === 1;
+    // one request per Instagram per party: a second code from the same account points to the request already confirmed
+    const active = await env.DB.prepare("SELECT * FROM guests WHERE event = ? AND lower(ig) = ? AND verified = 1 AND token <> ? AND status IN ('requested','waitlist','approved','paid','in') ORDER BY verified_at LIMIT 1")
+      .bind(g.event, normIg(g.ig), g.token).first();
+    if (active || g.status === "removed") {
+      const keep = active || g;
+      if (active && g.status !== "removed") {
+        await env.DB.prepare("UPDATE guests SET removed_from = status, status = 'removed', removed_reason = 'Double request: this Instagram already has a confirmed request for this party.', removed_at = ? WHERE token = ?").bind(Date.now(), g.token).run();
+      }
+      await igSend(env, ev, igsid, active ? [
+        `You already have a request for this party, ${String(active.name || "").split(" ")[0]}. This is your link:`,
+        ``,
+        `${shortUrl(await shortFor(env, active), active.token)}`,
+      ].join("\n") : "This request was cancelled. Request again on perugiaparty.com or DM us.");
+      return;
+    }
     await markVerified(env, g, igsid);
     await igSend(env, ev, igsid, [
       `Confirmed, ${first}! Your request is verified.`,
