@@ -81,7 +81,8 @@ h1{font-size:clamp(40px,8vw,64px)}
 .pay .eyebrow{color:var(--muted-dark)}
 .pay-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
 .pay-top h2{color:var(--cream);font-size:clamp(52px,14vw,76px);line-height:.95;margin-top:4px}
-.pay-tier{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;border:1.5px solid #4a423b;border-radius:999px;padding:5px 10px;color:var(--muted-dark);white-space:nowrap}
+.tier-tag{display:inline-block;background:var(--red);color:var(--cream);font-family:var(--f-display);font-size:14px;letter-spacing:.03em;text-transform:uppercase;border-radius:10px;padding:7px 12px;white-space:nowrap;transform:rotate(-3deg);box-shadow:3px 3px 0 #ff4a3d}
+.pay-tier-old{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;border:1.5px solid #4a423b;border-radius:999px;padding:5px 10px;color:var(--muted-dark);white-space:nowrap}
 .pay-hint{color:var(--muted-dark);font-size:15px;margin:0}
 .prow-list{display:grid;gap:8px}
 .prow{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:28px minmax(0,1fr) auto;grid-template-areas:"n k p" "n v p";column-gap:12px;row-gap:2px;align-items:center;background:var(--ink-2);border:1.5px solid #3a3330;border-radius:16px;padding:12px 14px;width:100%;-webkit-tap-highlight-color:transparent;transition:transform .12s,border-color .2s,background .2s}
@@ -113,6 +114,7 @@ h1{font-size:clamp(40px,8vw,64px)}
 .rq h1{color:var(--cream);font-size:clamp(36px,9vw,58px)}
 .rq .lead{color:var(--muted-dark)}
 .rq .state{background:var(--red);border-color:var(--red);color:var(--cream)}
+.wl-tag{justify-self:start;background:var(--red);color:var(--cream);font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;border-radius:8px;padding:6px 10px}
 .rq-stamp{position:absolute;top:22px;right:18px;font-family:var(--f-display);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#ff4a3d;border:3px solid #ff4a3d;border-radius:10px;padding:4px 12px;transform:rotate(12deg);animation:stamp .45s .35s cubic-bezier(.2,1.6,.4,1) both}
 .rq-steps{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;position:relative}
 .rq-steps li{display:grid;justify-items:center;gap:6px;font-family:var(--f-mono);font-size:10px;letter-spacing:.02em;text-transform:uppercase;color:var(--muted-dark);position:relative;min-width:0;text-align:center}
@@ -651,28 +653,26 @@ function celebrate(d){
   try { navigator.vibrate && navigator.vibrate([30, 40, 30]); } catch(e){}
 }
 // progress bar shown on every step: Request → Review → Pay → Ticket → Party
-function stepsHTML(stage, waitlist, cls){
-  const names = ["Request", waitlist ? "Waitlist" : "Review", "Pay", "Ticket", "Party"];
+function stepsHTML(stage, cls){
+  const names = ["Request", "Review", "Pay", "Ticket", "Party"];
   return `<ol class="rq-steps ${cls || ""}" aria-label="Your progress">${names.map((n, i) => `<li class="${i < stage ? "done" : i === stage ? "now" : ""}"${i === stage ? ' aria-current="step"' : ""}><i></i><span>${n}</span></li>`).join("")}</ol>`;
 }
 function render(d){
   const P = $("page"), first = esc(String(d.name || "").split(" ")[0]);
-  if (d.status === "requested") {
+  if (d.status === "requested" || d.status === "waitlist") {
+    // same page for both: the waitlist is only a tag, the steps don't change
+    const wl = d.status === "waitlist";
     P.innerHTML = `<div class="rq"><span class="rq-stamp" aria-hidden="true">Received</span>
         <span class="state">Request sent</span>
         <h1>You're on the list, ${first}.</h1>
-        <p class="lead">${d.verified ? `We're looking at your request for <b>${esc(d.event)}</b>. Once you're approved, this page shows your price and ticket.` : `One more step: send us your code on Instagram, then we look at your request for <b>${esc(d.event)}</b>.`}</p>
+        ${wl ? `<span class="wl-tag">Sold out · you're on the waitlist</span>` : ""}
+        <p class="lead">${!d.verified ? `One more step: send us your code on Instagram, then we look at your request for <b>${esc(d.event)}</b>.`
+          : wl ? `<b>${esc(d.event)}</b> is full right now. When a place opens up, we go down the list in order and this page shows your price.`
+          : `We're looking at your request for <b>${esc(d.event)}</b>. Once you're approved, this page shows your price and ticket.`}</p>
         ${stepsHTML(1)}
       </div>
       ${d.verified ? `<div class="card"><p><b>Save this page.</b> The link is in your Instagram DMs too.</p><div>${copyBtn(d.link || location.href)}</div></div>` : ""}`;
     celebrate(d);
-  } else if (d.status === "waitlist") {
-    P.innerHTML = `<div class="rq"><span class="state">Waitlist</span>
-        <h1>You're on the waitlist, ${first}.</h1>
-        <p class="lead"><b>${esc(d.event)}</b> is sold out right now. When a place opens up, we go down the waitlist in order. If you get one, this page shows your price straight away.</p>
-        ${stepsHTML(1, true)}
-      </div>
-      ${d.verified ? `<div class="card"><p><b>Save this page.</b> The link is in your Instagram DMs too.</p><div>${copyBtn(d.link || location.href)}</div></div>` : ""}`;
   } else if (d.status === "approved") {
     const left = d.deadline ? d.deadline - Date.now() : null;
     const overdue = left != null && left < 0;
@@ -690,9 +690,9 @@ function render(d){
     P.innerHTML = `<div class="hero-ok"><span class="state" style="background:var(--cream);border-color:var(--cream);color:var(--red)">Accepted</span>
         <h1>You're in, ${first}.</h1>
         <p class="lead">You've been accepted for <b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " on " + esc(d.date_label) : ""}. Pay to confirm your place. After that, your ticket and the location unlock right here.</p>
-        ${stepsHTML(2, false, "on-red")}</div>
+        ${stepsHTML(2, "on-red")}</div>
       <section class="pay" aria-labelledby="pay-h">
-        <div class="pay-top"><div><p class="eyebrow">Pay by bank transfer</p><h2 id="pay-h">${euro(d.price)}</h2></div><span class="pay-tier">${esc(tierName)}</span></div>
+        <div class="pay-top"><div><p class="eyebrow">Pay by bank transfer</p><h2 id="pay-h">${euro(d.price)}</h2></div><span class="tier-tag">${esc(tierName)} ticket</span></div>
         <p class="pay-hint">Open your banking app, make a transfer (bonifico) and tap each line to copy it.</p>
         <div class="prow-list">
           ${payRow("1", "Amount", euro(d.price), String(d.price).replace(".", ","))}
@@ -704,7 +704,6 @@ function render(d){
         <button class="btn pay-all" type="button" data-copy="${esc(allText)}">Copy all details</button>
         <div class="pay-after"><b>Paid?</b> You don't need to send us anything. We check transfers and your ticket appears on this page.</div>
       </section>
-      ${tiers.length > 1 ? `<details class="prices"><summary>Why ${euro(d.price)}?</summary><p>${esc(why)}</p><div class="tiers">${tiers.map(t => `<div class="tier ${t === d.ticket ? "me" : ""}">${t === d.ticket ? `<span class="you">Your price</span>` : ""}<b>${euro(d.tiers[t])}</b><span class="tn">${names[t]}</span></div>`).join("")}</div></details>` : ""}
       <p class="note">Your personal code: <b style="font-family:var(--f-mono)">${esc(d.code)}</b> · Questions? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>`;
   } else if (d.status === "paid" || d.status === "in") {
     const inside = d.status === "in", over = partyOver(d);
