@@ -248,7 +248,8 @@ async function igSend(env, ev, recipient, text) {
   try {
     const r = await fetch(`${igApi(env)}/me/messages`, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${ev.ig_token}` }, body: JSON.stringify({ recipient: { id: recipient }, message: { text } }) });
     await igLog(env, r.ok ? "reply-ok" : "reply-fail", r.ok ? "" : (await r.text()).slice(0, 300));
-  } catch (e) { await igLog(env, "reply-error", String(e)); }
+    return r.ok;
+  } catch (e) { await igLog(env, "reply-error", String(e)); return false; }
 }
 async function igUsername(env, ev, igsid) {
   try {
@@ -257,6 +258,11 @@ async function igUsername(env, ev, igsid) {
     if (!d || !d.username) await igLog(env, "username-fail", JSON.stringify(d).slice(0, 300));
     return d && d.username ? String(d.username) : null;
   } catch (e) { return null; }
+}
+// they wrote again, so the 24 h window is open: send the status messages Instagram refused before
+async function retryBlockedDms(env, igsid) {
+  const r = await env.DB.prepare("UPDATE guests SET ig_sent = 'retry' WHERE ig_fail = 1 AND lower(ig) IN (SELECT ig FROM people WHERE igsid = ?)").bind(igsid).run();
+  if (r.meta && r.meta.changes) await igStatusDms(env);
 }
 async function igHandleDm(env, ev, igsid, text) {
   const found = [...String(text).toUpperCase().matchAll(/(?<![A-Z0-9])([A-Z0-9]{1,5})[-\s]?([A-HJ-NP-Z2-9]{6})(?![A-Z0-9])/g)];
@@ -272,11 +278,13 @@ async function igHandleDm(env, ev, igsid, text) {
   }
   if (!g) { // not a code: Matt answers this DM himself
     await env.DB.prepare("UPDATE people SET last_dm_at = ? WHERE igsid = ?").bind(Date.now(), igsid).run();
+    await retryBlockedDms(env, igsid);
     await igLog(env, "no-code", String(text).slice(0, 80)); return;
   }
   const username = await igUsername(env, ev, igsid);
   await igLog(env, "dm", `code=${g.vcode} sender=${igsid} username=${username}`);
   if (username) await env.DB.prepare("UPDATE people SET igsid = ?, last_dm_at = ? WHERE ig = ?").bind(igsid, Date.now(), normIg(username)).run();
+  if (username) await retryBlockedDms(env, igsid);
   if (!username) return;
   const first = String(g.name || "").split(" ")[0];
   if (normIg(username) === normIg(g.ig)) {
@@ -562,7 +570,7 @@ async function findByCode(env, tag, text) {
   return list[0] || null;
 }
 function doorView(g, ev) {
-  return { name: g.name, code: g.code, status: g.status, price: g.price, crew: g.ticket === "crew", in_at: g.in_at, event: g.event, current: g.event === ev.tag, sign: ev.sign || "" };
+  return { name: g.name, code: g.code, status: g.status, price: g.price, ticket: g.ticket, crew: g.ticket === "crew", in_at: g.in_at, event: g.event, current: g.event === ev.tag, sign: ev.sign || "" };
 }
 async function apiDoor(req, env, action) {
   let body; try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
@@ -672,7 +680,9 @@ async function igStatusDms(env) {
     // claim it first so two runs at once never send twice
     const c = await env.DB.prepare("UPDATE guests SET ig_sent = ? WHERE token = ? AND (ig_sent IS NULL OR ig_sent <> ?)").bind(g.status, g.token, g.status).run();
     if (text && c.meta && c.meta.changes) {
-      await igSend(env, ev, g.igsid, text);
+      const sent = await igSend(env, ev, g.igsid, text);
+      // Instagram only lets the bot write within 24 h of the guest's last message: flag it so the admin shows "send link"
+      await env.DB.prepare("UPDATE guests SET ig_fail = ? WHERE token = ?").bind(sent ? 0 : 1, g.token).run();
       // returning guests get reminded of the free-pair offer with their own link
       const n = Number(ev.pair_free) || 0;
       const pairs = n > 0 ? ((await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND (invited_by IS NOT NULL OR with_ig IS NOT NULL) AND status NOT IN ('declined','removed','released')").bind(ev.tag).first()) || {}).n || 0 : 0;

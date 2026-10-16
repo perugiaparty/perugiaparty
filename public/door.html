@@ -14,45 +14,68 @@
 <link rel="stylesheet" href="/site.css?v=20261013f">
 <script src="/notify.js?v=20261013g" defer></script>
 <style>
-/* Door scanner: dark, one-handed, big verdicts. Built for a phone at night. */
-body{background:var(--ink);color:var(--cream)}
-main{padding-block:16px 40px;max-width:520px;margin-inline:auto}
-.top2{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:12px}
-.top2 .mark{font-size:19px}
+/* Door: one screen, one job. Scan, see a colour, let in. */
+body{background:var(--ink);color:var(--cream);overscroll-behavior:none}
+main{padding:12px 16px calc(24px + env(safe-area-inset-bottom,0px));max-width:480px;margin-inline:auto}
+.top2{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:6px 14px}
+.top2 .mark{font-size:18px}
 .lock{font:inherit;font-size:13px;font-weight:700;color:var(--muted-dark);background:transparent;border:1.5px solid #3a3330;border-radius:999px;padding:6px 12px;cursor:pointer}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.stats div{background:var(--ink-2);border-radius:14px;padding:10px 12px}
-.stats b{display:block;font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
-.stats span{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
-.cam{position:relative;border-radius:22px;overflow:hidden;background:#000;aspect-ratio:1/1;max-width:100%}
+.count{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.count b{font-family:var(--f-display);font-weight:400;font-size:56px;line-height:1;font-variant-numeric:tabular-nums;transition:transform .25s}
+.count b.bump{animation:bump .5s cubic-bezier(.2,1.6,.4,1)}
+.count span{font-family:var(--f-mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-dark)}
+.bar{height:6px;border-radius:99px;background:#2e2925;overflow:hidden;margin-bottom:6px}
+.bar i{display:block;height:100%;width:0;background:var(--red);border-radius:inherit;transition:width .6s cubic-bezier(.2,.9,.3,1)}
+.evline{font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark);margin-bottom:14px}
+.cam{position:relative;border-radius:24px;overflow:hidden;background:#000;aspect-ratio:3/4;max-height:58vh;width:100%}
 .cam video{width:100%;height:100%;object-fit:cover;display:block}
-.cam .frame{position:absolute;inset:16%;border:4px solid rgba(244,234,215,.9);border-radius:22px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
-.cam .msg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;color:var(--muted-dark);font-size:15px}
-.cam .msg .btn{margin-top:12px}
+.cam .frame{position:absolute;left:50%;top:50%;width:62%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:22px;border:4px solid var(--cream);box-shadow:0 0 0 999px rgba(0,0,0,.45)}
+.cam .scanline{position:absolute;left:19%;right:19%;height:3px;background:var(--red);box-shadow:0 0 18px var(--red);top:30%;animation:scan 2.2s ease-in-out infinite alternate;border-radius:3px}
+.cam.idle .scanline,.cam.idle .frame{display:none}
+.cam .msg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:28px}
+.cam .msg p{color:var(--muted-dark);font-size:15px;margin:0 0 14px;max-width:26ch}
+.cam .msg .btn{font-size:17px;padding:14px 26px}
 .manual{display:flex;gap:8px;margin-top:12px}
-.manual input{font-family:var(--f-mono);font-size:18px;letter-spacing:.06em;text-transform:uppercase;background:var(--ink-2);color:var(--cream);border-color:#3a3330}
+.manual input{flex:1;min-width:0;font-family:var(--f-mono);font-size:17px;letter-spacing:.06em;text-transform:uppercase;background:var(--ink-2);color:var(--cream);border:1.5px solid #3a3330;border-radius:999px;padding:12px 18px}
+.manual input::placeholder{text-transform:none;letter-spacing:0;font-family:var(--f-body);color:#7d7064}
 .manual .btn{flex:none}
-.verdict{position:fixed;inset:0;z-index:20;display:grid;align-content:center;gap:14px;padding:28px 22px calc(28px + env(safe-area-inset-bottom,0px));text-align:center}
-.verdict.go{background:#1f7a3d;color:#fff}
+@keyframes scan{from{top:26%}to{top:72%}}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+/* verdicts: full screen, colour does the talking */
+.verdict{position:fixed;inset:0;z-index:20;display:grid;align-content:center;justify-items:center;gap:12px;padding:28px 22px calc(28px + env(safe-area-inset-bottom,0px));text-align:center;animation:vin .18s ease-out}
+.verdict.go{background:#14843f;color:#fff}
 .verdict.stop{background:var(--red);color:var(--cream)}
-.verdict.hold{background:#f4ead7;color:var(--ink)}
-.verdict .big{font-family:var(--f-display);font-size:clamp(40px,12vw,64px);line-height:1}
-.verdict .who{font-size:24px;font-weight:700}
-.verdict .sub{font-size:16px;opacity:.9;max-width:34ch;margin-inline:auto}
-.verdict .code{font-family:var(--f-mono);font-size:18px;letter-spacing:.08em;opacity:.85}
-.verdict .sign{font-family:var(--f-display);font-size:clamp(26px,8vw,38px);background:rgba(0,0,0,.2);border-radius:16px;padding:14px 18px;justify-self:center}
-.verdict .row{display:grid;gap:10px;margin-top:6px}
-.verdict .btn{font-size:18px;padding:16px 24px;width:100%}
-.verdict .btn.light{background:#fff;border-color:#fff;color:#1f7a3d}
-.verdict .btn.ghost{background:transparent;border-color:currentColor;color:inherit}
-.verdict .icon{font-size:64px;line-height:1}
+.verdict.stop .inner{animation:shake .45s}
+.verdict.hold{background:var(--cream);color:var(--ink)}
+.verdict .inner{display:grid;justify-items:center;gap:12px;width:100%;max-width:420px}
+.verdict .big{font-family:var(--f-display);font-size:clamp(46px,15vw,84px);line-height:.95;margin:0}
+.verdict .who{font-size:clamp(26px,7.5vw,36px);font-weight:700;line-height:1.15;margin:0;text-wrap:balance}
+.verdict .sub{font-size:16px;opacity:.85;max-width:32ch;margin:0}
+.verdict .tag{font-family:var(--f-mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;border-radius:999px;padding:6px 14px;background:var(--ink);color:var(--cream)}
+.verdict .tag.crew{background:var(--red)}
+.verdict .sign{font-family:var(--f-display);font-size:clamp(22px,7vw,32px);background:rgba(0,0,0,.18);border-radius:16px;padding:12px 18px}
+.verdict .row{display:grid;gap:10px;width:100%;margin-top:14px}
+.verdict .btn{font-size:20px;padding:18px 24px;width:100%}
+.verdict .btn.ghost{background:transparent;border-color:currentColor;color:inherit;font-size:16px;padding:12px}
+.verdict .tap{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin-top:18px}
+.tick{width:120px;height:120px}
+.tick circle{fill:none;stroke:rgba(255,255,255,.35);stroke-width:6}
+.tick path{fill:none;stroke:#fff;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:80;stroke-dashoffset:80;animation:draw .45s .1s cubic-bezier(.6,0,.2,1) forwards}
+.cross{width:96px;height:96px}
+.cross path{fill:none;stroke:currentColor;stroke-width:10;stroke-linecap:round}
+.go .who{animation:rise .4s .15s both}
+.verdict .timer{position:absolute;left:0;bottom:0;height:6px;background:rgba(255,255,255,.55);animation:drain 1.8s linear forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes vin{from{opacity:0}to{opacity:1}}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-14px)}40%{transform:translateX(12px)}60%{transform:translateX(-8px)}80%{transform:translateX(5px)}}
+@keyframes drain{from{width:100%}to{width:0}}
+@media (prefers-reduced-motion: reduce){.verdict,.verdict *,.cam .scanline{animation:none!important}.tick path{stroke-dashoffset:0}}
 .login{display:grid;gap:14px;padding-top:30px}
 .login h1{font-size:44px;color:var(--cream)}
 .login p{color:var(--muted-dark)}
 .login input{background:var(--ink-2);color:var(--cream);border-color:#3a3330;font-size:18px}
 .err{color:#ff8a7f;font-weight:700;min-height:1.4em}
-.opt{display:flex;gap:10px;align-items:center;margin-top:12px;color:var(--muted-dark);font-size:14px}
-.opt input{width:20px;height:20px;accent-color:var(--red)}
 </style>
 </head>
 <body>
@@ -68,15 +91,16 @@ main{padding-block:16px 40px;max-width:520px;margin-inline:auto}
   </form>
 
   <section id="scan" hidden>
-    <p id="evname" style="color:var(--muted-dark);margin-bottom:10px"></p>
-    <div class="stats"><div><b id="s-in">0</b><span>Inside</span></div><div><b id="s-wait">0</b><span>Still to arrive</span></div></div>
-    <div class="cam" id="cam">
+    <div class="count"><b id="s-in">0</b><span>inside · <span id="s-tot">0</span> expected</span></div>
+    <div class="bar"><i id="s-bar"></i></div>
+    <p class="evline" id="evname"></p>
+    <div class="cam idle" id="cam">
       <video id="video" playsinline muted></video>
-      <div class="frame" aria-hidden="true"></div>
-      <div class="msg" id="cmsg"><div><p>Point the camera at the guest's QR code.</p><button class="btn" type="button" id="start">Start camera</button></div></div>
+      <div class="frame" aria-hidden="true"></div><div class="scanline" aria-hidden="true"></div>
+      <div class="msg" id="cmsg"><div><p>Scan the QR code on the guest's ticket.</p><button class="btn" type="button" id="start">Start scanning</button></div></div>
     </div>
-    <form class="manual" id="manual" autocomplete="off"><input id="code" placeholder="Type code or last 4" aria-label="Guest code"><button class="btn" type="submit">Check</button></form>
-    <label class="opt" for="auto"><input type="checkbox" id="auto"> Check in automatically when a paid ticket is scanned</label>
+    <form class="manual" id="manual" autocomplete="off"><input id="code" placeholder="No QR? Type the code" aria-label="Guest code"><button class="btn" type="submit">Check</button></form>
+    <input type="checkbox" id="auto" hidden>
   </section>
 </main>
 <div class="verdict" id="verdict" hidden role="alertdialog" aria-live="assertive"></div>
@@ -98,7 +122,12 @@ async function api(path, body){
   if (!r.ok) throw new Error(d.error || "Couldn't reach the server.");
   return d;
 }
-function stats(s){ if (!s) return; $("s-in").textContent = s.inside; $("s-wait").textContent = s.waiting; }
+let lastIn = null;
+function stats(s){ if (!s) return;
+  const b = $("s-in"), tot = s.inside + s.waiting;
+  if (lastIn != null && s.inside > lastIn) { b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); }
+  lastIn = s.inside; b.textContent = s.inside; $("s-tot").textContent = tot;
+  $("s-bar").style.width = (tot ? Math.round(s.inside / tot * 100) : 0) + "%"; }
 
 /* login */
 function showLogin(msg){ $("login").hidden = false; $("scan").hidden = true; $("lock").hidden = true; $("lerr").textContent = msg || ""; $("pw").focus(); }
@@ -113,7 +142,7 @@ $("login").addEventListener("submit", async e => {
 });
 async function enter(){
   const d = await api("login", {});
-  SIGN = d.sign || ""; $("evname").textContent = (d.event || "") + (SIGN ? " · sign: " + SIGN : "");
+  SIGN = d.sign || ""; $("evname").textContent = (d.event || "") + (SIGN ? " · give: " + SIGN : "");
   stats(d.stats);
   $("login").hidden = true; $("scan").hidden = false; $("lock").hidden = false;
 }
@@ -123,11 +152,12 @@ async function startCam(){
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
     const v = $("video"); v.srcObject = stream; await v.play();
-    $("cmsg").hidden = true;
+    $("cmsg").hidden = true; $("cam").classList.remove("idle");
+    try { localStorage.setItem("pp_door_cam", "1"); } catch(e){}
     if ("BarcodeDetector" in window) { try { detector = new BarcodeDetector({ formats: ["qr_code"] }); } catch(e){ detector = null; } }
     scanning = true; loop();
   } catch (e) {
-    $("cmsg").hidden = false;
+    $("cmsg").hidden = false; $("cam").classList.add("idle");
     const why = {
       NotAllowedError: "Camera blocked. Allow camera access for perugiaparty.com in your browser settings, then try again.",
       NotFoundError: "No camera found on this device. Type the codes below instead.",
@@ -173,27 +203,38 @@ async function check(text, forceCheckin){
   finally { busy = false; }
 }
 function buzz(p){ try { navigator.vibrate && navigator.vibrate(p); } catch(e){} }
+const TICK = `<svg class="tick" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="54"/><path d="M36 62 L53 78 L86 44"/></svg>`;
+const CROSS = `<svg class="cross" viewBox="0 0 96 96" aria-hidden="true"><path d="M26 26 L70 70 M70 26 L26 70"/></svg>`;
+const TYPE = { early: "Early bird", normal: "Normal", late: "Late", crew: "Crew" };
+let goTimer = null;
+function stop(title, who, sub){
+  return `<div class="inner">${CROSS}<p class="big">${title}</p>${who ? `<p class="who">${esc(who)}</p>` : ""}${sub ? `<p class="sub">${sub}</p>` : ""}<p class="tap">Tap to scan next</p></div>`;
+}
 function show(d, text){
   const V = $("verdict"); let cls = "stop", html = "";
-  const next = `<button class="btn ghost" type="button" data-next>Next guest</button>`;
-  if (d.error) html = `<div class="icon">⚠</div><p class="big">Try again</p><p class="sub">${esc(d.error)}</p><div class="row">${next}</div>`;
-  else if (!d.found) html = `<div class="icon">✕</div><p class="big">Not on the list</p><p class="sub">${d.ambiguous ? "Several codes end like this. Type the full code." : "No ticket with this code. Check the code or the guest's ticket page."}</p><p class="code">${esc(String(text).slice(0, 60))}</p><div class="row">${next}</div>`;
+  clearTimeout(goTimer);
+  if (d.error) html = stop("Try again", "", esc(d.error));
+  else if (!d.found) html = stop("Not on the list", "", d.ambiguous ? "Several codes end like this. Type the full code." : "No ticket with this code.");
   else {
     const g = d.guest;
-    if (!g.current) html = `<div class="icon">✕</div><p class="big">Wrong party</p><p class="who">${esc(g.name)}</p><p class="sub">This ticket is for ${esc(g.event)}.</p><div class="row">${next}</div>`;
-    else if (g.status === "in" && d.fresh) { cls = "go"; window.ppNotify && ppNotify("You checked in", "ok"); html = `<p class="big">Let in</p>${g.crew ? `<p class="sub" style="font-family:var(--f-mono);letter-spacing:.14em;text-transform:uppercase">Crew</p>` : ""}<p class="who">${esc(g.name)}</p><p class="code">${esc(g.code)}</p>${g.sign ? `<p class="sign">Give: ${esc(g.sign)}</p>` : ""}<p class="sub">Check their photo ID matches the name.</p><div class="row"><button class="btn light" type="button" data-next>Next guest</button></div>`; }
-    else if (g.status === "in") html = `<div class="icon">✕</div><p class="big">Already inside</p><p class="who">${esc(g.name)}</p><p class="sub">This ticket was used at ${esc(hhmm(g.in_at))}. Don't let in twice.</p><p class="code">${esc(g.code)}</p><div class="row">${next}</div>`;
-    else if (g.status === "paid") { cls = "hold"; html = `<p class="sub" style="font-family:var(--f-mono);letter-spacing:.1em;text-transform:uppercase">${g.crew ? "Crew" : "Paid · " + esc(euro(g.price))}</p><p class="who" style="font-size:30px">${esc(g.name)}</p><p class="code">${esc(g.code)}</p><p class="sub">Check their photo ID, then let them in.</p><div class="row"><button class="btn" type="button" data-in="${esc(g.code)}">Let in</button><button class="btn ghost" type="button" data-next>Cancel</button></div>`; }
-    else if (g.status === "approved") html = `<div class="icon">✕</div><p class="big">Not paid</p><p class="who">${esc(g.name)}</p><p class="sub">Approved, but the payment of ${esc(euro(g.price))} hasn't been confirmed. Check in the admin panel.</p><div class="row">${next}</div>`;
-    else html = `<div class="icon">✕</div><p class="big">No entry</p><p class="who">${esc(g.name)}</p><p class="sub">This request is ${esc(g.status)}.</p><div class="row">${next}</div>`;
+    if (!g.current) html = stop("Wrong party", g.name, `This ticket is for ${esc(g.event)}.`);
+    else if (g.status === "in" && d.fresh) {
+      cls = "go";
+      html = `<div class="inner">${TICK}<p class="big">In</p><p class="who">${esc(g.name)}</p>${g.sign ? `<p class="sign">Give: ${esc(g.sign)}</p>` : ""}<p class="tap">Tap to scan next</p></div><div class="timer"></div>`;
+      goTimer = setTimeout(() => { if (!V.hidden && V.classList.contains("go")) { V.hidden = true; lastText = ""; } }, 1800);
+    }
+    else if (g.status === "in") html = stop("Already in", g.name, `Scanned at ${esc(hhmm(g.in_at))}. Don't let in twice.`);
+    else if (g.status === "paid") { cls = "hold"; html = `<div class="inner"><span class="tag ${g.crew ? "crew" : ""}">${esc(TYPE[g.ticket] || "Paid")}</span><p class="who">${esc(g.name)}</p><p class="sub">Check their photo ID.</p><div class="row"><button class="btn" type="button" data-in="${esc(g.code)}">Let in</button><button class="btn ghost" type="button" data-next>Cancel</button></div></div>`; }
+    else if (g.status === "approved") html = stop("Not paid", g.name, `They still need to pay ${esc(euro(g.price))}.`);
+    else html = stop("No entry", g.name, `This request is ${esc(g.status)}.`);
   }
   V.className = "verdict " + cls; V.innerHTML = html; V.hidden = false;
-  buzz(cls === "go" ? 120 : cls === "hold" ? [60, 60, 60] : [300, 100, 300]);
+  buzz(cls === "go" ? [40, 60, 120] : cls === "hold" ? 30 : [300, 100, 300]);
 }
 $("verdict").addEventListener("click", e => {
   const inBtn = e.target.closest("[data-in]");
   if (inBtn) { $("verdict").hidden = true; check(inBtn.dataset.in, true); return; }
-  if (e.target.closest("[data-next]")) { $("verdict").hidden = true; lastText = ""; }
+  if (e.target.closest("[data-next]") || !$("verdict").classList.contains("hold")) { clearTimeout(goTimer); $("verdict").hidden = true; lastText = ""; }
 });
 $("manual").addEventListener("submit", e => { e.preventDefault(); const v = $("code").value.trim(); if (v) { check(v); $("code").value = ""; } });
 
@@ -201,7 +242,7 @@ $("manual").addEventListener("submit", e => { e.preventDefault(); const v = $("c
 (async () => {
   try { PW = localStorage.getItem("pp_door_pw"); } catch(e){}
   if (!PW) return showLogin();
-  try { await enter(); } catch (x) { if (x.message !== "auth") showLogin(x.message); }
+  try { await enter(); let cam = null; try { cam = localStorage.getItem("pp_door_cam"); } catch(e){} if (cam) startCam(); } catch (x) { if (x.message !== "auth") showLogin(x.message); }
 })();
 </script>
 </body>
