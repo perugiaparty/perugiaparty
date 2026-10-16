@@ -265,6 +265,11 @@ async function igHandleDm(env, ev, igsid, text) {
     g = await env.DB.prepare("SELECT * FROM guests WHERE vcode = ?").bind(`${m[1]}-${m[2]}`).first();
     if (g) break;
   }
+  if (!g && ev && ev.tag && found.some((m) => m[1] === String(ev.tag).toUpperCase())) {
+    await igLog(env, "bad-code", found.map((m) => m[0]).join(","));
+    await igSend(env, ev, igsid, "We couldn't find this code. Copy it again from your page on perugiaparty.com and send it here.");
+    return;
+  }
   if (!g) { // not a code: Matt answers this DM himself
     await env.DB.prepare("UPDATE people SET last_dm_at = ? WHERE igsid = ?").bind(Date.now(), igsid).run();
     await igLog(env, "no-code", String(text).slice(0, 80)); return;
@@ -649,6 +654,7 @@ function manifest(url) {
 
 // When Matt approves or marks someone paid in the admin panel, tell them on Instagram.
 const ordinal = (n) => n + (["th", "st", "nd", "rd"][((n % 100) - 20) % 10] || ["th", "st", "nd", "rd"][n % 100] || "th");
+const euro = (n) => "€" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", ",") : Number(n));
 async function igStatusDms(env) {
   const ev = await getEvent(env);
   if (!ev || !ev.ig_token) return;
@@ -659,10 +665,10 @@ async function igStatusDms(env) {
     const first = String(g.name || "").split(" ")[0];
     const link = shortUrl(await shortFor(env, g), g.token);
     const free = g.status === "paid" && Number(g.price) === 0 && g.ig_sent !== "paid";
-    const text = g.ig_sent == null ? null : {
-      approved: `You've been accepted`,
-      paid: free ? `You're in. Free entry` : `Payment confirmed`,
-    }[g.status];
+    const text = {
+      approved: `You're in, ${first}! Pay ${euro(g.price)} to lock in your place:\n\n${link}`,
+      paid: g.ticket === "crew" ? `You're on the crew, ${first}. Your crew pass:\n\n${link}` : free ? `You're in, ${first}. Free entry. Your ticket:\n\n${link}` : `Payment received. You're going, ${first}! Your ticket and the place:\n\n${link}`,
+    }[g.status] || null;
     // claim it first so two runs at once never send twice
     const c = await env.DB.prepare("UPDATE guests SET ig_sent = ? WHERE token = ? AND (ig_sent IS NULL OR ig_sent <> ?)").bind(g.status, g.token, g.status).run();
     if (text && c.meta && c.meta.changes) {
@@ -734,6 +740,7 @@ async function route(req, env) {
     if (url.pathname === "/admin" || url.pathname === "/admin/") {
       return Response.redirect(PANEL_URL, 302); // private panel; only Matt's Claude account can open it
     }
+    if (url.pathname === "/manifest.webmanifest") return manifest(url);
     if (url.pathname.startsWith("/api/")) {
       try {
         if (url.pathname === "/api/event" && req.method === "GET") return await apiEvent(env);
@@ -750,7 +757,6 @@ async function route(req, env) {
         if (url.pathname === "/api/login" && req.method === "POST") return await apiLogin(req, env);
         if (url.pathname === "/api/push/key" && req.method === "GET") return await apiPush(req, env, url, getEvent, TOKEN_RE, json);
         if ((url.pathname === "/api/push/subscribe" || url.pathname === "/api/push/unsubscribe") && req.method === "POST") return await apiPush(req, env, url, getEvent, TOKEN_RE, json);
-        if (url.pathname === "/manifest.webmanifest") return manifest(url);
         if (url.pathname === "/api/ig/webhook" && req.method === "GET") return await igWebhookVerify(url, env);
         if (url.pathname === "/api/ig/webhook" && req.method === "POST") return await igWebhook(req, env);
         if (url.pathname === "/api/door/login" && req.method === "POST") return await apiDoor(req, env, "login");
