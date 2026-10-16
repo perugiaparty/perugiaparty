@@ -596,21 +596,36 @@ function eventJsonLd(ev) {
   if (!ev || !ev.published || !ev.name || !ev.starts_at) return null;
   const start = new Date(ev.starts_at);
   if (!(start > new Date())) return null;
-  const price = priceRange(ev);
+  const end = new Date(start.getTime() + 6 * 36e5);
+  const prices = ["early", "normal", "late"].map((t) => Number(ev["price_" + t])).filter((n) => n > 0);
+  const org = { "@type": "Organization", "@id": "https://perugiaparty.com/#org", name: "PerugiaParty", url: "https://perugiaparty.com/" };
   const data = {
     "@context": "https://schema.org",
     "@type": "Event",
+    "@id": "https://perugiaparty.com/#event",
     name: `${ev.name} · PerugiaParty`,
     startDate: start.toISOString(),
+    endDate: end.toISOString(),
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    description: "Private student party in Perugia. Request your place on the guest list. 18+.",
-    image: ["https://perugiaparty.com/og-image.png"],
-    location: { "@type": "Place", name: "Perugia", address: { "@type": "PostalAddress", addressLocality: "Perugia", addressRegion: "Umbria", addressCountry: "IT" } },
-    organizer: { "@type": "Organization", name: "PerugiaParty", url: "https://perugiaparty.com/" },
+    description: `${ev.name}: a private student and Erasmus party in Perugia${ev.date_label ? " on " + ev.date_label : ""}${ev.doors ? ", doors " + ev.doors : ""}. Request your place on the guest list. 18+.`,
+    image: [ev.poster && /^https?:/.test(ev.poster) ? ev.poster : "https://perugiaparty.com/og-image.png", "https://perugiaparty.com/logo.png"],
+    url: "https://perugiaparty.com/",
+    inLanguage: "en",
+    isAccessibleForFree: false,
+    location: { "@type": "Place", name: ev.area ? `${ev.area}, Perugia` : "Perugia", address: { "@type": "PostalAddress", addressLocality: "Perugia", addressRegion: "PG", addressCountry: "IT" } },
+    organizer: org,
+    performer: org,
     typicalAgeRange: "18-",
+    audience: { "@type": "PeopleAudience", suggestedMinAge: 18, audienceType: "University and Erasmus students" },
   };
-  if (price) data.offers = { "@type": "Offer", price: String(price.min), priceCurrency: "EUR", url: "https://perugiaparty.com/#request", availability: ev.requests_open ? "https://schema.org/InStock" : "https://schema.org/PreOrder" };
+  if (prices.length) data.offers = {
+    "@type": "AggregateOffer", priceCurrency: "EUR",
+    lowPrice: String(Math.min(...prices)), highPrice: String(Math.max(...prices)), offerCount: String(prices.length),
+    url: "https://perugiaparty.com/#request",
+    availability: ev.requests_open ? "https://schema.org/InStock" : "https://schema.org/PreOrder",
+    validFrom: new Date(Number(ev.updated_at) || Date.now() - 864e5).toISOString(),
+  };
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 async function homepage(req, env) {
