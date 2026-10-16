@@ -48,7 +48,7 @@ async function getEvent(env) {
 }
 
 async function heldPlaces(env, tag) {
-  const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND status IN ('approved','paid','in')").bind(tag).first();
+  const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND status IN ('approved','paid','in') AND COALESCE(ticket,'') <> 'crew'").bind(tag).first();
   return r?.n || 0;
 }
 // Tier that applies right now by date (same rule as the admin Approve button).
@@ -372,7 +372,7 @@ async function apiEvent(env) {
     // real number of places left at the current price (tier name is never sent)
     spots_left: await spotsLeft(env, ev),
     // people already coming (set in admin) + everyone who signed up on the website
-    signed_up: Math.max(0, Number(ev.offline_going) || 0) + (((await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND status IN ('requested','waitlist','approved','paid','in')").bind(ev.tag).first()) || {}).n || 0),
+    signed_up: Math.max(0, Number(ev.offline_going) || 0) + (((await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND status IN ('requested','waitlist','approved','paid','in') AND COALESCE(ticket,'') <> 'crew'").bind(ev.tag).first()) || {}).n || 0),
     poster: ev.poster ? (String(ev.poster).startsWith("data:") ? `/api/poster?v=${ev.updated_at || 0}` : ev.poster) : null,
     turnstile: ev.turnstile_site_key || null,
     ...splash,
@@ -487,7 +487,7 @@ async function apiTicket(url, env) {
   }
   if (g.status === "paid" || g.status === "in") {
     Object.assign(out, {
-      code: g.code, price: g.price,
+      code: g.code, price: g.price, crew: g.ticket === "crew",
       location: sameEvent ? ev.location : null,
       date_label: sameEvent ? ev.date_label : null,
       doors: sameEvent ? ev.doors : null,
@@ -557,7 +557,7 @@ async function findByCode(env, tag, text) {
   return list[0] || null;
 }
 function doorView(g, ev) {
-  return { name: g.name, code: g.code, status: g.status, price: g.price, in_at: g.in_at, event: g.event, current: g.event === ev.tag, sign: ev.sign || "" };
+  return { name: g.name, code: g.code, status: g.status, price: g.price, crew: g.ticket === "crew", in_at: g.in_at, event: g.event, current: g.event === ev.tag, sign: ev.sign || "" };
 }
 async function apiDoor(req, env, action) {
   let body; try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }

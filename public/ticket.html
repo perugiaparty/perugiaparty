@@ -113,6 +113,8 @@ h1{font-size:clamp(40px,8vw,64px)}
 .tsave img{width:100%;max-height:68vh;object-fit:contain;border-radius:12px;-webkit-touch-callout:default;user-select:auto}
 .tsave-n{color:var(--muted-dark);font-size:13px;margin:0;max-width:36ch}
 .tsave .btn{min-width:140px}
+.cine .crewband{position:absolute;top:26px;right:-44px;transform:rotate(35deg);background:var(--red);color:var(--cream);font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:6px 52px;z-index:2}
+.cine.crew{box-shadow:10px 10px 0 var(--ink),10px 10px 0 2px var(--red)}
 /* how to pay */
 .pay{position:relative;background:var(--ink);color:var(--cream);border-radius:24px;padding:22px 18px 18px;display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
 .pay .eyebrow{color:var(--muted-dark)}
@@ -405,7 +407,7 @@ async function ticketCanvas(d){
   x.imageSmoothingEnabled = false; x.drawImage(qc, (W-box)/2, 724, box, box);
   x.fillStyle = "#f5f5f0"; x.font = `500 60px "DM Mono", monospace`; x.fillText(d.code, W/2, 1420);
   x.font = `500 40px "DM Mono", monospace`; x.fillText(d.name, W/2, 1490);
-  x.fillStyle = "#a9a9a2"; x.font = `500 26px "DM Mono", monospace`; x.fillText("PERSONAL TICKET · PHOTO ID AT THE DOOR · 18+", W/2, 1560);
+  x.fillStyle = "#a9a9a2"; x.font = `500 26px "DM Mono", monospace`; x.fillText(d.crew ? "CREW PASS · PHOTO ID AT THE DOOR" : "PERSONAL TICKET · PHOTO ID AT THE DOOR · 18+", W/2, 1560);
   return c;
 }
 // Instagram, Facebook and TikTok's built-in browsers silently block file downloads
@@ -707,7 +709,8 @@ function stepsHTML(stage, cls){
 function unlocked(d, first){
   const key = "pp_paid_" + (d.code || ""); try { if (localStorage.getItem(key)) return; localStorage.setItem(key, "1"); } catch(e){ return; }
   const o = document.createElement("div"); o.className = "unlock"; o.setAttribute("role", "status");
-  o.innerHTML = `<div class="unlock-in"><span class="unlock-k">Payment received</span><p class="unlock-h">You're<br>going.</p><span class="unlock-t">Tap to see your ticket</span></div>`;
+  o.innerHTML = d.crew ? `<div class="unlock-in"><span class="unlock-k">Crew pass</span><p class="unlock-h">You're<br>crew.</p><span class="unlock-t">Tap to see your pass</span></div>`
+    : `<div class="unlock-in"><span class="unlock-k">Payment received</span><p class="unlock-h">You're<br>going.</p><span class="unlock-t">Tap to see your ticket</span></div>`;
   const close = () => { o.classList.add("out"); setTimeout(() => o.remove(), 450); };
   o.addEventListener("click", close); setTimeout(close, 3200);
   document.body.appendChild(o);
@@ -775,16 +778,16 @@ function render(d){
   } else if (d.status === "paid" || d.status === "in") {
     const inside = d.status === "in", over = partyOver(d);
     P.innerHTML = `${inside && over ? thanksHTML(d, first) : `<div class="hype ${inside ? "" : "paid"}">
-        ${inside ? "" : `<span class="rq-stamp paid-stamp" aria-hidden="true">Paid</span>`}
+        ${inside ? "" : `<span class="rq-stamp paid-stamp" aria-hidden="true">${d.crew ? "Crew" : "Paid"}</span>`}
         ${inside ? `<span class="state">Checked in</span>` : ""}
-        <h1>${inside ? `You made it, <em>${first}</em>.` : `You're going, ${first}.`}</h1>
-        <p class="lead">${inside ? "Enjoy the night." : `See you at <b>${esc(d.event)}</b>${d.date_label ? ", " + esc(d.date_label) : ""}. Your ticket and the place are unlocked below.`}</p>
+        <h1>${inside ? `You made it, <em>${first}</em>.` : d.crew ? `You're crew, ${first}.` : `You're going, ${first}.`}</h1>
+        <p class="lead">${inside ? "Enjoy the night." : d.crew ? `Thanks for making <b>${esc(d.event)}</b> happen. Nothing to pay: your crew pass and the place are below.` : `See you at <b>${esc(d.event)}</b>${d.date_label ? ", " + esc(d.date_label) : ""}. Your ticket and the place are unlocked below.`}</p>
         <div class="count" id="tcount" ${inside ? 'style="display:none"' : ""} hidden></div>
-        ${stepsHTML(inside ? 5 : 4, inside ? "" : "on-red")}
+        ${d.crew ? "" : stepsHTML(inside ? 5 : 4, inside ? "" : "on-red")}
       </div>
       ${inside ? `<div class="inbar" role="status"><div><b>Checked in</b><span>${d.in_at ? "Entered at " + new Date(d.in_at).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) + ". " : ""}This ticket has been used.</span></div></div>` : ""}`}
       ${inside && !over ? programmeHTML(d) : ""}
-      <div class="cine${inside ? "" : " shine"}">
+      <div class="cine${inside ? "" : " shine"}${d.crew ? " crew" : ""}">${d.crew ? `<span class="crewband">Crew pass</span>` : ""}
         <span class="holes t" aria-hidden="true"></span><span class="holes b" aria-hidden="true"></span>
         ${inside ? `<span class="instamp">CHECKED IN</span>` : ""}
         <img class="logo" src="/logo.png" alt="PerugiaParty" width="150" height="106" decoding="async">
