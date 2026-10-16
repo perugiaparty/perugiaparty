@@ -477,12 +477,12 @@ async function apiTicket(url, env) {
   const out = { status: g.status, name: g.name, event: sameEvent ? ev.name : g.event, ig: g.ig, vcode: g.vcode, link: shortUrl(await shortFor(env, g), g.token), verified: Number(g.verified) === 1, mismatch: !!g.ig_mismatch, ig_auto: !!(ev.ig_token && ev.ig_app_secret) };
   if (g.status === "approved") {
     Object.assign(out, {
-      code: g.code, price: g.price, ticket: g.ticket, deadline: g.deadline,
+      code: g.code, price: g.price, ticket: g.ticket,
       iban: sameEvent ? ev.iban : null, beneficiary: sameEvent ? ev.beneficiary : null,
       reference: `${g.name} ${g.code}`,
       approved_at: g.approved_at,
       date_label: sameEvent ? ev.date_label : null,
-      tiers: sameEvent ? { early: ev.price_early, normal: ev.price_normal, late: ev.price_late, early_until: ev.early_until, normal_until: ev.normal_until } : null,
+      tiers: sameEvent ? { early: ev.price_early, normal: ev.price_normal, late: ev.price_late } : null, // expiry dates stay admin-only
     });
   }
   if (g.status === "paid" || g.status === "in") {

@@ -642,11 +642,10 @@ function render(d){
     const day = iso => iso ? new Date(iso).toLocaleDateString("en-GB", { weekday:"short", day:"numeric", month:"short", timeZone:"Europe/Rome" }) : null;
     const eu = d.tiers && day(d.tiers.early_until), nu = d.tiers && day(d.tiers.normal_until);
     const why = {
-      early: eu ? `You were approved before ${eu}, so you get the early bird price. Prices go up as the party gets closer.` : "You were approved early, so you get the lowest price. Prices go up as the party gets closer.",
-      normal: nu ? `You were approved ${eu ? "after the early bird period" : "at the normal price"}${nu ? ", before " + nu : ""}, so the normal price applies.` : "You were approved at the normal price. The early bird places are gone, and late tickets cost more.",
-      late: nu ? `You were approved after ${nu}, close to the party, so the late price applies.` : "You were approved close to the party, so the late price applies.",
+      early: "You were approved early, so you get the lowest price.",
+      normal: "You were approved at the normal price.",
+      late: "You were approved close to the party, so the late price applies.",
     }[d.ticket] || "This is the price for your place.";
-    const until = { early: eu ? "until " + eu : "", normal: nu ? "until " + nu : "", late: nu ? "after " + nu : "" };
     const tiers = d.tiers ? ["early","normal","late"].filter(t => d.tiers[t] != null && d.tiers[t] !== "") : [];
     const allText = `Amount: ${euro(d.price)}\nIBAN: ${d.iban || ""}\nBeneficiary: ${d.beneficiary || ""}\nReference: ${d.reference}`;
     P.innerHTML = `<div class="hero-ok"><span class="state" style="background:var(--cream);border-color:var(--cream);color:var(--red)">Accepted</span>
@@ -656,9 +655,8 @@ function render(d){
       <div class="amount"><p class="eyebrow" style="color:var(--muted-dark)">You pay · ${esc(tierName)}</p>
         <p class="big">${euro(d.price)}</p>
         <p class="why">${esc(why)}</p>
-        ${tiers.length > 1 ? `<div class="tiers">${tiers.map(t => `<div class="tier ${t === d.ticket ? "me" : ""}">${t === d.ticket ? `<span class="you">Your price</span>` : ""}<b>${euro(d.tiers[t])}</b><span class="tn">${names[t]}</span>${until[t] ? `<span class="tu">${until[t]}</span>` : ""}</div>`).join("")}</div>` : ""}
+        ${tiers.length > 1 ? `<div class="tiers">${tiers.map(t => `<div class="tier ${t === d.ticket ? "me" : ""}">${t === d.ticket ? `<span class="you">Your price</span>` : ""}<b>${euro(d.tiers[t])}</b><span class="tn">${names[t]}</span></div>`).join("")}</div>` : ""}
       </div>
-      ${d.deadline ? `<div class="deadline">${overdue ? "The payment deadline has passed. DM us on Instagram if you already paid." : `Pay before <span>${esc(when(d.deadline))}</span>. After that your place goes back to the list.`}</div>` : ""}
       <div class="card">
         <h2 style="font-size:30px">How to pay</h2>
         <ol class="howto">
@@ -715,7 +713,7 @@ function render(d){
   } else if (d.status === "removed") {
     empty("Your place was cancelled.", "Your request or ticket for this party has been cancelled. DM us on Instagram if you have questions.");
   } else if (d.status === "released") {
-    empty("Your place was released.", "The payment deadline passed, so your place went back to the list. DM us on Instagram if you think this is a mistake.");
+    empty("Your place was released.", "Your place went back to the list. DM us on Instagram if you think this is a mistake.");
   } else {
     empty("Something's off.", "We couldn't read this ticket. DM us on Instagram and we'll sort it out.");
   }
