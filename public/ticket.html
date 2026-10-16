@@ -77,38 +77,32 @@ h1{font-size:clamp(40px,8vw,64px)}
 .copyall{justify-self:start}
 .state{justify-self:start}
 /* how to pay */
-.pay{background:var(--ink);color:var(--cream);border-radius:24px;padding:24px 20px;display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+.pay{position:relative;background:var(--ink);color:var(--cream);border-radius:24px;padding:22px 18px 18px;display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
 .pay .eyebrow{color:var(--muted-dark)}
-.pay-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
-.pay-top h2{color:var(--cream);font-size:clamp(52px,14vw,76px);line-height:.95;margin-top:4px}
-.tier-tag{display:inline-block;background:var(--red);color:var(--cream);font-family:var(--f-display);font-size:14px;letter-spacing:.03em;text-transform:uppercase;border-radius:10px;padding:7px 12px;white-space:nowrap;transform:rotate(-3deg);box-shadow:3px 3px 0 #ff4a3d}
-.pay-tier-old{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;border:1.5px solid #4a423b;border-radius:999px;padding:5px 10px;color:var(--muted-dark);white-space:nowrap}
-.pay-hint{color:var(--muted-dark);font-size:15px;margin:0}
-.prow-list{display:grid;gap:8px}
-.prow{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:28px minmax(0,1fr) auto;grid-template-areas:"n k p" "n v p";column-gap:12px;row-gap:2px;align-items:center;background:var(--ink-2);border:1.5px solid #3a3330;border-radius:16px;padding:12px 14px;width:100%;-webkit-tap-highlight-color:transparent;transition:transform .12s,border-color .2s,background .2s}
+.pay h2{color:var(--cream);font-size:clamp(48px,13vw,68px);line-height:.95}
+.tier-tag{position:absolute;top:18px;right:18px;background:var(--red);color:var(--cream);font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:5px 10px;white-space:nowrap}
+.pay-hint{color:var(--muted-dark);font-size:14px;margin:0 0 4px}
+.prow-list{display:grid;gap:6px}
+.prow{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"k p" "v p";column-gap:12px;row-gap:1px;align-items:center;background:var(--ink-2);border:1.5px solid transparent;border-radius:14px;padding:10px 12px 10px 14px;width:100%;-webkit-tap-highlight-color:transparent;transition:transform .12s,border-color .2s,background .2s}
 .prow:active{transform:scale(.98)}
 .prow:focus-visible{outline:3px solid #ff4a3d;outline-offset:2px}
-.prow .pn{grid-area:n;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#3a3330;color:var(--cream);font-family:var(--f-display);font-size:13px}
-.prow .pk{grid-area:k;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-dark)}
-.prow .pv{grid-area:v;font-family:var(--f-mono);font-size:17px;font-weight:500;color:var(--cream);overflow-wrap:anywhere;line-height:1.3}
-.prow .pill{grid-area:p;font-size:13px;font-weight:700;border:1.5px solid #4a423b;border-radius:999px;padding:6px 12px;color:var(--cream);white-space:nowrap}
-.prow.key{border-color:#ff4a3d}
+.prow .pk{grid-area:k;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
+.prow .pv{grid-area:v;font-family:var(--f-mono);font-size:16px;font-weight:500;color:var(--cream);overflow-wrap:anywhere;line-height:1.3}
+.prow .pill{grid-area:p;font-size:12px;font-weight:700;border:1.5px solid #4a423b;border-radius:999px;padding:5px 11px;color:var(--cream);white-space:nowrap}
+.prow.key .pk{color:#ff8a7f}
 .prow.got{border-color:#2f8f55;background:#16241b}
-.prow.got .pn{background:#2f8f55}
 .prow.got .pill{border-color:#2f8f55;color:#9be0b4}
 .prow.off{cursor:default;opacity:.6}
-.pay-warn{margin:-4px 0 0;font-size:13px;color:#ff8a7f}
-.pay-all{width:100%}
-.pay-after{background:var(--ink-2);border-radius:14px;padding:12px 14px;font-size:14px;color:var(--muted-dark)}
-.pay-after b{color:var(--cream)}
-.prices{background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:14px 18px}
-.prices summary{cursor:pointer;font-weight:700}
-.prices p{color:var(--muted);font-size:15px;margin:8px 0 0}
-.prices .tier{border-color:var(--line);color:var(--muted)}
-.prices .tier b{color:var(--muted)}
-.prices .tier.me{background:var(--ink);border-color:var(--ink);color:var(--cream)}
-.prices .tier.me b{color:var(--cream)}
-@media (max-width:380px){.prow .pv{font-size:15px}.prow{padding:11px 12px;column-gap:10px}}
+.pay-all{width:100%;margin-top:4px}
+.pay-faq{background:var(--paper);border:1.5px solid var(--line);border-radius:20px;padding:18px}
+.pay-faq h3{font-size:20px;margin-bottom:6px}
+.pay-faq dl{margin:0;display:grid}
+.pay-faq dl div{padding:10px 0;border-top:1px solid var(--line)}
+.pay-faq dl div:first-child{border-top:0}
+.pay-faq dt{font-weight:700;font-size:15px}
+.pay-faq dd{margin:2px 0 0;color:var(--muted);font-size:14.5px;line-height:1.5}
+.pay-faq b{font-family:var(--f-mono);color:var(--ink)}
+@media (max-width:380px){.prow .pv{font-size:14.5px}}
 /* request received */
 .rq{position:relative;overflow:hidden;background:var(--ink);color:var(--cream);border-radius:24px;padding:28px 24px;display:grid;gap:12px;grid-template-columns:minmax(0,1fr);animation:rqIn .5s cubic-bezier(.2,.9,.3,1.2) both}
 .rq h1{color:var(--cream);font-size:clamp(36px,9vw,58px)}
@@ -317,9 +311,9 @@ let token = params.get("t");
 try { if (token) localStorage.setItem("pp_token", token); else token = localStorage.getItem("pp_token"); } catch(e){}
 if (token) { const c = document.getElementById("nav-cta"); c.textContent = "My ticket"; c.href = "/ticket.html?t=" + encodeURIComponent(token); }
 
-function payRow(n, k, shown, value, key){
-  if (!value) return `<div class="prow off"><span class="pn">${n}</span><span class="pk">${k}</span><span class="pv">${esc(shown)}</span></div>`;
-  return `<button class="prow${key ? " key" : ""}" type="button" data-copy="${esc(value)}"><span class="pn">${n}</span><span class="pk">${k}</span><span class="pv">${esc(shown)}</span><span class="pill">Copy</span></button>`;
+function payRow(k, shown, value, key){
+  if (!value) return `<div class="prow off"><span class="pk">${k}</span><span class="pv">${esc(shown)}</span></div>`;
+  return `<button class="prow${key ? " key" : ""}" type="button" data-copy="${esc(value)}"><span class="pk">${k}</span><span class="pv">${esc(shown)}</span><span class="pill">Copy</span></button>`;
 }
 function copyBtn(value){ return `<button class="copy" type="button" data-copy="${esc(value)}">Copy</button>`; }
 document.addEventListener("click", e => {
@@ -689,22 +683,32 @@ function render(d){
     const allText = `Amount: ${euro(d.price)}\nIBAN: ${d.iban || ""}\nBeneficiary: ${d.beneficiary || ""}\nReference: ${d.reference}`;
     P.innerHTML = `<div class="hero-ok"><span class="state" style="background:var(--cream);border-color:var(--cream);color:var(--red)">Accepted</span>
         <h1>You're in, ${first}.</h1>
-        <p class="lead">You've been accepted for <b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " on " + esc(d.date_label) : ""}. Pay to confirm your place. After that, your ticket and the location unlock right here.</p>
+        <p class="lead">You've been accepted for <b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " on " + esc(d.date_label) : ""}. Pay below to lock in your place.</p>
         ${stepsHTML(2, "on-red")}</div>
       <section class="pay" aria-labelledby="pay-h">
-        <div class="pay-top"><div><p class="eyebrow">Pay by bank transfer</p><h2 id="pay-h">${euro(d.price)}</h2></div><span class="tier-tag">${esc(tierName)} ticket</span></div>
-        <p class="pay-hint">Open your banking app, make a transfer (bonifico) and tap each line to copy it.</p>
+        <span class="tier-tag">${esc(tierName)}</span>
+        <p class="eyebrow">Bank transfer</p>
+        <h2 id="pay-h">${euro(d.price)}</h2>
+        <p class="pay-hint">Tap a line to copy it, then paste it in your banking app.</p>
         <div class="prow-list">
-          ${payRow("1", "Amount", euro(d.price), String(d.price).replace(".", ","))}
-          ${payRow("2", "IBAN", d.iban ? d.iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim() : "—", d.iban ? d.iban.replace(/\s+/g, "") : "")}
-          ${payRow("3", "Name", d.beneficiary || "—", d.beneficiary || "")}
-          ${payRow("4", "Description", d.reference, d.reference, true)}
+          ${payRow("IBAN", d.iban ? d.iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim() : "—", d.iban ? d.iban.replace(/\s+/g, "") : "")}
+          ${payRow("Name", d.beneficiary || "—", d.beneficiary || "")}
+          ${payRow("Amount", euro(d.price), String(d.price).replace(".", ","))}
+          ${payRow("Description · exact", d.reference, d.reference, true)}
         </div>
-        <p class="pay-warn">Write the description exactly like this, so we know the payment is yours.</p>
-        <button class="btn pay-all" type="button" data-copy="${esc(allText)}">Copy all details</button>
-        <div class="pay-after"><b>Paid?</b> You don't need to send us anything. We check transfers and your ticket appears on this page.</div>
+        <button class="btn pay-all" type="button" data-copy="${esc(allText)}">Copy all</button>
       </section>
-      <p class="note">Your personal code: <b style="font-family:var(--f-mono)">${esc(d.code)}</b> · Questions? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>`;
+      <div class="pay-faq">
+        <h3>Good to know</h3>
+        <dl>
+          <div><dt>After paying</dt><dd>Nothing to send us. Once we see your payment, your ticket and the location appear on this page${d.verified ? " and we message you on Instagram" : ""}.</dd></div>
+          <div><dt>How long it takes</dt><dd>An instant transfer (bonifico istantaneo) arrives right away. A normal one can take 1–2 working days, that's fine.</dd></div>
+          <div><dt>Which bank</dt><dd>Any bank or app works: Italian banks, Revolut, N26, Wise, etc. Pay from your own account.</dd></div>
+          <div><dt>Forgot the description?</dt><dd>Pay anyway. We match it by your name and amount.</dd></div>
+          <div><dt>Lost this page?</dt><dd>Log in at perugiaparty.com/ticket with your Instagram and the code <b>${esc(d.vcode || d.code)}</b>.</dd></div>
+        </dl>
+      </div>
+      <p class="note">Something else? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>`;
   } else if (d.status === "paid" || d.status === "in") {
     const inside = d.status === "in", over = partyOver(d);
     P.innerHTML = `${inside && over ? thanksHTML(d, first) : `<div class="hype">
