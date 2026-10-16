@@ -427,7 +427,7 @@ function verifyHTML(d){
     <p>DM this code to <b>@perugiaparty</b> from <b>${handle}</b>. It proves the account is yours${d.returner ? " and unlocks your priority as a returning guest" : ""}. ${d.ig_auto ? "You get an automatic reply within a minute." : "We confirm it as soon as we see it."}</p>
     <div class="vcode"><span>${esc(d.vcode)}</span>${copyBtn(d.vcode)}</div>
     ${d.mismatch ? `<p class="warn">We got this code from a different Instagram account. Send it from <b>${handle}</b>, the account in your request.</p>` : ""}
-    <a class="btn" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener" style="justify-self:start">Open Instagram DM ↗</a>
+    <a class="btn" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(d.vcode || "")}" target="_blank" rel="noopener" style="justify-self:start" onclick="try{navigator.clipboard.writeText(${esc(JSON.stringify(d.vcode || ""))})}catch(e){}">Send code on Instagram ↗</a>
     <p style="font-size:13px">Keep the code: with it you can log in at perugiaparty.com/ticket on any phone.</p></section>`;
 }
 function loginView(msg){

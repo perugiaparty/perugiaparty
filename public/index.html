@@ -410,7 +410,7 @@ body.locked{overflow:hidden}
             <h3>Last step: DM us this code.</h3>
             <p style="margin-top:8px">Send it to <b>@perugiaparty</b> from <b id="my-ig">your Instagram</b>. We reply with your link.</p>
             <p class="linkbox codebox" id="my-link" style="margin-top:12px"></p>
-            <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="copy-link">Copy code</button><a class="btn outline" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Open Instagram DM ↗</a></div>
+            <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="copy-link">Copy code</button><a class="btn outline" id="dm-link" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Send code on Instagram ↗</a></div>
             <p class="toast" id="toast" style="color:var(--red-deep)!important;margin-top:8px"></p>
             <div class="appbox" id="appbox" hidden></div>
           </div>
@@ -486,7 +486,7 @@ body.locked{overflow:hidden}
     <h3 id="save-h">DM us this code.</h3>
     <p class="linkbox codebox" id="save-link"></p>
     <p>Send it to <b>@perugiaparty</b> from <b id="save-ig">your Instagram</b>. We reply with your link.</p>
-    <a class="btn" id="save-copy" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener" style="width:100%">Copy and open Instagram</a>
+    <a class="btn" id="save-copy" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener" style="width:100%">Send code on Instagram</a>
     <button class="btn outline done" type="button" id="save-done" disabled style="width:100%;margin-top:8px">Done</button>
   </div>
 </div>
@@ -664,6 +664,7 @@ $("req-form").addEventListener("submit", async e => {
     const link = location.origin + "/ticket.html?t=" + data.token;
     const handle = data.ig || ("@" + body.ig.replace(/^@+/, "").toLowerCase());
     $("my-link").textContent = data.vcode || ""; $("my-ig").textContent = handle;
+    $("dm-link").href = dmUrl(data.vcode);
     showMyTicket(link);
     $("side-info").hidden = true; $("side-done").hidden = false;
     const st = $("pv-stamp"); st.textContent = "SENT"; st.classList.add("sent"); document.querySelector(".side .mini").classList.add("done");
@@ -688,17 +689,21 @@ function openSave(code, handle, waitlist){
   saveCopied = false;
   $("save-h").textContent = waitlist ? "Waitlist. DM us this code." : "DM us this code.";
   $("save-link").textContent = code || "";
+  $("save-copy").href = dmUrl(code);
   $("save-ig").textContent = handle || "your Instagram";
   $("save-done").disabled = true;
   $("saveov").hidden = false; document.body.classList.add("locked");
   $("save-copy").focus();
 }
-function unlockSave(){ saveCopied = true; $("save-done").disabled = false; $("save-copy").textContent = "Copied, open Instagram"; }
+// opens the DM with the code already typed in; the code is also copied in case the app drops the text
+function dmUrl(code){ return "https://ig.me/m/perugiaparty" + (code ? "?text=" + encodeURIComponent(code) : ""); }
+function unlockSave(){ saveCopied = true; $("save-done").disabled = false; $("save-copy").textContent = "Send code on Instagram"; }
 $("save-copy").addEventListener("click", () => {
   const text = $("save-link").textContent;
   try { navigator.clipboard.writeText(text).then(unlockSave, unlockSave); } catch (e) { unlockSave(); }
-  if (window.ppNotify) ppNotify("Code copied · paste it in the DM", "ok");
+  if (window.ppNotify) ppNotify("Code is in the chat · just press send", "ok");
 });
+$("dm-link").addEventListener("click", () => { try { navigator.clipboard.writeText($("my-link").textContent); } catch (e) {} });
 $("save-link").addEventListener("click", () => { const r = document.createRange(); r.selectNodeContents($("save-link")); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); try { navigator.clipboard.writeText($("save-link").textContent).then(unlockSave, () => {}); } catch (e) {} });
 $("save-done").addEventListener("click", () => {
   if (!saveCopied) return;
