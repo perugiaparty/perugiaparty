@@ -611,20 +611,18 @@ function pairHint(ev){
   el.innerHTML = `Been before and your friend never has? The <b>${ord} pair</b> gets in free, both of you.`;
   el.hidden = false;
 }
-// top-left status of the party: "13 signed up · 137 spots left"
+// top-left status of the party: "13 signed up"
 function statusLine(ev){
   if (ev.sold_out) return ev.requests_open ? "Sold out · waitlist open" : "Sold out";
   if (!ev.requests_open) return "Requests open soon";
   const parts = [];
   if (ev.signed_up > 0) parts.push(`${ev.signed_up} signed up`);
-  if (ev.spots_left != null) parts.push(`${ev.spots_left} spots left`);
   return parts.length ? parts.join(" · ") : "Requests open";
 }
 function showSigned(ev){
   const el = $("f-signed"); if (!el || !ev || !ev.published) return;
   const parts = [];
   if (ev.signed_up > 0) parts.push(`${ev.signed_up} signed up`);
-  if (ev.spots_left != null) parts.push(ev.spots_left > 0 ? `${ev.spots_left} spots left` : "Full · waitlist open");
   if (!parts.length) return;
   el.innerHTML = `<i aria-hidden="true"></i>${parts.join(" · ")}`;
   el.hidden = false;
