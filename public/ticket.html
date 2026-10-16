@@ -76,6 +76,30 @@ h1{font-size:clamp(40px,8vw,64px)}
 .ref .copy{color:var(--cream);border-color:#4a423b}
 .copyall{justify-self:start}
 .state{justify-self:start}
+/* request received */
+.rq{position:relative;overflow:hidden;background:var(--ink);color:var(--cream);border-radius:24px;padding:28px 24px;display:grid;gap:12px;grid-template-columns:minmax(0,1fr);animation:rqIn .5s cubic-bezier(.2,.9,.3,1.2) both}
+.rq h1{color:var(--cream);font-size:clamp(36px,9vw,58px)}
+.rq .lead{color:var(--muted-dark)}
+.rq .state{background:var(--red);border-color:var(--red);color:var(--cream)}
+.rq-stamp{position:absolute;top:22px;right:18px;font-family:var(--f-display);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#ff4a3d;border:3px solid #ff4a3d;border-radius:10px;padding:4px 12px;transform:rotate(12deg);animation:stamp .45s .35s cubic-bezier(.2,1.6,.4,1) both}
+.rq-steps{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;position:relative}
+.rq-steps li{display:grid;justify-items:center;gap:6px;font-family:var(--f-mono);font-size:10px;letter-spacing:.02em;text-transform:uppercase;color:var(--muted-dark);position:relative;min-width:0;text-align:center}
+.rq-steps li::before{content:"";position:absolute;top:8px;left:-50%;width:100%;height:2px;background:#3a3330;z-index:0}
+.rq-steps li:first-child::before{display:none}
+.rq-steps li.done::before,.rq-steps li.now::before{background:var(--red)}
+.rq-steps i{width:18px;height:18px;border-radius:50%;border:2px solid #4a423b;background:var(--ink);position:relative;z-index:1}
+.rq-steps li.done i{background:var(--red);border-color:var(--red);animation:pop .4s both}
+.rq-steps li.done:nth-child(2) i{animation-delay:.15s}
+.rq-steps li.now i{border-color:#ff4a3d;animation:pulse 1.6s infinite}
+.rq-steps li.done,.rq-steps li.now{color:var(--cream)}
+@keyframes rqIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes stamp{from{opacity:0;transform:rotate(12deg) scale(2.2)}to{opacity:1;transform:rotate(12deg) scale(1)}}
+@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,74,61,.6)}70%{box-shadow:0 0 0 10px rgba(255,74,61,0)}100%{box-shadow:0 0 0 0 rgba(255,74,61,0)}}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden}
+.confetti i{position:absolute;top:-14px;width:9px;height:14px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translate(var(--dx),110vh) rotate(var(--r))}}
+@media (prefers-reduced-motion: reduce){.rq,.rq-stamp,.rq-steps i{animation:none!important}}
 /* you're in */
 .hype{background:var(--ink);color:var(--cream);border-radius:24px;padding:28px 24px;display:grid;gap:12px;position:relative;overflow:hidden}
 .hype h1{color:var(--cream);font-size:clamp(38px,9vw,60px)}
@@ -421,7 +445,7 @@ function refHTML(d){
 }
 function verifyHTML(d){
   const handle = esc(d.ig || "your Instagram");
-  if (d.verified) return `<div class="verified"><span>Instagram confirmed</span><span style="font-weight:500">Your login code:</span><code>${esc(d.vcode)}</code></div>`;
+  if (d.verified) return "";
   return `<section class="verify" id="verify"><span class="kick">Last step</span>
     <h2>Send us your code on Instagram.</h2>
     <p>DM this code to <b>@perugiaparty</b> from <b>${handle}</b>. It proves the account is yours${d.returner ? " and unlocks your priority as a returning guest" : ""}. ${d.ig_auto ? "You get an automatic reply within a minute." : "We confirm it as soon as we see it."}</p>
@@ -520,11 +544,11 @@ function decorate(d){
   const P = $("page");
   const pre = d.status === "requested" || d.status === "waitlist" || d.status === "approved";
   if (!d.next && pre && d.vcode) {
-    const h = P.querySelector(".hero-ok") || P.querySelector("h1");
+    const h = P.querySelector(".rq") || P.querySelector(".hero-ok") || P.querySelector("h1");
     if (h) h.insertAdjacentHTML("afterend", verifyHTML(d));
   }
   if (d.priority && !d.next && (d.status === "requested" || d.status === "waitlist")) {
-    const h = P.querySelector("h1");
+    const h = P.querySelector(".rq") || P.querySelector("h1");
     if (h) h.insertAdjacentHTML("afterend", prioHTML("Priority · you came before", d.status === "waitlist" ? "Returning guests are first in line when a place opens up." : "Returning guests are first in line. We look at your request before new ones."));
   }
   if (d.next) P.insertAdjacentHTML("afterbegin", nextHTML(d) + inviteHTML(d)); // older ticket: the next party comes first
@@ -562,12 +586,36 @@ addEventListener("resize", () => { clearTimeout(fitHeadings.t); fitHeadings.t = 
 let LAST = null;
 setInterval(() => { const el = $("prog"); if (el && LAST) el.outerHTML = programmeHTML(LAST) || ""; }, 60000);
 
+// a short confetti burst the first time someone sees their request
+function celebrate(d){
+  const key = "pp_cheer_" + (d.vcode || ""); try { if (localStorage.getItem(key)) return; localStorage.setItem(key, "1"); } catch(e){}
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const box = document.createElement("div"); box.className = "confetti"; box.setAttribute("aria-hidden", "true");
+  const cols = ["#b90000", "#ff4a3d", "#141210", "#f4ead7", "#8f0000"];
+  for (let i = 0; i < 70; i++) {
+    const c = document.createElement("i");
+    c.style.left = (Math.random() * 100) + "%"; c.style.background = cols[i % cols.length];
+    c.style.setProperty("--dx", (Math.random() * 160 - 80) + "px"); c.style.setProperty("--r", (Math.random() * 720 - 360) + "deg");
+    c.style.animationDelay = (Math.random() * .35) + "s"; c.style.animationDuration = (1.6 + Math.random() * 1.2) + "s";
+    if (i % 3 === 0) c.style.borderRadius = "50%";
+    box.appendChild(c);
+  }
+  document.body.appendChild(box); setTimeout(() => box.remove(), 3600);
+  try { navigator.vibrate && navigator.vibrate([30, 40, 30]); } catch(e){}
+}
 function render(d){
   const P = $("page"), first = esc(String(d.name || "").split(" ")[0]);
   if (d.status === "requested") {
-    P.innerHTML = `<span class="state">Request received</span><h1>Thanks, ${first}.</h1>
-      <p class="lead">We're checking your request for <b>${esc(d.event)}</b>. Come back to this page: once you're approved, your price and ticket code appear here.</p>
-      ${d.verified ? `<div class="card"><p><b>Your personal page.</b> We sent this link to your Instagram DMs too, so you can always find it there.</p><p class="mono" style="font-family:var(--f-mono);overflow-wrap:anywhere">${esc(d.link || location.href)}</p><div>${copyBtn(d.link || location.href)}</div></div>` : ""}`;
+    const st = [["Request", 1], ["Instagram", d.verified ? 1 : 0], ["Review", 2], ["Pay", 0], ["Ticket", 0]];
+    if (!d.verified) st[2][1] = 0, st[1][1] = 2;
+    P.innerHTML = `<div class="rq"><span class="rq-stamp" aria-hidden="true">Received</span>
+        <span class="state">Request sent</span>
+        <h1>You're on the list, ${first}.</h1>
+        <p class="lead">${d.verified ? `We're looking at your request for <b>${esc(d.event)}</b>. Once you're approved, this page shows your price and ticket.` : `One more step: send us your code on Instagram, then we look at your request for <b>${esc(d.event)}</b>.`}</p>
+        <ol class="rq-steps">${st.map(([n, v]) => `<li class="${v === 1 ? "done" : v === 2 ? "now" : ""}"><i></i><span>${n}</span></li>`).join("")}</ol>
+      </div>
+      ${d.verified ? `<div class="card"><p><b>Save this page.</b> The link is in your Instagram DMs too.</p><div>${copyBtn(d.link || location.href)}</div></div>` : ""}`;
+    celebrate(d);
   } else if (d.status === "waitlist") {
     P.innerHTML = `<span class="state">Waitlist</span><h1>You're on the waitlist, ${first}.</h1>
       <p class="lead"><b>${esc(d.event)}</b> is sold out right now. When a place opens up, we go down the waitlist in order. If you get one, this page shows your price and code straight away.</p>
