@@ -748,13 +748,13 @@ function render(d){
     const allText = `Amount: ${euro(d.price)}\nIBAN: ${d.iban || ""}\nBeneficiary: ${d.beneficiary || ""}\nReference: ${d.reference}`;
     P.innerHTML = `<div class="hero-ok"><span class="state">Accepted</span>
         <h1>You're in, ${first}.</h1>
-        <p class="lead">You've been accepted for <b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " on " + esc(d.date_label) : ""}. Pay below to lock in your place.</p>
+        <p class="lead">Pay below to lock in your place at <b style="color:var(--cream)">${esc(d.event)}</b>.</p>
         ${stepsHTML(2, "on-red")}</div>
       <section class="pay" aria-labelledby="pay-h">
         <span class="tier-tag">${esc(tierName)}</span>
         <p class="eyebrow">Bank transfer</p>
         <h2 id="pay-h">${euro(d.price)}</h2>
-        <p class="pay-hint">Tap a line to copy it, then paste it in your banking app.</p>
+        <p class="pay-hint">Tap to copy.</p>
         <div class="prow-list">
           ${payRow("IBAN", d.iban ? d.iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim() : "—", d.iban ? d.iban.replace(/\s+/g, "") : "")}
           ${payRow("Name", d.beneficiary || "—", d.beneficiary || "")}
@@ -763,17 +763,7 @@ function render(d){
         </div>
         <button class="btn pay-all" type="button" data-copy="${esc(allText)}">Copy all</button>
       </section>
-      <div class="pay-faq">
-        <h3>Good to know</h3>
-        <dl>
-          <div><dt>After paying</dt><dd>Nothing to send us. Once we see your payment, your ticket and the location appear on this page${d.verified ? " and we message you on Instagram" : ""}.</dd></div>
-          <div><dt>How long it takes</dt><dd>An instant transfer (bonifico istantaneo) arrives right away. A normal one can take 1–2 working days, that's fine.</dd></div>
-          <div><dt>Which bank</dt><dd>Any bank or app works: Italian banks, Revolut, N26, Wise, etc. Pay from your own account.</dd></div>
-          <div><dt>Forgot the description?</dt><dd>Pay anyway. We match it by your name and amount.</dd></div>
-          <div><dt>Lost this page?</dt><dd>Log in at perugiaparty.com/ticket with your Instagram and the code <b>${esc(d.vcode || d.code)}</b>.</dd></div>
-        </dl>
-      </div>
-      <p class="note">Something else? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>`;
+      <p class="note">After paying there's nothing to send. Your ticket appears here once we see it. Questions? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>`;
     celebrate({ vcode: "ok-" + (d.code || "") }, 45);
   } else if (d.status === "paid" || d.status === "in") {
     const inside = d.status === "in", over = partyOver(d);
