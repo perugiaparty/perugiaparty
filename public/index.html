@@ -369,8 +369,8 @@ body.locked{overflow:hidden}
           </div>
 
           <div class="hp" aria-hidden="true"><label for="f-website">Website</label><input id="f-website" tabindex="-1" autocomplete="off"></div>
-          <label class="check" for="f-age"><input type="checkbox" id="f-age"> I'm 18 or older and will bring photo ID.</label>
-          <label class="check" for="f-rules"><input type="checkbox" id="f-rules"> I've read the <a href="#rules">house rules</a>.</label>
+          <label class="check" for="f-age"><input type="checkbox" id="f-age"> <span>I'm 18+, I'll bring photo ID and I accept the <a href="#rules">house rules</a>.</span></label>
+          <input type="checkbox" id="f-rules" hidden tabindex="-1" aria-hidden="true">
           <p class="err" id="f-err" role="alert"></p>
           <div id="ts" class="ts" hidden></div>
           <div class="send-row"><button class="btn" type="submit" id="f-send">Send request</button></div>
@@ -596,6 +596,14 @@ function preview(e){
   const h = $("pv-hi"); h.textContent = hi ? "“" + hi.slice(0, 120) + (hi.length > 120 ? "…" : "") + "”" : ""; h.hidden = !hi;
   for (const [id, box] of [["pv-age","f-age"],["pv-rules","f-rules"]]) { const li = $(id), on = $(box).checked; li.classList.toggle("on", on); li.querySelector("span").textContent = on ? "■" : "☐"; }
 }
+// one tick covers both the 18+ and the house rules
+$("f-age").addEventListener("change", () => { $("f-rules").checked = $("f-age").checked; $("f-rules").dispatchEvent(new Event("change")); });
+// paste anything Instagram-ish: instagram.com/name, @name, name → @name
+$("f-ig").addEventListener("blur", () => {
+  const v = $("f-ig").value.trim(); if (!v) return;
+  const m = v.match(/instagram\.com\/([A-Za-z0-9._]{1,30})/i) || v.match(/^@*([A-Za-z0-9._]{1,30})\/?$/);
+  if (m) { $("f-ig").value = "@" + m[1].toLowerCase(); preview(); }
+});
 ["f-name","f-ig","f-intro","f-age","f-rules"].forEach(id => { $(id).addEventListener("input", preview); $(id).addEventListener("change", preview); });
 function previewEvent(){ if (EVENT && EVENT.published && EVENT.name) $("pv-ev").textContent = "Guest request · " + EVENT.name; }
 (function(){ try { const m = JSON.parse(localStorage.getItem("pp_me") || "null"); if (m) { $("f-name").value = m.name || ""; $("f-ig").value = m.ig || ""; $("f-phone").value = m.phone || ""; } } catch(e){} })();
@@ -643,7 +651,7 @@ $("req-form").addEventListener("submit", async e => {
   if (!igClean) { missing.push("your Instagram"); bad.push("f-ig"); }
   else if (!/^[A-Za-z0-9._]{1,30}$/.test(igClean)) { err.textContent = "That Instagram handle has characters Instagram doesn't allow. Use letters, numbers, dots and underscores."; fieldErr("f-ig"); return; }
   if (!body.age) { missing.push("the 18+ confirmation"); bad.push("f-age"); }
-  if (!body.rules) { missing.push("the house rules confirmation"); bad.push("f-rules"); }
+  if (!body.rules && body.age) { missing.push("the house rules confirmation"); bad.push("f-age"); }
   if (missing.length) { err.textContent = "Add " + missing.join(", ") + "."; bad.forEach(fieldErr); $(bad[0]).focus(); if (window.ppNotify) ppNotify(missing.length === 1 ? "Add " + missing[0] : "Fill in the red fields", "warn"); return; }
   err.textContent = ""; btn.disabled = true; btn.textContent = "Sending…";
   try {

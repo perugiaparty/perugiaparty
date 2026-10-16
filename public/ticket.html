@@ -750,6 +750,7 @@ function render(d){
         </dl>
       </div>
       <p class="note">Something else? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>`;
+    celebrate({ vcode: "ok-" + (d.code || "") }, 45);
   } else if (d.status === "paid" || d.status === "in") {
     const inside = d.status === "in", over = partyOver(d);
     P.innerHTML = `${inside && over ? thanksHTML(d, first) : `<div class="hype ${inside ? "" : "paid"}">
@@ -807,8 +808,8 @@ if (!token) {
   loginView();
 } else {
   // live updates: check every 20 s while the page is open, and when the guest comes back to it
-  let last = null, busy = false;
-  const STATUS_TEXT = { waitlist: ["You're on the waitlist", "warn"], approved: ["You've been accepted", "ok"], paid: ["Payment confirmed", "ok"], in: ["You're checked in", "ok"], declined: ["Your request was updated", "warn"], released: ["Your request was updated", "warn"], removed: ["Your request was updated", "warn"] };
+  let last = null, busy = false, prevVerified = null;
+  const STATUS_TEXT = { waitlist: ["You're on the waitlist", "warn"], approved: ["You're accepted", "ok"], paid: ["Payment received", "ok"], in: ["You're checked in", "ok"], declined: ["Your request was updated", "warn"], released: ["Your request was updated", "warn"], removed: ["Your request was updated", "warn"] };
   async function check(first){
     if (busy) return; busy = true;
     try {
@@ -820,6 +821,8 @@ if (!token) {
       const prev = last ? JSON.parse(last).status : null;
       last = sig;
       render(d);
+      if (prev && prev === d.status && d.verified && prevVerified === false) note("Instagram confirmed", "ok");
+      prevVerified = !!d.verified;
       if (prev && prev !== d.status) { const [m, t] = STATUS_TEXT[d.status] || ["Your page just updated", "ok"]; note(m, t); window.scrollTo({ top: 0, behavior: "smooth" }); }
     } catch (e) {
       if (first) oops("Couldn't load your ticket.", navigator.onLine === false ? "You're offline. Connect to the internet and try again." : "We couldn't reach the server. Check your connection and try again.", () => { $("page").innerHTML = `<p class="note">Loading your ticket…</p>`; check(true); });
