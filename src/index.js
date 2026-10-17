@@ -643,10 +643,14 @@ async function homepage(req, env) {
   }
   const res = await env.ASSETS.fetch(req);
   if (!res.ok || !(res.headers.get("content-type") || "").includes("text/html")) return res;
-  let ld = null;
-  try { ld = eventJsonLd(await getEvent(env)); } catch (e) {}
-  if (!ld) return res;
-  return new HTMLRewriter().on("head", { element(el) { el.append(`<script type="application/ld+json">${ld}</script>`, { html: true }); } }).transform(res);
+  let ld = null, ev1 = null;
+  try { ev1 = await getEvent(env); ld = eventJsonLd(ev1); } catch (e) {}
+  const closed = !(ev1 && ev1.published && ev1.requests_open);
+  let rw = new HTMLRewriter();
+  // no party taking requests: mark the page so the request form is hidden from the first paint
+  if (closed) rw = rw.on("html", { element(el) { el.setAttribute("data-closed", ""); } });
+  if (ld) rw = rw.on("head", { element(el) { el.append(`<script type="application/ld+json">${ld}</script>`, { html: true }); } });
+  return (closed || ld) ? rw.transform(res) : res;
 }
 
 // Poster uploaded from the admin panel, stored in the database as a data URL.

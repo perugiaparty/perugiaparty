@@ -279,6 +279,8 @@ body.locked{overflow:hidden}
 .hero-meta{display:flex;align-items:center;gap:10px;margin:0;font-family:var(--f-mono);font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);cursor:default;user-select:none}
 .hero-meta .hm-red{color:var(--red-deep);font-weight:500}
 .hero-meta .hm-red:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:9px;vertical-align:2px}
+/* no party taking requests: the form and everything pointing to it disappears */
+html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
 </style>
 </head>
 <body>
@@ -288,7 +290,7 @@ body.locked{overflow:hidden}
     <nav aria-label="Main">
       <a href="#rules">House rules</a>
       <a class="keep" href="#faq">FAQ</a>
-      <a class="btn" id="nav-cta" href="#request">Request a place</a>
+      <a class="btn" id="nav-cta" href="#request" data-req>Request a place</a>
     </nav>
   </div>
 </header>
@@ -301,12 +303,12 @@ body.locked{overflow:hidden}
         <h1 style="margin-top:22px">Your people. <em>Your night.</em></h1>
         <p class="lede">Private student parties in Perugia. House-party vibes, a guest list, and new people to meet.</p>
         <div class="ctas">
-          <a class="btn" href="#request">Request a place</a>
+          <a class="btn" href="#request" data-req>Request a place</a>
           <a class="btn outline" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Instagram ↗</a>
         </div>
         <p class="ig-note">We check every request on Instagram, so your Instagram handle is required. Questions? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>
       </div>
-      <a class="ticket" href="#request" aria-label="Request a place: example guest ticket">
+      <a class="ticket" href="#request" data-req aria-label="Request a place: example guest ticket">
         <span class="stamp">APPROVED</span>
         <img class="logo" src="/logo.png" alt="PerugiaParty, student parties in Perugia" width="150" height="106" fetchpriority="high" decoding="async">
         <p class="name">Your name</p>
@@ -526,6 +528,16 @@ function renderAppBox(){
 
 /* next party + countdown */
 let timer = null;
+// requests closed: hide the form, send every "Request a place" to Instagram instead
+function applyOpen(ev){
+  const closed = !(ev && ev.published && ev.requests_open);
+  document.documentElement.toggleAttribute("data-closed", closed);
+  document.querySelectorAll("[data-req]").forEach(a => {
+    if (!a.dataset.label) a.dataset.label = a.textContent;
+    if (closed) { a.href = "https://www.instagram.com/perugiaparty/"; a.target = "_blank"; a.rel = "noopener"; if (a.classList.contains("btn")) a.textContent = a.id === "nav-cta" ? "Instagram ↗" : "Follow for the next date ↗"; }
+    else { a.href = "#request"; a.removeAttribute("target"); if (a.classList.contains("btn")) a.textContent = a.dataset.label; }
+  });
+}
 function renderNext(ev){
   const el = $("next-card");
   if (!ev || !ev.published) return; // keep the static heading and "announcing soon" card
@@ -557,7 +569,7 @@ function tick(){
   const p = n => String(n).padStart(2,"0");
   c.innerHTML = [[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]].map(([v,l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
 }
-fetch("/api/event").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(ev => { EVENT = ev; renderNext(ev); previewEvent(); setupForm(ev); })
+fetch("/api/event").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(ev => { EVENT = ev; applyOpen(ev); renderNext(ev); previewEvent(); setupForm(ev); })
   .catch(() => { if (window.ppNotify) ppNotify("Party info didn't load", "warn", { action: { label: "Refresh", onClick: () => location.reload() } }); });
 
 /* sold out -> waitlist wording; optional Cloudflare human check */
