@@ -95,12 +95,12 @@
 @media (max-width:720px){.next,.next.has-poster{grid-template-columns:1fr;padding:26px;min-height:0}.next .poster{order:-1;justify-self:center;max-width:280px;margin-bottom:8px;transform:rotate(-2deg)}.count div{min-width:64px;padding:8px 10px}.count b{font-size:26px}}
 
 /* steps */
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;list-style:none;padding:0;margin:0;counter-reset:s}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;list-style:none;padding:0;margin:0;counter-reset:s}
 .steps li{counter-increment:s;min-width:0}
 .steps li::before{content:counter(s);display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:var(--red);color:var(--cream);font-family:var(--f-display);font-size:24px;line-height:1}
 .steps h3{margin:16px 0 8px}
 .steps p{color:var(--muted);font-size:15px}
-@media (max-width:860px){.steps{grid-template-columns:repeat(2,1fr);row-gap:36px}}
+@media (max-width:860px){.steps{grid-template-columns:repeat(3,1fr);row-gap:36px}}
 @media (max-width:480px){.steps{grid-template-columns:1fr}}
 
 /* request */
@@ -339,13 +339,14 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
     <section class="sec" id="how" aria-labelledby="how-h">
       <div class="sec-head">
         <h2 id="how-h">How it works.</h2>
-        <p>Four steps, from request to the door.</p>
+        <p>Five steps, from request to the door.</p>
       </div>
       <ol class="steps">
-        <li><h3>Request a place</h3><p>Fill in the form below with your Instagram. You get a personal link to your ticket page. Save it.</p></li>
-        <li><h3>Get approved</h3><p>We check every request. If you're in, your page shows your price and your PP code.</p></li>
-        <li><h3>Pay</h3><p>Bank transfer with your full name and PP code as the reference.</p></li>
-        <li><h3>You're in</h3><p>Once we confirm your payment, your page shows the location, your QR code and a ticket to download. Bring it with photo ID.</p></li>
+        <li><h3>Request</h3><p>Fill in the form, then tap to send us your code on Instagram. That confirms it's really you.</p></li>
+        <li><h3>Review</h3><p>We look at every request. If you're in, your page shows your ticket type and price.</p></li>
+        <li><h3>Pay</h3><p>Pay by bank transfer. Every detail is on your page: tap to copy, paste in your banking app.</p></li>
+        <li><h3>Ticket</h3><p>Once we see your payment, your page unlocks your QR ticket and the location.</p></li>
+        <li><h3>Party</h3><p>Show your QR and photo ID at the door. See you inside.</p></li>
       </ol>
     </section>
 
