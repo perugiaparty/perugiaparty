@@ -28,6 +28,11 @@ function priceRange(ev) {
 
 // ---- rate limits: stop bots and code-guessing (counts per IP, stored as a hash, never the IP itself) ----
 const LIMITS = { short: [30, 600], request: [6, 600], rerequest: [6, 600], login: [8, 600], invite: [40, 600], door: [20, 600] };
+// Matt tests the site a lot: his own Instagram never hits the "too many tries" limit
+const TESTERS = ["@mattheovanderlee"];
+async function isTester(req) {
+  try { const b = await req.clone().json(); return TESTERS.includes("@" + String(b.ig || "").trim().replace(/^@+/, "").toLowerCase()); } catch (e) { return false; }
+}
 async function tooMany(req, env, name) {
   const [max, win] = LIMITS[name] || [30, 600];
   const ip = req.headers.get("CF-Connecting-IP") || "local";
@@ -773,7 +778,7 @@ async function route(req, env) {
     if (url.pathname.startsWith("/api/")) {
       try {
         if (url.pathname === "/api/event" && req.method === "GET") return await apiEvent(env);
-        if (req.method === "POST" && url.pathname === "/api/request" && (await tooMany(req, env, "request"))) return slowDown();
+        if (req.method === "POST" && url.pathname === "/api/request" && !(await isTester(req)) && (await tooMany(req, env, "request"))) return slowDown();
         if (req.method === "POST" && url.pathname === "/api/rerequest" && (await tooMany(req, env, "rerequest"))) return slowDown();
         if (req.method === "POST" && url.pathname === "/api/login" && (await tooMany(req, env, "login"))) return slowDown();
         if (req.method === "POST" && url.pathname === "/api/door/login" && (await tooMany(req, env, "door"))) return slowDown();
