@@ -696,7 +696,8 @@ $("req-form").addEventListener("submit", async e => {
     const st = $("pv-stamp"); st.textContent = "DM CODE"; st.classList.add("sent"); document.querySelector(".side .mini").classList.add("done");
     $("pv-tiny").textContent = "DM your code to @perugiaparty";
     $("req-form").reset();
-    openSave(data.vcode, handle, data.waitlist);
+    // straight to their own page: big "Not sent yet" + the code + the Instagram button
+    location.href = "/ticket.html?t=" + encodeURIComponent(data.token);
   } catch (x) {
     err.textContent = "Couldn't reach us. Check your connection and try again.";
     if (window.ppNotify) ppNotify("Offline · not sent", "error", { action: { label: "Retry", onClick: () => $("req-form").requestSubmit() } });
