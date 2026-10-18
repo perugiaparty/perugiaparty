@@ -1,5 +1,5 @@
 // PerugiaParty app: works offline at the door and shows notifications.
-const CACHE = "pp-v2";
+const CACHE = "pp-v3";
 const SHELL = ["/ticket.html", "/site.css", "/notify.js", "/vendor/qrcode.js", "/logo.png", "/icon-192.png"];
 
 self.addEventListener("install", (e) => {
@@ -17,7 +17,7 @@ self.addEventListener("fetch", (e) => {
   if (url.pathname.startsWith("/api/") && !isTicketApi) return;
   e.respondWith((async () => {
     try {
-      const res = await fetch(req);
+      const res = await fetch(req, { cache: "no-cache" });
       if (res.ok && (isTicketApi || req.mode === "navigate" || SHELL.includes(url.pathname))) {
         const copy = res.clone();
         caches.open(CACHE).then((c) => c.put(isTicketApi ? req : (req.mode === "navigate" && url.pathname.startsWith("/ticket") ? "/ticket.html" : req), copy));
