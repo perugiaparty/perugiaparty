@@ -115,6 +115,14 @@ h1{font-size:clamp(40px,8vw,64px)}
 .tsave .btn{min-width:140px}
 .cine .crewband{position:absolute;top:26px;right:-44px;transform:rotate(35deg);background:var(--red);color:var(--cream);font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:6px 52px;z-index:2}
 .cine.crew{overflow:hidden;box-shadow:10px 10px 0 var(--ink),10px 10px 0 2px var(--red)}
+.rq.pending{border:3px solid #ff4a3d}
+.rq.pending .state{background:#ff4a3d;border-color:#ff4a3d;color:var(--ink)}
+.rq.pending .lead b{color:var(--cream)}
+.rq.pending .vcode{margin-top:4px}
+.rq.pending .pend-go{width:100%;font-size:18px;padding:16px 22px}
+.rq.pending .pend-n{font-size:14px;color:var(--muted-dark);margin:0}
+.rq.pending .pend-n b{color:var(--cream)}
+.rq.pending .warn{background:var(--red);color:var(--cream);border-radius:12px;padding:10px 12px;font-size:14px;margin:0}
 /* how to pay */
 .pay{position:relative;background:var(--ink);color:var(--cream);border-radius:24px;padding:22px 18px 18px;display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
 .pay .eyebrow{color:var(--muted-dark)}
@@ -640,7 +648,7 @@ function prioHTML(title, text){ return `<div class="prio" role="note"><span clas
 function decorate(d){
   const P = $("page");
   const pre = d.status === "requested" || d.status === "waitlist" || d.status === "approved";
-  if (!d.next && pre && d.vcode) {
+  if (!d.next && pre && d.vcode && !P.querySelector(".rq.pending")) {
     const h = P.querySelector(".rq") || P.querySelector(".hero-ok") || P.querySelector("h1");
     if (h) h.insertAdjacentHTML("afterend", verifyHTML(d));
   }
@@ -721,6 +729,18 @@ function render(d){
   if (d.status === "requested" || d.status === "waitlist") {
     // same page for both: the waitlist is only a tag, the steps don't change
     const wl = d.status === "waitlist";
+    if (!d.verified) {
+      // not finished: nothing reaches us until the code arrives on Instagram, so no celebration yet
+      P.innerHTML = `<div class="rq pending"><span class="state">Not sent yet</span>
+          <h1>One step left, ${first}.</h1>
+          <p class="lead">Your request <b>only counts once you send us your code on Instagram</b>. Until then we can't see it, and you're not on the list.</p>
+          <div class="vcode"><span>${esc(d.vcode)}</span>${copyBtn(d.vcode)}</div>
+          ${d.mismatch ? `<p class="warn">We got this code from a different account. Send it from <b>${esc(d.ig || "your Instagram")}</b>.</p>` : ""}
+          <a class="btn pend-go" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(d.vcode || "")}" target="_blank" rel="noopener" onclick="try{navigator.clipboard.writeText(${esc(JSON.stringify(d.vcode || ""))})}catch(e){}">Send code on Instagram ↗</a>
+          <p class="pend-n">Send it from <b>${esc(d.ig || "your Instagram")}</b>. You get an automatic reply within a minute, and this page updates by itself.</p>
+          ${stepsHTML(0)}
+        </div>`;
+    } else {
     P.innerHTML = `<div class="rq"><span class="rq-stamp" aria-hidden="true">Received</span>
         <span class="state">Request sent</span>
         <h1>You're on the list, ${first}.</h1>
@@ -732,6 +752,7 @@ function render(d){
       </div>
       ${d.verified ? `<div class="card"><p><b>Save this page.</b> The link is in your Instagram DMs too.</p><div>${copyBtn(d.link || location.href)}</div></div>` : ""}`;
     celebrate(d);
+    }
   } else if (d.status === "approved") {
     const left = d.deadline ? d.deadline - Date.now() : null;
     const overdue = left != null && left < 0;
