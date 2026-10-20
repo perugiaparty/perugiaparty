@@ -358,6 +358,14 @@ let token = params.get("t");
 try { if (token) localStorage.setItem("pp_token", token); else token = localStorage.getItem("pp_token"); } catch(e){}
 if (token) { const c = document.getElementById("nav-cta"); c.textContent = "My ticket"; c.href = "/ticket.html?t=" + encodeURIComponent(token); }
 
+function payLeftHTML(dl){
+  const ms = dl - Date.now();
+  const when = new Date(dl).toLocaleString("en-GB", { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" });
+  if (ms <= 0) return `⏱ Your time to pay is up. <span>Pay now or DM us</span>, otherwise your place can go to someone on the waitlist.`;
+  const m = Math.floor(ms / 60000), dd = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60;
+  const txt = dd >= 2 ? `${dd} days` : dd === 1 ? `1 day ${h} h` : h ? `${h} h ${mm} min` : `${mm} min`;
+  return `⏱ Pay within <span>${txt}</span><br><small style="font-weight:500;opacity:.75">Before ${when}</small>`;
+}
 function payRow(k, shown, value, key){
   if (!value) return `<div class="prow off"><span class="pk">${k}</span><span class="pv">${esc(shown)}</span></div>`;
   return `<button class="prow${key ? " key" : ""}" type="button" data-copy="${esc(value)}"><span class="pk">${k}</span><span class="pv">${esc(shown)}</span><span class="pill">Copy</span></button>`;
@@ -775,6 +783,7 @@ function render(d){
         <span class="tier-tag">${esc(tierName)}</span>
         <p class="eyebrow">Bank transfer</p>
         <h2 id="pay-h">${euro(d.price)}</h2>
+        ${d.deadline ? `<div class="deadline" id="pay-left" data-dl="${d.deadline}" style="margin:6px 0 12px;background:rgba(244,234,215,.08);padding:11px 14px;border-radius:14px;font-size:15px;font-weight:600;line-height:1.4">${payLeftHTML(d.deadline)}</div>` : ""}
         <p class="pay-hint">Tap a line to copy it, then paste it in your banking app.</p>
         <div class="prow-list">
           ${payRow("IBAN", d.iban ? d.iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim() : "—", d.iban ? d.iban.replace(/\s+/g, "") : "")}
@@ -796,6 +805,8 @@ function render(d){
       </div>
       <p class="note">Something else? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>`;
     celebrate({ vcode: "ok-" + (d.code || "") }, 45);
+    clearInterval(window.__payTimer);
+    window.__payTimer = setInterval(() => { const el = document.getElementById("pay-left"); if (!el) return clearInterval(window.__payTimer); el.innerHTML = payLeftHTML(Number(el.dataset.dl)); }, 30000);
   } else if (d.status === "paid" || d.status === "in") {
     const inside = d.status === "in", over = partyOver(d);
     P.innerHTML = `${inside && over ? thanksHTML(d, first) : `<div class="hype ${inside ? "" : "paid"}">

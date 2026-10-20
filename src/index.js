@@ -499,6 +499,7 @@ async function apiTicket(url, env) {
       iban: sameEvent ? ev.iban : null, beneficiary: sameEvent ? ev.beneficiary : null,
       reference: `${g.name} ${g.code}`,
       approved_at: g.approved_at,
+      deadline: Number(g.deadline) || null,
       date_label: sameEvent ? ev.date_label : null,
       tiers: sameEvent ? { early: ev.price_early, normal: ev.price_normal, late: ev.price_late } : null, // expiry dates stay admin-only
     });
