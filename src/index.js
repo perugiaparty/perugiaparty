@@ -719,10 +719,30 @@ async function igStatusDms(env) {
   }
 }
 
+// Payment reminders Matt sends from the admin panel (Remind button sets remind_req)
+async function igReminders(env) {
+  const ev = await getEvent(env);
+  if (!ev || !ev.ig_token) return;
+  const rows = (await env.DB.prepare(
+    "SELECT g.*, p.igsid FROM guests g JOIN people p ON p.ig = lower(g.ig) WHERE p.igsid IS NOT NULL AND g.verified = 1 AND g.status = 'approved' AND g.remind_req IS NOT NULL AND g.remind_req > COALESCE(g.remind_sent, 0) LIMIT 20"
+  ).all()).results || [];
+  for (const g of rows) {
+    const c = await env.DB.prepare("UPDATE guests SET remind_sent = ? WHERE token = ? AND remind_req > COALESCE(remind_sent, 0)").bind(g.remind_req, g.token).run();
+    if (!(c.meta && c.meta.changes)) continue;
+    const ms = Number(g.deadline) - Date.now();
+    const h = Math.max(1, Math.round(ms / 36e5));
+    const left = ms > 0 ? `You have ${h} hour${h > 1 ? "s" : ""} left to pay ${euro(g.price)}` : `Your time to pay ${euro(g.price)} is up`;
+    const link = shortUrl(await shortFor(env, g), g.token);
+    const text = `Reminder: your place for ${ev.name} is waiting for your payment. ${left}, otherwise it goes to the waitlist.\n\n${link}`;
+    const sent = await igSend(env, ev, g.igsid, text);
+    if (!sent) await env.DB.prepare("UPDATE guests SET ig_fail = 1 WHERE token = ?").bind(g.token).run();
+  }
+}
+
 async function tickIfDue(env) {
   const now = Date.now();
   const r = await env.DB.prepare("UPDATE event SET tick_at = ? WHERE id = 1 AND (tick_at IS NULL OR tick_at < ?)").bind(now, now - 55000).run();
-  if (r.meta && r.meta.changes) { await pushTick(env, getEvent, parseProgram); await igStatusDms(env); }
+  if (r.meta && r.meta.changes) { await pushTick(env, getEvent, parseProgram); await igStatusDms(env); await igReminders(env); }
 }
 
 // Security headers on every response the site sends.
@@ -749,7 +769,7 @@ export default {
     // backup for the minute timer: guests' pages poll every 20 s, so notifications still go out
     if (path === "/api/event" || path === "/api/ticket" || path === "/api/ig/webhook") ctx.waitUntil(tickIfDue(env).catch(() => {}));
     // the admin panel pings this right after Approve / Paid, so the Instagram message goes out straight away
-    if (path === "/api/nudge") { ctx.waitUntil(igStatusDms(env).catch(() => {})); return secure(new Response(null, { status: 204, headers: { "cache-control": "no-store", "access-control-allow-origin": "*" } })); }
+    if (path === "/api/nudge") { ctx.waitUntil(igStatusDms(env).then(() => igReminders(env)).catch(() => {})); return secure(new Response(null, { status: 204, headers: { "cache-control": "no-store", "access-control-allow-origin": "*" } })); }
     return secure(await route(req, env));
   },
   async scheduled(event, env, ctx) {
