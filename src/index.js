@@ -731,9 +731,9 @@ async function igReminders(env) {
     if (!(c.meta && c.meta.changes)) continue;
     const ms = Number(g.deadline) - Date.now();
     const h = Math.max(1, Math.round(ms / 36e5));
-    const left = ms > 0 ? `You have ${h} hour${h > 1 ? "s" : ""} left to pay ${euro(g.price)}` : `Your time to pay ${euro(g.price)} is up`;
+    const left = ms > 0 ? `${h} hour${h > 1 ? "s" : ""} left to pay ${euro(g.price)}.` : `The deadline to pay ${euro(g.price)} has passed.`;
     const link = shortUrl(await shortFor(env, g), g.token);
-    const text = `Reminder: your place for ${ev.name} is waiting for your payment. ${left}, otherwise it goes to the waitlist.\n\n${link}`;
+    const text = `Payment not received yet. ${left}\nAfter the deadline your spot will be released.\n\n${link}`;
     const sent = await igSend(env, ev, g.igsid, text);
     if (!sent) await env.DB.prepare("UPDATE guests SET ig_fail = 1 WHERE token = ?").bind(g.token).run();
   }
