@@ -685,7 +685,7 @@ function manifest(url) {
   }), { headers: { "content-type": "application/manifest+json", "cache-control": "no-store" } });
 }
 
-// When Matt approves or marks someone paid in the admin panel, tell them on Instagram.
+// When Matt approves, marks paid or releases someone in the admin panel, tell them on Instagram.
 const ordinal = (n) => n + (["th", "st", "nd", "rd"][((n % 100) - 20) % 10] || ["th", "st", "nd", "rd"][n % 100] || "th");
 const euro = (n) => "€" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", ",") : Number(n));
 async function igStatusDms(env) {
@@ -700,6 +700,7 @@ async function igStatusDms(env) {
     const free = g.status === "paid" && Number(g.price) === 0 && g.ig_sent !== "paid";
     const text = {
       approved: `You're in, ${first}! Pay ${euro(g.price)} to lock in your place:\n\n${link}`,
+      released: g.event === ev.tag ? `Status: SPOT RELEASED\nEvent: ${ev.name}\nReason: payment not received before the deadline\n\nYour spot has been reassigned.\n\nSign up again on perugiaparty.com to get back on the waitlist.` : null,
       paid: g.ticket === "crew" ? `You're on the crew, ${first}. Your crew pass:\n\n${link}` : free ? `You're in, ${first}. Free entry. Your ticket:\n\n${link}` : `Payment received. You're going, ${first}! Your ticket and the place:\n\n${link}`,
     }[g.status] || null;
     // claim it first so two runs at once never send twice
