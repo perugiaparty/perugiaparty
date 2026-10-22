@@ -700,7 +700,7 @@ async function igStatusDms(env) {
     const free = g.status === "paid" && Number(g.price) === 0 && g.ig_sent !== "paid";
     const text = {
       approved: `You're in, ${first}! Pay ${euro(g.price)} to lock in your place:\n\n${link}`,
-      released: g.event === ev.tag ? `Status: SPOT RELEASED\nEvent: ${ev.name}\nReason: payment not received before the deadline\n\nYour spot has been reassigned.\n\nSign up again on perugiaparty.com to get back on the waitlist.` : null,
+      released: g.event === ev.tag ? `Your spot has been reassigned, payment was not received before the deadline.\nSign up again on perugiaparty.com to get back on the waitlist.` : null,
       paid: g.ticket === "crew" ? `You're on the crew, ${first}. Your crew pass:\n\n${link}` : free ? `You're in, ${first}. Free entry. Your ticket:\n\n${link}` : `Payment received. You're going, ${first}! Your ticket and the place:\n\n${link}`,
     }[g.status] || null;
     // claim it first so two runs at once never send twice
