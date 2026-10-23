@@ -764,7 +764,7 @@ function render(d){
   } else if (d.status === "approved") {
     const left = d.deadline ? d.deadline - Date.now() : null;
     const overdue = left != null && left < 0;
-    const names = { early: "Early bird", normal: "Normal", late: "Late" };
+    const names = { early: "Early bird", normal: "Normal", late: "Late", special: "Special price" };
     const tierName = names[d.ticket] || "Ticket";
     const day = iso => iso ? new Date(iso).toLocaleDateString("en-GB", { weekday:"short", day:"numeric", month:"short", timeZone:"Europe/Rome" }) : null;
     const eu = d.tiers && day(d.tiers.early_until), nu = d.tiers && day(d.tiers.normal_until);
@@ -772,6 +772,7 @@ function render(d){
       early: "You were approved early, so you get the lowest price.",
       normal: "You were approved at the normal price.",
       late: "You were approved close to the party, so the late price applies.",
+      special: "This is a special price, just for you.",
     }[d.ticket] || "This is the price for your place.";
     const tiers = d.tiers ? ["early","normal","late"].filter(t => d.tiers[t] != null && d.tiers[t] !== "") : [];
     const allText = `Amount: ${euro(d.price)}\nIBAN: ${d.iban || ""}\nBeneficiary: ${d.beneficiary || ""}\nReference: ${d.reference}`;
