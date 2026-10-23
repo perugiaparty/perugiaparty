@@ -118,3 +118,7 @@ footer nav a{font-size:14px}
 .btn{transition:transform .12s ease,background-color .2s,color .2s,border-color .2s}
 .btn:active{transform:scale(.97)}
 @media (prefers-reduced-motion: reduce){.btn:active{transform:none}}
+/* anchor links land just below the sticky header; "Request a place" lands on the form's title */
+html{scroll-padding-top:calc(var(--hdr,64px) + 14px)}
+#request{scroll-margin-top:-80px}
+@media (max-width:640px){#request{scroll-margin-top:-56px}}
