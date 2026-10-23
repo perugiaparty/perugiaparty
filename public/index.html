@@ -570,7 +570,19 @@ function tick(){
   const p = n => String(n).padStart(2,"0");
   c.innerHTML = [[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]].map(([v,l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
 }
-fetch("/api/event").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(ev => { EVENT = ev; applyOpen(ev); renderNext(ev); previewEvent(); setupForm(ev); })
+/* opened with a link like perugiaparty.com/#request: the party block loads after the browser already jumped, which pushes the form down. Jump again once the page settles, unless the visitor already scrolled. */
+const reJump = (() => {
+  const id = location.hash.slice(1);
+  if (!id || !/^[\w-]+$/.test(id)) return () => {};
+  let moved = false;
+  ["touchmove", "wheel", "keydown"].forEach(e => addEventListener(e, () => { moved = true; }, { once: true, passive: true }));
+  const go = () => { const el = document.getElementById(id); if (!moved && el) el.scrollIntoView({ block: "start" }); };
+  addEventListener("load", go);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  [250, 800, 1600, 3000].forEach(t => setTimeout(go, t));
+  return () => requestAnimationFrame(() => { go(); document.querySelectorAll("img").forEach(i => { if (!i.complete) i.addEventListener("load", go, { once: true }); }); });
+})();
+fetch("/api/event").then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(ev => { EVENT = ev; applyOpen(ev); renderNext(ev); previewEvent(); setupForm(ev); reJump(); })
   .catch(() => { if (window.ppNotify) ppNotify("Party info didn't load", "warn", { action: { label: "Refresh", onClick: () => location.reload() } }); });
 
 /* sold out -> waitlist wording; optional Cloudflare human check */
