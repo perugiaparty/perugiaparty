@@ -659,6 +659,46 @@ async function homepage(req, env) {
   return (closed || ld) ? rw.transform(res) : res;
 }
 
+// AI assistants and answer engines: a plain-text summary of PerugiaParty, with the next party when one is published.
+async function llmsTxt(env) {
+  let ev = null; try { ev = await getEvent(env); } catch (e) {}
+  const up = ev && ev.published && ev.name && ev.starts_at && new Date(ev.starts_at) > new Date();
+  const next = up
+    ? `## Next party\n\n- ${ev.name}${ev.date_label ? ", " + ev.date_label : ""}${ev.doors ? ", doors " + ev.doors : ""}\n- Where: Perugia city centre (exact location on the ticket after payment)\n- Requests: ${ev.requests_open ? "open now on https://perugiaparty.com/#request" : "not open yet, follow @perugiaparty on Instagram"}\n`
+    : `## Next party\n\n- The next date is announced on Instagram (@perugiaparty) and on https://perugiaparty.com/\n`;
+  const body = `# PerugiaParty
+
+> PerugiaParty organises private student and Erasmus parties in Perugia, Italy (feste universitarie ed Erasmus a Perugia). Guest list only, 18+, in the city centre.
+
+PerugiaParty is for university and Erasmus students in Perugia who want a good night out and new people to meet. Every party works with a guest list: you request a place, get approved, pay, and receive a personal ticket.
+
+${next}
+## How to join
+
+1. Request a place on https://perugiaparty.com/#request
+2. Send your personal code to @perugiaparty on Instagram to confirm the request
+3. Once approved, pay by bank transfer before the deadline shown on your personal page
+4. Your ticket and the exact location appear on your personal page; bring photo ID
+
+## Key facts
+
+- City: Perugia, Umbria, Italy (centro storico)
+- Who: university and Erasmus students, 18+ only
+- Tickets are personal and cannot be transferred
+- Instagram: https://www.instagram.com/perugiaparty/
+- Website: https://perugiaparty.com/
+
+## Links
+
+- [Homepage and request form](https://perugiaparty.com/)
+- [FAQ](https://perugiaparty.com/#faq)
+- [House rules](https://perugiaparty.com/#rules)
+- [Find your ticket](https://perugiaparty.com/ticket)
+- [Privacy](https://perugiaparty.com/privacy)
+`;
+  return new Response(body, { headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=3600" } });
+}
+
 // Poster uploaded from the admin panel, stored in the database as a data URL.
 async function apiPoster(env) {
   const ev = await getEvent(env);
@@ -823,6 +863,7 @@ async function route(req, env) {
       }
     }
     // one address per page for Google: /index.html is the same page as /
+    if (url.pathname === "/llms.txt") return llmsTxt(env);
     if (url.pathname === "/index.html") return Response.redirect(url.origin + "/" + url.search, 301);
     if (url.pathname === "/") return homepage(req, env);
     return env.ASSETS.fetch(req);
