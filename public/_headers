@@ -20,3 +20,7 @@
 /door*
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-cache
+
+/m-58d15e45d1/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: public, max-age=86400
