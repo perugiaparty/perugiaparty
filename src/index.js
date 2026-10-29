@@ -801,10 +801,10 @@ async function igReminders(env) {
     const c = await env.DB.prepare("UPDATE guests SET remind_sent = ? WHERE token = ? AND remind_req > COALESCE(remind_sent, 0)").bind(g.remind_req, g.token).run();
     if (!(c.meta && c.meta.changes)) continue;
     const ms = Number(g.deadline) - Date.now();
-    const mins = Math.max(0, Math.floor(ms / 6e4)), hhmm = `${Math.floor(mins / 60)}:${String(mins % 60).padStart(2, "0")}`;
+    const mins = Math.max(1, Math.floor(ms / 6e4)), left = mins >= 60 ? `${Math.floor(mins / 60)}h` : `${mins} min`;
     const text = ms > 0
-      ? `PROMEMORIA: hai ancora ${hhmm} per pagare ${euro(g.price)}.\nDopo la scadenza il tuo posto verrà liberato.`
-      : `La scadenza per pagare ${euro(g.price)} è passata.\nPaga ora per tenere il tuo posto, altrimenti verrà liberato.`;
+      ? `Payment not received yet. You still have ${left} to pay ${euro(g.price)}.\nAfter the deadline your spot will be released.`
+      : `Payment not received yet. The deadline to pay ${euro(g.price)} has passed.\nPay now to keep your spot, otherwise it will be released.`;
     const sent = await igSend(env, ev, g.igsid, text);
     if (!sent) await env.DB.prepare("UPDATE guests SET ig_fail = 1 WHERE token = ?").bind(g.token).run();
   }
