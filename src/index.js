@@ -409,6 +409,8 @@ async function verifyTurnstile(ev, token, req) {
   } catch { return true; } // never lock real guests out if the check service is down
 }
 
+// where the request was sent from: Cloudflare's approximate city and country for the connection
+const geo = (req) => ({ country: (req.cf && req.cf.country) || null, city: (req.cf && req.cf.city) || null });
 async function apiRequest(req, env) {
   let body;
   try { body = await req.json(); } catch { return json({ error: "Send the form again." }, 400); }
@@ -446,8 +448,9 @@ async function apiRequest(req, env) {
   const status = (await soldOut(env, ev)) ? "waitlist" : "requested";
   const token = newToken(), vcode = newVcode(ev.tag);
   if (withIg === ig) withIg = null;
-  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, invited_by, is_returning, vcode, verified, with_ig) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)")
-    .bind(token, ev.tag, name, ig, phone, note, status, Date.now(), inviter, returning ? 1 : 0, vcode, withIg).run();
+  const where = geo(req);
+  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, invited_by, is_returning, vcode, verified, with_ig, signup_country, signup_city) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)")
+    .bind(token, ev.tag, name, ig, phone, note, status, Date.now(), inviter, returning ? 1 : 0, vcode, withIg, where.country, where.city).run();
   await upsertPerson(env, ig, name, phone);
   return json({ ok: true, token, vcode, ig, waitlist: status === "waitlist" });
 }
@@ -475,8 +478,9 @@ async function apiRerequest(req, env) {
   const token = newToken();
   // the old personal link proves it's them when that ticket was used at the door or confirmed by DM
   if (proven) await dropUnconfirmed(env, ev.tag, ig, null);
-  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, is_returning, vcode, verified, verified_at) VALUES (?, ?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?)")
-    .bind(token, ev.tag, g.name, ig, g.phone || "", status, Date.now(), returning ? 1 : 0, newVcode(ev.tag), proven ? 1 : 0, proven ? Date.now() : null).run();
+  const where = geo(req);
+  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, is_returning, vcode, verified, verified_at, signup_country, signup_city) VALUES (?, ?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?)")
+    .bind(token, ev.tag, g.name, ig, g.phone || "", status, Date.now(), returning ? 1 : 0, newVcode(ev.tag), proven ? 1 : 0, proven ? Date.now() : null, where.country, where.city).run();
   if (proven) await env.DB.prepare("UPDATE people SET verified = 1 WHERE ig = ?").bind(ig).run();
   await upsertPerson(env, ig, g.name, g.phone);
   return json({ ok: true, token, waitlist: status === "waitlist" });
@@ -582,6 +586,13 @@ async function apiDoor(req, env, action) {
   if (error) return error;
   if (action === "login") return json({ ok: true, event: ev.name, sign: ev.sign || "", stats: await doorStats(env, ev.tag) });
   if (action === "stats") return json({ stats: await doorStats(env, ev.tag) });
+  // where this party's requests came from (only requests made since location was saved)
+  if (action === "where") {
+    const q = (col) => env.DB.prepare(`SELECT ${col} AS k, signup_country AS c, COUNT(*) AS n FROM guests WHERE event = ? AND signup_country IS NOT NULL AND status NOT IN ('removed') GROUP BY ${col}, signup_country ORDER BY n DESC LIMIT 30`).bind(ev.tag).all();
+    const [cities, countries, total] = await Promise.all([q("signup_city"), q("signup_country"),
+      env.DB.prepare("SELECT COUNT(*) AS n, SUM(signup_country IS NULL) AS unknown FROM guests WHERE event = ? AND status NOT IN ('removed')").bind(ev.tag).first()]);
+    return json({ cities: cities.results || [], countries: countries.results || [], total: total?.n || 0, unknown: total?.unknown || 0 });
+  }
   // the guest list for this party, so the door keeps working when the internet drops
   if (action === "list") {
     const rows = (await env.DB.prepare("SELECT code, name, ig, status, price, ticket, paid_at, in_at FROM guests WHERE event = ? AND code IS NOT NULL").bind(ev.tag).all()).results || [];
@@ -889,6 +900,7 @@ async function route(req, env) {
         if (url.pathname === "/api/door/list" && req.method === "POST") return await apiDoor(req, env, "list");
         if (url.pathname === "/api/door/sync" && req.method === "POST") return await apiDoor(req, env, "sync");
         if (url.pathname === "/api/door/undo" && req.method === "POST") return await apiDoor(req, env, "undo");
+        if (url.pathname === "/api/door/where" && req.method === "POST") return await apiDoor(req, env, "where");
         return json({ error: "Not found" }, 404);
       } catch (e) {
         return json({ error: "Something went wrong on our side. Try again in a minute." }, 500);

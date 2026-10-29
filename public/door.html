@@ -145,6 +145,24 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 .net em{font-style:normal;margin-left:2px;color:var(--warn)}
 .v .chip{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;border-radius:999px;padding:6px 12px;background:rgba(0,0,0,.2)}
 .v .undo{position:absolute;right:16px;top:calc(16px + env(safe-area-inset-top,0px));font:inherit;font-weight:800;font-size:15px;border:2px solid rgba(255,255,255,.6);background:transparent;color:inherit;border-radius:999px;padding:9px 16px;cursor:pointer}
+/* where from */
+.sheet{position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;animation:vin .16s ease-out}
+.sheet-card{width:100%;max-width:520px;max-height:86dvh;overflow-y:auto;background:var(--card);border-radius:26px 26px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+.sheet-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sheet-top h2{margin:0;font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1;color:var(--txt)}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--bg);border-radius:999px;padding:4px;margin-bottom:12px}
+.seg button{font:inherit;font-weight:800;font-size:15px;border:0;border-radius:999px;padding:10px;background:transparent;color:var(--dim);cursor:pointer}
+.seg button.on{background:var(--card2);color:var(--txt)}
+.wl{list-style:none;margin:0;padding:0}
+.wl li{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:10px;padding:10px 4px;border-top:1px solid var(--hair)}
+.wl li:first-child{border-top:0}
+.wl .f{font-size:22px;line-height:1;text-align:center}
+.wl b{display:block;font-weight:700;font-size:16px}
+.wl .bar2{height:5px;border-radius:9px;background:var(--hair);margin-top:6px;overflow:hidden}
+.wl .bar2 i{display:block;height:100%;background:var(--red);border-radius:inherit}
+.wl span{font-family:var(--f-display);font-size:22px;font-variant-numeric:tabular-nums}
+.wl .empty{display:block;padding:26px 6px;text-align:center;color:var(--dim);border:0}
+.wnote{margin:12px 4px 0;font-size:13px;color:var(--dim)}
 @keyframes scan{from{top:10%}to{top:88%}}
 @keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1)}}
 @keyframes draw{to{stroke-dashoffset:0}}
@@ -162,6 +180,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
     <div class="brand"><img src="/apple-touch-icon.png" alt=""><div><b>Door</b><span id="evname">PerugiaParty</span></div></div>
     <div style="display:flex;align-items:center;gap:10px">
       <span class="net" id="net"><i></i><span>Online</span></span>
+      <button class="icon hide" id="wherebtn" type="button" aria-label="Where guests signed up from"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></button>
       <button class="icon hide" id="lockbtn" type="button" aria-label="Lock the scanner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></button>
     </div>
   </div>
@@ -198,6 +217,14 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
   </section>
 </div>
 <div class="v hide" id="v" role="alertdialog" aria-live="assertive"></div>
+<div class="sheet hide" id="where" role="dialog" aria-modal="true" aria-labelledby="where-h">
+  <div class="sheet-card">
+    <div class="sheet-top"><h2 id="where-h">Where from</h2><button class="icon" type="button" id="where-x" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="seg" role="tablist"><button type="button" class="on" data-w="cities" role="tab">Cities</button><button type="button" data-w="countries" role="tab">Countries</button></div>
+    <ol class="wl" id="wl"></ol>
+    <p class="wnote" id="wnote"></p>
+  </div>
+</div>
 
 <script src="/vendor/jsQR.js"></script>
 <script>
@@ -294,7 +321,7 @@ function stopTimers(){ timers.forEach(clearInterval); timers = []; }
 addEventListener("online", () => { syncQueue(); showSync(); }); addEventListener("offline", showSync);
 
 /* ---------- login ---------- */
-function showLogin(msg){ $("login").classList.remove("hide"); $("scan").classList.add("hide"); $("lockbtn").classList.add("hide"); $("lerr").textContent = msg || ""; setTimeout(() => $("pw").focus(), 50); }
+function showLogin(msg){ $("login").classList.remove("hide"); $("scan").classList.add("hide"); $("lockbtn").classList.add("hide"); $("wherebtn").classList.add("hide"); $("lerr").textContent = msg || ""; setTimeout(() => $("pw").focus(), 50); }
 function lock(msg){ syncQueue(); PW = null; LIST = null; try { localStorage.removeItem("pp_door_pw"); localStorage.removeItem("pp_door_list"); } catch(e){} stopTimers(); stopCam(); showLogin(msg); }
 $("lockbtn").addEventListener("click", () => lock(""));
 const LOGINERR = {
@@ -318,7 +345,7 @@ async function enter(){
   const d = await api("login", {});
   SIGN = d.sign || ""; $("evname").textContent = d.event || "PerugiaParty";
   stats(d.stats);
-  $("login").classList.add("hide"); $("scan").classList.remove("hide"); $("lockbtn").classList.remove("hide");
+  $("login").classList.add("hide"); $("scan").classList.remove("hide"); $("lockbtn").classList.remove("hide"); $("wherebtn").classList.remove("hide");
   refreshList(); syncQueue(); startTimers(); showSync();
 }
 
@@ -503,6 +530,25 @@ $("manual").addEventListener("submit", e => {
   if (v.replace(/[^a-z0-9]/gi, "").length < 4) { $("mhint").textContent = "Code too short."; buzz(60); return; }
   pick(v.replace(/\s+/g, ""));
 });
+
+/* ---------- where guests signed up from ---------- */
+const flag = cc => cc && /^[A-Z]{2}$/.test(cc) ? String.fromCodePoint(...[...cc].map(c => 127397 + c.charCodeAt(0))) : "";
+let countryName = cc => cc; try { const dn = new Intl.DisplayNames(["en"], { type: "region" }); countryName = cc => { try { return dn.of(cc) || cc; } catch(e){ return cc; } }; } catch(e){}
+let WHERE = null, wtab = "cities";
+function drawWhere(){
+  const rows = WHERE ? WHERE[wtab] : [], max = Math.max(1, ...rows.map(x => x.n));
+  $("wl").innerHTML = !WHERE ? `<li class="empty">Loading…</li>` : rows.length ? rows.map(x => `<li><span class="f">${flag(x.c)}</span><div><b>${esc(wtab === "cities" ? (x.k || "Unknown city") : countryName(x.k))}</b><div class="bar2"><i style="width:${Math.round(x.n / max * 100)}%"></i></div></div><span>${x.n}</span></li>`).join("") : `<li class="empty">No locations yet</li>`;
+  $("wnote").textContent = WHERE && WHERE.unknown ? `${WHERE.total - WHERE.unknown} of ${WHERE.total} requests have a location` : "";
+}
+async function openWhere(){
+  $("where").classList.remove("hide"); WHERE = null; drawWhere();
+  try { WHERE = await api("where", {}); } catch(e){ WHERE = { cities: [], countries: [], total: 0, unknown: 0 }; $("wnote").textContent = "Couldn't load. Check the connection."; }
+  drawWhere();
+}
+$("wherebtn").addEventListener("click", openWhere);
+$("where-x").addEventListener("click", () => $("where").classList.add("hide"));
+$("where").addEventListener("click", e => { if (e.target.id === "where") $("where").classList.add("hide"); });
+document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => { wtab = b.dataset.w; document.querySelectorAll(".seg button").forEach(x => x.classList.toggle("on", x === b)); drawWhere(); }));
 
 /* ---------- boot ---------- */
 (async () => {
