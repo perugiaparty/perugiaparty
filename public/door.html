@@ -379,7 +379,7 @@ function read(d){
 function verdict(o){
   const V = $("v"); clearTimeout(vTimer);
   V.className = "v " + o.cls;
-  V.innerHTML = `<div class="inner"><div class="mark">${MARK[o.cls]}</div><p class="title">${o.title}</p>${o.who ? `<p class="who">${esc(o.who)}</p>` : ""}${o.paid || ""}${o.why ? `<p class="why">${o.why}</p>` : ""}${o.give ? `<p class="give">Give: ${esc(o.give)}</p>` : ""}</div>${o.auto ? `<div class="timer" style="--t:${o.auto}ms"></div>` : `<p class="tapnext">Tap to continue</p>`}`;
+  V.innerHTML = `<div class="inner"><div class="mark">${MARK[o.cls]}</div><p class="title">${o.title}</p>${o.who ? `<p class="who">${esc(o.who)}</p>` : ""}${o.paid || ""}${o.give ? `<p class="give">Give: ${esc(o.give)}</p>` : ""}</div>${o.auto ? `<div class="timer" style="--t:${o.auto}ms"></div>` : `<p class="tapnext">Tap to continue</p>`}`;
   V.classList.remove("hide");
   FEEL[o.cls] && FEEL[o.cls]();
   addRecent(o);
