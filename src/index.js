@@ -576,7 +576,7 @@ async function findByCode(env, tag, text) {
   return list[0] || null;
 }
 function doorView(g, ev) {
-  return { name: g.name, code: g.code, status: g.status, price: g.price, ticket: g.ticket, crew: g.ticket === "crew", in_at: g.in_at, event: g.event, current: g.event === ev.tag, sign: ev.sign || "" };
+  return { name: g.name, code: g.code, status: g.status, price: g.price, ticket: g.ticket, crew: g.ticket === "crew", paid_at: g.paid_at, in_at: g.in_at, event: g.event, current: g.event === ev.tag, sign: ev.sign || "" };
 }
 async function apiDoor(req, env, action) {
   let body; try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }

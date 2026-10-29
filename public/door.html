@@ -53,6 +53,11 @@ main{padding:12px 16px calc(24px + env(safe-area-inset-bottom,0px));max-width:48
 .verdict .sub{font-size:16px;opacity:.85;max-width:32ch;margin:0}
 .verdict .tag{font-family:var(--f-mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;border-radius:999px;padding:6px 14px;background:var(--ink);color:var(--cream)}
 .verdict .tag.crew{background:var(--red)}
+.verdict .paid{display:grid;justify-items:center;gap:2px;background:rgba(0,0,0,.16);border-radius:18px;padding:12px 22px;min-width:200px}
+.verdict.hold .paid{background:var(--ink);color:var(--cream)}
+.verdict .paid small{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
+.verdict .paid b{font-family:var(--f-display);font-weight:400;font-size:clamp(34px,11vw,52px);line-height:1}
+.verdict .paid span{font-size:14px;opacity:.85}
 .verdict .sign{font-family:var(--f-display);font-size:clamp(22px,7vw,32px);background:rgba(0,0,0,.18);border-radius:16px;padding:12px 18px}
 .verdict .row{display:grid;gap:10px;width:100%;margin-top:14px}
 .verdict .btn{font-size:20px;padding:18px 24px;width:100%}
@@ -207,6 +212,14 @@ const TICK = `<svg class="tick" viewBox="0 0 120 120" aria-hidden="true"><circle
 const CROSS = `<svg class="cross" viewBox="0 0 96 96" aria-hidden="true"><path d="M26 26 L70 70 M70 26 L26 70"/></svg>`;
 const TYPE = { early: "Early bird", normal: "Normal", late: "Late", special: "Special price", crew: "Crew" };
 let goTimer = null;
+const dayTime = t => t ? new Date(Number(t)).toLocaleString("it-IT", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) : "";
+// what this guest paid: amount, ticket type and when the payment was marked
+function paidBox(g){
+  const free = g.crew || g.price == null || Number(g.price) === 0;
+  const amount = g.crew ? "Crew" : free ? "Free" : euro(g.price);
+  const bits = [g.crew ? "" : (TYPE[g.ticket] || ""), g.paid_at ? "paid " + dayTime(g.paid_at) : ""].filter(Boolean).join(" · ");
+  return `<div class="paid"><small>${g.crew ? "Crew pass" : free ? "Free entry" : "Paid"}</small><b>${esc(amount)}</b>${bits ? `<span>${esc(bits)}</span>` : ""}</div>`;
+}
 function stop(title, who, sub){
   return `<div class="inner">${CROSS}<p class="big">${title}</p>${who ? `<p class="who">${esc(who)}</p>` : ""}${sub ? `<p class="sub">${sub}</p>` : ""}<p class="tap">Tap to scan next</p></div>`;
 }
@@ -220,11 +233,11 @@ function show(d, text){
     if (!g.current) html = stop("Wrong party", g.name, `This ticket is for ${esc(g.event)}.`);
     else if (g.status === "in" && d.fresh) {
       cls = "go";
-      html = `<div class="inner">${TICK}<p class="big">In</p><p class="who">${esc(g.name)}</p>${g.sign ? `<p class="sign">Give: ${esc(g.sign)}</p>` : ""}<p class="tap">Tap to scan next</p></div><div class="timer"></div>`;
-      goTimer = setTimeout(() => { if (!V.hidden && V.classList.contains("go")) { V.hidden = true; lastText = ""; } }, 1800);
+      html = `<div class="inner">${TICK}<p class="big">In</p><p class="who">${esc(g.name)}</p>${paidBox(g)}${g.sign ? `<p class="sign">Give: ${esc(g.sign)}</p>` : ""}<p class="tap">Tap to scan next</p></div><div class="timer"></div>`;
+      goTimer = setTimeout(() => { if (!V.hidden && V.classList.contains("go")) { V.hidden = true; lastText = ""; } }, 2600);
     }
-    else if (g.status === "in") html = stop("Already in", g.name, `Scanned at ${esc(hhmm(g.in_at))}. Don't let in twice.`);
-    else if (g.status === "paid") { cls = "hold"; html = `<div class="inner"><span class="tag ${g.crew ? "crew" : ""}">${esc(TYPE[g.ticket] || "Paid")}</span><p class="who">${esc(g.name)}</p><p class="sub">Check their photo ID.</p><div class="row"><button class="btn" type="button" data-in="${esc(g.code)}">Let in</button><button class="btn ghost" type="button" data-next>Cancel</button></div></div>`; }
+    else if (g.status === "in") html = stop("Already in", g.name, `Scanned at ${esc(hhmm(g.in_at))}. Don't let in twice.`).replace('<p class="tap">', paidBox(g) + '<p class="tap">');
+    else if (g.status === "paid") { cls = "hold"; html = `<div class="inner"><p class="who">${esc(g.name)}</p>${paidBox(g)}<p class="sub">Check their photo ID.</p><div class="row"><button class="btn" type="button" data-in="${esc(g.code)}">Let in</button><button class="btn ghost" type="button" data-next>Cancel</button></div></div>`; }
     else if (g.status === "approved") html = stop("Not paid", g.name, `They still need to pay ${esc(euro(g.price))}.`);
     else html = stop("No entry", g.name, `This request is ${esc(g.status)}.`);
   }
