@@ -88,7 +88,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 .recent li i{width:10px;height:10px;border-radius:50%}
 .recent li i.go{background:var(--go)}.recent li i.stop{background:#ff5a4f}.recent li i.warn{background:var(--warn)}
 .recent li b{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.recent li b em{font-style:normal;font-weight:500;color:var(--dim);margin-left:6px}
+.recent li b em{display:none}
 .recent li span{font-family:var(--f-mono);font-size:12px;color:var(--soft)}
 
 /* login */
@@ -113,18 +113,17 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 .v.stop .mark circle,.v.warn .mark circle{fill:rgba(0,0,0,.14)}
 .v.stop .mark path,.v.warn .mark path{fill:none;stroke:currentColor;stroke-width:11;stroke-linecap:round;stroke-linejoin:round}
 .v.stop .inner{animation:shake .45s}
-.v .inner{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:440px}
+.v .inner{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:440px}
 .v .kick{font-family:var(--f-mono);font-size:13px;letter-spacing:.16em;text-transform:uppercase;opacity:.85}
 .v .title{margin:0;font-family:var(--f-display);font-weight:400;font-size:clamp(40px,12.5vw,70px);line-height:.95}
-.v .who{margin:0;font-weight:800;font-size:clamp(26px,8vw,38px);line-height:1.1;text-wrap:balance}
-.v .why{margin:0;font-size:17px;line-height:1.4;max-width:30ch;opacity:.92}
+.v .who{margin:0;font-weight:800;font-size:clamp(28px,8.5vw,40px);line-height:1.1;text-wrap:balance}
+.v .why{margin:0;font-size:18px;font-weight:700;opacity:.85}
+.v .tapnext{position:absolute;left:0;right:0;bottom:calc(26px + env(safe-area-inset-bottom,0px));margin:0;font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;opacity:.6}
 .v .todo{margin:2px 0 0;font-size:15px;font-weight:700;background:rgba(0,0,0,.16);border-radius:14px;padding:10px 14px;max-width:32ch}
 .v.warn .todo{background:rgba(0,0,0,.08)}
-.paid{display:flex;align-items:center;gap:14px;background:rgba(0,0,0,.18);border-radius:20px;padding:12px 18px 12px 20px}
-.paid b{font-family:var(--f-display);font-weight:400;font-size:clamp(34px,11vw,46px);line-height:1}
-.paid div{text-align:left}
-.paid small{display:block;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
-.paid span{display:block;font-size:14px;opacity:.9}
+.paid{display:flex;flex-direction:column;align-items:center;gap:2px;background:rgba(0,0,0,.16);border-radius:20px;padding:12px 26px}
+.paid b{font-family:var(--f-display);font-weight:400;font-size:clamp(40px,13vw,56px);line-height:1}
+.paid span{font-size:14px;font-weight:700;opacity:.8}
 .give{font-family:var(--f-display);font-size:clamp(20px,6.5vw,28px);background:#fff;color:var(--go2);border-radius:14px;padding:10px 16px}
 .v .id{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:15px;border:2px solid rgba(255,255,255,.55);border-radius:999px;padding:8px 14px}
 .v .id svg{width:18px;height:18px}
@@ -154,8 +153,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 
   <form class="login hide" id="login" novalidate>
     <div class="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
-    <h1>Door check-in</h1>
-    <p>Enter the door password to open the scanner.</p>
+    <h1>Door</h1>
     <input id="pw" type="password" autocomplete="current-password" placeholder="Door password" aria-label="Door password" enterkeyhint="go">
     <p class="err" id="lerr" role="alert"></p>
     <button class="big-btn" type="submit" id="lbtn">Open scanner</button>
@@ -172,12 +170,12 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
       <div class="shade"></div>
       <div class="brk" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
       <div class="line" aria-hidden="true"></div>
-      <div class="hint">Point at the QR code on the ticket</div>
+      <div class="hint">Scan the ticket</div>
       <button class="torch hide" id="torch" type="button" aria-label="Flashlight"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6l-1 7h3l-7 13 1-9H8z"/></svg></button>
       <div class="msg" id="cmsg"></div>
     </div>
     <form class="manual" id="manual" autocomplete="off" novalidate>
-      <input id="code" placeholder="No QR? Type the code" aria-label="Ticket code" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go">
+      <input id="code" placeholder="Or type the code" aria-label="Ticket code" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go">
       <button type="submit" aria-label="Check in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     </form>
     <p class="mhint" id="mhint" role="status"></p>
@@ -247,12 +245,12 @@ function showLogin(msg){ $("login").classList.remove("hide"); $("scan").classLis
 function lock(msg){ PW = null; try { localStorage.removeItem("pp_door_pw"); } catch(e){} stopCam(); showLogin(msg); }
 $("lockbtn").addEventListener("click", () => lock(""));
 const LOGINERR = {
-  password: "Wrong door password. Check it with Mattheo.",
-  nopassword: "No door password is set yet. Set one in the admin panel under Event & website.",
-  offline: "No connection. Check the internet on this phone.",
-  slow: "The connection is too slow. Try again.",
-  toomany: "Too many wrong tries. Wait a few minutes, then try again.",
-  server: "The server had a problem. Try again in a moment.",
+  password: "Wrong password.",
+  nopassword: "No door password set yet. Set it in the admin panel.",
+  offline: "No connection.",
+  slow: "Connection too slow. Try again.",
+  toomany: "Too many tries. Wait a few minutes.",
+  server: "Server error. Try again.",
 };
 $("login").addEventListener("submit", async e => {
   e.preventDefault();
@@ -273,7 +271,7 @@ async function enter(){
 /* ---------- camera ---------- */
 function camMsg(icon, title, text, btn){
   const m = $("cmsg"); m.classList.remove("hide"); $("cam").classList.add("idle"); $("torch").classList.add("hide");
-  m.innerHTML = `<div><div class="ico">${ICON[icon]}</div><h2>${title}</h2><p>${text}</p>${btn ? `<button class="big-btn" type="button" id="camgo">${btn}</button>` : ""}</div>`;
+  m.innerHTML = `<div><div class="ico">${ICON[icon]}</div><h2>${title}</h2>${text ? `<p>${text}</p>` : ""}${btn ? `<button class="big-btn" type="button" id="camgo">${btn}</button>` : ""}</div>`;
   if (btn) $("camgo").addEventListener("click", startCam);
 }
 async function startCam(){
@@ -292,13 +290,13 @@ async function startCam(){
     scanning = true; keepAwake(); loop();
   } catch (e) {
     const why = {
-      NotAllowedError: ["Camera blocked", "Allow camera access for perugiaparty.com in the browser settings, then tap Try again."],
-      SecurityError: ["Camera blocked", "Allow camera access for perugiaparty.com in the browser settings, then tap Try again."],
-      NotFoundError: ["No camera found", "This device has no camera. Type the codes below instead."],
-      OverconstrainedError: ["Camera can't scan", "This camera can't be used for scanning. Type the codes below instead."],
-      NotReadableError: ["Camera in use", "Another app is using the camera. Close it, then tap Try again."],
-      AbortError: ["Camera stopped", "The camera stopped unexpectedly. Tap Try again."],
-    }[e && e.name] || ["Camera didn't start", "Tap Try again, or type the code below."];
+      NotAllowedError: ["Camera blocked", "Allow the camera in the browser settings."],
+      SecurityError: ["Camera blocked", "Allow the camera in the browser settings."],
+      NotFoundError: ["No camera found", "Type the codes below."],
+      OverconstrainedError: ["Camera can't scan", "Type the codes below."],
+      NotReadableError: ["Camera in use", "Close the other app using it."],
+      AbortError: ["Camera stopped", ""],
+    }[e && e.name] || ["Camera didn't start", ""];
     camMsg("cam", why[0], why[1], e && e.name === "NotFoundError" ? "" : "Try again");
     window.ppNotify && ppNotify("Camera not available", "warn");
   }
@@ -348,40 +346,40 @@ async function check(text){
   try { const d = await api("checkin", { code: text }); stats(d.stats); verdict(read(d)); }
   catch (x) {
     if (x.kind === "password" || x.kind === "nopassword") { lock(LOGINERR[x.kind]); return; }
-    const [t, w] = NETERR[x.kind] || NETERR.server;
-    verdict({ cls: "warn", kick: "Not checked", title: t, why: w, todo: "Nobody was checked in. Scan the ticket again." });
+    const t = { offline: "No connection", slow: "Too slow", toomany: "Too many tries" }[x.kind] || "Server error";
+    verdict({ cls: "warn", title: t, why: "Not checked in · scan again" });
   }
   finally { busy = false; $("cam").classList.remove("busy"); }
 }
 function paidBox(g){
   const free = g.crew || g.price == null || Number(g.price) === 0;
   const amount = g.crew ? "Crew" : free ? "Free" : euro(g.price);
-  const bits = [g.crew ? "" : (TYPE[g.ticket] || ""), g.paid_at ? "paid " + dayTime(g.paid_at) : ""].filter(Boolean).join(" · ");
-  return `<div class="paid"><b>${esc(amount)}</b><div><small>${g.crew ? "Crew pass" : free ? "Free entry" : "Paid"}</small>${bits ? `<span>${esc(bits)}</span>` : ""}</div></div>`;
+  const tier = g.crew || free ? "" : (TYPE[g.ticket] || "");
+  return `<div class="paid"><b>${esc(amount)}</b>${tier ? `<span>${esc(tier)}</span>` : ""}</div>`;
 }
-// every possible answer from the server, turned into one clear screen
+// every answer from the server as one short screen
 function read(d){
-  if (!d.found && d.ambiguous) return { cls: "warn", kick: "Code too short", title: "Type the full code", why: "Several tickets end with these characters.", todo: "Type every character of the code on the ticket." };
-  if (!d.found) return { cls: "stop", kick: "No entry", title: "Not on the list", why: "There is no ticket with this code.", todo: "Check the code, or send them to Miltiad." };
-  const g = d.guest, name = g.name;
-  if (!g.current) return { cls: "stop", kick: "No entry", title: "Wrong party", who: name, why: `This ticket is for ${esc(g.event)}, not tonight.`, todo: "Send them to Miltiad." };
-  if (g.status === "in" && d.fresh) return { cls: "go", kick: g.crew ? "Crew" : "Welcome", title: "In", who: name, paid: paidBox(g), give: SIGN, id: true, auto: 2400 };
-  switch (g.status) {
-    case "in":       return { cls: "stop", kick: "Already inside", title: "Already in", who: name, why: `Checked in at ${esc(hhmm(g.in_at))}.`, paid: paidBox(g), todo: "Don't let them in twice. Is it really them? Check the ID." };
-    case "approved": return { cls: "stop", kick: "Not paid", title: "Not paid", who: name, why: `Approved, but they still need to pay ${esc(euro(g.price) || "")}.`.replace(" .", "."), todo: "Payment: cash or instant transfer, now, to Mattheo or Miltiad only. Then scan again." };
-    case "requested":return { cls: "stop", kick: "No entry", title: "Not approved", who: name, why: "Their request was never approved.", todo: "Send them to Miltiad." };
-    case "waitlist": return { cls: "stop", kick: "No entry", title: "Waitlist", who: name, why: "They're on the waitlist and never got a place.", todo: "Send them to Miltiad." };
-    case "declined": return { cls: "stop", kick: "No entry", title: "Declined", who: name, why: "Their request was declined.", todo: "No entry. Don't discuss, stay calm." };
-    case "released": return { cls: "stop", kick: "No entry", title: "Place released", who: name, why: "They didn't pay in time, so their place was released.", todo: "Send them to Miltiad." };
-    case "removed":  return { cls: "stop", kick: "No entry", title: "Removed", who: name, why: g.removed_reason ? esc(g.removed_reason) : "This ticket was removed from the list.", todo: "No entry. Send them to Miltiad if they insist." };
-    case "paid":     return { cls: "warn", kick: "Not checked in", title: "Scan again", who: name, why: "They paid, but the check-in didn't go through.", todo: "Scan the ticket again." };
-    default:         return { cls: "stop", kick: "No entry", title: "Can't let in", who: name, why: `Ticket status: ${esc(g.status)}.`, todo: "Send them to Miltiad." };
-  }
+  if (!d.found && d.ambiguous) return { cls: "warn", title: "Type the full code" };
+  if (!d.found) return { cls: "stop", title: "Not on the list", why: "Send to Miltiad" };
+  const g = d.guest, who = g.name;
+  if (!g.current) return { cls: "stop", title: "Wrong party", who, why: esc(g.event) };
+  if (g.status === "in" && d.fresh) return { cls: "go", title: g.crew ? "Crew" : "In", who, paid: paidBox(g), give: SIGN, auto: 2200 };
+  const S = {
+    in:       { title: "Already in", why: "Since " + esc(hhmm(g.in_at)), paid: paidBox(g) },
+    approved: { title: "Not paid", why: "Owes " + esc(euro(g.price)) },
+    requested:{ title: "Not approved", why: "Send to Miltiad" },
+    waitlist: { title: "Waitlist", why: "Send to Miltiad" },
+    declined: { title: "Declined" },
+    released: { title: "Place released", why: "Send to Miltiad" },
+    removed:  { title: "Removed", why: "Send to Miltiad" },
+  }[g.status];
+  if (g.status === "paid") return { cls: "warn", title: "Scan again", who };
+  return { cls: "stop", who, ...(S || { title: "No entry", why: "Send to Miltiad" }) };
 }
 function verdict(o){
   const V = $("v"); clearTimeout(vTimer);
   V.className = "v " + o.cls;
-  V.innerHTML = `<div class="inner"><div class="mark">${MARK[o.cls]}</div>${o.kick ? `<span class="kick">${o.kick}</span>` : ""}<p class="title">${o.title}</p>${o.who ? `<p class="who">${esc(o.who)}</p>` : ""}${o.paid || ""}${o.why ? `<p class="why">${o.why}</p>` : ""}${o.give ? `<p class="give">Give: ${esc(o.give)}</p>` : ""}${o.id ? `<span class="id">${ID_ICON}Check the ID if you're not sure: 18+</span>` : ""}${o.todo ? `<p class="todo">${o.todo}</p>` : ""}<p class="next">${o.auto ? "Next scan in a moment · tap to skip" : "Tap anywhere to scan next"}</p></div>${o.auto ? `<div class="timer" style="--t:${o.auto}ms"></div>` : ""}`;
+  V.innerHTML = `<div class="inner"><div class="mark">${MARK[o.cls]}</div><p class="title">${o.title}</p>${o.who ? `<p class="who">${esc(o.who)}</p>` : ""}${o.paid || ""}${o.why ? `<p class="why">${o.why}</p>` : ""}${o.give ? `<p class="give">Give: ${esc(o.give)}</p>` : ""}</div>${o.auto ? `<div class="timer" style="--t:${o.auto}ms"></div>` : `<p class="tapnext">Tap to continue</p>`}`;
   V.classList.remove("hide");
   FEEL[o.cls] && FEEL[o.cls]();
   addRecent(o);
@@ -402,8 +400,8 @@ function addRecent(o){
 $("manual").addEventListener("submit", e => {
   e.preventDefault();
   const v = $("code").value.trim().replace(/\s+/g, "");
-  if (!v) { $("mhint").textContent = "Type the code from the ticket first."; buzz(60); return; }
-  if (v.length < 4) { $("mhint").textContent = "That code is too short. Type at least 4 characters."; buzz(60); return; }
+  if (!v) { $("mhint").textContent = "Type a code first."; buzz(60); return; }
+  if (v.length < 4) { $("mhint").textContent = "Code too short."; buzz(60); return; }
   $("code").value = ""; $("code").blur(); check(v);
 });
 
@@ -411,7 +409,7 @@ $("manual").addEventListener("submit", e => {
 (async () => {
   try { PW = localStorage.getItem("pp_door_pw"); } catch(e){}
   if (!PW) return showLogin();
-  try { await enter(); let cam = null; try { cam = localStorage.getItem("pp_door_cam"); } catch(e){} if (cam) startCam(); else camMsg("cam", "Ready to scan", "Tap to turn on the camera. Every scan checks the guest in straight away.", "Start scanning"); }
+  try { await enter(); let cam = null; try { cam = localStorage.getItem("pp_door_cam"); } catch(e){} if (cam) startCam(); else camMsg("cam", "Ready", "", "Start scanning"); }
   catch (x) { PW = null; if (x.kind === "password") { try { localStorage.removeItem("pp_door_pw"); } catch(e){} } showLogin(LOGINERR[x.kind] || ""); }
 })();
 </script>
