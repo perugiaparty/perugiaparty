@@ -586,13 +586,6 @@ async function apiDoor(req, env, action) {
   if (error) return error;
   if (action === "login") return json({ ok: true, event: ev.name, sign: ev.sign || "", stats: await doorStats(env, ev.tag) });
   if (action === "stats") return json({ stats: await doorStats(env, ev.tag) });
-  // where this party's requests came from (only requests made since location was saved)
-  if (action === "where") {
-    const q = (col) => env.DB.prepare(`SELECT ${col} AS k, signup_country AS c, COUNT(*) AS n FROM guests WHERE event = ? AND signup_country IS NOT NULL AND status NOT IN ('removed') GROUP BY ${col}, signup_country ORDER BY n DESC LIMIT 30`).bind(ev.tag).all();
-    const [cities, countries, total] = await Promise.all([q("signup_city"), q("signup_country"),
-      env.DB.prepare("SELECT COUNT(*) AS n, SUM(signup_country IS NULL) AS unknown FROM guests WHERE event = ? AND status NOT IN ('removed')").bind(ev.tag).first()]);
-    return json({ cities: cities.results || [], countries: countries.results || [], total: total?.n || 0, unknown: total?.unknown || 0 });
-  }
   // the guest list for this party, so the door keeps working when the internet drops
   if (action === "list") {
     const rows = (await env.DB.prepare("SELECT code, name, ig, status, price, ticket, paid_at, in_at FROM guests WHERE event = ? AND code IS NOT NULL").bind(ev.tag).all()).results || [];
@@ -900,7 +893,6 @@ async function route(req, env) {
         if (url.pathname === "/api/door/list" && req.method === "POST") return await apiDoor(req, env, "list");
         if (url.pathname === "/api/door/sync" && req.method === "POST") return await apiDoor(req, env, "sync");
         if (url.pathname === "/api/door/undo" && req.method === "POST") return await apiDoor(req, env, "undo");
-        if (url.pathname === "/api/door/where" && req.method === "POST") return await apiDoor(req, env, "where");
         return json({ error: "Not found" }, 404);
       } catch (e) {
         return json({ error: "Something went wrong on our side. Try again in a minute." }, 500);
