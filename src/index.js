@@ -773,7 +773,7 @@ async function igReminders(env) {
     const mins = Math.max(0, Math.floor(ms / 6e4)), hhmm = `${Math.floor(mins / 60)}:${String(mins % 60).padStart(2, "0")}`;
     const text = ms > 0
       ? `PROMEMORIA: hai ancora ${hhmm} per pagare ${euro(g.price)}.\nDopo la scadenza il tuo posto verrà liberato.`
-      : `ULTIMA OCCASIONE: la scadenza per pagare ${euro(g.price)} è passata.\nPaga ora per tenere il tuo posto, altrimenti verrà liberato.`;
+      : `La scadenza per pagare ${euro(g.price)} è passata.\nPaga ora per tenere il tuo posto, altrimenti verrà liberato.`;
     const sent = await igSend(env, ev, g.igsid, text);
     if (!sent) await env.DB.prepare("UPDATE guests SET ig_fail = 1 WHERE token = ?").bind(g.token).run();
   }
