@@ -301,11 +301,9 @@ async function igHandleDm(env, ev, igsid, text) {
       if (active && g.status !== "removed") {
         await env.DB.prepare("UPDATE guests SET removed_from = status, status = 'removed', removed_reason = 'Double request: this Instagram already has a confirmed request for this party.', removed_at = ? WHERE token = ?").bind(Date.now(), g.token).run();
       }
-      await igSend(env, ev, igsid, active ? [
-        `You already have a request for this party, ${String(active.name || "").split(" ")[0]}. This is your link:`,
-        ``,
-        `${shortUrl(await shortFor(env, active), active.token)}`,
-      ].join("\n") : "This request was cancelled. DM us if you need help.");
+      await igSend(env, ev, igsid, active
+        ? `You already have a request for this party, ${String(active.name || "").split(" ")[0]}.`
+        : "This request was cancelled. DM us if you need help.");
       return;
     }
     await markVerified(env, g, igsid);
@@ -583,9 +581,39 @@ async function apiDoor(req, env, action) {
   const { ev, error } = await doorAuth(body, env);
   if (error) return error;
   if (action === "login") return json({ ok: true, event: ev.name, sign: ev.sign || "", stats: await doorStats(env, ev.tag) });
+  if (action === "stats") return json({ stats: await doorStats(env, ev.tag) });
+  // the guest list for this party, so the door keeps working when the internet drops
+  if (action === "list") {
+    const rows = (await env.DB.prepare("SELECT code, name, ig, status, price, ticket, paid_at, in_at FROM guests WHERE event = ? AND code IS NOT NULL").bind(ev.tag).all()).results || [];
+    return json({ tag: ev.tag, at: Date.now(), guests: rows.map((g) => ({ code: g.code, name: g.name, ig: g.ig || "", status: g.status, price: g.price, ticket: g.ticket, crew: g.ticket === "crew", paid_at: g.paid_at, in_at: g.in_at })), stats: await doorStats(env, ev.tag) });
+  }
+  // check-ins made offline, sent when the connection is back
+  if (action === "sync") {
+    const items = Array.isArray(body.items) ? body.items.slice(0, 200) : [];
+    const out = [];
+    for (const it of items) {
+      const g = await findByCode(env, ev.tag, it && it.code);
+      if (!g || g.ambiguous || g.event !== ev.tag) { out.push({ code: it && it.code, result: "unknown" }); continue; }
+      if (g.status === "paid") {
+        const at = Math.min(Date.now(), Number(it.at) || Date.now());
+        const c = await env.DB.prepare("UPDATE guests SET status='in', in_at=? WHERE token=? AND status='paid'").bind(at, g.token).run();
+        out.push({ code: g.code, name: g.name, result: c.meta && c.meta.changes ? "in" : "already" });
+      } else out.push({ code: g.code, name: g.name, result: g.status === "in" ? "already" : g.status });
+    }
+    return json({ results: out, stats: await doorStats(env, ev.tag) });
+  }
   const g = await findByCode(env, ev.tag, body.code);
   if (!g) return json({ found: false, stats: await doorStats(env, ev.tag) });
   if (g.ambiguous) return json({ found: false, ambiguous: true, stats: await doorStats(env, ev.tag) });
+  // undo a check-in made by mistake (only shortly after)
+  if (action === "undo") {
+    if (g.event === ev.tag && g.status === "in" && Date.now() - Number(g.in_at || 0) < 15 * 60 * 1000) {
+      await env.DB.prepare("UPDATE guests SET status='paid', in_at=NULL WHERE token=? AND status='in'").bind(g.token).run();
+      g.status = "paid"; g.in_at = null;
+      return json({ found: true, undone: true, guest: doorView(g, ev), stats: await doorStats(env, ev.tag) });
+    }
+    return json({ found: true, undone: false, guest: doorView(g, ev), stats: await doorStats(env, ev.tag) });
+  }
   if (action === "checkin") {
     if (g.event === ev.tag && g.status === "paid") {
       const now = Date.now();
@@ -736,12 +764,11 @@ async function igStatusDms(env) {
   ).all()).results || [];
   for (const g of rows) {
     const first = String(g.name || "").split(" ")[0];
-    const link = shortUrl(await shortFor(env, g), g.token);
     const free = g.status === "paid" && Number(g.price) === 0 && g.ig_sent !== "paid";
     const text = {
       approved: `You're in, ${first}! Pay ${euro(g.price)} to lock in your place.`,
       released: g.event === ev.tag ? `Your spot has been reassigned, payment was not received before the deadline.\nSign up again to get back on the waitlist.` : null,
-      paid: g.ticket === "crew" ? `You're on the crew, ${first}. Your crew pass:\n\n${link}` : free ? `You're in, ${first}. Free entry. Your ticket:\n\n${link}` : `Payment received. You're going, ${first}! Your ticket and the place:\n\n${link}`,
+      paid: g.ticket === "crew" ? `You're on the crew, ${first}.` : free ? `You're in, ${first}. Free entry.` : `Payment received. You're going, ${first}!`,
     }[g.status] || null;
     // claim it first so two runs at once never send twice
     const c = await env.DB.prepare("UPDATE guests SET ig_sent = ? WHERE token = ? AND (ig_sent IS NULL OR ig_sent <> ?)").bind(g.status, g.token, g.status).run();
@@ -858,6 +885,10 @@ async function route(req, env) {
         if (url.pathname === "/api/door/login" && req.method === "POST") return await apiDoor(req, env, "login");
         if (url.pathname === "/api/door/check" && req.method === "POST") return await apiDoor(req, env, "check");
         if (url.pathname === "/api/door/checkin" && req.method === "POST") return await apiDoor(req, env, "checkin");
+        if (url.pathname === "/api/door/stats" && req.method === "POST") return await apiDoor(req, env, "stats");
+        if (url.pathname === "/api/door/list" && req.method === "POST") return await apiDoor(req, env, "list");
+        if (url.pathname === "/api/door/sync" && req.method === "POST") return await apiDoor(req, env, "sync");
+        if (url.pathname === "/api/door/undo" && req.method === "POST") return await apiDoor(req, env, "undo");
         return json({ error: "Not found" }, 404);
       } catch (e) {
         return json({ error: "Something went wrong on our side. Try again in a minute." }, 500);

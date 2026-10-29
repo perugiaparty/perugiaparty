@@ -31,7 +31,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 .brand span{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .icon{width:42px;height:42px;flex:none;border-radius:50%;border:1.5px solid var(--hair);background:var(--card);color:var(--soft);display:grid;place-items:center;cursor:pointer}
 .icon svg{width:19px;height:19px}
-.net{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.net{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
 .net i{width:8px;height:8px;border-radius:50%;background:var(--go)}
 .net.off{color:#ff8a7f}.net.off i{background:#ff5a4f;animation:blink 1s infinite}
 
@@ -72,7 +72,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 
 /* manual code */
 .manual{display:flex;gap:8px;margin-top:10px}
-.manual input{flex:1;min-width:0;height:56px;font-family:var(--f-mono);font-size:20px;letter-spacing:.14em;text-transform:uppercase;background:var(--card);color:var(--txt);border:1.5px solid var(--hair);border-radius:18px;padding:0 18px;outline:none}
+.manual input{flex:1;min-width:0;height:56px;font-family:var(--f-body);font-size:18px;font-weight:700;background:var(--card);color:var(--txt);border:1.5px solid var(--hair);border-radius:18px;padding:0 18px;outline:none}
 .manual input:focus{border-color:var(--soft)}
 .manual input::placeholder{text-transform:none;letter-spacing:0;font-family:var(--f-body);font-size:16px;color:var(--dim)}
 .manual button{flex:none;width:56px;height:56px;border-radius:18px;border:0;background:var(--red);color:var(--txt);display:grid;place-items:center;cursor:pointer}
@@ -130,6 +130,21 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 .v .next{margin-top:10px;font-family:var(--f-mono);font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;opacity:.75}
 .v .timer{position:absolute;left:0;bottom:0;height:7px;background:rgba(255,255,255,.6);animation:drain var(--t,2.2s) linear forwards}
 
+/* name search */
+.sugg{list-style:none;margin:8px 0 0;padding:0;background:var(--card);border-radius:18px;overflow:hidden;max-height:46vh;overflow-y:auto}
+.sugg li button{width:100%;display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:12px;padding:13px 16px;background:none;border:0;border-top:1px solid var(--hair);color:var(--txt);font:inherit;text-align:left;cursor:pointer;min-height:56px}
+.sugg li:first-child button{border-top:0}
+.sugg li button:active{background:var(--card2)}
+.sugg .dot{display:block;width:10px;height:10px;border-radius:50%;background:var(--dim)}
+.sugg .dot.ok{background:var(--go)}.sugg .dot.in{background:var(--soft)}.sugg .dot.no{background:#ff5a4f}
+.sugg b{display:block;font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sugg small{display:block;font-size:12.5px;color:var(--dim)}
+.sugg button>span:last-child{font-family:var(--f-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--soft)}
+.sugg .none{padding:14px 16px;color:var(--dim);font-size:14px}
+/* sync + offline */
+.net em{font-style:normal;margin-left:2px;color:var(--warn)}
+.v .chip{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;border-radius:999px;padding:6px 12px;background:rgba(0,0,0,.2)}
+.v .undo{position:absolute;right:16px;top:calc(16px + env(safe-area-inset-top,0px));font:inherit;font-weight:800;font-size:15px;border:2px solid rgba(255,255,255,.6);background:transparent;color:inherit;border-radius:999px;padding:9px 16px;cursor:pointer}
 @keyframes scan{from{top:10%}to{top:88%}}
 @keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1)}}
 @keyframes draw{to{stroke-dashoffset:0}}
@@ -174,9 +189,10 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
       <div class="msg" id="cmsg"></div>
     </div>
     <form class="manual" id="manual" autocomplete="off" novalidate>
-      <input id="code" placeholder="Or type the code" aria-label="Ticket code" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go">
+      <input id="code" placeholder="Code or name" aria-label="Ticket code or guest name" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go">
       <button type="submit" aria-label="Check in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     </form>
+    <ul class="sugg hide" id="sugg"></ul>
     <p class="mhint" id="mhint" role="status"></p>
     <div class="recent hide" id="recent"><h3>Last scans</h3><ul id="rlist"></ul></div>
   </section>
@@ -206,7 +222,7 @@ const MARK = {
 const ID_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.2"/><path d="M14 10h4M14 14h3"/></svg>';
 
 /* ---------- network ---------- */
-function setNet(){ const on = navigator.onLine; $("net").classList.toggle("off", !on); $("net").lastElementChild.textContent = on ? "Online" : "Offline"; }
+function setNet(){ const on = navigator.onLine; $("net").classList.toggle("off", !on); try { showSync(); } catch(e){ $("net").lastElementChild.textContent = on ? "Online" : "Offline"; } }
 addEventListener("online", setNet); addEventListener("offline", setNet); setNet();
 class DoorError extends Error { constructor(kind, msg){ super(msg || kind); this.kind = kind; } }
 async function api(path, body){
@@ -239,9 +255,47 @@ function stats(s){
   $("s-bar").style.width = (tot ? Math.round(inside / tot * 100) : 0) + "%";
 }
 
+/* ---------- offline guest list + sync queue ---------- */
+// codes look like PP-XXXX-XXXX; compare them without dashes, like the server does
+const normCode = t => { const m = String(t || "").toUpperCase().match(/PP-?[A-Z0-9]{1,5}-?[A-Z0-9]{4}/); return (m ? m[0] : String(t || "").toUpperCase()).replace(/[^A-Z0-9]/g, ""); };
+let LIST = null, QUEUE = [];
+try { QUEUE = JSON.parse(localStorage.getItem("pp_door_queue") || "[]"); } catch(e){ QUEUE = []; }
+try { LIST = JSON.parse(localStorage.getItem("pp_door_list") || "null"); } catch(e){ LIST = null; }
+const saveQ = () => { try { localStorage.setItem("pp_door_queue", JSON.stringify(QUEUE)); } catch(e){} showSync(); };
+const saveL = () => { try { localStorage.setItem("pp_door_list", JSON.stringify(LIST)); } catch(e){} };
+function showSync(){ const n = QUEUE.length; $("net").lastElementChild.innerHTML = (navigator.onLine ? "Online" : "Offline") + (n ? ` <em>· ${n}</em>` : ""); $("net").title = n ? n + " check-ins waiting to sync" : ""; }
+function localFind(text){
+  if (!LIST) return null;
+  const n = normCode(text); if (n.length < 4) return null;
+  const all = LIST.guests, exact = all.find(g => g.code && g.code.replace(/-/g, "") === n);
+  if (exact) return exact;
+  const tail = all.filter(g => g.code && g.code.replace(/-/g, "").slice(-4) === n.slice(-4));
+  return tail.length === 1 ? tail[0] : tail.length > 1 ? { ambiguous: true } : null;
+}
+function localPut(g){ if (!LIST || !g || !g.code) return; const i = LIST.guests.findIndex(x => x.code === g.code); const v = { code: g.code, name: g.name, ig: (i >= 0 && LIST.guests[i].ig) || "", status: g.status, price: g.price, ticket: g.ticket, crew: g.crew, paid_at: g.paid_at, in_at: g.in_at }; if (i >= 0) LIST.guests[i] = v; else LIST.guests.push(v); saveL(); }
+async function refreshList(){ try { const d = await api("list", {}); LIST = { tag: d.tag, at: d.at, guests: d.guests }; for (const q of QUEUE) { const g = LIST.guests.find(x => x.code === q.code); if (g && g.status === "paid") { g.status = "in"; g.in_at = q.at; } } saveL(); stats(d.stats); } catch(e){} }
+let syncing = false;
+async function syncQueue(){
+  if (syncing || !QUEUE.length || !navigator.onLine || !PW) return; syncing = true;
+  try {
+    const items = QUEUE.slice(0, 100), d = await api("sync", { items });
+    QUEUE = QUEUE.slice(items.length); saveQ(); stats(d.stats);
+    const clash = (d.results || []).filter(x => x.result !== "in" && x.result !== "already");
+    for (const c of clash) addRecent({ cls: "stop", who: c.name || c.code, title: "Sync: " + c.result });
+  } catch(e){} finally { syncing = false; }
+}
+let timers = [];
+function startTimers(){ stopTimers();
+  timers.push(setInterval(() => { if (navigator.onLine && PW && !busy) api("stats", {}).then(d => stats(d.stats)).catch(() => {}); }, 12000));
+  timers.push(setInterval(() => { if (navigator.onLine && PW) refreshList(); }, 60000));
+  timers.push(setInterval(syncQueue, 5000));
+}
+function stopTimers(){ timers.forEach(clearInterval); timers = []; }
+addEventListener("online", () => { syncQueue(); showSync(); }); addEventListener("offline", showSync);
+
 /* ---------- login ---------- */
 function showLogin(msg){ $("login").classList.remove("hide"); $("scan").classList.add("hide"); $("lockbtn").classList.add("hide"); $("lerr").textContent = msg || ""; setTimeout(() => $("pw").focus(), 50); }
-function lock(msg){ PW = null; try { localStorage.removeItem("pp_door_pw"); } catch(e){} stopCam(); showLogin(msg); }
+function lock(msg){ syncQueue(); PW = null; LIST = null; try { localStorage.removeItem("pp_door_pw"); localStorage.removeItem("pp_door_list"); } catch(e){} stopTimers(); stopCam(); showLogin(msg); }
 $("lockbtn").addEventListener("click", () => lock(""));
 const LOGINERR = {
   password: "Wrong password.",
@@ -265,6 +319,7 @@ async function enter(){
   SIGN = d.sign || ""; $("evname").textContent = d.event || "PerugiaParty";
   stats(d.stats);
   $("login").classList.add("hide"); $("scan").classList.remove("hide"); $("lockbtn").classList.remove("hide");
+  refreshList(); syncQueue(); startTimers(); showSync();
 }
 
 /* ---------- camera ---------- */
@@ -312,6 +367,7 @@ document.addEventListener("visibilitychange", () => {
 async function keepAwake(){ try { if ("wakeLock" in navigator) wake = await navigator.wakeLock.request("screen"); } catch(e){} }
 function releaseWake(){ try { wake && wake.release(); } catch(e){} wake = null; }
 
+let frame = 0;
 const canvas = document.createElement("canvas"), ctx = canvas.getContext("2d", { willReadFrequently: true });
 async function loop(){
   if (!scanning) return;
@@ -320,14 +376,15 @@ async function loop(){
     let text = null;
     try {
       if (detector) { const codes = await detector.detect(v); if (codes.length) text = codes[0].rawValue; }
-      else if (window.jsQR) {
-        const w = 520, h = Math.round(w * v.videoHeight / v.videoWidth) || 520;
-        canvas.width = w; canvas.height = h; ctx.drawImage(v, 0, 0, w, h);
-        const r = jsQR(ctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: "dontInvert" });
+      else if (window.jsQR && (frame++ & 1) === 0) {
+        // only the middle of the picture, where the frame is: much faster on older phones
+        const vw = v.videoWidth, vh = v.videoHeight, side = Math.min(vw, vh) * .72, sx = (vw - side) / 2, sy = (vh - side) / 2, w = 420;
+        canvas.width = w; canvas.height = w; ctx.drawImage(v, sx, sy, side, side, 0, 0, w, w);
+        const r = jsQR(ctx.getImageData(0, 0, w, w).data, w, w, { inversionAttempts: "attemptBoth" });
         if (r) text = r.data;
       }
     } catch(e){}
-    if (text && (text !== lastText || Date.now() - lastAt > 5000)) { lastText = text; lastAt = Date.now(); check(text); }
+    if (text && (normCode(text) !== normCode(lastText) || Date.now() - lastAt > 5000)) { lastText = text; lastAt = Date.now(); check(text); }
   }
   requestAnimationFrame(loop);
 }
@@ -342,13 +399,27 @@ const FEEL = { go: () => { tone([[880,.09],[1320,.16]]); buzz([40,60,120]); }, s
 /* ---------- check: every scan checks the guest in straight away ---------- */
 async function check(text){
   if (busy) return; busy = true; $("cam").classList.add("busy"); $("mhint").textContent = "";
-  try { const d = await api("checkin", { code: text }); stats(d.stats); verdict(read(d)); }
+  try { const d = await api("checkin", { code: text }); stats(d.stats); if (d.found && d.guest && d.guest.current) localPut(d.guest); verdict(read(d)); }
   catch (x) {
     if (x.kind === "password" || x.kind === "nopassword") { lock(LOGINERR[x.kind]); return; }
+    if ((x.kind === "offline" || x.kind === "slow") && LIST) { verdict(read(offlineCheck(text))); return; }
     const t = { offline: "No connection", slow: "Too slow", toomany: "Too many tries" }[x.kind] || "Server error";
-    verdict({ cls: "warn", title: t, why: "Not checked in · scan again" });
+    verdict({ cls: "warn", title: t });
   }
   finally { busy = false; $("cam").classList.remove("busy"); }
+}
+// no internet: decide from the saved list and remember the check-in for later
+function offlineCheck(text){
+  const g = localFind(text);
+  if (!g) return { found: false, offline: true };
+  if (g.ambiguous) return { found: false, ambiguous: true, offline: true };
+  const v = { ...g, current: true };
+  if (g.status === "paid") {
+    g.status = "in"; g.in_at = Date.now(); saveL();
+    QUEUE.push({ code: g.code, at: g.in_at }); saveQ();
+    return { found: true, fresh: true, offline: true, guest: { ...v, status: "in", in_at: g.in_at } };
+  }
+  return { found: true, offline: true, guest: v };
 }
 function paidBox(g){
   const free = g.crew || g.price == null || Number(g.price) === 0;
@@ -359,10 +430,10 @@ function paidBox(g){
 // every answer from the server as one short screen
 function read(d){
   if (!d.found && d.ambiguous) return { cls: "warn", title: "Type the full code" };
-  if (!d.found) return { cls: "stop", title: "Not on the list", why: "Send to Miltiad" };
+  if (!d.found) return d.offline ? { cls: "warn", title: "Not in saved list", offline: true } : { cls: "stop", title: "Not on the list", why: "Send to Miltiad" };
   const g = d.guest, who = g.name;
   if (!g.current) return { cls: "stop", title: "Wrong party", who, why: esc(g.event) };
-  if (g.status === "in" && d.fresh) return { cls: "go", title: g.crew ? "Crew" : "In", who, paid: paidBox(g), give: SIGN, auto: 2200 };
+  if (g.status === "in" && d.fresh) return { cls: "go", title: g.crew ? "Crew" : "In", who, paid: paidBox(g), give: SIGN, auto: 2600, undo: g.code, offline: d.offline };
   const S = {
     in:       { title: "Already in", why: "Since " + esc(hhmm(g.in_at)), paid: paidBox(g) },
     approved: { title: "Not paid", why: "Owes " + esc(euro(g.price)) },
@@ -373,16 +444,25 @@ function read(d){
     removed:  { title: "Removed", why: "Send to Miltiad" },
   }[g.status];
   if (g.status === "paid") return { cls: "warn", title: "Scan again", who };
-  return { cls: "stop", who, ...(S || { title: "No entry", why: "Send to Miltiad" }) };
+  return { cls: "stop", who, offline: d.offline, ...(S || { title: "No entry", why: "Send to Miltiad" }) };
 }
 function verdict(o){
   const V = $("v"); clearTimeout(vTimer);
   V.className = "v " + o.cls;
-  V.innerHTML = `<div class="inner"><div class="mark">${MARK[o.cls]}</div><p class="title">${o.title}</p>${o.who ? `<p class="who">${esc(o.who)}</p>` : ""}${o.paid || ""}${o.give ? `<p class="give">Give: ${esc(o.give)}</p>` : ""}</div>${o.auto ? `<div class="timer" style="--t:${o.auto}ms"></div>` : `<p class="tapnext">Tap to continue</p>`}`;
+  V.innerHTML = `${o.undo ? `<button class="undo" type="button" id="undo">Undo</button>` : ""}<div class="inner"><div class="mark">${MARK[o.cls]}</div>${o.offline ? `<span class="chip">Offline</span>` : ""}<p class="title">${o.title}</p>${o.who ? `<p class="who">${esc(o.who)}</p>` : ""}${o.paid || ""}${o.give ? `<p class="give">Give: ${esc(o.give)}</p>` : ""}</div>${o.auto ? `<div class="timer" style="--t:${o.auto}ms"></div>` : `<p class="tapnext">Tap to continue</p>`}`;
   V.classList.remove("hide");
   FEEL[o.cls] && FEEL[o.cls]();
-  addRecent(o);
+  if (!o.noRecent) addRecent(o);
   if (o.auto) vTimer = setTimeout(closeV, o.auto);
+  if (o.undo) $("undo").addEventListener("click", e => { e.stopPropagation(); undo(o.undo, o.offline); });
+}
+async function undo(code, offline){
+  clearTimeout(vTimer);
+  const qi = QUEUE.findIndex(q => q.code === code);
+  if (qi >= 0) { QUEUE.splice(qi, 1); saveQ(); const g = LIST && LIST.guests.find(x => x.code === code); if (g) { g.status = "paid"; g.in_at = null; saveL(); } done(); return; }
+  try { const d = await api("undo", { code }); stats(d.stats); if (d.guest) localPut(d.guest); if (d.undone) done(); else verdict({ cls: "warn", title: "Can't undo" }); }
+  catch(e){ verdict({ cls: "warn", title: "Can't undo" }); }
+  function done(){ RECENT.shift(); closeV(); verdict({ cls: "warn", title: "Undone", auto: 1400, noRecent: true }); }
 }
 function closeV(){ clearTimeout(vTimer); $("v").classList.add("hide"); lastText = ""; }
 $("v").addEventListener("click", closeV);
@@ -391,17 +471,37 @@ $("v").addEventListener("click", closeV);
 const RECENT = [];
 function addRecent(o){
   RECENT.unshift({ cls: o.cls, who: o.who || "Unknown code", what: o.title, at: Date.now() }); RECENT.length = Math.min(RECENT.length, 4);
-  $("recent").classList.remove("hide");
+  renderRecent();
+}
+function renderRecent(){
+  $("recent").classList.toggle("hide", !RECENT.length);
   $("rlist").innerHTML = RECENT.map(r => `<li><i class="${r.cls}"></i><b>${esc(r.who)}<em>${esc(r.what)}</em></b><span>${esc(hhmm(r.at))}</span></li>`).join("");
 }
 
-/* ---------- manual code ---------- */
+/* ---------- manual: code or name ---------- */
+const fold = t => String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/^@/, "");
+const looksLikeCode = v => /^pp/i.test(v) || (/\d/.test(v) && /^[a-z0-9-]{4,}$/i.test(v));
+const ST_LABEL = { paid: "Paid", in: "Inside", approved: "Not paid", requested: "Not approved", waitlist: "Waitlist", declined: "Declined", released: "Released", removed: "Removed" };
+let MATCH = [];
+function suggest(){
+  const v = $("code").value.trim(), box = $("sugg");
+  if (!LIST || v.length < 2 || looksLikeCode(v)) { box.classList.add("hide"); MATCH = []; return; }
+  const q = fold(v);
+  MATCH = LIST.guests.filter(g => fold(g.name).includes(q) || fold(g.ig).includes(q))
+    .sort((a, b) => (a.status === "paid" ? 0 : a.status === "in" ? 1 : 2) - (b.status === "paid" ? 0 : b.status === "in" ? 1 : 2) || fold(a.name).localeCompare(fold(b.name))).slice(0, 6);
+  box.innerHTML = MATCH.length ? MATCH.map((g, i) => `<li><button type="button" data-i="${i}"><span class="dot ${g.status === "paid" ? "ok" : g.status === "in" ? "in" : "no"}"></span><div><b>${esc(g.name)}</b><small>${esc(g.ig ? "@" + String(g.ig).replace(/^@/, "") : g.code)}</small></div><span>${esc(ST_LABEL[g.status] || g.status)}</span></button></li>`).join("") : `<li class="none">No guest with this name</li>`;
+  box.classList.remove("hide");
+}
+$("code").addEventListener("input", () => { $("mhint").textContent = ""; suggest(); });
+$("sugg").addEventListener("click", e => { const b = e.target.closest("[data-i]"); if (!b) return; const g = MATCH[+b.dataset.i]; pick(g.code); });
+function pick(code){ $("code").value = ""; $("code").blur(); $("sugg").classList.add("hide"); MATCH = []; check(code); }
 $("manual").addEventListener("submit", e => {
   e.preventDefault();
-  const v = $("code").value.trim().replace(/\s+/g, "");
-  if (!v) { $("mhint").textContent = "Type a code first."; buzz(60); return; }
-  if (v.length < 4) { $("mhint").textContent = "Code too short."; buzz(60); return; }
-  $("code").value = ""; $("code").blur(); check(v);
+  const v = $("code").value.trim().replace(/\s+/g, " ");
+  if (!v) { $("mhint").textContent = "Type a code or name."; buzz(60); return; }
+  if (!looksLikeCode(v)) { if (MATCH.length === 1) return pick(MATCH[0].code); $("mhint").textContent = MATCH.length ? "Tap the right person." : LIST ? "No guest with this name." : "Type the code."; buzz(60); return; }
+  if (v.replace(/[^a-z0-9]/gi, "").length < 4) { $("mhint").textContent = "Code too short."; buzz(60); return; }
+  pick(v.replace(/\s+/g, ""));
 });
 
 /* ---------- boot ---------- */
