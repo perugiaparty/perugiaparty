@@ -2,260 +2,417 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <title>Door · PerugiaParty</title>
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#141210">
+<meta name="theme-color" content="#0e0c0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="icon" type="image/png" sizes="48x48" href="/favicon-v2.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Figtree:wght@400;500;700;800&family=DM+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/site.css?v=20261023a">
 <script src="/notify.js?v=20261013g" defer></script>
 <style>
-/* Door: one screen, one job. Scan, see a colour, let in. */
-body{background:var(--ink);color:var(--cream);overscroll-behavior:none}
-main{padding:12px 16px calc(24px + env(safe-area-inset-bottom,0px));max-width:480px;margin-inline:auto}
-.top2{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:6px 14px}
-.top2 .mark{font-size:18px}
-.lock{font:inherit;font-size:13px;font-weight:700;color:var(--muted-dark);background:transparent;border:1.5px solid #3a3330;border-radius:999px;padding:6px 12px;cursor:pointer}
-.count{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
-.count b{font-family:var(--f-display);font-weight:400;font-size:56px;line-height:1;font-variant-numeric:tabular-nums;transition:transform .25s}
-.count b.bump{animation:bump .5s cubic-bezier(.2,1.6,.4,1)}
-.count span{font-family:var(--f-mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-dark)}
-.bar{height:6px;border-radius:99px;background:#2e2925;overflow:hidden;margin-bottom:6px}
-.bar i{display:block;height:100%;width:0;background:var(--red);border-radius:inherit;transition:width .6s cubic-bezier(.2,.9,.3,1)}
-.evline{font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark);margin-bottom:14px}
-.cam{position:relative;border-radius:24px;overflow:hidden;background:#000;aspect-ratio:3/4;max-height:58vh;width:100%}
-.cam video{width:100%;height:100%;object-fit:cover;display:block}
-.cam .frame{position:absolute;left:50%;top:50%;width:62%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:22px;border:4px solid var(--cream);box-shadow:0 0 0 999px rgba(0,0,0,.45)}
-.cam .scanline{position:absolute;left:19%;right:19%;height:3px;background:var(--red);box-shadow:0 0 18px var(--red);top:30%;animation:scan 2.2s ease-in-out infinite alternate;border-radius:3px}
-.cam.idle .scanline,.cam.idle .frame{display:none}
-.cam .msg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:28px}
-.cam .msg p{color:var(--muted-dark);font-size:15px;margin:0 0 14px;max-width:26ch}
-.cam .msg .btn{font-size:17px;padding:14px 26px}
-.manual{display:flex;gap:8px;margin-top:12px}
-.manual input{flex:1;min-width:0;font-family:var(--f-mono);font-size:17px;letter-spacing:.06em;text-transform:uppercase;background:var(--ink-2);color:var(--cream);border:1.5px solid #3a3330;border-radius:999px;padding:12px 18px}
-.manual input::placeholder{text-transform:none;letter-spacing:0;font-family:var(--f-body);color:#7d7064}
-.manual .btn{flex:none}
-@keyframes scan{from{top:26%}to{top:72%}}
-@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
-/* verdicts: full screen, colour does the talking */
-.verdict{position:fixed;inset:0;z-index:20;display:grid;align-content:center;justify-items:center;gap:12px;padding:28px 22px calc(28px + env(safe-area-inset-bottom,0px));text-align:center;animation:vin .18s ease-out}
-.verdict.go{background:#14843f;color:#fff}
-.verdict.stop{background:var(--red);color:var(--cream)}
-.verdict.stop .inner{animation:shake .45s}
-.verdict.hold{background:var(--cream);color:var(--ink)}
-.verdict .inner{display:grid;justify-items:center;gap:12px;width:100%;max-width:420px}
-.verdict .big{font-family:var(--f-display);font-size:clamp(46px,15vw,84px);line-height:.95;margin:0}
-.verdict .who{font-size:clamp(26px,7.5vw,36px);font-weight:700;line-height:1.15;margin:0;text-wrap:balance}
-.verdict .sub{font-size:16px;opacity:.85;max-width:32ch;margin:0}
-.verdict .tag{font-family:var(--f-mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;border-radius:999px;padding:6px 14px;background:var(--ink);color:var(--cream)}
-.verdict .tag.crew{background:var(--red)}
-.verdict .paid{display:grid;justify-items:center;gap:2px;background:rgba(0,0,0,.16);border-radius:18px;padding:12px 22px;min-width:200px}
-.verdict.hold .paid{background:var(--ink);color:var(--cream)}
-.verdict .paid small{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.8}
-.verdict .paid b{font-family:var(--f-display);font-weight:400;font-size:clamp(34px,11vw,52px);line-height:1}
-.verdict .paid span{font-size:14px;opacity:.85}
-.verdict .sign{font-family:var(--f-display);font-size:clamp(22px,7vw,32px);background:rgba(0,0,0,.18);border-radius:16px;padding:12px 18px}
-.verdict .row{display:grid;gap:10px;width:100%;margin-top:14px}
-.verdict .btn{font-size:20px;padding:18px 24px;width:100%}
-.verdict .btn.ghost{background:transparent;border-color:currentColor;color:inherit;font-size:16px;padding:12px}
-.verdict .tap{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.7;margin-top:18px}
-.tick{width:120px;height:120px}
-.tick circle{fill:none;stroke:rgba(255,255,255,.35);stroke-width:6}
-.tick path{fill:none;stroke:#fff;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:80;stroke-dashoffset:80;animation:draw .45s .1s cubic-bezier(.6,0,.2,1) forwards}
-.cross{width:96px;height:96px}
-.cross path{fill:none;stroke:currentColor;stroke-width:10;stroke-linecap:round}
-.go .who{animation:rise .4s .15s both}
-.verdict .timer{position:absolute;left:0;bottom:0;height:6px;background:rgba(255,255,255,.55);animation:drain 1.8s linear forwards}
+/* Door: scan, colour, next. Built for one hand, a dark room and loud music. */
+:root{--bg:#0e0c0b;--card:#1b1715;--card2:#241f1c;--hair:#2f2825;--go:#12a150;--go2:#0d7f3f;--warn:#ffd23f;--txt:#f4ead7;--soft:#b9ab98;--dim:#7d7064}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);overscroll-behavior:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.app{min-height:100dvh;display:flex;flex-direction:column;max-width:520px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top,0px)) 14px calc(12px + env(safe-area-inset-bottom,0px))}
+.hide{display:none!important}
+
+/* top bar */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 2px 12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand img{width:34px;height:34px;border-radius:9px;flex:none}
+.brand b{display:block;font-weight:800;font-size:16px;line-height:1.1}
+.brand span{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon{width:42px;height:42px;flex:none;border-radius:50%;border:1.5px solid var(--hair);background:var(--card);color:var(--soft);display:grid;place-items:center;cursor:pointer}
+.icon svg{width:19px;height:19px}
+.net{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.net i{width:8px;height:8px;border-radius:50%;background:var(--go)}
+.net.off{color:#ff8a7f}.net.off i{background:#ff5a4f;animation:blink 1s infinite}
+
+/* stats */
+.stats{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.st{background:var(--card);border-radius:16px;padding:10px 12px}
+.st small{display:block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.st b{display:block;font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1.05;font-variant-numeric:tabular-nums;margin-top:2px}
+.st.main b{color:var(--txt)}
+.st.main b.bump{animation:bump .5s cubic-bezier(.2,1.6,.4,1)}
+.prog{height:5px;border-radius:9px;background:var(--hair);overflow:hidden;margin-top:8px}
+.prog i{display:block;height:100%;width:0;background:var(--go);border-radius:inherit;transition:width .6s cubic-bezier(.2,.9,.3,1)}
+
+/* camera */
+.cam{position:relative;flex:1;min-height:300px;border-radius:26px;overflow:hidden;background:#050404}
+.cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cam .shade{position:absolute;inset:0;background:radial-gradient(ellipse 58% 42% at 50% 46%,transparent 58%,rgba(0,0,0,.55) 100%)}
+.cam .brk{position:absolute;left:50%;top:46%;width:min(64%,300px);aspect-ratio:1;transform:translate(-50%,-50%)}
+.cam .brk i{position:absolute;width:44px;height:44px;border:5px solid var(--txt);border-radius:4px}
+.cam .brk i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0;border-top-left-radius:22px}
+.cam .brk i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0;border-top-right-radius:22px}
+.cam .brk i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0;border-bottom-left-radius:22px}
+.cam .brk i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0;border-bottom-right-radius:22px}
+.cam .line{position:absolute;left:8%;right:8%;height:3px;border-radius:3px;background:var(--red);box-shadow:0 0 16px 2px var(--red);animation:scan 2s ease-in-out infinite alternate}
+.cam .hint{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-size:14px;font-weight:700;color:rgba(244,234,215,.9);text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.cam.busy .line{animation-duration:.6s}
+.cam.idle .brk,.cam.idle .line,.cam.idle .hint,.cam.idle .shade{display:none}
+.cam .msg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:26px}
+.cam .msg .ico{width:62px;height:62px;margin:0 auto 14px;border-radius:50%;background:var(--card2);display:grid;place-items:center}
+.cam .msg .ico svg{width:28px;height:28px;color:var(--soft)}
+.cam .msg h2{font-family:var(--f-body);font-weight:800;font-size:22px;margin:0 0 6px;color:var(--txt)}
+.cam .msg p{margin:0 auto 18px;max-width:30ch;color:var(--soft);font-size:15px;line-height:1.45}
+.big-btn{font:inherit;font-weight:800;font-size:18px;border:0;border-radius:999px;padding:16px 28px;background:var(--red);color:var(--txt);cursor:pointer;min-height:56px}
+.big-btn:active{transform:scale(.97)}
+.torch{position:absolute;right:12px;top:12px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:var(--txt);display:grid;place-items:center;cursor:pointer}
+.torch svg{width:20px;height:20px}
+.torch.on{background:var(--warn);color:#141210}
+
+/* manual code */
+.manual{display:flex;gap:8px;margin-top:10px}
+.manual input{flex:1;min-width:0;height:56px;font-family:var(--f-mono);font-size:20px;letter-spacing:.14em;text-transform:uppercase;background:var(--card);color:var(--txt);border:1.5px solid var(--hair);border-radius:18px;padding:0 18px;outline:none}
+.manual input:focus{border-color:var(--soft)}
+.manual input::placeholder{text-transform:none;letter-spacing:0;font-family:var(--f-body);font-size:16px;color:var(--dim)}
+.manual button{flex:none;width:56px;height:56px;border-radius:18px;border:0;background:var(--red);color:var(--txt);display:grid;place-items:center;cursor:pointer}
+.manual button svg{width:22px;height:22px}
+.mhint{min-height:18px;margin:6px 4px 0;font-size:13px;font-weight:700;color:#ff8a7f}
+
+/* recent */
+.recent{margin-top:8px}
+.recent h3{margin:6px 4px 6px;font-family:var(--f-mono);font-weight:400;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.recent ul{list-style:none;margin:0;padding:0;background:var(--card);border-radius:16px;overflow:hidden}
+.recent li{display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--hair);font-size:14px}
+.recent li:first-child{border-top:0}
+.recent li i{width:10px;height:10px;border-radius:50%}
+.recent li i.go{background:var(--go)}.recent li i.stop{background:#ff5a4f}.recent li i.warn{background:var(--warn)}
+.recent li b{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recent li b em{font-style:normal;font-weight:500;color:var(--dim);margin-left:6px}
+.recent li span{font-family:var(--f-mono);font-size:12px;color:var(--soft)}
+
+/* login */
+.login{flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px;padding-bottom:10vh}
+.login .lock{width:64px;height:64px;border-radius:20px;background:var(--red);display:grid;place-items:center}
+.login .lock svg{width:30px;height:30px;color:var(--txt)}
+.login h1{margin:6px 0 0;font-family:var(--f-display);font-weight:400;font-size:40px;line-height:1;color:var(--txt)}
+.login p{margin:0;color:var(--soft);font-size:15px}
+.login input{height:58px;font:inherit;font-size:18px;background:var(--card);color:var(--txt);border:1.5px solid var(--hair);border-radius:18px;padding:0 18px;outline:none}
+.login input:focus{border-color:var(--soft)}
+.login .err{min-height:22px;margin:0;color:#ff8a7f;font-weight:700;font-size:15px}
+.login .big-btn{width:100%}
+
+/* verdict */
+.v{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:14px;padding:calc(30px + env(safe-area-inset-top,0px)) 24px calc(34px + env(safe-area-inset-bottom,0px));animation:vin .16s ease-out;cursor:pointer}
+.v.go{background:var(--go);color:#fff}
+.v.stop{background:var(--red);color:var(--txt)}
+.v.warn{background:var(--warn);color:#141210}
+.v .mark svg{width:118px;height:118px}
+.v.go .mark circle{fill:rgba(255,255,255,.16)}
+.v.go .mark path{fill:none;stroke:#fff;stroke-width:11;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:90;stroke-dashoffset:90;animation:draw .42s .05s cubic-bezier(.6,0,.2,1) forwards}
+.v.stop .mark circle,.v.warn .mark circle{fill:rgba(0,0,0,.14)}
+.v.stop .mark path,.v.warn .mark path{fill:none;stroke:currentColor;stroke-width:11;stroke-linecap:round;stroke-linejoin:round}
+.v.stop .inner{animation:shake .45s}
+.v .inner{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;max-width:440px}
+.v .kick{font-family:var(--f-mono);font-size:13px;letter-spacing:.16em;text-transform:uppercase;opacity:.85}
+.v .title{margin:0;font-family:var(--f-display);font-weight:400;font-size:clamp(40px,12.5vw,70px);line-height:.95}
+.v .who{margin:0;font-weight:800;font-size:clamp(26px,8vw,38px);line-height:1.1;text-wrap:balance}
+.v .why{margin:0;font-size:17px;line-height:1.4;max-width:30ch;opacity:.92}
+.v .todo{margin:2px 0 0;font-size:15px;font-weight:700;background:rgba(0,0,0,.16);border-radius:14px;padding:10px 14px;max-width:32ch}
+.v.warn .todo{background:rgba(0,0,0,.08)}
+.paid{display:flex;align-items:center;gap:14px;background:rgba(0,0,0,.18);border-radius:20px;padding:12px 18px 12px 20px}
+.paid b{font-family:var(--f-display);font-weight:400;font-size:clamp(34px,11vw,46px);line-height:1}
+.paid div{text-align:left}
+.paid small{display:block;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.paid span{display:block;font-size:14px;opacity:.9}
+.give{font-family:var(--f-display);font-size:clamp(20px,6.5vw,28px);background:#fff;color:var(--go2);border-radius:14px;padding:10px 16px}
+.v .id{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:15px;border:2px solid rgba(255,255,255,.55);border-radius:999px;padding:8px 14px}
+.v .id svg{width:18px;height:18px}
+.v .next{margin-top:10px;font-family:var(--f-mono);font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;opacity:.75}
+.v .timer{position:absolute;left:0;bottom:0;height:7px;background:rgba(255,255,255,.6);animation:drain var(--t,2.2s) linear forwards}
+
+@keyframes scan{from{top:24%}to{top:68%}}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1)}}
 @keyframes draw{to{stroke-dashoffset:0}}
-@keyframes vin{from{opacity:0}to{opacity:1}}
-@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes vin{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
 @keyframes shake{0%,100%{transform:none}20%{transform:translateX(-14px)}40%{transform:translateX(12px)}60%{transform:translateX(-8px)}80%{transform:translateX(5px)}}
 @keyframes drain{from{width:100%}to{width:0}}
-@media (prefers-reduced-motion: reduce){.verdict,.verdict *,.cam .scanline{animation:none!important}.tick path{stroke-dashoffset:0}}
-.login{display:grid;gap:14px;padding-top:30px}
-.login h1{font-size:44px;color:var(--cream)}
-.login p{color:var(--muted-dark)}
-.login input{background:var(--ink-2);color:var(--cream);border-color:#3a3330;font-size:18px}
-.err{color:#ff8a7f;font-weight:700;min-height:1.4em}
+@keyframes blink{50%{opacity:.25}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}.v.go .mark path{stroke-dashoffset:0}}
+@media (max-height:700px){.stats .st b{font-size:24px}.recent{display:none}}
 </style>
 </head>
 <body>
-<main class="wrap">
-  <div class="top2"><span class="mark">Perugia<span>Party</span> · Door</span><button class="lock" id="lock" hidden>Lock</button></div>
+<div class="app">
+  <div class="bar">
+    <div class="brand"><img src="/apple-touch-icon.png" alt=""><div><b>Door</b><span id="evname">PerugiaParty</span></div></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="net" id="net"><i></i><span>Online</span></span>
+      <button class="icon hide" id="lockbtn" type="button" aria-label="Lock the scanner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></button>
+    </div>
+  </div>
 
-  <form class="login" id="login" hidden>
+  <form class="login hide" id="login" novalidate>
+    <div class="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
     <h1>Door check-in</h1>
-    <p>Enter the door password you set in the admin panel.</p>
-    <label for="pw" style="color:var(--cream)">Door password<input id="pw" type="password" autocomplete="current-password" required></label>
+    <p>Enter the door password to open the scanner.</p>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="Door password" aria-label="Door password" enterkeyhint="go">
     <p class="err" id="lerr" role="alert"></p>
-    <button class="btn" type="submit" id="lbtn">Open scanner</button>
+    <button class="big-btn" type="submit" id="lbtn">Open scanner</button>
   </form>
 
-  <section id="scan" hidden>
-    <div class="count"><b id="s-in">0</b><span>inside · <span id="s-tot">0</span> expected</span></div>
-    <div class="bar"><i id="s-bar"></i></div>
-    <p class="evline" id="evname"></p>
+  <section id="scan" class="hide" style="display:flex;flex-direction:column;flex:1">
+    <div class="stats">
+      <div class="st main"><small>Inside</small><b id="s-in">0</b><div class="prog"><i id="s-bar"></i></div></div>
+      <div class="st"><small>Still to come</small><b id="s-wait">0</b></div>
+      <div class="st"><small>Expected</small><b id="s-tot">0</b></div>
+    </div>
     <div class="cam idle" id="cam">
       <video id="video" playsinline muted></video>
-      <div class="frame" aria-hidden="true"></div><div class="scanline" aria-hidden="true"></div>
-      <div class="msg" id="cmsg"><div><p>Scan the QR code on the guest's ticket.</p><button class="btn" type="button" id="start">Start scanning</button></div></div>
+      <div class="shade"></div>
+      <div class="brk" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="line" aria-hidden="true"></div>
+      <div class="hint">Point at the QR code on the ticket</div>
+      <button class="torch hide" id="torch" type="button" aria-label="Flashlight"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6l-1 7h3l-7 13 1-9H8z"/></svg></button>
+      <div class="msg" id="cmsg"></div>
     </div>
-    <form class="manual" id="manual" autocomplete="off"><input id="code" placeholder="No QR? Type the code" aria-label="Guest code"><button class="btn" type="submit">Check</button></form>
-    <input type="checkbox" id="auto" hidden>
+    <form class="manual" id="manual" autocomplete="off" novalidate>
+      <input id="code" placeholder="No QR? Type the code" aria-label="Ticket code" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="go">
+      <button type="submit" aria-label="Check in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </form>
+    <p class="mhint" id="mhint" role="status"></p>
+    <div class="recent hide" id="recent"><h3>Last scans</h3><ul id="rlist"></ul></div>
   </section>
-</main>
-<div class="verdict" id="verdict" hidden role="alertdialog" aria-live="assertive"></div>
+</div>
+<div class="v hide" id="v" role="alertdialog" aria-live="assertive"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const euro = n => n == null ? "" : "€" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", ",") : Number(n));
-const hhmm = t => t ? new Date(Number(t)).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) : "";
-let PW = null, SIGN = "", stream = null, scanning = false, busy = false, lastText = "", lastAt = 0, detector = null;
-try { $("auto").checked = localStorage.getItem("pp_door_auto") === "1"; } catch(e){}
-$("auto").addEventListener("change", () => { try { localStorage.setItem("pp_door_auto", $("auto").checked ? "1" : "0"); } catch(e){} });
+const tz = { timeZone:"Europe/Rome" };
+const hhmm = t => t ? new Date(Number(t)).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", ...tz }) : "";
+const dayTime = t => t ? new Date(Number(t)).toLocaleString("it-IT", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", ...tz }) : "";
+const TYPE = { early:"Early bird", normal:"Normal", late:"Late", special:"Special price", crew:"Crew" };
+let PW = null, SIGN = "", stream = null, track = null, scanning = false, busy = false, lastText = "", lastAt = 0, detector = null, wake = null, lastIn = null, vTimer = null;
+const ICON = {
+  cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  block:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg>',
+  wifi:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10 10 0 0 1 14 0M8.5 15.5a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1"/><path d="M3 3l18 18"/></svg>',
+};
+const MARK = {
+  go:'<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56"/><path d="M34 62 L53 80 L88 42"/></svg>',
+  stop:'<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56"/><path d="M40 40 L80 80 M80 40 L40 80"/></svg>',
+  warn:'<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="56"/><path d="M60 32 V68 M60 86 V87"/></svg>',
+};
+const ID_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="2.2"/><path d="M14 10h4M14 14h3"/></svg>';
 
+/* ---------- network ---------- */
+function setNet(){ const on = navigator.onLine; $("net").classList.toggle("off", !on); $("net").lastElementChild.textContent = on ? "Online" : "Offline"; }
+addEventListener("online", setNet); addEventListener("offline", setNet); setNet();
+class DoorError extends Error { constructor(kind, msg){ super(msg || kind); this.kind = kind; } }
 async function api(path, body){
-  const r = await fetch("/api/door/" + path, { method:"POST", headers:{ "content-type":"application/json" }, body: JSON.stringify({ password: PW, ...body }) });
+  if (!navigator.onLine) throw new DoorError("offline");
+  let r;
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 9000);
+  try { r = await fetch("/api/door/" + path, { method:"POST", headers:{ "content-type":"application/json" }, body: JSON.stringify({ password: PW, ...body }), signal: ctl.signal }); }
+  catch (e) { throw new DoorError(e.name === "AbortError" ? "slow" : "offline"); }
+  finally { clearTimeout(to); }
   const d = await r.json().catch(() => ({}));
-  if (r.status === 401 || r.status === 403) { lock(d.error); throw new Error("auth"); }
-  if (!r.ok) throw new Error(d.error || "Couldn't reach the server.");
+  if (r.status === 401) throw new DoorError("password", d.error);
+  if (r.status === 403) throw new DoorError("nopassword", d.error);
+  if (r.status === 429) throw new DoorError("toomany", d.error);
+  if (!r.ok) throw new DoorError("server", d.error);
   return d;
 }
-let lastIn = null;
-function stats(s){ if (!s) return;
-  const b = $("s-in"), tot = s.inside + s.waiting;
-  if (lastIn != null && s.inside > lastIn) { b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); }
-  lastIn = s.inside; b.textContent = s.inside; $("s-tot").textContent = tot;
-  $("s-bar").style.width = (tot ? Math.round(s.inside / tot * 100) : 0) + "%"; }
+const NETERR = {
+  offline: ["No connection", "This phone has no internet. Check Wi-Fi or mobile data, then scan again."],
+  slow:    ["Too slow", "The connection is very slow and the check didn't finish. Scan again."],
+  server:  ["Server problem", "The server had a problem. Scan again. If it keeps happening, tell Mattheo."],
+  toomany: ["Too many tries", "Wait a few minutes, then try again."],
+};
 
-/* login */
-function showLogin(msg){ $("login").hidden = false; $("scan").hidden = true; $("lock").hidden = true; $("lerr").textContent = msg || ""; $("pw").focus(); }
+/* ---------- stats ---------- */
+function stats(s){
+  if (!s) return;
+  const inside = Number(s.inside) || 0, wait = Number(s.waiting) || 0, tot = inside + wait, b = $("s-in");
+  if (lastIn != null && inside > lastIn) { b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); }
+  lastIn = inside; b.textContent = inside; $("s-wait").textContent = wait; $("s-tot").textContent = tot;
+  $("s-bar").style.width = (tot ? Math.round(inside / tot * 100) : 0) + "%";
+}
+
+/* ---------- login ---------- */
+function showLogin(msg){ $("login").classList.remove("hide"); $("scan").classList.add("hide"); $("lockbtn").classList.add("hide"); $("lerr").textContent = msg || ""; setTimeout(() => $("pw").focus(), 50); }
 function lock(msg){ PW = null; try { localStorage.removeItem("pp_door_pw"); } catch(e){} stopCam(); showLogin(msg); }
-$("lock").addEventListener("click", () => lock(""));
+$("lockbtn").addEventListener("click", () => lock(""));
+const LOGINERR = {
+  password: "Wrong door password. Check it with Mattheo.",
+  nopassword: "No door password is set yet. Set one in the admin panel under Event & website.",
+  offline: "No connection. Check the internet on this phone.",
+  slow: "The connection is too slow. Try again.",
+  toomany: "Too many wrong tries. Wait a few minutes, then try again.",
+  server: "The server had a problem. Try again in a moment.",
+};
 $("login").addEventListener("submit", async e => {
   e.preventDefault();
-  PW = $("pw").value; $("lbtn").disabled = true;
-  try { await enter(); try { localStorage.setItem("pp_door_pw", PW); } catch(e){} }
-  catch (x) { if (x.message !== "auth") { const m = x.message === "Failed to fetch" ? "No connection. Check the internet on this phone." : x.message; $("lerr").textContent = m; window.ppNotify && ppNotify(/connection/i.test(m) ? "No connection" : "Couldn't open scanner", "error"); } }
-  finally { $("lbtn").disabled = false; }
+  const pw = $("pw").value.trim();
+  if (!pw) { $("lerr").textContent = "Type the door password first."; return; }
+  PW = pw; $("lbtn").disabled = true; $("lbtn").textContent = "Opening…"; $("lerr").textContent = "";
+  try { await enter(); try { localStorage.setItem("pp_door_pw", PW); } catch(e){} startCam(); }
+  catch (x) { PW = null; $("lerr").textContent = LOGINERR[x.kind] || "Couldn't open the scanner. Try again."; buzz([200]); }
+  finally { $("lbtn").disabled = false; $("lbtn").textContent = "Open scanner"; }
 });
 async function enter(){
   const d = await api("login", {});
-  SIGN = d.sign || ""; $("evname").textContent = (d.event || "") + (SIGN ? " · give: " + SIGN : "");
+  SIGN = d.sign || ""; $("evname").textContent = d.event || "PerugiaParty";
   stats(d.stats);
-  $("login").hidden = true; $("scan").hidden = false; $("lock").hidden = false;
+  $("login").classList.add("hide"); $("scan").classList.remove("hide"); $("lockbtn").classList.remove("hide");
 }
 
-/* camera */
+/* ---------- camera ---------- */
+function camMsg(icon, title, text, btn){
+  const m = $("cmsg"); m.classList.remove("hide"); $("cam").classList.add("idle"); $("torch").classList.add("hide");
+  m.innerHTML = `<div><div class="ico">${ICON[icon]}</div><h2>${title}</h2><p>${text}</p>${btn ? `<button class="big-btn" type="button" id="camgo">${btn}</button>` : ""}</div>`;
+  if (btn) $("camgo").addEventListener("click", startCam);
+}
 async function startCam(){
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    return camMsg("block", "Camera not supported", window.isSecureContext ? "This browser can't use the camera. Open perugiaparty.com/door in Safari or Chrome, or type the codes below." : "Open the page with https://perugiaparty.com/door to use the camera.", "");
+  }
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
     const v = $("video"); v.srcObject = stream; await v.play();
-    $("cmsg").hidden = true; $("cam").classList.remove("idle");
+    track = stream.getVideoTracks()[0];
+    $("cmsg").classList.add("hide"); $("cam").classList.remove("idle");
+    try { const caps = track.getCapabilities ? track.getCapabilities() : {}; $("torch").classList.toggle("hide", !caps.torch); } catch(e){}
     try { localStorage.setItem("pp_door_cam", "1"); } catch(e){}
     if ("BarcodeDetector" in window) { try { detector = new BarcodeDetector({ formats: ["qr_code"] }); } catch(e){ detector = null; } }
-    scanning = true; loop();
+    if (!detector && !window.jsQR) camMsg("block", "Scanner didn't load", "The QR reader couldn't load. Reload the page, or type the codes below.", "");
+    scanning = true; keepAwake(); loop();
   } catch (e) {
-    $("cmsg").hidden = false; $("cam").classList.add("idle");
     const why = {
-      NotAllowedError: "Camera blocked. Allow camera access for perugiaparty.com in your browser settings, then try again.",
-      NotFoundError: "No camera found on this device. Type the codes below instead.",
-      NotReadableError: "Another app is using the camera. Close it, then try again.",
-      OverconstrainedError: "This camera can't be used for scanning. Type the codes below instead.",
-    }[e && e.name] || (navigator.mediaDevices ? "The camera didn't start. Try again, or type the code below." : "This browser can't use the camera. Open perugiaparty.com/door in Safari or Chrome, or type the codes below.");
-    $("cmsg").innerHTML = `<div><p>${why}</p><button class="btn" type="button" id="start">Try again</button></div>`;
+      NotAllowedError: ["Camera blocked", "Allow camera access for perugiaparty.com in the browser settings, then tap Try again."],
+      SecurityError: ["Camera blocked", "Allow camera access for perugiaparty.com in the browser settings, then tap Try again."],
+      NotFoundError: ["No camera found", "This device has no camera. Type the codes below instead."],
+      OverconstrainedError: ["Camera can't scan", "This camera can't be used for scanning. Type the codes below instead."],
+      NotReadableError: ["Camera in use", "Another app is using the camera. Close it, then tap Try again."],
+      AbortError: ["Camera stopped", "The camera stopped unexpectedly. Tap Try again."],
+    }[e && e.name] || ["Camera didn't start", "Tap Try again, or type the code below."];
+    camMsg("cam", why[0], why[1], e && e.name === "NotFoundError" ? "" : "Try again");
     window.ppNotify && ppNotify("Camera not available", "warn");
-    $("start").addEventListener("click", startCam);
   }
 }
-function stopCam(){ scanning = false; if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; }
-$("start").addEventListener("click", startCam);
+function stopCam(){ scanning = false; if (stream) stream.getTracks().forEach(t => t.stop()); stream = null; track = null; releaseWake(); }
+$("torch").addEventListener("click", async () => {
+  if (!track) return; const on = !$("torch").classList.contains("on");
+  try { await track.applyConstraints({ advanced: [{ torch: on }] }); $("torch").classList.toggle("on", on); } catch(e){ $("mhint").textContent = "The flashlight doesn't work on this phone."; }
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { stopCam(); }
+  else if (PW && !$("scan").classList.contains("hide")) { let c = null; try { c = localStorage.getItem("pp_door_cam"); } catch(e){} if (c) startCam(); }
+});
+async function keepAwake(){ try { if ("wakeLock" in navigator) wake = await navigator.wakeLock.request("screen"); } catch(e){} }
+function releaseWake(){ try { wake && wake.release(); } catch(e){} wake = null; }
+
 const canvas = document.createElement("canvas"), ctx = canvas.getContext("2d", { willReadFrequently: true });
 async function loop(){
   if (!scanning) return;
   const v = $("video");
-  if (!busy && $("verdict").hidden && v.readyState >= 2) {
+  if (!busy && $("v").classList.contains("hide") && v.readyState >= 2) {
     let text = null;
     try {
       if (detector) { const codes = await detector.detect(v); if (codes.length) text = codes[0].rawValue; }
       else if (window.jsQR) {
-        const w = 480, h = Math.round(w * v.videoHeight / v.videoWidth) || 480;
+        const w = 520, h = Math.round(w * v.videoHeight / v.videoWidth) || 520;
         canvas.width = w; canvas.height = h; ctx.drawImage(v, 0, 0, w, h);
-        const img = ctx.getImageData(0, 0, w, h); const r = jsQR(img.data, w, h, { inversionAttempts: "dontInvert" });
+        const r = jsQR(ctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: "dontInvert" });
         if (r) text = r.data;
       }
     } catch(e){}
-    if (text && (text !== lastText || Date.now() - lastAt > 4000)) { lastText = text; lastAt = Date.now(); check(text); }
+    if (text && (text !== lastText || Date.now() - lastAt > 5000)) { lastText = text; lastAt = Date.now(); check(text); }
   }
   requestAnimationFrame(loop);
 }
 
-/* check + verdicts */
-async function check(text, forceCheckin){
-  if (busy) return; busy = true;
-  try {
-    const auto = forceCheckin || $("auto").checked;
-    let d = await api("check", { code: text });
-    if (d.found && d.guest.current && d.guest.status === "paid" && auto) d = await api("checkin", { code: text });
-    stats(d.stats); show(d, text);
-  } catch (x) { if (x.message !== "auth") show({ error: x.message === "Failed to fetch" ? "No connection. Check the internet on this phone, then scan again." : x.message }, text); }
-  finally { busy = false; }
-}
+/* ---------- sound + vibration ---------- */
+let AC = null;
+function tone(seq){ try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); let t = AC.currentTime;
+  for (const [f, d, type] of seq) { const o = AC.createOscillator(), g = AC.createGain(); o.type = type || "sine"; o.frequency.value = f; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.35, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g).connect(AC.destination); o.start(t); o.stop(t + d + .02); t += d * .9; } } catch(e){} }
 function buzz(p){ try { navigator.vibrate && navigator.vibrate(p); } catch(e){} }
-const TICK = `<svg class="tick" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="54"/><path d="M36 62 L53 78 L86 44"/></svg>`;
-const CROSS = `<svg class="cross" viewBox="0 0 96 96" aria-hidden="true"><path d="M26 26 L70 70 M70 26 L26 70"/></svg>`;
-const TYPE = { early: "Early bird", normal: "Normal", late: "Late", special: "Special price", crew: "Crew" };
-let goTimer = null;
-const dayTime = t => t ? new Date(Number(t)).toLocaleString("it-IT", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) : "";
-// what this guest paid: amount, ticket type and when the payment was marked
+const FEEL = { go: () => { tone([[880,.09],[1320,.16]]); buzz([40,60,120]); }, stop: () => { tone([[220,.22,"square"],[180,.3,"square"]]); buzz([300,100,300]); }, warn: () => { tone([[520,.14,"triangle"]]); buzz([120,80,120]); } };
+
+/* ---------- check: every scan checks the guest in straight away ---------- */
+async function check(text){
+  if (busy) return; busy = true; $("cam").classList.add("busy"); $("mhint").textContent = "";
+  try { const d = await api("checkin", { code: text }); stats(d.stats); verdict(read(d)); }
+  catch (x) {
+    if (x.kind === "password" || x.kind === "nopassword") { lock(LOGINERR[x.kind]); return; }
+    const [t, w] = NETERR[x.kind] || NETERR.server;
+    verdict({ cls: "warn", kick: "Not checked", title: t, why: w, todo: "Nobody was checked in. Scan the ticket again." });
+  }
+  finally { busy = false; $("cam").classList.remove("busy"); }
+}
 function paidBox(g){
   const free = g.crew || g.price == null || Number(g.price) === 0;
   const amount = g.crew ? "Crew" : free ? "Free" : euro(g.price);
   const bits = [g.crew ? "" : (TYPE[g.ticket] || ""), g.paid_at ? "paid " + dayTime(g.paid_at) : ""].filter(Boolean).join(" · ");
-  return `<div class="paid"><small>${g.crew ? "Crew pass" : free ? "Free entry" : "Paid"}</small><b>${esc(amount)}</b>${bits ? `<span>${esc(bits)}</span>` : ""}</div>`;
+  return `<div class="paid"><b>${esc(amount)}</b><div><small>${g.crew ? "Crew pass" : free ? "Free entry" : "Paid"}</small>${bits ? `<span>${esc(bits)}</span>` : ""}</div></div>`;
 }
-function stop(title, who, sub){
-  return `<div class="inner">${CROSS}<p class="big">${title}</p>${who ? `<p class="who">${esc(who)}</p>` : ""}${sub ? `<p class="sub">${sub}</p>` : ""}<p class="tap">Tap to scan next</p></div>`;
-}
-function show(d, text){
-  const V = $("verdict"); let cls = "stop", html = "";
-  clearTimeout(goTimer);
-  if (d.error) html = stop("Try again", "", esc(d.error));
-  else if (!d.found) html = stop("Not on the list", "", d.ambiguous ? "Several codes end like this. Type the full code." : "No ticket with this code.");
-  else {
-    const g = d.guest;
-    if (!g.current) html = stop("Wrong party", g.name, `This ticket is for ${esc(g.event)}.`);
-    else if (g.status === "in" && d.fresh) {
-      cls = "go";
-      html = `<div class="inner">${TICK}<p class="big">In</p><p class="who">${esc(g.name)}</p>${paidBox(g)}${g.sign ? `<p class="sign">Give: ${esc(g.sign)}</p>` : ""}<p class="tap">Tap to scan next</p></div><div class="timer"></div>`;
-      goTimer = setTimeout(() => { if (!V.hidden && V.classList.contains("go")) { V.hidden = true; lastText = ""; } }, 2600);
-    }
-    else if (g.status === "in") html = stop("Already in", g.name, `Scanned at ${esc(hhmm(g.in_at))}. Don't let in twice.`).replace('<p class="tap">', paidBox(g) + '<p class="tap">');
-    else if (g.status === "paid") { cls = "hold"; html = `<div class="inner"><p class="who">${esc(g.name)}</p>${paidBox(g)}<p class="sub">Check their photo ID.</p><div class="row"><button class="btn" type="button" data-in="${esc(g.code)}">Let in</button><button class="btn ghost" type="button" data-next>Cancel</button></div></div>`; }
-    else if (g.status === "approved") html = stop("Not paid", g.name, `They still need to pay ${esc(euro(g.price))}.`);
-    else html = stop("No entry", g.name, `This request is ${esc(g.status)}.`);
+// every possible answer from the server, turned into one clear screen
+function read(d){
+  if (!d.found && d.ambiguous) return { cls: "warn", kick: "Code too short", title: "Type the full code", why: "Several tickets end with these characters.", todo: "Type every character of the code on the ticket." };
+  if (!d.found) return { cls: "stop", kick: "No entry", title: "Not on the list", why: "There is no ticket with this code.", todo: "Check the code, or send them to Miltiad." };
+  const g = d.guest, name = g.name;
+  if (!g.current) return { cls: "stop", kick: "No entry", title: "Wrong party", who: name, why: `This ticket is for ${esc(g.event)}, not tonight.`, todo: "Send them to Miltiad." };
+  if (g.status === "in" && d.fresh) return { cls: "go", kick: g.crew ? "Crew" : "Welcome", title: "In", who: name, paid: paidBox(g), give: SIGN, id: true, auto: 2400 };
+  switch (g.status) {
+    case "in":       return { cls: "stop", kick: "Already inside", title: "Already in", who: name, why: `Checked in at ${esc(hhmm(g.in_at))}.`, paid: paidBox(g), todo: "Don't let them in twice. Is it really them? Check the ID." };
+    case "approved": return { cls: "stop", kick: "Not paid", title: "Not paid", who: name, why: `Approved, but they still need to pay ${esc(euro(g.price) || "")}.`.replace(" .", "."), todo: "Payment: cash or instant transfer, now, to Mattheo or Miltiad only. Then scan again." };
+    case "requested":return { cls: "stop", kick: "No entry", title: "Not approved", who: name, why: "Their request was never approved.", todo: "Send them to Miltiad." };
+    case "waitlist": return { cls: "stop", kick: "No entry", title: "Waitlist", who: name, why: "They're on the waitlist and never got a place.", todo: "Send them to Miltiad." };
+    case "declined": return { cls: "stop", kick: "No entry", title: "Declined", who: name, why: "Their request was declined.", todo: "No entry. Don't discuss, stay calm." };
+    case "released": return { cls: "stop", kick: "No entry", title: "Place released", who: name, why: "They didn't pay in time, so their place was released.", todo: "Send them to Miltiad." };
+    case "removed":  return { cls: "stop", kick: "No entry", title: "Removed", who: name, why: g.removed_reason ? esc(g.removed_reason) : "This ticket was removed from the list.", todo: "No entry. Send them to Miltiad if they insist." };
+    case "paid":     return { cls: "warn", kick: "Not checked in", title: "Scan again", who: name, why: "They paid, but the check-in didn't go through.", todo: "Scan the ticket again." };
+    default:         return { cls: "stop", kick: "No entry", title: "Can't let in", who: name, why: `Ticket status: ${esc(g.status)}.`, todo: "Send them to Miltiad." };
   }
-  V.className = "verdict " + cls; V.innerHTML = html; V.hidden = false;
-  buzz(cls === "go" ? [40, 60, 120] : cls === "hold" ? 30 : [300, 100, 300]);
 }
-$("verdict").addEventListener("click", e => {
-  const inBtn = e.target.closest("[data-in]");
-  if (inBtn) { $("verdict").hidden = true; check(inBtn.dataset.in, true); return; }
-  if (e.target.closest("[data-next]") || !$("verdict").classList.contains("hold")) { clearTimeout(goTimer); $("verdict").hidden = true; lastText = ""; }
-});
-$("manual").addEventListener("submit", e => { e.preventDefault(); const v = $("code").value.trim(); if (v) { check(v); $("code").value = ""; } });
+function verdict(o){
+  const V = $("v"); clearTimeout(vTimer);
+  V.className = "v " + o.cls;
+  V.innerHTML = `<div class="inner"><div class="mark">${MARK[o.cls]}</div>${o.kick ? `<span class="kick">${o.kick}</span>` : ""}<p class="title">${o.title}</p>${o.who ? `<p class="who">${esc(o.who)}</p>` : ""}${o.paid || ""}${o.why ? `<p class="why">${o.why}</p>` : ""}${o.give ? `<p class="give">Give: ${esc(o.give)}</p>` : ""}${o.id ? `<span class="id">${ID_ICON}Check the ID if you're not sure: 18+</span>` : ""}${o.todo ? `<p class="todo">${o.todo}</p>` : ""}<p class="next">${o.auto ? "Next scan in a moment · tap to skip" : "Tap anywhere to scan next"}</p></div>${o.auto ? `<div class="timer" style="--t:${o.auto}ms"></div>` : ""}`;
+  V.classList.remove("hide");
+  FEEL[o.cls] && FEEL[o.cls]();
+  addRecent(o);
+  if (o.auto) vTimer = setTimeout(closeV, o.auto);
+}
+function closeV(){ clearTimeout(vTimer); $("v").classList.add("hide"); lastText = ""; }
+$("v").addEventListener("click", closeV);
 
-/* boot */
+/* ---------- last scans ---------- */
+const RECENT = [];
+function addRecent(o){
+  RECENT.unshift({ cls: o.cls, who: o.who || "Unknown code", what: o.title, at: Date.now() }); RECENT.length = Math.min(RECENT.length, 4);
+  $("recent").classList.remove("hide");
+  $("rlist").innerHTML = RECENT.map(r => `<li><i class="${r.cls}"></i><b>${esc(r.who)}<em>${esc(r.what)}</em></b><span>${esc(hhmm(r.at))}</span></li>`).join("");
+}
+
+/* ---------- manual code ---------- */
+$("manual").addEventListener("submit", e => {
+  e.preventDefault();
+  const v = $("code").value.trim().replace(/\s+/g, "");
+  if (!v) { $("mhint").textContent = "Type the code from the ticket first."; buzz(60); return; }
+  if (v.length < 4) { $("mhint").textContent = "That code is too short. Type at least 4 characters."; buzz(60); return; }
+  $("code").value = ""; $("code").blur(); check(v);
+});
+
+/* ---------- boot ---------- */
 (async () => {
   try { PW = localStorage.getItem("pp_door_pw"); } catch(e){}
   if (!PW) return showLogin();
-  try { await enter(); let cam = null; try { cam = localStorage.getItem("pp_door_cam"); } catch(e){} if (cam) startCam(); } catch (x) { if (x.message !== "auth") showLogin(x.message); }
+  try { await enter(); let cam = null; try { cam = localStorage.getItem("pp_door_cam"); } catch(e){} if (cam) startCam(); else camMsg("cam", "Ready to scan", "Tap to turn on the camera. Every scan checks the guest in straight away.", "Start scanning"); }
+  catch (x) { PW = null; if (x.kind === "password") { try { localStorage.removeItem("pp_door_pw"); } catch(e){} } showLogin(LOGINERR[x.kind] || ""); }
 })();
 </script>
 </body>
