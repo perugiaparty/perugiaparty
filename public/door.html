@@ -36,9 +36,9 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 .net.off{color:#ff8a7f}.net.off i{background:#ff5a4f;animation:blink 1s infinite}
 
 /* stats */
-.stats{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.stats{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px;margin-bottom:10px}
 .st{background:var(--card);border-radius:16px;padding:10px 12px}
-.st small{display:block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.st small{display:block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
 .st b{display:block;font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1.05;font-variant-numeric:tabular-nums;margin-top:2px}
 .st.main b{color:var(--txt)}
 .st.main b.bump{animation:bump .5s cubic-bezier(.2,1.6,.4,1)}
@@ -55,11 +55,11 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 .cam .brk i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0;border-top-right-radius:22px}
 .cam .brk i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0;border-bottom-left-radius:22px}
 .cam .brk i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0;border-bottom-right-radius:22px}
-.cam .line{position:absolute;left:8%;right:8%;height:3px;border-radius:3px;background:var(--red);box-shadow:0 0 16px 2px var(--red);animation:scan 2s ease-in-out infinite alternate}
+.cam .line{position:absolute;left:10%;right:10%;height:3px;border-radius:3px;background:var(--red);box-shadow:0 0 16px 2px var(--red);animation:scan 2s ease-in-out infinite alternate}
 .cam .hint{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-size:14px;font-weight:700;color:rgba(244,234,215,.9);text-shadow:0 1px 8px rgba(0,0,0,.6)}
 .cam.busy .line{animation-duration:.6s}
 .cam.idle .brk,.cam.idle .line,.cam.idle .hint,.cam.idle .shade{display:none}
-.cam .msg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:26px}
+.cam .msg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:26px;background:#050404}
 .cam .msg .ico{width:62px;height:62px;margin:0 auto 14px;border-radius:50%;background:var(--card2);display:grid;place-items:center}
 .cam .msg .ico svg{width:28px;height:28px;color:var(--soft)}
 .cam .msg h2{font-family:var(--f-body);font-weight:800;font-size:22px;margin:0 0 6px;color:var(--txt)}
@@ -107,16 +107,16 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 .v.go{background:var(--go);color:#fff}
 .v.stop{background:var(--red);color:var(--txt)}
 .v.warn{background:var(--warn);color:#141210}
-.v .mark svg{width:118px;height:118px}
+.v .mark svg{width:104px;height:104px}
 .v.go .mark circle{fill:rgba(255,255,255,.16)}
 .v.go .mark path{fill:none;stroke:#fff;stroke-width:11;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:90;stroke-dashoffset:90;animation:draw .42s .05s cubic-bezier(.6,0,.2,1) forwards}
 .v.stop .mark circle,.v.warn .mark circle{fill:rgba(0,0,0,.14)}
 .v.stop .mark path,.v.warn .mark path{fill:none;stroke:currentColor;stroke-width:11;stroke-linecap:round;stroke-linejoin:round}
 .v.stop .inner{animation:shake .45s}
-.v .inner{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:440px}
+.v .inner{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:440px}
 .v .kick{font-family:var(--f-mono);font-size:13px;letter-spacing:.16em;text-transform:uppercase;opacity:.85}
-.v .title{margin:0;font-family:var(--f-display);font-weight:400;font-size:clamp(40px,12.5vw,70px);line-height:.95}
-.v .who{margin:0;font-weight:800;font-size:clamp(28px,8.5vw,40px);line-height:1.1;text-wrap:balance}
+.v .title{margin:0;font-family:var(--f-display);font-weight:400;font-size:clamp(36px,10.5vw,58px);line-height:1.02;letter-spacing:-.005em;text-wrap:balance;max-width:11ch}
+.v .who{margin:0;font-weight:700;font-size:clamp(24px,7vw,32px);line-height:1.1;text-wrap:balance}
 .v .why{margin:0;font-size:18px;font-weight:700;opacity:.85}
 .v .tapnext{position:absolute;left:0;right:0;bottom:calc(26px + env(safe-area-inset-bottom,0px));margin:0;font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;opacity:.6}
 .v .todo{margin:2px 0 0;font-size:15px;font-weight:700;background:rgba(0,0,0,.16);border-radius:14px;padding:10px 14px;max-width:32ch}
@@ -130,7 +130,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 .v .next{margin-top:10px;font-family:var(--f-mono);font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;opacity:.75}
 .v .timer{position:absolute;left:0;bottom:0;height:7px;background:rgba(255,255,255,.6);animation:drain var(--t,2.2s) linear forwards}
 
-@keyframes scan{from{top:24%}to{top:68%}}
+@keyframes scan{from{top:10%}to{top:88%}}
 @keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1)}}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes vin{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
@@ -162,14 +162,13 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
   <section id="scan" class="hide" style="display:flex;flex-direction:column;flex:1">
     <div class="stats">
       <div class="st main"><small>Inside</small><b id="s-in">0</b><div class="prog"><i id="s-bar"></i></div></div>
-      <div class="st"><small>Still to come</small><b id="s-wait">0</b></div>
-      <div class="st"><small>Expected</small><b id="s-tot">0</b></div>
+      <div class="st"><small>To come</small><b id="s-wait">0</b></div>
+      <div class="st"><small>Total</small><b id="s-tot">0</b></div>
     </div>
     <div class="cam idle" id="cam">
       <video id="video" playsinline muted></video>
       <div class="shade"></div>
-      <div class="brk" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-      <div class="line" aria-hidden="true"></div>
+      <div class="brk" aria-hidden="true"><i></i><i></i><i></i><i></i><b class="line"></b></div>
       <div class="hint">Scan the ticket</div>
       <button class="torch hide" id="torch" type="button" aria-label="Flashlight"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6l-1 7h3l-7 13 1-9H8z"/></svg></button>
       <div class="msg" id="cmsg"></div>
@@ -184,7 +183,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 </div>
 <div class="v hide" id="v" role="alertdialog" aria-live="assertive"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="/vendor/jsQR.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));

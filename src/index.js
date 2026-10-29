@@ -278,7 +278,7 @@ async function igHandleDm(env, ev, igsid, text) {
   }
   if (!g && ev && ev.tag && found.some((m) => m[1] === String(ev.tag).toUpperCase())) {
     await igLog(env, "bad-code", found.map((m) => m[0]).join(","));
-    await igSend(env, ev, igsid, "We couldn't find this code. Copy it again from your page on perugiaparty.com and send it here.");
+    await igSend(env, ev, igsid, "Code not found. Copy it again and send it here.");
     return;
   }
   if (!g) { // not a code: Matt answers this DM himself
@@ -305,7 +305,7 @@ async function igHandleDm(env, ev, igsid, text) {
         `You already have a request for this party, ${String(active.name || "").split(" ")[0]}. This is your link:`,
         ``,
         `${shortUrl(await shortFor(env, active), active.token)}`,
-      ].join("\n") : "This request was cancelled. Request again on perugiaparty.com or DM us.");
+      ].join("\n") : "This request was cancelled. DM us if you need help.");
       return;
     }
     await markVerified(env, g, igsid);
@@ -434,7 +434,7 @@ async function apiRequest(req, env) {
   // an unconfirmed request doesn't lock the handle: whoever proves the account by DM keeps it
   const dup = await env.DB.prepare("SELECT 1 FROM guests WHERE event = ? AND lower(ig) = ? AND verified = 1 AND status IN ('requested','waitlist','approved','paid','in')")
     .bind(ev.tag, ig).first();
-  if (dup) return json({ error: "This Instagram already has a confirmed request for this party. Log in with your code at perugiaparty.com/ticket, or DM us." }, 409);
+  if (dup) return json({ error: "This Instagram already has a confirmed request for this party. Log in with your code on your ticket page, or DM us." }, 409);
   const returning = await isReturner(env, ig, ev.tag);
   let inviter = null;
   if (body.invite) {
@@ -740,7 +740,7 @@ async function igStatusDms(env) {
     const free = g.status === "paid" && Number(g.price) === 0 && g.ig_sent !== "paid";
     const text = {
       approved: `You're in, ${first}! Pay ${euro(g.price)} to lock in your place:\n\n${link}`,
-      released: g.event === ev.tag ? `Your spot has been reassigned, payment was not received before the deadline.\nSign up again on perugiaparty.com to get back on the waitlist.` : null,
+      released: g.event === ev.tag ? `Your spot has been reassigned, payment was not received before the deadline.\nSign up again to get back on the waitlist.` : null,
       paid: g.ticket === "crew" ? `You're on the crew, ${first}. Your crew pass:\n\n${link}` : free ? `You're in, ${first}. Free entry. Your ticket:\n\n${link}` : `Payment received. You're going, ${first}! Your ticket and the place:\n\n${link}`,
     }[g.status] || null;
     // claim it first so two runs at once never send twice
@@ -753,7 +753,7 @@ async function igStatusDms(env) {
       const n = Number(ev.pair_free) || 0;
       const pairs = n > 0 ? ((await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND (invited_by IS NOT NULL OR with_ig IS NOT NULL) AND status NOT IN ('declined','removed','released')").bind(ev.tag).first()) || {}).n || 0 : 0;
       if (g.status === "approved" && n > 0 && pairs < n && g.event === ev.tag && (await isReturner(env, normIg(g.ig), ev.tag))) {
-        await igSend(env, ev, g.igsid, `Bring a friend who's never been to PerugiaParty. The ${ordinal(n)} pair gets in free, both of you.\n\nThey request a place on perugiaparty.com and fill in ${normIg(g.ig)} as their friend.`);
+        await igSend(env, ev, g.igsid, `Bring a new friend: the ${ordinal(n)} pair gets in free. They add ${normIg(g.ig)} as their friend.`);
       }
     }
   }
@@ -772,8 +772,8 @@ async function igReminders(env) {
     const ms = Number(g.deadline) - Date.now();
     const mins = Math.max(0, Math.floor(ms / 6e4)), hhmm = `${Math.floor(mins / 60)}:${String(mins % 60).padStart(2, "0")}`;
     const text = ms > 0
-      ? `Payment not received yet. You still have ${hhmm} to pay ${euro(g.price)}.\nAfter the deadline your spot will be released.`
-      : `Payment not received yet. Your deadline to pay ${euro(g.price)} has passed.\nPay now to keep your spot, otherwise it will be released.`;
+      ? `PROMEMORIA: hai ancora ${hhmm} per pagare ${euro(g.price)}.\nDopo la scadenza il tuo posto verrà liberato.`
+      : `ULTIMA OCCASIONE: la scadenza per pagare ${euro(g.price)} è passata.\nPaga ora per tenere il tuo posto, altrimenti verrà liberato.`;
     const sent = await igSend(env, ev, g.igsid, text);
     if (!sent) await env.DB.prepare("UPDATE guests SET ig_fail = 1 WHERE token = ?").bind(g.token).run();
   }
