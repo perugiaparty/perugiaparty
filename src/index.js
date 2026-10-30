@@ -813,18 +813,31 @@ async function igReminders(env) {
     if (!(c.meta && c.meta.changes)) continue;
     const ms = Number(g.deadline) - Date.now();
     const mins = Math.max(1, Math.floor(ms / 6e4)), left = mins >= 60 ? `${Math.floor(mins / 60)}h` : `${mins} min`;
+    const up = Number(ev.price_late) > Number(g.price) && ["early", "normal"].includes(g.ticket) && Number.isFinite(Date.parse(ev.normal_until));
     const text = ms > 0
-      ? `Payment not received yet. You still have ${left} to pay ${euro(g.price)}.\nAfter the deadline your spot will be released.`
+      ? `Payment not received yet. You still have ${left} to pay ${euro(g.price)}.\n${up ? `After the deadline the price goes up to ${euro(ev.price_late)}.` : "After the deadline your spot will be released."}`
       : `Payment not received yet. The deadline to pay ${euro(g.price)} has passed.\nPay now to keep your spot, otherwise it will be released.`;
     const sent = await igSend(env, ev, g.igsid, text);
     if (!sent) await env.DB.prepare("UPDATE guests SET ig_fail = 1 WHERE token = ?").bind(g.token).run();
   }
 }
 
+// Last round: once the late price applies, anyone still unpaid at an earlier price moves to the late price
+// when their deadline has passed. They get a reminder with the new amount and a new deadline (never after the party starts).
+async function repriceLate(env) {
+  const ev = await getEvent(env);
+  if (!ev || !ev.tag || dateTier(ev) !== "late" || !(Number(ev.price_late) > 0)) return;
+  const now = Date.now(), start = Date.parse(ev.starts_at);
+  let dl = now + (Number(ev.hours_late) || 24) * 36e5;
+  if (Number.isFinite(start) && start > now) dl = Math.min(dl, start);
+  await env.DB.prepare("UPDATE guests SET ticket = 'late', price = ?, deadline = ?, remind_req = ? WHERE event = ? AND status = 'approved' AND ticket IN ('early','normal') AND deadline IS NOT NULL AND deadline < ? AND COALESCE(price, 0) < ?")
+    .bind(Number(ev.price_late), dl, now, ev.tag, now, Number(ev.price_late)).run();
+}
+
 async function tickIfDue(env) {
   const now = Date.now();
   const r = await env.DB.prepare("UPDATE event SET tick_at = ? WHERE id = 1 AND (tick_at IS NULL OR tick_at < ?)").bind(now, now - 55000).run();
-  if (r.meta && r.meta.changes) { await pushTick(env, getEvent, parseProgram); await igStatusDms(env); await igReminders(env); }
+  if (r.meta && r.meta.changes) { await pushTick(env, getEvent, parseProgram); await repriceLate(env); await igStatusDms(env); await igReminders(env); }
 }
 
 // Security headers on every response the site sends.
