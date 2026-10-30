@@ -578,7 +578,8 @@ async function findByCode(env, tag, text) {
   return list[0] || null;
 }
 function doorView(g, ev) {
-  return { name: g.name, code: g.code, status: g.status, price: g.price, ticket: g.ticket, crew: g.ticket === "crew", paid_at: g.paid_at, in_at: g.in_at, removed_reason: g.status === "removed" ? g.removed_reason || "" : "", event: g.event, current: g.event === ev.tag, sign: ev.sign || "" };
+  // no prices or ticket rounds at the door: whoever checks tickets only needs to know they have paid
+  return { name: g.name, code: g.code, status: g.status, crew: g.ticket === "crew", paid_at: g.paid_at, in_at: g.in_at, removed_reason: g.status === "removed" ? g.removed_reason || "" : "", event: g.event, current: g.event === ev.tag, sign: ev.sign || "" };
 }
 async function apiDoor(req, env, action) {
   let body; try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
@@ -588,8 +589,8 @@ async function apiDoor(req, env, action) {
   if (action === "stats") return json({ stats: await doorStats(env, ev.tag) });
   // the guest list for this party, so the door keeps working when the internet drops
   if (action === "list") {
-    const rows = (await env.DB.prepare("SELECT code, name, ig, status, price, ticket, paid_at, in_at FROM guests WHERE event = ? AND code IS NOT NULL").bind(ev.tag).all()).results || [];
-    return json({ tag: ev.tag, at: Date.now(), guests: rows.map((g) => ({ code: g.code, name: g.name, ig: g.ig || "", status: g.status, price: g.price, ticket: g.ticket, crew: g.ticket === "crew", paid_at: g.paid_at, in_at: g.in_at })), stats: await doorStats(env, ev.tag) });
+    const rows = (await env.DB.prepare("SELECT code, name, ig, status, ticket, paid_at, in_at FROM guests WHERE event = ? AND code IS NOT NULL").bind(ev.tag).all()).results || [];
+    return json({ tag: ev.tag, at: Date.now(), guests: rows.map((g) => ({ code: g.code, name: g.name, ig: g.ig || "", status: g.status, crew: g.ticket === "crew", paid_at: g.paid_at, in_at: g.in_at })), stats: await doorStats(env, ev.tag) });
   }
   // check-ins made offline, sent when the connection is back
   if (action === "sync") {
