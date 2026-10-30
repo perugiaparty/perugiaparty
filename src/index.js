@@ -577,11 +577,19 @@ async function findByCode(env, tag, text) {
   if (list.length === 2 && norm.length <= 4) return { ambiguous: true };
   return list[0] || null;
 }
-// the amount the venue prints on its receipt for one entry (set by the organizer, same for everyone); never what the guest paid
-const receiptFor = (g, ev) => { const v = g.ticket === "crew" ? ev.receipt_crew : ev.receipt_price; return v == null || v === "" ? null : Number(v); };
+// the amount the venue rings up for one entry: the set amount for everyone, never more than the guest paid.
+// Paid less (e.g. €15) -> that amount, marked "non beve". Crew or free -> €0, "omaggio". Never shows what anyone paid above the set amount.
+const receiptFor = (g, ev) => {
+  const base = ev.receipt_price == null || ev.receipt_price === "" ? null : Number(ev.receipt_price);
+  if (base == null) return { receipt: null, receipt_note: "" };
+  const paid = g.price == null || g.price === "" ? base : Number(g.price);
+  if (g.ticket === "crew" || paid <= 0) return { receipt: 0, receipt_note: "Omaggio" };
+  if (paid < base) return { receipt: paid, receipt_note: "Non beve" };
+  return { receipt: base, receipt_note: "" };
+};
 function doorView(g, ev) {
   // no prices or ticket rounds at the door: whoever checks tickets only needs to know they have paid
-  return { name: g.name, code: g.code, status: g.status, crew: g.ticket === "crew", receipt: receiptFor(g, ev), paid_at: g.paid_at, in_at: g.in_at, removed_reason: g.status === "removed" ? g.removed_reason || "" : "", event: g.event, current: g.event === ev.tag, sign: ev.sign || "" };
+  return { name: g.name, code: g.code, status: g.status, crew: g.ticket === "crew", ...receiptFor(g, ev), paid_at: g.paid_at, in_at: g.in_at, removed_reason: g.status === "removed" ? g.removed_reason || "" : "", event: g.event, current: g.event === ev.tag, sign: ev.sign || "" };
 }
 async function apiDoor(req, env, action) {
   let body; try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
@@ -591,8 +599,8 @@ async function apiDoor(req, env, action) {
   if (action === "stats") return json({ stats: await doorStats(env, ev.tag) });
   // the guest list for this party, so the door keeps working when the internet drops
   if (action === "list") {
-    const rows = (await env.DB.prepare("SELECT code, name, ig, status, ticket, paid_at, in_at FROM guests WHERE event = ? AND code IS NOT NULL").bind(ev.tag).all()).results || [];
-    return json({ tag: ev.tag, at: Date.now(), guests: rows.map((g) => ({ code: g.code, name: g.name, ig: g.ig || "", status: g.status, crew: g.ticket === "crew", receipt: receiptFor(g, ev), paid_at: g.paid_at, in_at: g.in_at })), stats: await doorStats(env, ev.tag) });
+    const rows = (await env.DB.prepare("SELECT code, name, ig, status, ticket, price, paid_at, in_at FROM guests WHERE event = ? AND code IS NOT NULL").bind(ev.tag).all()).results || [];
+    return json({ tag: ev.tag, at: Date.now(), guests: rows.map((g) => ({ code: g.code, name: g.name, ig: g.ig || "", status: g.status, crew: g.ticket === "crew", ...receiptFor(g, ev), paid_at: g.paid_at, in_at: g.in_at })), stats: await doorStats(env, ev.tag) });
   }
   // check-ins made offline, sent when the connection is back
   if (action === "sync") {
