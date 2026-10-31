@@ -115,6 +115,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 .v.stop .inner{animation:shake .45s}
 .v .inner{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:440px}
 .v .kick{font-family:var(--f-mono);font-size:13px;letter-spacing:.16em;text-transform:uppercase;opacity:.85}
+.v.go .title{font-size:clamp(72px,24vw,130px)!important;max-width:none}
 .v .title{margin:0;font-family:var(--f-display);font-weight:400;font-size:clamp(36px,10.5vw,58px);line-height:1.02;letter-spacing:-.005em;text-wrap:balance;max-width:11ch}
 .v .who{margin:0;font-weight:700;font-size:clamp(24px,7vw,32px);line-height:1.1;text-wrap:balance}
 .v .why{margin:0;font-size:18px;font-weight:700;opacity:.85}
@@ -421,6 +422,11 @@ function offlineCheck(text){
   }
   return { found: true, offline: true, guest: v };
 }
+function doorExtra(g){
+  const note = g.receipt_note ? `<p class="give" style="font-size:22px;font-weight:800">${esc(g.receipt_note)}</p>` : "";
+  const due = Number(g.door_due) > 0 ? `<div class="paid" style="background:#f2b84b;color:#141210;margin-top:8px"><span>Da pagare alla porta</span><b>${esc(euro(g.door_due))}</b></div>` : "";
+  return note + due;
+}
 function paidBox(g){
   // never show what the guest paid: the door only sees the venue's receipt amount, the same for everyone
   const due = Number(g.door_due) > 0 ? `<div class="paid" style="background:#f2b84b;color:#141210;margin-top:8px"><span>Da pagare alla porta</span><b>${esc(euro(g.door_due))}</b></div>` : "";
@@ -433,9 +439,10 @@ function read(d){
   if (!d.found) return d.offline ? { cls: "warn", title: "Not in saved list", offline: true } : { cls: "stop", title: "Not on the list", why: "Send to Miltiad" };
   const g = d.guest, who = g.name;
   if (!g.current) return { cls: "stop", title: "Wrong party", who, why: esc(g.event) };
-  if (g.status === "in" && d.fresh) return { cls: "go", title: g.crew ? "Crew" : "In", who, paid: paidBox(g), give: SIGN, auto: 2600, undo: g.code, offline: d.offline };
+  // the restaurant only needs the amount to ring up: show that big, and nothing else
+  if (g.status === "in" && d.fresh) return { cls: "go", title: g.receipt != null ? esc(euro(g.receipt)) : (g.crew ? "Crew" : "In"), who, paid: doorExtra(g), auto: 2600, undo: g.code, offline: d.offline };
   const S = {
-    in:       { title: "Already in", why: "Since " + esc(hhmm(g.in_at)), paid: paidBox(g) },
+    in:       { title: "Already in", why: "Since " + esc(hhmm(g.in_at)) },
     approved: { title: "Not paid", why: "Send to Miltiad" },
     requested:{ title: "Not approved", why: "Send to Miltiad" },
     waitlist: { title: "Waitlist", why: "Send to Miltiad" },
