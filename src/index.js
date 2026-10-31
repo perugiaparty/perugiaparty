@@ -583,14 +583,13 @@ const receiptFor = (g, ev) => ({ ...receiptBase(g, ev), door_due: Number(g.door_
 const receiptBase = (g, ev) => {
   const base = ev.receipt_price == null || ev.receipt_price === "" ? null : Number(ev.receipt_price);
   if (base == null) return { receipt: null, receipt_note: "" };
-  // the organizer can set the category per guest (agreed with the venue): drinks, non beve, omaggio
-  if (g.receipt_kind === "omaggio") return { receipt: 0, receipt_note: "Omaggio" };
-  if (g.receipt_kind === "nonbeve") return { receipt: Math.min(base, 15), receipt_note: "Non beve" };
-  if (g.receipt_kind === "beve") return { receipt: base, receipt_note: "" };
+  // the scontrino is what the guest really paid; non beve and omaggio are the categories agreed with the venue
   const paid = g.price == null || g.price === "" ? base : Number(g.price);
-  if (g.ticket === "crew" || paid <= 0) return { receipt: 0, receipt_note: "Omaggio" };
+  if (g.receipt_kind === "omaggio") return { receipt: 0, receipt_note: "Omaggio" };
+  if (g.receipt_kind === "nonbeve") return { receipt: Math.min(paid, 15), receipt_note: "Non beve" };
+  if (g.ticket === "crew" || paid <= 0) return g.receipt_kind === "beve" ? { receipt: base, receipt_note: "" } : { receipt: 0, receipt_note: "Omaggio" };
   if (paid < base) return { receipt: paid, receipt_note: "Non beve" };
-  return { receipt: base, receipt_note: "" };
+  return { receipt: paid, receipt_note: "" };
 };
 function doorView(g, ev) {
   // no prices or ticket rounds at the door: whoever checks tickets only needs to know they have paid
