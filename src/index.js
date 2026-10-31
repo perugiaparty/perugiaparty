@@ -579,9 +579,14 @@ async function findByCode(env, tag, text) {
 }
 // the amount the venue rings up for one entry: the set amount for everyone, never more than the guest paid.
 // Paid less (e.g. €15) -> that amount, marked "non beve". Crew or free -> €0, "omaggio". Never shows what anyone paid above the set amount.
-const receiptFor = (g, ev) => {
+const receiptFor = (g, ev) => ({ ...receiptBase(g, ev), door_due: Number(g.door_due) > 0 ? Number(g.door_due) : 0 });
+const receiptBase = (g, ev) => {
   const base = ev.receipt_price == null || ev.receipt_price === "" ? null : Number(ev.receipt_price);
   if (base == null) return { receipt: null, receipt_note: "" };
+  // the organizer can set the category per guest (agreed with the venue): drinks, non beve, omaggio
+  if (g.receipt_kind === "omaggio") return { receipt: 0, receipt_note: "Omaggio" };
+  if (g.receipt_kind === "nonbeve") return { receipt: Math.min(base, 15), receipt_note: "Non beve" };
+  if (g.receipt_kind === "beve") return { receipt: base, receipt_note: "" };
   const paid = g.price == null || g.price === "" ? base : Number(g.price);
   if (g.ticket === "crew" || paid <= 0) return { receipt: 0, receipt_note: "Omaggio" };
   if (paid < base) return { receipt: paid, receipt_note: "Non beve" };
@@ -599,7 +604,7 @@ async function apiDoor(req, env, action) {
   if (action === "stats") return json({ stats: await doorStats(env, ev.tag) });
   // the guest list for this party, so the door keeps working when the internet drops
   if (action === "list") {
-    const rows = (await env.DB.prepare("SELECT code, name, ig, status, ticket, price, paid_at, in_at FROM guests WHERE event = ? AND code IS NOT NULL").bind(ev.tag).all()).results || [];
+    const rows = (await env.DB.prepare("SELECT code, name, ig, status, ticket, price, receipt_kind, door_due, paid_at, in_at FROM guests WHERE event = ? AND code IS NOT NULL").bind(ev.tag).all()).results || [];
     return json({ tag: ev.tag, at: Date.now(), guests: rows.map((g) => ({ code: g.code, name: g.name, ig: g.ig || "", status: g.status, crew: g.ticket === "crew", ...receiptFor(g, ev), paid_at: g.paid_at, in_at: g.in_at })), stats: await doorStats(env, ev.tag) });
   }
   // check-ins made offline, sent when the connection is back

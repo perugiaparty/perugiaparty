@@ -272,7 +272,7 @@ function localFind(text){
   const tail = all.filter(g => g.code && g.code.replace(/-/g, "").slice(-4) === n.slice(-4));
   return tail.length === 1 ? tail[0] : tail.length > 1 ? { ambiguous: true } : null;
 }
-function localPut(g){ if (!LIST || !g || !g.code) return; const i = LIST.guests.findIndex(x => x.code === g.code); const v = { code: g.code, name: g.name, ig: (i >= 0 && LIST.guests[i].ig) || "", status: g.status, crew: g.crew, receipt: g.receipt, receipt_note: g.receipt_note || "", paid_at: g.paid_at, in_at: g.in_at }; if (i >= 0) LIST.guests[i] = v; else LIST.guests.push(v); saveL(); }
+function localPut(g){ if (!LIST || !g || !g.code) return; const i = LIST.guests.findIndex(x => x.code === g.code); const v = { code: g.code, name: g.name, ig: (i >= 0 && LIST.guests[i].ig) || "", status: g.status, crew: g.crew, receipt: g.receipt, receipt_note: g.receipt_note || "", door_due: g.door_due || 0, paid_at: g.paid_at, in_at: g.in_at }; if (i >= 0) LIST.guests[i] = v; else LIST.guests.push(v); saveL(); }
 async function refreshList(){ try { const d = await api("list", {}); LIST = { tag: d.tag, at: d.at, guests: d.guests }; for (const q of QUEUE) { const g = LIST.guests.find(x => x.code === q.code); if (g && g.status === "paid") { g.status = "in"; g.in_at = q.at; } } saveL(); stats(d.stats); } catch(e){} }
 let syncing = false;
 async function syncQueue(){
@@ -423,8 +423,9 @@ function offlineCheck(text){
 }
 function paidBox(g){
   // never show what the guest paid: the door only sees the venue's receipt amount, the same for everyone
-  if (g.receipt != null) return `<div class="paid"><span>Scontrino</span><b>${esc(euro(g.receipt))}</b><span>${esc(g.receipt_note || "paid in advance")}</span></div>`;
-  return `<div class="paid"><b>${g.crew ? "Crew" : "Paid"}</b><span>in advance</span></div>`;
+  const due = Number(g.door_due) > 0 ? `<div class="paid" style="background:#f2b84b;color:#141210;margin-top:8px"><span>Da pagare alla porta</span><b>${esc(euro(g.door_due))}</b></div>` : "";
+  if (g.receipt != null) return `<div class="paid"><span>Scontrino</span><b>${esc(euro(g.receipt))}</b><span>${esc(g.receipt_note || "paid in advance")}</span></div>` + due;
+  return `<div class="paid"><b>${g.crew ? "Crew" : "Paid"}</b><span>in advance</span></div>` + due;
 }
 // every answer from the server as one short screen
 function read(d){
