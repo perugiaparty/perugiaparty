@@ -776,6 +776,10 @@ function manifest(url) {
 // When Matt approves, marks paid or releases someone in the admin panel, tell them on Instagram.
 const ordinal = (n) => n + (["th", "st", "nd", "rd"][((n % 100) - 20) % 10] || ["th", "st", "nd", "rd"][n % 100] || "th");
 const euro = (n) => "€" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", ",") : Number(n));
+// true on the day of the party (Rome time): then unpaid guests have to pay straight away
+const romeDay = (t) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(t));
+const isPartyDay = (ev) => { const st = Date.parse(ev.starts_at); return Number.isFinite(st) && romeDay(st) === romeDay(Date.now()); };
+const payNowText = (ev, g) => `Today is the party, so please pay ${euro(g.price)} right now by instant bank transfer (bonifico istantaneo):\nIBAN: ${ev.iban || ""}\nBeneficiary: ${ev.beneficiary || ""}\nReference: ${g.code || g.name}\n\nThen send the screenshot of the bonifico here in this chat.`;
 async function igStatusDms(env) {
   const ev = await getEvent(env);
   if (!ev || !ev.ig_token) return;
@@ -788,7 +792,7 @@ async function igStatusDms(env) {
     const first = String(g.name || "").split(" ")[0];
     const free = g.status === "paid" && Number(g.price) === 0 && g.ig_sent !== "paid";
     const text = {
-      approved: `You're in, ${first}! Pay ${euro(g.price)} to lock in your place.`,
+      approved: isPartyDay(ev) ? `You're in, ${first}! ${payNowText(ev, g)}` : `You're in, ${first}! Pay ${euro(g.price)} to lock in your place.`,
       released: g.event === ev.tag ? `Your spot has been reassigned, payment was not received before the deadline.\nSign up again to get back on the waitlist.` : null,
       paid: g.ticket === "crew" ? `You're on the crew, ${first}.` : free ? `You're in, ${first}. Free entry.` : `Payment received. You're going, ${first}!`,
     }[g.status] || null;
@@ -822,7 +826,7 @@ async function igReminders(env) {
     const ms = Number(g.deadline) - Date.now();
     const mins = Math.max(1, Math.floor(ms / 6e4)), left = mins >= 60 ? `${Math.floor(mins / 60)}h` : `${mins} min`;
     const up = Number(ev.price_late) > Number(g.price) && ["early", "normal"].includes(g.ticket) && Number.isFinite(Date.parse(ev.normal_until));
-    const text = ms > 0
+    const text = isPartyDay(ev) ? `Payment not received yet. ${payNowText(ev, g)}` : ms > 0
       ? `Payment not received yet. You still have ${left} to pay ${euro(g.price)}.\n${up ? `After the deadline the price goes up to ${euro(ev.price_late)}.` : "After the deadline your spot will be released."}`
       : `Payment not received yet. The deadline to pay ${euro(g.price)} has passed.\nPay now to keep your spot, otherwise it will be released.`;
     const sent = await igSend(env, ev, g.igsid, text);
