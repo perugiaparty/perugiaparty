@@ -779,6 +779,8 @@ const euro = (n) => "€" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", "
 async function igStatusDms(env) {
   const ev = await getEvent(env);
   if (!ev || !ev.ig_token) return;
+  // status messages switched off: mark them as handled so nothing old floods out when they're switched back on
+  if (Number(ev.ig_dms_off) === 1) { await env.DB.prepare("UPDATE guests SET ig_sent = status WHERE verified = 1 AND (ig_sent IS NULL OR ig_sent <> status)").run(); return; }
   const rows = (await env.DB.prepare(
     "SELECT g.*, p.igsid, p.last_dm_at FROM guests g JOIN people p ON p.ig = lower(g.ig) WHERE p.igsid IS NOT NULL AND g.verified = 1 AND (g.ig_sent IS NULL OR g.ig_sent <> g.status) LIMIT 20"
   ).all()).results || [];
@@ -810,6 +812,7 @@ async function igStatusDms(env) {
 async function igReminders(env) {
   const ev = await getEvent(env);
   if (!ev || !ev.ig_token) return;
+  if (Number(ev.ig_dms_off) === 1) { await env.DB.prepare("UPDATE guests SET remind_sent = remind_req WHERE remind_req IS NOT NULL AND remind_req > COALESCE(remind_sent, 0)").run(); return; }
   const rows = (await env.DB.prepare(
     "SELECT g.*, p.igsid FROM guests g JOIN people p ON p.ig = lower(g.ig) WHERE p.igsid IS NOT NULL AND g.verified = 1 AND g.status = 'approved' AND g.remind_req IS NOT NULL AND g.remind_req > COALESCE(g.remind_sent, 0) LIMIT 20"
   ).all()).results || [];
