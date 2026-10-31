@@ -779,7 +779,7 @@ const euro = (n) => "€" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", "
 // true on the day of the party (Rome time): then unpaid guests have to pay straight away
 const romeDay = (t) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(t));
 const isPartyDay = (ev) => { const st = Date.parse(ev.starts_at); return Number.isFinite(st) && romeDay(st) === romeDay(Date.now()); };
-const payNowText = (ev, g) => `Today is the party, so please pay ${euro(g.price)} right now by instant bank transfer (bonifico istantaneo):\nIBAN: ${ev.iban || ""}\nBeneficiary: ${ev.beneficiary || ""}\nReference: ${g.code || g.name}\n\nThen send the screenshot of the bonifico here in this chat.`;
+const payNowText = (ev, g) => `Today is the party, so please pay ${euro(g.price)} right now with a bonifico istantaneo (no cash):\nIBAN: ${ev.iban || ""}\nBeneficiary: ${ev.beneficiary || ""}\nReference: ${g.code || g.name}\n\nThen send the screenshot of the bonifico here in this chat.`;
 async function igStatusDms(env) {
   const ev = await getEvent(env);
   if (!ev || !ev.ig_token) return;
