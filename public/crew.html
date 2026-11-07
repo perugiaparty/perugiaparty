@@ -339,7 +339,7 @@ function enter(d) {
   // the panel writes the session while this tab opens: give it a moment
   for (let i = 0; i < 6; i++) {
     try { const r = await fetch("/api/crew/state", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token }), cache: "no-store" });
-      if (r.ok) { enter(await r.json()); return; } } catch (e) {}
+      if (r.ok) { try { localStorage.setItem("pp_crew_dev", token); } catch (x) {} enter(await r.json()); return; } } catch (e) {}
     await new Promise((r) => setTimeout(r, 700));
   }
   token = null; screen("login"); $("#lerr").textContent = "That link expired. Open /crew from the admin panel again.";
