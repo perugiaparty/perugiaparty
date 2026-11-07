@@ -8,6 +8,7 @@
 
 const ITER = 100000;
 const SESSION_MS = 12 * 3600 * 1000;
+const PHASES = ["prep", "promo", "day", "during", "after"];
 const CATS = ["Drinks", "Food", "Deco", "Venue", "Music", "Promo", "Other"];
 
 const hex = (buf) => Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
@@ -85,7 +86,7 @@ async function state(env, ev, me) {
   const [crew, spends, needs, st, news, note] = await Promise.all([
     env.DB.prepare("SELECT c.id, c.name, c.lead, p.role, p.going, p.arrive FROM crew c JOIN crew_party p ON p.crew_id = c.id WHERE p.event = ? ORDER BY c.lead DESC, c.name").bind(tag).all(),
     env.DB.prepare("SELECT id, item, amount, cat, shop, repaid, created_at FROM crew_spend WHERE event = ? AND crew_id = ? ORDER BY created_at DESC").bind(tag, me.id).all(),
-    env.DB.prepare("SELECT id, COALESCE(kind,'buy') AS kind, item, qty, cat, shop, owner, done, done_by, done_at, created_at, created_by FROM crew_need WHERE event = ? ORDER BY done, created_at").bind(tag).all(),
+    env.DB.prepare("SELECT id, COALESCE(kind,'buy') AS kind, phase, item, qty, cat, shop, owner, done, done_by, done_at, created_at, created_by FROM crew_need WHERE event = ? ORDER BY done, created_at").bind(tag).all(),
     env.DB.prepare(
       "SELECT SUM(status IN ('requested','waitlist')) AS requested, SUM(status = 'approved') AS approved, SUM(status IN ('paid','in')) AS paid, SUM(status = 'in') AS inside, SUM(ticket = 'crew' AND status IN ('approved','paid','in')) AS crew_tickets FROM guests WHERE event = ?"
     ).bind(tag).first(),
@@ -185,9 +186,10 @@ export async function apiCrew(req, env, action, { getEvent, json }) {
       const item = clean(body.item, 120);
       if (!item) return json({ error: "Write what it is first." }, 400);
       const kind = body.kind === "todo" ? "todo" : "buy";
+      const phase = kind === "todo" && PHASES.includes(body.phase) ? body.phase : kind === "todo" ? "prep" : null;
       const cat = CATS.includes(body.cat) ? body.cat : "Other";
-      await env.DB.prepare("INSERT INTO crew_need (event, kind, item, qty, cat, shop, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-        .bind(tag, kind, item, clean(body.qty, 30), kind === "todo" ? "Other" : cat, kind === "todo" ? null : clean(body.shop, 40) || null, now, me.id).run();
+      await env.DB.prepare("INSERT INTO crew_need (event, kind, phase, item, qty, cat, shop, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        .bind(tag, kind, phase, item, clean(body.qty, 30), kind === "todo" ? "Other" : cat, kind === "todo" ? null : clean(body.shop, 40) || null, now, me.id).run();
       return ok();
     }
     case "need_claim": {

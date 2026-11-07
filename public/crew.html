@@ -53,6 +53,11 @@ h2{font-family:var(--f-body);font-weight:800;font-size:26px;letter-spacing:-.01e
 .subnav{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--card);border-radius:14px;padding:4px;margin:6px 0 16px}
 .subnav button{font:inherit;font-weight:700;font-size:14px;border:0;border-radius:10px;padding:10px 6px;background:none;color:var(--soft);cursor:pointer}
 .subnav button.on{background:var(--card2);color:var(--txt)}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 6px;padding:2px 16px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;font:inherit;font-weight:700;font-size:13.5px;border-radius:99px;border:1.5px solid var(--hair);background:none;color:var(--soft);padding:8px 13px;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--txt);color:var(--bg);border-color:var(--txt)}
+.chip i{font-style:normal;opacity:.6;margin-left:4px}
 .pin{display:inline-block;width:12px;height:12px;vertical-align:-1px;margin-right:4px;opacity:.8}
 h3{font-size:13px;font-family:var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:500;margin:22px 0 8px}
 .card{background:var(--card);border-radius:18px;padding:14px 16px;margin-bottom:10px}
@@ -189,7 +194,7 @@ textarea{font:inherit;resize:vertical;line-height:1.5}
 <script>
 "use strict";
 // The session lives only in this variable: reload or close the page and the password is asked again.
-let token = null, S = null, tab = "home", sub = "notes", busy = false, openId = null, adding = null, hiddenAt = 0, timer = null;
+let token = null, S = null, tab = "home", sub = "notes", phase = "all", busy = false, openId = null, adding = null, hiddenAt = 0, timer = null;
 let noteTimer = null, noteDirty = false, noteSaving = false;
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -343,17 +348,26 @@ function doneBlock(items, label) {
   return items.length ? `<details ${openId && items.some((n) => n.id === openId) ? "open" : ""}><summary>${label} · ${items.length} ▾</summary><div class="card list">${items.map(itemRow).join("")}</div></details>` : "";
 }
 
+const PHASES = [["prep", "Preparation"], ["promo", "Marketing & PR"], ["day", "Day before & day of"], ["during", "During the party"], ["after", "After the party"]];
+const phaseOf = (n) => PHASES.some(([k]) => k === n.phase) ? n.phase : "prep";
 function homeView() {
   const me = S.me, todo = list("todo", false), mine = todo.filter((n) => n.owner === me.id).length;
+  const done = list("todo", true);
+  const shown = PHASES.filter(([k]) => phase === "all" || phase === k);
   return `<h2>To do</h2>
   <p class="lead">${todo.length ? `${todo.length} open${mine ? ` · ${mine} on you` : ""}` : "All done for now"}${me.role ? ` · your job: <b style="color:var(--txt)">${esc(me.role)}</b>` : ""}</p>
   ${S.news.length || me.lead ? `<div class="shd"><h3>Announcements</h3>${me.lead ? plus("news", "Post") : ""}</div>` : ""}
   ${adding === "news" ? `<form class="addbox" data-f="news"><textarea name="body" rows="3" maxlength="1000" placeholder="Message for the whole crew" data-autofocus></textarea><button class="big" style="padding:12px">Post to everyone</button></form>` : ""}
   ${S.news.map((x) => `<div class="news"><small>${esc(x.author || "Matt")} · ${when(x.created_at)}</small><p>${esc(x.body)}</p>${me.lead ? `<button class="x" data-delnews="${x.id}" aria-label="Remove">×</button>` : ""}</div>`).join("")}
   <div class="shd"><h3>Tasks</h3>${plus("todo", "Add")}</div>
-  ${adding === "todo" ? `<form class="addbox" data-f="todo"><input name="item" placeholder="What needs to happen? e.g. Pick up the speaker" maxlength="120" data-autofocus><button class="big" style="padding:12px">Add task</button></form>` : ""}
-  <div class="card list">${todo.map(itemRow).join("") || `<div class="empty">No open tasks</div>`}</div>
-  ${doneBlock(list("todo", true), "Done")}`;
+  <div class="chips">${[["all", "All"], ...PHASES].map(([k, l]) => { const n = k === "all" ? todo.length : todo.filter((x) => phaseOf(x) === k).length; return `<button class="chip ${phase === k ? "on" : ""}" data-phase="${k}">${l}<i>${n}</i></button>`; }).join("")}</div>
+  ${adding === "todo" ? `<form class="addbox" data-f="todo"><input name="item" placeholder="What needs to happen?" maxlength="120" data-autofocus>
+    <select name="phase" aria-label="When">${PHASES.map(([k, l]) => `<option value="${k}" ${(phase === "all" ? "prep" : phase) === k ? "selected" : ""}>${l}</option>`).join("")}</select>
+    <button class="big" style="padding:12px">Add task</button></form>` : ""}
+  ${shown.map(([k, l]) => { const items = todo.filter((x) => phaseOf(x) === k);
+    if (phase === "all" && !items.length) return "";
+    return `${phase === "all" ? `<div class="shop">${l} <span class="pill">${items.length}</span></div>` : ""}<div class="card list">${items.map(itemRow).join("") || `<div class="empty">Nothing open here</div>`}</div>`; }).join("") || `<div class="card empty">No open tasks</div>`}
+  ${doneBlock(phase === "all" ? done : done.filter((x) => phaseOf(x) === phase), "Done")}`;
 }
 
 function paletteBlock() {
@@ -448,6 +462,7 @@ document.addEventListener("click", (e) => {
   const t = e.target.closest("button"); if (!t || !token) return;
   const d = t.dataset;
   if (d.tab) { if (noteDirty) saveNote(); tab = d.tab; openId = null; adding = null; draw(); window.scrollTo(0, 0); return; }
+  if (d.phase) { phase = d.phase; openId = null; draw(); return; }
   if (d.sub) { if (noteDirty) saveNote(); sub = d.sub; adding = null; draw(); return; }
   if (d.add) { adding = adding === d.add ? null : d.add; openId = null; draw(); return; }
   if (d.open) { const id = Number(d.open); openId = openId === id ? null : id; adding = null; draw(); return; }
@@ -473,7 +488,7 @@ document.addEventListener("submit", (e) => {
   const v = Object.fromEntries(new FormData(f).entries());
   const k = f.dataset.f;
   const need = (x) => { if (!String(x || "").trim()) { toast("Write something first", true); return false; } return true; };
-  if (k === "todo") { if (!need(v.item)) return; adding = null; return act("need_add", { item: v.item, kind: "todo" }, "Added"); }
+  if (k === "todo") { if (!need(v.item)) return; adding = null; if (phase !== "all") phase = v.phase || phase; return act("need_add", { item: v.item, kind: "todo", phase: v.phase }, "Added"); }
   if (k === "buy") { if (!need(v.item)) return; adding = null; return act("need_add", { ...v, kind: "buy" }, "Added to the list"); }
   if (k === "news") { if (!need(v.body)) return; adding = null; return act("news_add", { body: v.body }, "Posted to everyone"); }
   if (k === "spend") { if (!need(v.item) || !need(v.amount)) return; adding = null; return act("spend_add", v, "Receipt added"); }
