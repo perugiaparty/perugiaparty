@@ -174,7 +174,7 @@ def it_post(s):
 .go p{color:var(--muted);margin:0 auto 24px;max-width:40ch}
 .go-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 </style>""", 1)
-    s = s.replace("</style>", """.hero{grid-template-columns:1fr!important;padding-block:clamp(28px,5vw,56px) 0!important;gap:0!important}
+    s = s.replace("</style>", """.hero{grid-template-columns:1fr!important;padding-block:clamp(36px,6vw,72px) clamp(40px,6vw,72px)!important;gap:0!important}
 .hero .lede{max-width:46ch}
 .o-why #why{padding-top:clamp(28px,4vw,44px)}
 .o-why .why-big{font-size:clamp(28px,4vw,48px);margin-bottom:clamp(18px,3vw,32px)}

@@ -772,15 +772,6 @@ async function pastNightsHtml(env, lang = "en") {
   if (!rows.length) return null;
   return rows.map((h, i) => `<article class="night n${(i % 3) + 1}"><p class="when">${lang === "it" ? (i === 0 ? "Ultima edizione" : "Edizione passata") : (i === 0 ? "Last edition" : "Past edition")}</p><div><h3>${escH(h.title)}</h3></div></article>`).join("");
 }
-async function lastNightProof(env, lang) {
-  const h = await env.DB.prepare("SELECT tag, name, site_title FROM history WHERE tag IS NOT NULL ORDER BY closed_at DESC LIMIT 1").first();
-  if (!h) return null;
-  const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND status = 'in' AND COALESCE(ticket,'') <> 'crew'").bind(h.tag).first();
-  const n = (r && r.n) || 0;
-  if (n < 20) return null;
-  const t = h.site_title || h.name;
-  return lang === "it" ? `${n} persone a ${t}` : `${n} came to ${t}`;
-}
 async function nightPage(env, slug) {
   const rows = await pastNights(env);
   const h = rows.find((r) => r.slug === slug);
