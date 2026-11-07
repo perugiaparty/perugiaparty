@@ -38,24 +38,38 @@ async function session(env, ev, token) {
   return onCrew(env, s.crew_id, ev.tag);
 }
 
+// colour palette set in the admin panel: {note, colors:[{name, hex}]}
+function palette(raw) {
+  try {
+    const p = JSON.parse(raw || "null");
+    if (!p || !Array.isArray(p.colors)) return null;
+    const colors = p.colors.filter((c) => c && /^#[0-9a-f]{6}$/i.test(c.hex)).slice(0, 8).map((c) => ({ name: clean(c.name, 30), hex: c.hex }));
+    return colors.length ? { note: clean(p.note, 300), colors } : null;
+  } catch { return null; }
+}
+
 async function state(env, ev, me) {
   const tag = ev.tag;
-  const [crew, spends, needs, st] = await Promise.all([
+  const [crew, spends, needs, st, news, note] = await Promise.all([
     env.DB.prepare("SELECT c.id, c.name, c.lead, p.role, p.going, p.arrive FROM crew c JOIN crew_party p ON p.crew_id = c.id WHERE p.event = ? ORDER BY c.lead DESC, c.name").bind(tag).all(),
     env.DB.prepare("SELECT id, item, amount, cat, shop, repaid, created_at FROM crew_spend WHERE event = ? AND crew_id = ? ORDER BY created_at DESC").bind(tag, me.id).all(),
-    env.DB.prepare("SELECT id, item, qty, cat, owner, done, done_by, done_at, created_at, created_by FROM crew_need WHERE event = ? ORDER BY done, created_at").bind(tag).all(),
+    env.DB.prepare("SELECT id, COALESCE(kind,'buy') AS kind, item, qty, cat, shop, owner, done, done_by, done_at, created_at, created_by FROM crew_need WHERE event = ? ORDER BY done, created_at").bind(tag).all(),
     env.DB.prepare(
       "SELECT SUM(status IN ('requested','waitlist')) AS requested, SUM(status = 'approved') AS approved, SUM(status IN ('paid','in')) AS paid, SUM(status = 'in') AS inside, SUM(ticket = 'crew' AND status IN ('approved','paid','in')) AS crew_tickets FROM guests WHERE event = ?"
     ).bind(tag).first(),
+    env.DB.prepare("SELECT id, body, author, crew_id, created_at FROM crew_news WHERE event = ? ORDER BY created_at DESC LIMIT 30").bind(tag).all(),
+    env.DB.prepare("SELECT body, updated_at FROM crew_note WHERE crew_id = ?").bind(me.id).first(),
   ]);
   const a = st || {};
   const out = {
-    event: { name: ev.name || "", tag, date: ev.date_label || "", starts_at: ev.starts_at || "", doors: ev.doors || "", capacity: Number(ev.capacity) || null },
+    event: { name: ev.name || "", tag, date: ev.date_label || "", starts_at: ev.starts_at || "", doors: ev.doors || "", capacity: Number(ev.capacity) || null, palette: palette(ev.crew_palette) },
     me: { id: me.id, name: me.name, lead: Number(me.lead) === 1, role: me.role || "", going: me.going || "", arrive: me.arrive || "" },
     crew: crew.results || [],
     spends: spends.results || [],
     needs: needs.results || [],
     cats: CATS,
+    news: news.results || [],
+    note: note ? { body: note.body || "", at: note.updated_at } : { body: "", at: null },
     attendance: { requested: a.requested || 0, approved: a.approved || 0, paid: a.paid || 0, inside: a.inside || 0, crew_tickets: a.crew_tickets || 0 },
   };
   return out;
@@ -117,10 +131,11 @@ export async function apiCrew(req, env, action, { getEvent, json }) {
 
     case "need_add": {
       const item = clean(body.item, 120);
-      if (!item) return json({ error: "What do we need?" }, 400);
+      if (!item) return json({ error: "Write what it is first." }, 400);
+      const kind = body.kind === "todo" ? "todo" : "buy";
       const cat = CATS.includes(body.cat) ? body.cat : "Other";
-      await env.DB.prepare("INSERT INTO crew_need (event, item, qty, cat, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?)")
-        .bind(tag, item, clean(body.qty, 30), cat, now, me.id).run();
+      await env.DB.prepare("INSERT INTO crew_need (event, kind, item, qty, cat, shop, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+        .bind(tag, kind, item, clean(body.qty, 30), kind === "todo" ? "Other" : cat, kind === "todo" ? null : clean(body.shop, 40) || null, now, me.id).run();
       return ok();
     }
     case "need_claim": {
@@ -133,7 +148,7 @@ export async function apiCrew(req, env, action, { getEvent, json }) {
       if (!n) return ok();
       if (body.v) {
         const stmts = [env.DB.prepare("UPDATE crew_need SET done = 1, done_by = ?, done_at = ?, owner = COALESCE(owner, ?) WHERE id = ?").bind(me.id, now, me.id, id)];
-        const price = money(body.price);
+        const price = n.kind === "todo" ? null : money(body.price);
         // bought with own money: goes straight into spendings, so it gets paid back
         if (price && price > 0) stmts.push(env.DB.prepare("INSERT INTO crew_spend (event, crew_id, item, amount, cat, shop, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
           .bind(tag, me.id, n.item + (n.qty ? " (" + n.qty + ")" : ""), price, n.cat || "Other", clean(body.shop, 60), now, me.id));
@@ -151,6 +166,24 @@ export async function apiCrew(req, env, action, { getEvent, json }) {
       return ok();
     }
 
+    case "note": {
+      // private notepad: only this person ever reads it back
+      const text = String(body.body ?? "").replace(/\u0000/g, "").slice(0, 20000);
+      await env.DB.prepare("INSERT INTO crew_note (crew_id, body, updated_at) VALUES (?, ?, ?) ON CONFLICT(crew_id) DO UPDATE SET body = excluded.body, updated_at = excluded.updated_at").bind(me.id, text, now).run();
+      return json({ ok: true, at: now });
+    }
+    case "news_add": {
+      if (!lead) return json({ error: "Only a lead can post announcements." }, 403);
+      const text = String(body.body ?? "").replace(/\u0000/g, "").trim().slice(0, 1000);
+      if (!text) return json({ error: "Write the announcement first." }, 400);
+      await env.DB.prepare("INSERT INTO crew_news (event, body, author, crew_id, created_at) VALUES (?, ?, ?, ?, ?)").bind(tag, text, me.name, me.id, now).run();
+      return ok();
+    }
+    case "news_del": {
+      if (!lead) return json({ error: "Only a lead can remove announcements." }, 403);
+      await env.DB.prepare("DELETE FROM crew_news WHERE id = ? AND event = ?").bind(id, tag).run();
+      return ok();
+    }
     case "me": {
       const going = ["yes", "maybe", "no"].includes(body.going) ? body.going : "";
       await env.DB.prepare("UPDATE crew_party SET going = ?, arrive = ? WHERE crew_id = ? AND event = ?").bind(going, clean(body.arrive, 40), me.id, tag).run();
