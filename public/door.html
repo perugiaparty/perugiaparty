@@ -95,14 +95,15 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 .recent li span{font-family:var(--f-mono);font-size:12px;color:var(--soft)}
 
 /* login */
-.login{flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px;padding-bottom:10vh}
-.login .lock{width:64px;height:64px;border-radius:20px;background:var(--red);display:grid;place-items:center}
-.login .lock svg{width:30px;height:30px;color:var(--txt)}
-.login h1{margin:6px 0 0;font-family:var(--f-display);font-weight:400;font-size:40px;line-height:1;color:var(--txt)}
+.login{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;padding-bottom:10vh;max-width:340px;width:100%;margin:0 auto;text-align:center}
+.login .logo{width:64px;height:64px;border-radius:16px;margin:0 auto 14px;display:block}
+.login h1{margin:0 0 14px;font-family:var(--f-body);font-weight:800;font-size:26px;line-height:1.1;color:var(--txt)}
+body.auth .bar{display:none}
 .login p{margin:0;color:var(--soft);font-size:15px}
 .login input{height:58px;font:inherit;font-size:18px;background:var(--card);color:var(--txt);border:1.5px solid var(--hair);border-radius:18px;padding:0 18px;outline:none}
 .login input:focus{border-color:var(--soft)}
-.login .err{min-height:22px;margin:0;color:#ff8a7f;font-weight:700;font-size:15px}
+.login .err{margin:0;color:#ff8a7f;font-weight:700;font-size:14px}.login .err:empty{display:none}
+.login input{text-align:left}
 .login .big-btn{width:100%}
 
 /* verdict */
@@ -171,7 +172,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
   </div>
 
   <form class="login hide" id="login" novalidate>
-    <div class="lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+    <img class="logo" src="/apple-touch-icon.png" alt="">
     <h1>Door</h1>
     <input id="pw" type="password" autocomplete="current-password" placeholder="Door password" aria-label="Door password" enterkeyhint="go">
     <p class="err" id="lerr" role="alert"></p>
@@ -305,7 +306,7 @@ function stopTimers(){ timers.forEach(clearInterval); timers = []; }
 addEventListener("online", () => { syncQueue(); showSync(); }); addEventListener("offline", showSync);
 
 /* ---------- login ---------- */
-function showLogin(msg){ $("login").classList.remove("hide"); $("scan").classList.add("hide"); $("lockbtn").classList.add("hide"); $("lerr").textContent = msg || ""; setTimeout(() => $("pw").focus(), 50); }
+function showLogin(msg){ document.body.classList.add("auth"); $("login").classList.remove("hide"); $("scan").classList.add("hide"); $("lockbtn").classList.add("hide"); $("lerr").textContent = msg || ""; setTimeout(() => $("pw").focus(), 50); }
 function lock(msg){ syncQueue(); PW = null; LIST = null; try { localStorage.removeItem("pp_door_pw"); localStorage.removeItem("pp_door_list"); } catch(e){} stopTimers(); stopCam(); showLogin(msg); }
 $("lockbtn").addEventListener("click", () => lock(""));
 const LOGINERR = {
@@ -329,7 +330,7 @@ async function enter(){
   const d = await api("login", {});
   SIGN = d.sign || ""; $("evname").textContent = d.event || "PerugiaParty";
   stats(d.stats);
-  $("login").classList.add("hide"); $("scan").classList.remove("hide"); $("lockbtn").classList.remove("hide");
+  document.body.classList.remove("auth"); $("login").classList.add("hide"); $("scan").classList.remove("hide"); $("lockbtn").classList.remove("hide");
   refreshList(); syncQueue(); startTimers(); showSync();
 }
 

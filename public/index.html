@@ -318,7 +318,7 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
           <a class="btn" href="#request" data-req>Request a place</a>
           <a class="btn outline" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Instagram ↗</a>
         </div>
-        <p class="ig-note">We check every request on Instagram, so your Instagram handle is required. Questions? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>
+        <p class="ig-note">Questions? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>
       </div>
       <a class="ticket" href="#request" data-req aria-label="Request a place: example guest ticket">
         <span class="stamp">APPROVED</span>
@@ -336,12 +336,12 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
     <div class="wrap sec next-sec">
       <div class="sec-head" id="next-head">
         <h2>Next party.</h2>
-        <p>Every edition has its own list. Even if you came before, request again.</p>
+        <p>New list every edition.</p>
       </div>
       <div class="next" id="next-card">
         <div><span class="status"><i></i>Announcing soon</span>
           <h3>The next edition is in the works.</h3>
-          <p>Date and theme drop on Instagram first. Follow @perugiaparty so you don't miss when requests open.</p></div>
+          <p>Date and theme drop on Instagram first.</p></div>
         <a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram ↗</a>
       </div>
     </div>
@@ -351,21 +351,21 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
     <section class="sec" id="how" aria-labelledby="how-h">
       <div class="sec-head">
         <h2 id="how-h">How it works.</h2>
-        <p>Five steps, from request to the door.</p>
+        <p>Five steps to the door.</p>
       </div>
       <ol class="steps">
-        <li><h3>Request</h3><p>Fill in the form, then tap to send us your code on Instagram. That confirms it's really you.</p></li>
-        <li><h3>Review</h3><p>We look at every request. If you're in, your page shows your ticket type and price.</p></li>
-        <li><h3>Pay</h3><p>Pay by bank transfer. Every detail is on your page: tap to copy, paste in your banking app.</p></li>
-        <li><h3>Ticket</h3><p>Once we see your payment, your page unlocks your QR ticket and the location.</p></li>
-        <li><h3>Party</h3><p>Show your QR and photo ID at the door. See you inside.</p></li>
+        <li><h3>Request</h3><p>Fill in the form and send us your code on Instagram.</p></li>
+        <li><h3>Review</h3><p>We check every request. Your page shows your price.</p></li>
+        <li><h3>Pay</h3><p>Bank transfer. Tap to copy the details.</p></li>
+        <li><h3>Ticket</h3><p>Your QR ticket and the place unlock.</p></li>
+        <li><h3>Party</h3><p>QR and photo ID at the door.</p></li>
       </ol>
     </section>
 
     <section class="sec" id="request" aria-labelledby="req-h">
       <div class="sec-head">
         <h2 id="req-h">Request a place.</h2>
-        <p>Your Instagram is required: that's how we check every request. Questions? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>
+        <p>We check every request on Instagram.</p>
       </div>
       <div class="req">
         <form id="req-form" novalidate>
@@ -485,7 +485,7 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
       <div class="rules-card">
       <div class="sec-head">
         <h2 id="rules-h">House rules.</h2>
-        <p>Good nights work when everyone is on the same page.</p>
+
       </div>
       <ul class="rules">
         <li><span class="x" aria-hidden="true">1</span><div><h3>On the list or not in</h3><p>No list, no entry. Tickets are personal.</p></div></li>
@@ -575,7 +575,7 @@ function renderNext(ev){
   el.classList.toggle("has-poster", !!ev.poster);
   el.innerHTML = `<div class="next-main"><span class="status"><i></i>${statusLine(ev)}</span>
       <h3>${esc(ev.name || "Next PerugiaParty")}</h3>
-      <p>Apply below and save your ticket link. Once approved, pay to confirm your place and unlock your ticket and the location.</p>
+      <p>Request below. Once approved, pay to unlock your ticket.</p>
       ${facts.length ? `<dl>${facts.map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>` : ""}
       <div class="count" id="count" ${ev.starts_at ? "" : "hidden"} aria-label="Countdown to the party"></div>
       ${ev.poster ? `<div class="next-cta">${cta}</div>` : ""}</div>

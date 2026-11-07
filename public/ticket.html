@@ -333,6 +333,24 @@ h1{font-size:clamp(40px,8vw,64px)}
 .appc.on .tx b{color:var(--red)}
 .appc .steps{font-size:13px;color:var(--ink-2);margin:4px 0 0;padding-left:18px}
 @media (max-width:420px){.appc{flex-wrap:wrap}.appc .btn{width:100%}}
+
+/* when & where: the first thing a guest needs */
+.ww{background:var(--ink);color:var(--cream);border-radius:22px;padding:6px 20px 18px;margin:16px 0}
+.ww-r{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:14px 0;border-bottom:1px solid rgba(244,234,215,.14)}
+.ww-r span{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#b9ab98;flex:none}
+.ww-r b{font-size:18px;font-weight:800;text-align:right;overflow-wrap:anywhere}
+.ww-r a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+.ww-go{margin-top:14px;width:100%;justify-content:center}
+/* clean login: centred column, logo, no extra text */
+.auth{max-width:340px;margin:0 auto;text-align:center;padding:6vh 0 4vh}
+.auth-logo{width:64px;height:64px;border-radius:16px;display:block;margin:0 auto 14px}
+.auth h1{font-family:var(--f-body);font-weight:800;font-size:26px;letter-spacing:-.01em;margin:0 0 18px}
+.auth .login{display:grid;gap:10px}
+.auth .login input{width:100%;box-sizing:border-box}
+.auth .login .btn{width:100%;justify-content:center}
+.auth .err:empty{display:none}
+.auth-note{margin-top:18px;font-size:14px;color:var(--muted);line-height:1.8}
+.auth-note a{color:var(--ink);font-weight:700}
 </style>
 </head>
 <body>
@@ -568,15 +586,16 @@ function verifyHTML(d){
     <p style="font-size:13px">Keep the code: with it you can log in at perugiaparty.com/ticket on any phone.</p></section>`;
 }
 function loginView(msg){
-  $("page").innerHTML = `<span class="state">My ticket</span><h1>Log in.</h1>
-    <p class="lead">Use your Instagram and the personal code you got when you requested a place, like <span style="font-family:var(--f-mono)">H26-K7M4QX</span>.</p>
-    <form class="card login" id="login" novalidate>
-      <label for="l-ig">Instagram<input id="l-ig" placeholder="@yourhandle" autocapitalize="off" autocomplete="username" maxlength="40"></label>
-      <label for="l-code">Personal code<input id="l-code" placeholder="H26-XXXXXX" autocapitalize="characters" autocomplete="one-time-code" maxlength="20" style="font-family:var(--f-mono);letter-spacing:.06em"></label>
+  $("page").innerHTML = `<div class="auth">
+    <img class="auth-logo" src="/apple-touch-icon.png" alt="">
+    <h1>My ticket</h1>
+    <form class="login" id="login" novalidate>
+      <input id="l-ig" placeholder="@instagram" aria-label="Instagram" autocapitalize="off" autocomplete="username" maxlength="40">
+      <input id="l-code" placeholder="Code (H26-XXXXXX)" aria-label="Personal code" autocapitalize="characters" autocomplete="one-time-code" maxlength="20" style="font-family:var(--f-mono);letter-spacing:.06em">
       <p class="err" id="l-err" role="alert">${esc(msg || "")}</p>
       <button class="btn" type="submit" id="l-go">Log in</button>
     </form>
-    <p class="note">No request yet? <a href="/#request">Request a place</a>. Lost your code? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>`;
+    <p class="auth-note">No request yet? <a href="/#request">Request a place</a><br>Lost your code? <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">DM us</a></p></div>`;
   try { const m = JSON.parse(localStorage.getItem("pp_me") || "null"); if (m && m.ig) $("l-ig").value = m.ig; } catch(e){}
   $("login").addEventListener("submit", async e => {
     e.preventDefault();
@@ -732,6 +751,20 @@ function unlocked(d, first){
   document.body.appendChild(o);
   celebrate({ vcode: "paid-" + (d.code || "") }, 120);
 }
+// date, time and place in one clear block at the top of the ticket
+function whenWhereHTML(d){
+  const st = d.starts_at ? new Date(d.starts_at) : null, ok = st && !isNaN(st);
+  const date = ok ? st.toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Rome" }) : (d.date_label || "");
+  const time = d.doors || (ok ? st.toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) : "");
+  const maps = d.location ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(d.location) : "";
+  if (!date && !time && !d.location) return "";
+  return `<section class="ww" aria-label="When and where">
+    ${date ? `<div class="ww-r"><span>Date</span><b>${esc(date)}</b></div>` : ""}
+    ${time ? `<div class="ww-r"><span>Time</span><b>${esc(time)}</b></div>` : ""}
+    ${d.location ? `<div class="ww-r"><span>Place</span><b><a href="${maps}" target="_blank" rel="noopener">${esc(d.location)}</a></b></div>
+      <a class="btn ww-go" href="${maps}" target="_blank" rel="noopener">Open in Maps ↗</a>` : ""}
+  </section>`;
+}
 function render(d){
   const P = $("page"), first = esc(String(d.name || "").split(" ")[0]);
   if (d.status === "requested" || d.status === "waitlist") {
@@ -741,11 +774,11 @@ function render(d){
       // not finished: nothing reaches us until the code arrives on Instagram, so no celebration yet
       P.innerHTML = `<div class="rq pending"><span class="state">Not sent yet</span>
           <h1>One step left, ${first}.</h1>
-          <p class="lead">Your request <b>only counts once you send us your code on Instagram</b>. Until then we can't see it, and you're not on the list.</p>
+          <p class="lead">Send us this code on Instagram. Until then your request doesn't count.</p>
           <div class="vcode"><span>${esc(d.vcode)}</span>${copyBtn(d.vcode)}</div>
           ${d.mismatch ? `<p class="warn">We got this code from a different account. Send it from <b>${esc(d.ig || "your Instagram")}</b>.</p>` : ""}
           <a class="btn pend-go" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(d.vcode || "")}" target="_blank" rel="noopener" onclick="try{navigator.clipboard.writeText(${esc(JSON.stringify(d.vcode || ""))})}catch(e){}">Send code on Instagram ↗</a>
-          <p class="pend-n">Send it from <b>${esc(d.ig || "your Instagram")}</b>. You get an automatic reply within a minute, and this page updates by itself.</p>
+          <p class="pend-n">From <b>${esc(d.ig || "your Instagram")}</b>. This page updates by itself.</p>
           ${stepsHTML(0)}
         </div>`;
     } else {
@@ -754,11 +787,11 @@ function render(d){
         <h1>You're on the list, ${first}.</h1>
         ${wl ? `<span class="wl-tag">Waitlist</span>` : ""}
         <p class="lead">${!d.verified ? `One more step: send us your code on Instagram, then we look at your request for <b>${esc(d.event)}</b>.`
-          : wl ? `<b>${esc(d.event)}</b> is full right now. When a place opens up, we go down the list in order and this page shows your price.`
-          : `We're looking at your request for <b>${esc(d.event)}</b>. Once you're approved, this page shows your price and ticket.`}</p>
+          : wl ? `<b>${esc(d.event)}</b> is full. If a place opens up, this page shows your price.`
+          : `We're checking your request for <b>${esc(d.event)}</b>. You'll see your price here.`}</p>
         ${stepsHTML(1)}
       </div>
-      ${d.verified ? `<div class="card"><p><b>Save this page.</b> The link is in your Instagram DMs too.</p><div>${copyBtn(d.link || location.href)}</div></div>` : ""}`;
+      ${d.verified ? `<div class="card"><p><b>Save this page.</b> The link is also in your DMs.</p><div>${copyBtn(d.link || location.href)}</div></div>` : ""}`;
     celebrate(d);
     }
   } else if (d.status === "approved") {
@@ -782,14 +815,14 @@ function render(d){
     const allText = `Amount: ${euro(d.price)}\nIBAN: ${d.iban || ""}\nBeneficiary: ${d.beneficiary || ""}${bankCountry ? `\nBank country: ${bankCountry}` : ""}\nReference: ${d.reference}`;
     P.innerHTML = `<div class="hero-ok"><span class="state">Accepted</span>
         <h1>You're in, ${first}.</h1>
-        <p class="lead">You've been accepted for <b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " on " + esc(d.date_label) : ""}. Pay below to lock in your place.</p>
+        <p class="lead"><b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " · " + esc(d.date_label) : ""}. Pay below to lock your place.</p>
         ${stepsHTML(2, "on-red")}</div>
       <section class="pay" aria-labelledby="pay-h">
         <span class="tier-tag">${esc(tierName)}</span>
         <p class="eyebrow">Bank transfer</p>
         <h2 id="pay-h">${euro(d.price)}</h2>
         ${d.deadline ? `<div class="deadline" id="pay-left" data-dl="${d.deadline}" style="margin:6px 0 12px;background:rgba(244,234,215,.08);padding:11px 14px;border-radius:14px;font-size:15px;font-weight:600;line-height:1.4">${payLeftHTML(d.deadline)}</div>` : ""}
-        <p class="pay-hint">Tap a line to copy it, then paste it in your banking app.</p>
+        <p class="pay-hint">Tap a line to copy it.</p>
         <div class="prow-list">
           ${payRow("IBAN", d.iban ? d.iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim() : "—", d.iban ? d.iban.replace(/\s+/g, "") : "")}
           ${payRow("Name", d.beneficiary || "—", d.beneficiary || "")}
@@ -802,12 +835,10 @@ function render(d){
       <div class="pay-faq">
         <h3>Good to know</h3>
         <dl>
-          <div><dt>After paying</dt><dd>Nothing to send us. Once we see your payment, your ticket and the location appear on this page${d.verified ? " and we message you on Instagram" : ""}.</dd></div>
-          <div><dt>How long it takes</dt><dd>An instant transfer (bonifico istantaneo) arrives right away. A normal one can take 1–2 working days, that's fine.</dd></div>
-          <div><dt>Which bank</dt><dd>Any bank or app works: Italian banks, Revolut, N26, Wise, etc. Pay from your own account.</dd></div>
-          ${bankCountry && ibanCC !== "IT" ? `<div><dt>Foreign account?</dt><dd>Our account is in ${esc(CC[ibanCC] || ibanCC)}. It's a normal SEPA transfer in euro, so within the EU it works and costs the same as a transfer at home. If your bank asks for the country, choose ${esc(CC[ibanCC] || ibanCC)}.</dd></div>` : ""}
-          <div><dt>Forgot the description?</dt><dd>Pay anyway. We match it by your name and amount.</dd></div>
-          <div><dt>Lost this page?</dt><dd>Log in at perugiaparty.com/ticket with your Instagram and the code <b>${esc(d.vcode || d.code)}</b>.</dd></div>
+          <div><dt>After paying</dt><dd>Nothing to send. Your ticket and the place appear here${d.verified ? " and we DM you" : ""}.</dd></div>
+          <div><dt>How long</dt><dd>Instant transfer: right away. Normal: 1–2 working days.</dd></div>
+          ${bankCountry && ibanCC !== "IT" ? `<div><dt>Foreign account</dt><dd>Normal SEPA transfer in euro. Bank country: ${esc(CC[ibanCC] || ibanCC)}.</dd></div>` : ""}
+          <div><dt>Lost this page?</dt><dd>Log in at perugiaparty.com/ticket with code <b>${esc(d.vcode || d.code)}</b>.</dd></div>
         </dl>
       </div>
       <p class="note">Something else? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>`;
@@ -820,11 +851,12 @@ function render(d){
         ${inside ? "" : `<span class="rq-stamp paid-stamp" aria-hidden="true">${d.crew ? "Crew" : "Paid"}</span>`}
         ${inside ? `<span class="state">Checked in</span>` : ""}
         <h1>${inside ? `You made it, <em>${first}</em>.` : d.crew ? `You're crew, ${first}.` : `You're going, ${first}.`}</h1>
-        <p class="lead">${inside ? "Enjoy the night." : d.crew ? `Thanks for making <b>${esc(d.event)}</b> happen. Nothing to pay: your crew pass and the place are below.` : `See you at <b>${esc(d.event)}</b>${d.date_label ? ", " + esc(d.date_label) : ""}. Your ticket and the place are unlocked below.`}</p>
+        <p class="lead">${inside ? "Enjoy the night." : d.crew ? `Thanks for making <b>${esc(d.event)}</b> happen.` : `See you at <b>${esc(d.event)}</b>.`}</p>
         <div class="count" id="tcount" ${inside ? 'style="display:none"' : ""} hidden></div>
         ${d.crew ? "" : stepsHTML(inside ? 5 : 4, inside ? "" : "on-red")}
       </div>
       ${inside ? `<div class="inbar" role="status"><div><b>Checked in</b><span>${d.in_at ? "Entered at " + new Date(d.in_at).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) + ". " : ""}This ticket has been used.</span></div></div>` : ""}`}
+      ${!over ? whenWhereHTML(d) : ""}
       ${inside && !over ? programmeHTML(d) : ""}
       <div class="cine${inside ? "" : " shine"}${d.crew ? " crew" : ""}">${d.crew ? `<span class="crewband">Crew pass</span>` : ""}
         <span class="holes t" aria-hidden="true"></span><span class="holes b" aria-hidden="true"></span>
@@ -837,14 +869,13 @@ function render(d){
         <p class="who">${esc(d.name)}</p>
         <p class="meta">Show this QR and your photo ID at the door</p>
       </div>
-      ${d.location && !over ? `<div class="where"><div><span class="eyebrow unl">Unlocked · the place</span><p><a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-underline-offset:3px">${esc(d.location)}</a></p></div><a class="btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener">Open in Google Maps</a></div>` : ""}
       ${!inside && !over ? programmeHTML(d) : ""}
       ${over ? "" : `<div class="actions">
         <button class="btn wide" type="button" id="pdf">${IN_APP ? "Save ticket" : "Save ticket (PDF)"}</button>
         ${d.starts_at ? `<button class="btn outline" type="button" id="cal">Calendar</button>` : ""}
         <button class="btn outline" type="button" id="share">Tell friends</button>
       </div>
-      <p class="note">One entry, checked at the door with your photo ID. Save the PDF in case there's no signal.</p>`}`;
+      <p class="note">Bring your photo ID. Save the ticket in case there's no signal.</p>`}`;
     if (!inside && !over) unlocked(d, first);
     try { drawQR(d.qr, $("qr")); } catch (e) { $("qr").parentElement.innerHTML = `<p style="color:#111;padding:20px;font-family:var(--f-mono)">${esc(d.code)}</p>`; }
     if ($("pdf")) $("pdf").addEventListener("click", e => downloadTicket(d, e.currentTarget));
