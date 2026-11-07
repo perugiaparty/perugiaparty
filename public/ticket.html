@@ -362,6 +362,8 @@ h1{font-size:clamp(40px,8vw,64px)}
 .rc-tot.got b{color:#12a150}
 .rc-dl{margin-top:12px;text-align:center;font-family:var(--f-body);text-transform:none;letter-spacing:0;font-size:13.5px;color:#444}
 #pay-all{width:100%;justify-content:center;margin-top:4px}
+.pay-info{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:6px;font-size:14px;color:var(--muted);line-height:1.45}
+.pay-info b{color:var(--ink)}.pay-info a{color:var(--ink);font-weight:700}
 .rc-f{text-align:center;margin:0;line-height:1.8}
 /* when & where: the first thing a guest needs */
 .ww{background:var(--ink);color:var(--cream);border-radius:22px;padding:6px 20px 18px;margin:16px 0}
@@ -895,7 +897,13 @@ function render(d){
         ${stepsHTML(2, "on-red")}</div>
       ${receiptHTML(d, tierName, tip, bankCountry)}
       <button class="btn pay-all" id="pay-all" type="button" data-copy="${esc(allText)}">Copy all payment details</button>
-      <p class="note">After paying, your ticket and the place appear here.</p>`;
+      <ul class="pay-info">
+        <li><b>After paying:</b> nothing to send. Your ticket and the place appear here${d.verified ? " and we DM you" : ""}.</li>
+        <li><b>How long:</b> instant transfer right away, normal 1–2 working days.</li>
+        ${bankCountry && ibanCC !== "IT" ? `<li><b>Foreign account:</b> normal SEPA transfer in euro.</li>` : ""}
+        <li><b>Lost this page?</b> perugiaparty.com/ticket with code <b>${esc(d.vcode || d.code)}</b>.</li>
+        <li><b>Questions?</b> DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</li>
+      </ul>`;
     celebrate({ vcode: "ok-" + (d.code || "") }, 45);
     clearInterval(window.__payTimer);
     window.__payTimer = setInterval(() => { const el = document.getElementById("pay-left"); if (!el) return clearInterval(window.__payTimer); el.innerHTML = payLeftHTML(Number(el.dataset.dl)); }, 30000);
