@@ -353,6 +353,15 @@ h1{font-size:clamp(40px,8vw,64px)}
 .rc-why{text-transform:none;letter-spacing:0;font-family:var(--f-body);font-size:13px;color:#555;margin:8px 0 0;line-height:1.45}
 .rc-tot{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--f-display);font-size:30px;letter-spacing:0;text-transform:uppercase}
 .rc-tot b{font-weight:400}
+.rc-tot{width:100%;border:0;background:none;padding:0;color:inherit;cursor:pointer;text-align:left}
+.rc-sub{text-align:center;margin:0 0 8px;font-size:11.5px;color:#666;letter-spacing:.12em}
+.rc-c{display:flex;justify-content:space-between;align-items:baseline;gap:14px;width:100%;border:0;background:none;padding:9px 0;border-bottom:1px dotted #bbb;color:#111;font:inherit;text-align:left;cursor:pointer}
+.rc-c span{font-size:11px;color:#666;letter-spacing:.12em;flex:none}
+.rc-c b{font-weight:500;text-align:right;overflow-wrap:anywhere;text-transform:none;letter-spacing:.02em}
+.rc-c:active,.rc-c.got{background:#e9f8ee}
+.rc-tot.got b{color:#12a150}
+.rc-dl{margin-top:12px;text-align:center;font-family:var(--f-body);text-transform:none;letter-spacing:0;font-size:13.5px;color:#444}
+#pay-all{width:100%;justify-content:center;margin-top:4px}
 .rc-f{text-align:center;margin:0;line-height:1.8}
 /* when & where: the first thing a guest needs */
 .ww{background:var(--ink);color:var(--cream);border-radius:22px;padding:6px 20px 18px;margin:16px 0}
@@ -416,6 +425,9 @@ document.addEventListener("click", e => {
   const pill = b.querySelector(".pill");
   if (pill) { const done = () => { b.classList.add("got"); pill.textContent = "Copied"; note && note("Copied", "ok"); setTimeout(() => pill.textContent = "Copy", 1800); };
     try { navigator.clipboard.writeText(v).then(done, () => note("Long-press to copy", "warn")); } catch(x){ note("Long-press to copy", "warn"); } return; }
+  if (b.classList.contains("rc-c") || b.classList.contains("rc-tot")) { // receipt lines: keep the layout, flash and toast
+    const ok = () => { b.classList.add("got"); note && note("Copied", "ok"); setTimeout(() => b.classList.remove("got"), 1200); };
+    try { navigator.clipboard.writeText(v).then(ok, () => note("Long-press to copy", "warn")); } catch(x){ note("Long-press to copy", "warn"); } return; }
   const label = b.textContent; const done = () => { b.textContent = "Copied"; setTimeout(() => b.textContent = label, 1500); };
   const fail = () => { b.textContent = "Long-press to copy"; note("Long-press to copy", "warn"); };
   try { navigator.clipboard.writeText(v).then(done, fail); } catch(x){ fail(); }
@@ -787,7 +799,7 @@ function whenWhereHTML(d){
   </section>`;
 }
 // ---- the receipt: what you get, what you pay, and an optional tip for the crew ----
-function receiptHTML(d, tierName, tip){
+function receiptHTML(d, tierName, tip, country){
   const total = (Number(d.price) || 0) + tip;
   const line = (q, item, v) => `<div class="rc-l"><span class="q">${q}</span><span class="i">${item}</span><span class="v">${v}</span></div>`;
   return `<section class="rcpt" aria-label="Your receipt">
@@ -799,8 +811,18 @@ function receiptHTML(d, tierName, tip){
       <span class="v rc-step"><button type="button" data-tip="-1" aria-label="Less" ${tip ? "" : "disabled"}>−</button><b id="tip-v">${euro(tip)}</b><button type="button" data-tip="1" aria-label="Add €1">+</button></span></div>
     <p class="rc-why">Helps us keep it cheap for every student ♥</p>
     <div class="rc-d"></div>
-    <div class="rc-tot"><span>TOTAL</span><b id="tip-tot">${euro(total)}</b></div>
+    <button class="rc-tot" type="button" id="tot-copy" data-copy="${String(total).replace(".", ",")}"><span>TOTAL</span><b id="tip-tot">${euro(total)}</b></button>
+    <div class="rc-d"></div>
+    <p class="rc-sub">PAY BY BANK TRANSFER · TAP TO COPY</p>
+    ${copyLine("IBAN", d.iban ? d.iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim() : "—", d.iban ? d.iban.replace(/\s+/g, "") : "")}
+    ${copyLine("NAME", d.beneficiary || "—", d.beneficiary || "")}
+    ${country ? copyLine("BANK", country, country.replace(/ \([A-Z]{2}\)$/, "")) : ""}
+    ${copyLine("REFERENCE", d.reference, d.reference)}
+    ${d.deadline ? `<div class="rc-dl" id="pay-left" data-dl="${d.deadline}">${payLeftHTML(d.deadline)}</div>` : ""}
   </section>`;
+}
+function copyLine(k, shown, value){
+  return value ? `<button class="rc-c" type="button" data-copy="${esc(value)}"><span>${k}</span><b>${esc(shown)}</b></button>` : `<div class="rc-c"><span>${k}</span><b>${esc(shown)}</b></div>`;
 }
 let tipTimer = null;
 document.addEventListener("click", e => {
@@ -809,11 +831,10 @@ document.addEventListener("click", e => {
   window.__tip = Math.max(0, Math.min(50, (window.__tip || 0) + Number(b.dataset.tip)));
   const tip = window.__tip, total = (Number(d.price) || 0) + tip;
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  set("tip-v", euro(tip)); set("tip-tot", euro(total)); set("pay-h", euro(total));
+  set("tip-v", euro(tip)); set("tip-tot", euro(total));
+  const tc = document.getElementById("tot-copy"); if (tc) tc.dataset.copy = String(total).replace(".", ",");
   const minus = document.querySelector('[data-tip="-1"]'); if (minus) minus.disabled = !tip;
-  const row = document.getElementById("amt-row"); if (row) row.innerHTML = payRow("Amount", euro(total), String(total).replace(".", ","));
   const all = document.getElementById("pay-all"); if (all) all.dataset.copy = all.dataset.copy.replace(/^Amount: .*$/m, "Amount: " + euro(total));
-  const tag = document.querySelector(".pay .tier-tag"); if (tag) tag.textContent = tag.textContent.replace(/ \+ contribution$/, "") + (tip ? " + contribution" : "");
   clearTimeout(tipTimer);
   tipTimer = setTimeout(() => { const t = token; if (t) fetch("/api/ticket/tip", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ t, tip }) }).catch(() => {}); }, 600);
 });
@@ -872,33 +893,9 @@ function render(d){
         <h1>You're in, ${first}.</h1>
         <p class="lead"><b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " · " + esc(d.date_label) : ""}. Pay below to lock your place.</p>
         ${stepsHTML(2, "on-red")}</div>
-      ${receiptHTML(d, tierName, tip)}
-      <section class="pay" aria-labelledby="pay-h">
-        <span class="tier-tag">${esc(tierName)}${tip ? " + tip" : ""}</span>
-        <p class="eyebrow">Bank transfer</p>
-        <h2 id="pay-h">${euro(total)}</h2>
-        ${d.deadline ? `<div class="deadline" id="pay-left" data-dl="${d.deadline}" style="margin:6px 0 12px;background:rgba(244,234,215,.08);padding:11px 14px;border-radius:14px;font-size:15px;font-weight:600;line-height:1.4">${payLeftHTML(d.deadline)}</div>` : ""}
-        <p class="pay-hint">Tap a line to copy it.</p>
-        <div class="prow-list">
-          ${payRow("IBAN", d.iban ? d.iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim() : "—", d.iban ? d.iban.replace(/\s+/g, "") : "")}
-          ${payRow("Name", d.beneficiary || "—", d.beneficiary || "")}
-          ${bankCountry ? payRow("Bank country", bankCountry, bankCountry.replace(/ \([A-Z]{2}\)$/, "")) : ""}
-          <span id="amt-row">${payRow("Amount", euro(total), String(total).replace(".", ","))}</span>
-          ${payRow("Description", d.reference, d.reference, true)}
-        </div>
-        <button class="btn pay-all" id="pay-all" type="button" data-copy="${esc(allText)}">Copy all</button>
-      </section>
-      <div class="pay-faq">
-        <h3>Good to know</h3>
-        <dl>
-          <div><dt>Contribution</dt><dd>Optional. It helps us keep prices low for everyone.</dd></div>
-          <div><dt>After paying</dt><dd>Nothing to send. Your ticket and the place appear here${d.verified ? " and we DM you" : ""}.</dd></div>
-          <div><dt>How long</dt><dd>Instant transfer: right away. Normal: 1–2 working days.</dd></div>
-          ${bankCountry && ibanCC !== "IT" ? `<div><dt>Foreign account</dt><dd>Normal SEPA transfer in euro. Bank country: ${esc(CC[ibanCC] || ibanCC)}.</dd></div>` : ""}
-          <div><dt>Lost this page?</dt><dd>Log in at perugiaparty.com/ticket with code <b>${esc(d.vcode || d.code)}</b>.</dd></div>
-        </dl>
-      </div>
-      <p class="note">Something else? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>`;
+      ${receiptHTML(d, tierName, tip, bankCountry)}
+      <button class="btn pay-all" id="pay-all" type="button" data-copy="${esc(allText)}">Copy all payment details</button>
+      <p class="note">After paying, your ticket and the place appear here.</p>`;
     celebrate({ vcode: "ok-" + (d.code || "") }, 45);
     clearInterval(window.__payTimer);
     window.__payTimer = setInterval(() => { const el = document.getElementById("pay-left"); if (!el) return clearInterval(window.__payTimer); el.innerHTML = payLeftHTML(Number(el.dataset.dl)); }, 30000);
