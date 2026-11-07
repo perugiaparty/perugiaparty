@@ -17,6 +17,10 @@
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-cache
 
+/crew*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-cache
+
 /door*
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-cache

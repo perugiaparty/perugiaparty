@@ -1,4 +1,5 @@
 import { pushTick, apiPush } from "./push.js";
+import { apiCrew } from "./crew.js";
 // PerugiaParty site worker: serves the static site and a small JSON API.
 // Guests only ever see their own record, looked up by a long random token.
 // All organizer actions happen in the private admin panel, never through this API.
@@ -27,7 +28,7 @@ function priceRange(ev) {
 }
 
 // ---- rate limits: stop bots and code-guessing (counts per IP, stored as a hash, never the IP itself) ----
-const LIMITS = { short: [30, 600], request: [6, 600], rerequest: [6, 600], login: [8, 600], invite: [40, 600], door: [20, 600] };
+const LIMITS = { short: [30, 600], request: [6, 600], rerequest: [6, 600], login: [8, 600], invite: [40, 600], door: [20, 600], crew: [10, 600] };
 // Matt tests the site a lot: his own Instagram never hits the "too many tries" limit
 const TESTERS = ["@mattheovanderlee"];
 async function isTester(req) {
@@ -930,6 +931,12 @@ async function route(req, env) {
         if ((url.pathname === "/api/push/subscribe" || url.pathname === "/api/push/unsubscribe") && req.method === "POST") return await apiPush(req, env, url, getEvent, TOKEN_RE, json);
         if (url.pathname === "/api/ig/webhook" && req.method === "GET") return await igWebhookVerify(url, env);
         if (url.pathname === "/api/ig/webhook" && req.method === "POST") return await igWebhook(req, env);
+        // crew dashboard: login is rate-limited, every other call needs a valid session
+        if (url.pathname.startsWith("/api/crew/") && req.method === "POST") {
+          const action = url.pathname.slice(10);
+          if (action === "login" && (await tooMany(req, env, "crew"))) return slowDown();
+          return await apiCrew(req, env, action, { getEvent, json });
+        }
         if (url.pathname === "/api/door/login" && req.method === "POST") return await apiDoor(req, env, "login");
         if (url.pathname === "/api/door/check" && req.method === "POST") return await apiDoor(req, env, "check");
         if (url.pathname === "/api/door/checkin" && req.method === "POST") return await apiDoor(req, env, "checkin");
