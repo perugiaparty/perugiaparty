@@ -770,7 +770,7 @@ const escH = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&
 async function pastNightsHtml(env, lang = "en") {
   const rows = await pastNights(env);
   if (!rows.length) return null;
-  return rows.map((h, i) => `<a class="night n${(i % 3) + 1}" href="/nights/${h.slug}"><p class="when">${lang === "it" ? (i === 0 ? "Ultima edizione" : "Edizione passata") : (i === 0 ? "Last edition" : "Past edition")}</p><div><h3>${escH(h.title)}</h3></div></a>`).join("");
+  return rows.map((h, i) => `<article class="night n${(i % 3) + 1}"><p class="when">${lang === "it" ? (i === 0 ? "Ultima edizione" : "Edizione passata") : (i === 0 ? "Last edition" : "Past edition")}</p><div><h3>${escH(h.title)}</h3></div></article>`).join("");
 }
 async function nightPage(env, slug) {
   const rows = await pastNights(env);
@@ -810,7 +810,7 @@ async function sitemap(env) {
   const alt = `<xhtml:link rel="alternate" hreflang="en" href="https://perugiaparty.com/"/><xhtml:link rel="alternate" hreflang="it" href="https://perugiaparty.com/it"/>`;
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-${[u("/", today, "1.0", alt), u("/it", today, "0.8", alt), u("/erasmus", today, "0.8"), ...nights.map((n) => u(`/nights/${n.slug}`, day(n.closed || Date.now()), "0.5")), u("/privacy", "2026-10-13", "0.2")].join("\n")}
+${[u("/", today, "1.0", alt), u("/it", today, "0.8", alt), u("/erasmus", today, "0.8"), u("/privacy", "2026-10-13", "0.2")].join("\n")}
 </urlset>`;
   return new Response(body, { headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" } });
 }
@@ -1065,8 +1065,7 @@ async function route(req, env) {
     // one address per page for Google: /index.html is the same page as /
     if (url.pathname === "/llms.txt") return llmsTxt(env);
     if (url.pathname === "/sitemap.xml") return sitemap(env);
-    { const m = url.pathname.match(/^\/nights\/([a-z0-9-]{1,80})\/?$/);
-      if (m) { const r = await nightPage(env, m[1]).catch(() => null); if (r) return r; } }
+
     if (url.pathname === "/index.html") return Response.redirect(url.origin + "/" + url.search, 301);
     if (url.pathname === "/" || url.pathname === "/it" || url.pathname === "/erasmus") return homepage(req, env);
     return env.ASSETS.fetch(req);
