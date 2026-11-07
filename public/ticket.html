@@ -383,6 +383,7 @@ h1{font-size:clamp(40px,8vw,64px)}
 .auth .err:empty{display:none}
 .auth-note{margin-top:18px;font-size:14px;color:var(--muted);line-height:1.8}
 .auth-note a{color:var(--ink);font-weight:700}
+.step-art{display:block;width:min(240px,70%);height:auto;border-radius:18px;margin:0 0 18px}
 </style>
 </head>
 <body>
@@ -840,6 +841,7 @@ document.addEventListener("click", e => {
   clearTimeout(tipTimer);
   tipTimer = setTimeout(() => { const t = token; if (t) fetch("/api/ticket/tip", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ t, tip }) }).catch(() => {}); }, 600);
 });
+const art = (k) => `<img class="step-art" src="/ill/${k}.svg" alt="" width="240" height="170">`;
 function render(d){
   const P = $("page"), first = esc(String(d.name || "").split(" ")[0]);
   if (d.status === "requested" || d.status === "waitlist") {
@@ -847,7 +849,7 @@ function render(d){
     const wl = d.status === "waitlist";
     if (!d.verified) {
       // not finished: nothing reaches us until the code arrives on Instagram, so no celebration yet
-      P.innerHTML = `<div class="rq pending"><span class="state">Not sent yet</span>
+      P.innerHTML = `<div class="rq pending">${art("step-dm")}<span class="state">Not sent yet</span>
           <h1>One step left, ${first}.</h1>
           <p class="lead">Send us this code on Instagram. Until then your request doesn't count.</p>
           <div class="vcode"><span>${esc(d.vcode)}</span>${copyBtn(d.vcode)}</div>
@@ -857,7 +859,7 @@ function render(d){
           ${stepsHTML(0)}
         </div>`;
     } else {
-    P.innerHTML = `<div class="rq"><span class="rq-stamp" aria-hidden="true">Received</span>
+    P.innerHTML = `<div class="rq">${art(wl ? "waitlist" : "step-approved")}<span class="rq-stamp" aria-hidden="true">Received</span>
         <span class="state">Request sent</span>
         <h1>You're on the list, ${first}.</h1>
         ${wl ? `<span class="wl-tag">Waitlist</span>` : ""}
@@ -891,7 +893,7 @@ function render(d){
     window.__tip = tip; window.__payD = d;
     const total = (Number(d.price) || 0) + tip;
     const allText = `Amount: ${euro(total)}\nIBAN: ${d.iban || ""}\nBeneficiary: ${d.beneficiary || ""}${bankCountry ? `\nBank country: ${bankCountry}` : ""}\nReference: ${d.reference}`;
-    P.innerHTML = `<div class="hero-ok"><span class="state">Accepted</span>
+    P.innerHTML = `<div class="hero-ok">${art("step-pay")}<span class="state">Accepted</span>
         <h1>You're in, ${first}.</h1>
         <p class="lead"><b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " · " + esc(d.date_label) : ""}. Pay below to lock your place.</p>
         ${stepsHTML(2, "on-red")}</div>

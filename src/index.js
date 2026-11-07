@@ -735,7 +735,7 @@ async function homepage(req, env) {
     }
   }
   // one event read (reused from above), and the page + past nights fetched at the same time
-  const [res, nights] = await Promise.all([env.ASSETS.fetch(req), pastNightsHtml(env).catch(() => null)]);
+  const [res, nights] = await Promise.all([env.ASSETS.fetch(req), pastNightsHtml(env, u.pathname === "/it" ? "it" : "en").catch(() => null)]);
   if (!res.ok || !(res.headers.get("content-type") || "").includes("text/html")) return res;
   let ld = null; const ev1 = ev0;
   try { if (ev1) ld = eventJsonLd(ev1); } catch (e) {}
@@ -765,10 +765,10 @@ async function pastNights(env) {
   });
 }
 const escH = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-async function pastNightsHtml(env) {
+async function pastNightsHtml(env, lang = "en") {
   const rows = await pastNights(env);
   if (!rows.length) return null;
-  return rows.map((h, i) => `<a class="night n${(i % 3) + 1}" href="/nights/${h.slug}"><p class="when">${i === 0 ? "Last edition" : "Past edition"}</p><div><h3>${escH(h.title)}</h3>${h.line ? `<p class="nl">${escH(h.line)}</p>` : ""}</div></a>`).join("");
+  return rows.map((h, i) => `<a class="night n${(i % 3) + 1}" href="/nights/${h.slug}"><p class="when">${lang === "it" ? (i === 0 ? "Ultima edizione" : "Edizione passata") : (i === 0 ? "Last edition" : "Past edition")}</p><div><h3>${escH(h.title)}</h3>${h.line ? `<p class="nl">${escH(h.line)}</p>` : ""}</div></a>`).join("");
 }
 async function nightPage(env, slug) {
   const rows = await pastNights(env);
@@ -778,6 +778,10 @@ async function nightPage(env, slug) {
   const url = `https://perugiaparty.com/nights/${h.slug}`;
   const desc = `${h.title}: a PerugiaParty student night in Perugia, ${month}. ${h.line}`.trim();
   const ld = h.exact ? JSON.stringify({ "@context": "https://schema.org", "@type": "Event", name: `PerugiaParty · ${h.title}`, startDate: h.when.toISOString(), eventStatus: "https://schema.org/EventScheduled", eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode", location: { "@type": "Place", name: "Perugia city centre", address: { "@type": "PostalAddress", addressLocality: "Perugia", addressRegion: "Umbria", addressCountry: "IT" } }, organizer: { "@id": "https://perugiaparty.com/#org", name: "PerugiaParty", url: "https://perugiaparty.com/" }, url }).replace(/</g, "\\u003c") : "";
+  // ticket stub with the date, same flat style as the homepage illustrations
+  const dd = h.exact ? h.when.toLocaleDateString("en-GB", { day: "numeric", timeZone: "Europe/Rome" }) : "’" + String(h.when.getUTCFullYear()).slice(2);
+  const mm = (h.exact ? h.when.toLocaleDateString("en-GB", { month: "short", year: "numeric", timeZone: "Europe/Rome" }) : h.when.toLocaleDateString("en-GB", { month: "long", timeZone: "Europe/Rome" })).toUpperCase();
+  const stub = `<svg class="stub" viewBox="0 0 360 200" role="img" aria-label="${escH(h.title)} ticket stub"><rect width="360" height="200" fill="#e9dfcc"/><g transform="rotate(-5 180 100)"><rect x="80" y="52" width="200" height="96" rx="12" fill="#141210"/><circle cx="214" cy="52" r="9" fill="#e9dfcc"/><circle cx="214" cy="148" r="9" fill="#e9dfcc"/><path d="M214 64v72" stroke="#4a423b" stroke-width="2" stroke-dasharray="4 4"/><text x="100" y="100" font-family="sans-serif" font-weight="900" font-size="38" fill="#f4ead7">${escH(dd)}</text><text x="102" y="124" font-family="monospace" font-weight="700" font-size="13" fill="#e8392b">${escH(mm)}</text><text x="248" y="104" text-anchor="middle" font-family="monospace" font-weight="700" font-size="10" fill="#ffd23f" transform="rotate(90 248 100)">ADMIT ONE</text></g><g fill="#ffd23f"><circle cx="43" cy="30" r="2.5"/><circle cx="317" cy="46" r="2.5"/><rect x="288" y="18" width="5" height="5"/></g></svg>`;
   const others = rows.filter((r) => r.slug !== h.slug).slice(0, 6).map((r) => `<a href="/nights/${r.slug}">${escH(r.title)}</a>`).join(" · ");
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>${escH(h.title)} · PerugiaParty, student party in Perugia</title>
@@ -786,10 +790,10 @@ async function nightPage(env, slug) {
 <meta property="og:type" content="website"><meta property="og:title" content="${escH(h.title)} · PerugiaParty"><meta property="og:description" content="${escH(desc)}"><meta property="og:url" content="${url}"><meta property="og:image" content="https://perugiaparty.com/og-image.png"><meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" sizes="48x48" href="/favicon-v2.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preload" href="/fonts/bowlby-400.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/fonts/fonts.css?v=1"><link rel="stylesheet" href="/site.css?v=20261023a">
-<style>.np{max-width:640px;padding:9vh 0 10vh}.np .k{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 14px}.np h1{font-size:clamp(44px,9vw,84px);margin:0 0 16px}.np .l{font-size:clamp(18px,2.4vw,22px);margin:0 0 30px}.np .cta{display:flex;gap:10px;flex-wrap:wrap}.np .more{margin-top:44px;color:var(--muted);font-size:15px}</style>
+<style>.np{max-width:640px;padding:9vh 0 10vh}.np .k{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 14px}.np h1{font-size:clamp(44px,9vw,84px);margin:0 0 16px}.np .l{font-size:clamp(18px,2.4vw,22px);margin:0 0 30px}.np .cta{display:flex;gap:10px;flex-wrap:wrap}.np .more{margin-top:44px;color:var(--muted);font-size:15px}.np .stub{display:block;width:min(360px,100%);height:auto;border-radius:20px;margin:0 0 28px}</style>
 ${ld ? `<script type="application/ld+json">${ld}</script>` : ""}
 </head><body><header class="top"><div class="wrap"><a class="mark" href="/"><img src="/brand/wordmark-2.png" alt="PerugiaParty" width="851" height="160"></a><nav aria-label="Main"><a class="btn" href="/#next">Next party</a></nav></div></header>
-<main class="wrap"><section class="np"><p class="k">Past edition · ${escH(month)}</p><h1>${escH(h.title)}</h1>${h.line ? `<p class="l">${escH(h.line)}</p>` : ""}
+<main class="wrap"><section class="np">${stub}<p class="k">Past edition · ${escH(month)}</p><h1>${escH(h.title)}</h1>${h.line ? `<p class="l">${escH(h.line)}</p>` : ""}
 <div class="cta"><a class="btn" href="/#next">See the next party</a><a class="btn outline" href="/#nights">All nights</a></div>
 ${others ? `<p class="more">More nights: ${others}</p>` : ""}</section></main>
 <footer><div class="wrap"><img class="foot-mark" src="/brand/wordmark-5.png" alt="PerugiaParty" width="851" height="160" loading="lazy"><div class="meta"><p>Student parties · Perugia, Italia</p><nav aria-label="Footer"><a href="/it" hreflang="it">Italiano</a><a href="/erasmus">Erasmus</a><a href="/privacy">Privacy</a></nav></div></div></footer></body></html>`;
@@ -1061,7 +1065,7 @@ async function route(req, env) {
     { const m = url.pathname.match(/^\/nights\/([a-z0-9-]{1,80})\/?$/);
       if (m) { const r = await nightPage(env, m[1]).catch(() => null); if (r) return r; } }
     if (url.pathname === "/index.html") return Response.redirect(url.origin + "/" + url.search, 301);
-    if (url.pathname === "/") return homepage(req, env);
+    if (url.pathname === "/" || url.pathname === "/it" || url.pathname === "/erasmus") return homepage(req, env);
     return env.ASSETS.fetch(req);
   }
 }

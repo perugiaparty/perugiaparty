@@ -38,6 +38,7 @@
 </header>
 <main class="wrap">
   <section class="ph" id="ph">
+    <img src="/ill/photos.svg" alt="" width="360" height="200" style="display:block;width:100%;height:auto;border-radius:20px;margin:0 0 22px">
     <h1>Photos</h1>
     <p class="sub">For everyone who signed up for the party. Online for 7 days.</p>
     <form id="f" novalidate>
@@ -54,7 +55,7 @@
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 function show(albums) {
-  $("ph").innerHTML = `<h1>Photos</h1><p class="sub">Thanks for coming ♥</p>
+  $("ph").innerHTML = `<img src="/ill/photos.svg" alt="" width="360" height="200" style="display:block;width:100%;height:auto;border-radius:20px;margin:0 0 22px"><h1>Photos</h1><p class="sub">Thanks for coming ♥</p>
     <div class="albums">${albums.map((a) => `<a class="album" href="${esc(a.url)}" target="_blank" rel="noopener"><div>${esc(a.title)}${a.until ? `<small class="until">Online until ${new Date(a.until).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/Rome" })}</small>` : ""}</div><span>Open ↗</span></a>`).join("")}</div>
     <p class="note">Tag <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">@perugiaparty</a> if you post one.</p>`;
 }
