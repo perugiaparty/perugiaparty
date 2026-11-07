@@ -115,7 +115,7 @@ async function state(env, ev, me) {
   const tag = ev.tag;
   const [crew, spends, needs, st, news, note, shifts, risks, decisions, retro] = await Promise.all([
     env.DB.prepare("SELECT c.id, c.name, c.lead, p.role, p.going, p.arrive, p.here_at FROM crew c JOIN crew_party p ON p.crew_id = c.id WHERE p.event = ? ORDER BY c.lead DESC, c.name").bind(tag).all(),
-    env.DB.prepare("SELECT id, item, amount, cat, shop, repaid, created_at FROM crew_spend WHERE event = ? AND crew_id = ? ORDER BY created_at DESC").bind(tag, me.id).all(),
+    env.DB.prepare("SELECT id, item, amount, cat, shop, repaid, repaid_at, created_at FROM crew_spend WHERE event = ? AND crew_id = ? ORDER BY created_at DESC").bind(tag, me.id).all(),
     env.DB.prepare("SELECT id, COALESCE(kind,'buy') AS kind, phase, due, doff, COALESCE(blocker,0) AS blocker, item, qty, cat, shop, owner, done, done_by, done_at, created_at, created_by FROM crew_need WHERE event = ? ORDER BY done, created_at").bind(tag).all(),
     env.DB.prepare(
       "SELECT SUM(status IN ('requested','waitlist')) AS requested, SUM(status = 'approved') AS approved, SUM(status IN ('paid','in')) AS paid, SUM(status = 'in') AS inside, SUM(ticket = 'crew' AND status IN ('approved','paid','in')) AS crew_tickets FROM guests WHERE event = ?"

@@ -78,6 +78,27 @@ h2{font-family:var(--f-body);font-weight:800;font-size:26px;letter-spacing:-.01e
 .shift .t{font-family:var(--f-mono);font-size:13px;color:var(--txt);min-width:92px}
 .shift .main{flex:1;min-width:0}.shift .main b{display:block}.shift .main span{color:var(--soft);font-size:13px}
 .shift.me .t{color:var(--warn)}
+/* tikkie-style receipts */
+.tk-bal{text-align:center;padding:26px 16px;border-radius:22px;background:linear-gradient(160deg,#1f6b45,#12a150);color:#fff}
+.tk-bal.zero{background:var(--card);color:var(--txt)}
+.tk-bal small{display:block;font:500 11px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.tk-bal b{display:block;font-size:44px;font-weight:800;letter-spacing:-.02em;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.tk-bal span{font-size:14px;opacity:.85}
+.tk-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--hair)}
+.list > .tk-row:first-child{border-top:0}
+.tk-ic{width:40px;height:40px;flex:none;border-radius:50%;background:var(--card2);display:grid;place-items:center;font-size:19px}
+.tk-row .main{flex:1;min-width:0}.tk-row .main b{display:block;font-weight:700;overflow-wrap:anywhere}.tk-row .main span{color:var(--soft);font-size:13px}
+.tk-row i{font-style:normal;font-weight:700}.tk-ok{color:#5fd893}.tk-wait{color:var(--warn)}
+.tk-done{color:var(--dim);text-decoration:line-through}
+.tk-sheet{display:grid;gap:12px;background:var(--card);border-radius:22px;padding:22px 16px}
+.tk-amt{display:flex;align-items:center;justify-content:center;gap:6px;font-size:46px;font-weight:800}
+.tk-amt span{color:var(--soft)}
+.tk-amt input{font-size:46px;font-weight:800;background:none;border:0;width:6.2ch;text-align:left;padding:0;color:var(--txt)}
+.tk-amt input:focus{border:0}
+.tk-cats{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.tk-cats input{position:absolute;opacity:0;pointer-events:none}
+.tk-cats span{display:inline-block;border:1.5px solid var(--hair);border-radius:99px;padding:8px 12px;font-weight:700;font-size:13.5px;color:var(--soft);cursor:pointer}
+.tk-cats input:checked + span{background:var(--txt);color:var(--bg);border-color:var(--txt)}
 .pin{display:inline-block;width:12px;height:12px;vertical-align:-1px;margin-right:4px;opacity:.8}
 h3{font-size:13px;font-family:var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:500;margin:22px 0 8px}
 .card{background:var(--card);border-radius:18px;padding:14px 16px;margin-bottom:10px}
@@ -214,7 +235,7 @@ textarea{font:inherit;resize:vertical;line-height:1.5}
 <script>
 "use strict";
 // The session lives only in this variable: reload or close the page and the password is asked again.
-let token = null, S = null, tab = "home", sub = "notes", phase = "all", busy = false, openId = null, adding = null, hiddenAt = 0, timer = null;
+let token = null, S = null, tab = "home", sub = "spend", phase = "all", busy = false, openId = null, adding = null, hiddenAt = 0, timer = null;
 let noteTimer = null, noteDirty = false, noteSaving = false;
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -466,8 +487,8 @@ function notesView() {
 }
 
 function moreView() {
-  const tabs = [["notes", "Notes"], ["spend", "Receipts"], ["info", "Info"], ["risk", "Plan B"], ["dec", "Decisions"], ["retro", "Retro"]];
-  if (!tabs.some(([k]) => k === sub)) sub = "notes";
+  const tabs = [["spend", "Money"], ["notes", "Notes"], ["info", "Info"], ["risk", "Plan B"], ["dec", "Decisions"], ["retro", "Retro"]];
+  if (!tabs.some(([k]) => k === sub)) sub = "spend";
   const v = sub === "spend" ? spendView() : sub === "info" ? infoView() : sub === "risk" ? riskView() : sub === "dec" ? decView() : sub === "retro" ? retroView() : notesView();
   return `<h2>More</h2>
   <div class="chips" style="margin-top:8px;margin-bottom:14px">${tabs.map(([k, l]) => `<button class="chip ${sub === k ? "on" : ""}" data-sub="${k}">${l}</button>`).join("")}</div>${v}`;
@@ -499,20 +520,28 @@ function retroView() {
     <button class="big" style="padding:12px">${r.updated_at ? "Update" : "Send"}</button>
   </form>`;
 }
+const CAT_ICON = { Drinks: "🍸", Food: "🍿", Deco: "🎈", Venue: "🏠", Music: "🎧", Promo: "📣", Other: "🧾" };
 function spendView() {
-  const mine = S.spends, owed = mine.filter((x) => !Number(x.repaid)).reduce((a, x) => a + Number(x.amount || 0), 0);
-  return `<div class="shd" style="margin-top:0"><p class="lead" style="margin:0">Paid yourself? Matt pays you back.</p>${plus("spend", "Add")}</div>
-  <div style="height:10px"></div>
-  ${adding === "spend" ? `<form class="addbox" data-f="spend"><input name="item" placeholder="What did you buy?" maxlength="120" data-autofocus>
-    <div class="two"><input name="amount" inputmode="decimal" placeholder="€ amount"><select name="cat" aria-label="Category">${S.cats.map((c) => `<option>${c}</option>`).join("")}</select></div>
-    <input name="shop" placeholder="Shop (optional)" maxlength="60"><button class="big" style="padding:12px">Add receipt</button></form>` : ""}
-  <div class="card"><div class="kpi"><small>Owed to you</small><b>${eur(owed)}</b></div></div>
-  <div class="card">${mine.length ? mine.map((x) => {
-    const paid = Number(x.repaid) === 1;
-    return `<div class="row"><div class="main"><b>${esc(x.item)}</b><span>${esc(x.cat || "Other")}${x.shop ? " · " + esc(x.shop) : ""} · ${day(x.created_at)}</span>
-      <div style="margin-top:5px"><span class="pill ${paid ? "ok" : "due"}">${paid ? "Paid back" : "To pay back"}</span></div></div>
-      <div class="amt">${eur(x.amount)}</div>${!paid ? `<button class="x" data-delspend="${x.id}" aria-label="Remove">×</button>` : ""}</div>`;
-  }).join("") : `<div class="empty">No receipts yet</div>`}</div>`;
+  const mine = S.spends, open = mine.filter((x) => !Number(x.repaid)), owed = open.reduce((a, x) => a + Number(x.amount || 0), 0);
+  const paidTot = mine.filter((x) => Number(x.repaid)).reduce((a, x) => a + Number(x.amount || 0), 0);
+  if (adding === "spend") return `<form class="tk-sheet" data-f="spend">
+      <div class="tk-amt"><span>€</span><input name="amount" inputmode="decimal" placeholder="0,00" autocomplete="off" data-autofocus></div>
+      <input name="item" placeholder="What for? e.g. Ice at Penny" maxlength="120">
+      <div class="tk-cats">${S.cats.map((c, i) => `<label><input type="radio" name="cat" value="${c}" ${i === 0 ? "checked" : ""}><span>${CAT_ICON[c] || "🧾"} ${c}</span></label>`).join("")}</div>
+      <button class="big">Add expense</button>
+      <button type="button" class="linkbtn" data-add="spend">Cancel</button>
+    </form>`;
+  return `<div class="tk-bal ${owed ? "" : "zero"}">
+      <small>${owed ? "Matt owes you" : "All settled"}</small>
+      <b>${eur(owed)}</b>
+      <span>${owed ? `${open.length} expense${open.length === 1 ? "" : "s"} waiting` : paidTot ? `${eur(paidTot)} paid back` : "Paid for something yourself? Add it."}</span>
+    </div>
+    <button class="big" data-add="spend" style="margin:12px 0 4px">+ Add expense</button>
+    ${mine.length ? `<div class="card list" style="margin-top:12px">${mine.map((x) => {
+      const paid = Number(x.repaid) === 1;
+      return `<div class="tk-row"><span class="tk-ic">${CAT_ICON[x.cat] || "🧾"}</span><div class="main"><b>${esc(x.item)}</b><span>${day(x.created_at)}${paid ? ` · <i class="tk-ok">Paid${x.repaid_at ? " " + day(x.repaid_at) : ""} ✓</i>` : ` · <i class="tk-wait">Waiting</i>`}</span></div>
+        <div class="amt ${paid ? "tk-done" : ""}">${eur(x.amount)}</div>${!paid ? `<button class="x" data-delspend="${x.id}" aria-label="Remove">×</button>` : ""}</div>`;
+    }).join("")}</div>` : ""}`;
 }
 
 // check-in shows from 6 hours before the doors until 12 hours after
@@ -600,7 +629,7 @@ document.addEventListener("submit", (e) => {
   if (k === "todo") { if (!need(v.item)) return; adding = null; if (phase !== "all") phase = v.phase || phase; return act("need_add", { item: v.item, kind: "todo", phase: v.phase, due: v.due }, "Added"); }
   if (k === "buy") { if (!need(v.item)) return; adding = null; return act("need_add", { ...v, kind: "buy" }, "Added to the list"); }
   if (k === "news") { if (!need(v.body)) return; adding = null; return act("news_add", { body: v.body }, "Posted to everyone"); }
-  if (k === "spend") { if (!need(v.item) || !need(v.amount)) return; adding = null; return act("spend_add", v, "Receipt added"); }
+  if (k === "spend") { if (!String(v.amount || "").trim() || !(Number(String(v.amount).replace(",", ".")) > 0)) { toast("Type the amount", true); return; } if (!need(v.item)) return; adding = null; return act("spend_add", v, "Expense added"); }
   if (k === "got") { openId = null; return act("need_done", { id: Number(f.dataset.id), v: true, price: v.price }, v.price ? "Got it ✓ · added to your receipts" : "Got it ✓"); }
   if (k === "risk") { if (!need(v.risk)) return; adding = null; return act("risk_add", v, "Added"); }
   if (k === "dec") { if (!need(v.body)) return; adding = null; return act("decision_add", v, "Logged"); }
