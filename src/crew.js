@@ -6,6 +6,8 @@
 // Money is Matt's only (admin panel): crew see just their own receipts and what they're owed back.
 // No totals, budget, ticket money, other people's spendings or price estimates ever leave the server here.
 
+import { sendPush } from "./push.js";
+
 const ITER = 100000;
 const SESSION_MS = 12 * 3600 * 1000;
 const PHASES = ["prep", "promo", "day", "during", "after"];
@@ -54,6 +56,34 @@ export async function crewApprovedDms(env, ev, igSend) {
   }
 }
 
+// ---- phone notifications for the crew (same Web Push as guests; subscriptions stored as token "crew:<id>") ----
+async function pushToCrew(env, ev, ids, message) {
+  if (!ev || !ev.vapid_public || !ev.vapid_private || !ids.length) return 0;
+  let sent = 0;
+  for (const id of ids) {
+    const subs = (await env.DB.prepare("SELECT * FROM push_subs WHERE token = ?").bind("crew:" + id).all()).results || [];
+    for (const sub of subs) {
+      const r = await sendPush(env, ev, sub, { url: "/crew", tag: "crew", ...message });
+      if (r === "gone") await env.DB.prepare("DELETE FROM push_subs WHERE endpoint = ?").bind(sub.endpoint).run();
+      if (r === "ok") sent++;
+    }
+  }
+  return sent;
+}
+// announcements (from /crew or the admin panel) go out with the minute tick
+export async function crewNewsPush(env, ev) {
+  if (!ev || !ev.tag) return;
+  const rows = (await env.DB.prepare("SELECT * FROM crew_news WHERE event = ? AND COALESCE(pushed, 1) = 0 LIMIT 5").bind(ev.tag).all()).results || [];
+  for (const n of rows) {
+    const r = await env.DB.prepare("UPDATE crew_news SET pushed = 1 WHERE id = ? AND pushed = 0").bind(n.id).run();
+    if (!r.meta || !r.meta.changes) continue;
+    const ids = ((await env.DB.prepare("SELECT crew_id FROM crew_party WHERE event = ?").bind(ev.tag).all()).results || []).map((x) => x.crew_id).filter((id) => id !== n.crew_id);
+    await pushToCrew(env, ev, ids, { title: `📣 ${n.author || "Matt"}`, body: String(n.body).slice(0, 180), tag: "crew-news-" + n.id });
+  }
+}
+const dueOk = (d) => /^\d{4}-\d{2}-\d{2}$/.test(String(d || "")) ? String(d) : null;
+const timeOk = (t) => /^([01]\d|2[0-3]):[0-5]\d$/.test(String(t || "")) ? String(t) : null;
+
 function newToken() {
   const alph = "abcdefghijkmnpqrstuvwxyz23456789";
   return Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) => alph[b % 32]).join("");
@@ -83,15 +113,16 @@ function palette(raw) {
 
 async function state(env, ev, me) {
   const tag = ev.tag;
-  const [crew, spends, needs, st, news, note] = await Promise.all([
+  const [crew, spends, needs, st, news, note, shifts] = await Promise.all([
     env.DB.prepare("SELECT c.id, c.name, c.lead, p.role, p.going, p.arrive FROM crew c JOIN crew_party p ON p.crew_id = c.id WHERE p.event = ? ORDER BY c.lead DESC, c.name").bind(tag).all(),
     env.DB.prepare("SELECT id, item, amount, cat, shop, repaid, created_at FROM crew_spend WHERE event = ? AND crew_id = ? ORDER BY created_at DESC").bind(tag, me.id).all(),
-    env.DB.prepare("SELECT id, COALESCE(kind,'buy') AS kind, phase, item, qty, cat, shop, owner, done, done_by, done_at, created_at, created_by FROM crew_need WHERE event = ? ORDER BY done, created_at").bind(tag).all(),
+    env.DB.prepare("SELECT id, COALESCE(kind,'buy') AS kind, phase, due, item, qty, cat, shop, owner, done, done_by, done_at, created_at, created_by FROM crew_need WHERE event = ? ORDER BY done, created_at").bind(tag).all(),
     env.DB.prepare(
       "SELECT SUM(status IN ('requested','waitlist')) AS requested, SUM(status = 'approved') AS approved, SUM(status IN ('paid','in')) AS paid, SUM(status = 'in') AS inside, SUM(ticket = 'crew' AND status IN ('approved','paid','in')) AS crew_tickets FROM guests WHERE event = ?"
     ).bind(tag).first(),
     env.DB.prepare("SELECT id, body, author, crew_id, created_at FROM crew_news WHERE event = ? ORDER BY created_at DESC LIMIT 30").bind(tag).all(),
     env.DB.prepare("SELECT body, updated_at FROM crew_note WHERE crew_id = ?").bind(me.id).first(),
+    env.DB.prepare("SELECT id, crew_id, role, start, end FROM crew_shift WHERE event = ? ORDER BY CASE WHEN start < '12:00' THEN 1 ELSE 0 END, start, end").bind(tag).all(),
   ]);
   const a = st || {};
   const out = {
@@ -102,6 +133,7 @@ async function state(env, ev, me) {
     needs: needs.results || [],
     cats: CATS,
     news: news.results || [],
+    shifts: shifts.results || [],
     note: note ? { body: note.body || "", at: note.updated_at } : { body: "", at: null },
     attendance: { requested: a.requested || 0, approved: a.approved || 0, paid: a.paid || 0, inside: a.inside || 0, crew_tickets: a.crew_tickets || 0 },
   };
@@ -188,8 +220,8 @@ export async function apiCrew(req, env, action, { getEvent, json }) {
       const kind = body.kind === "todo" ? "todo" : "buy";
       const phase = kind === "todo" && PHASES.includes(body.phase) ? body.phase : kind === "todo" ? "prep" : null;
       const cat = CATS.includes(body.cat) ? body.cat : "Other";
-      await env.DB.prepare("INSERT INTO crew_need (event, kind, phase, item, qty, cat, shop, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-        .bind(tag, kind, phase, item, clean(body.qty, 30), kind === "todo" ? "Other" : cat, kind === "todo" ? null : clean(body.shop, 40) || null, now, me.id).run();
+      await env.DB.prepare("INSERT INTO crew_need (event, kind, phase, due, item, qty, cat, shop, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        .bind(tag, kind, phase, dueOk(body.due), item, clean(body.qty, 30), kind === "todo" ? "Other" : cat, kind === "todo" ? null : clean(body.shop, 40) || null, now, me.id).run();
       return ok();
     }
     case "need_claim": {
@@ -230,13 +262,51 @@ export async function apiCrew(req, env, action, { getEvent, json }) {
       if (!lead) return json({ error: "Only a lead can post announcements." }, 403);
       const text = String(body.body ?? "").replace(/\u0000/g, "").trim().slice(0, 1000);
       if (!text) return json({ error: "Write the announcement first." }, 400);
-      await env.DB.prepare("INSERT INTO crew_news (event, body, author, crew_id, created_at) VALUES (?, ?, ?, ?, ?)").bind(tag, text, me.name, me.id, now).run();
+      await env.DB.prepare("INSERT INTO crew_news (event, body, author, crew_id, created_at, pushed) VALUES (?, ?, ?, ?, ?, 0)").bind(tag, text, me.name, me.id, now).run();
       return ok();
     }
     case "news_del": {
       if (!lead) return json({ error: "Only a lead can remove announcements." }, 403);
       await env.DB.prepare("DELETE FROM crew_news WHERE id = ? AND event = ?").bind(id, tag).run();
       return ok();
+    }
+    case "need_due": {
+      await env.DB.prepare("UPDATE crew_need SET due = ? WHERE id = ? AND event = ?").bind(dueOk(body.due), id, tag).run();
+      return ok();
+    }
+    case "need_assign": {
+      if (!lead) return json({ error: "Only a lead can give tasks to others." }, 403);
+      const to = Number(body.to) || null;
+      const n = await env.DB.prepare("SELECT * FROM crew_need WHERE id = ? AND event = ?").bind(id, tag).first();
+      if (!n) return ok();
+      if (to && !(await onCrew(env, to, tag))) return json({ error: "That person isn't on the crew for this party." }, 400);
+      await env.DB.prepare("UPDATE crew_need SET owner = ? WHERE id = ?").bind(to, id).run();
+      if (to && to !== me.id) await pushToCrew(env, ev, [to], { title: n.kind === "todo" ? "New task for you" : "Can you get this?", body: `${n.item}${n.qty ? " × " + n.qty : ""} · from ${String(me.name).split(" ")[0]}`, tag: "crew-task-" + id });
+      return ok();
+    }
+    case "shift_add": {
+      if (!lead) return json({ error: "Only a lead can plan shifts." }, 403);
+      const who = Number(body.crew_id), start = timeOk(body.start), end = timeOk(body.end), role = clean(body.role, 30);
+      if (!who || !(await onCrew(env, who, tag))) return json({ error: "Pick someone from the crew." }, 400);
+      if (!role || !start) return json({ error: "Add the job and the start time." }, 400);
+      await env.DB.prepare("INSERT INTO crew_shift (event, crew_id, role, start, end, created_at) VALUES (?, ?, ?, ?, ?, ?)").bind(tag, who, role, start, end, now).run();
+      if (who !== me.id) await pushToCrew(env, ev, [who], { title: "New shift for you", body: `${role} · ${start}${end ? "–" + end : ""}${ev.date_label ? " · " + ev.date_label : ""}`, tag: "crew-shift" });
+      return ok();
+    }
+    case "shift_del": {
+      if (!lead) return json({ error: "Only a lead can change shifts." }, 403);
+      await env.DB.prepare("DELETE FROM crew_shift WHERE id = ? AND event = ?").bind(id, tag).run();
+      return ok();
+    }
+    case "push": {
+      // turn phone notifications on/off for this crew member on this device
+      const sub = body.sub || {}, keys = sub.keys || {}, endpoint = String(sub.endpoint || "");
+      if (body.off) { await env.DB.prepare("DELETE FROM push_subs WHERE endpoint = ? AND token = ?").bind(endpoint, "crew:" + me.id).run(); return json({ ok: true }); }
+      if (!/^https:\/\/[^\s]{10,500}$/.test(endpoint) || !keys.p256dh || !keys.auth || String(keys.p256dh).length > 200 || String(keys.auth).length > 60) return json({ error: "Notifications couldn't be turned on." }, 400);
+      await env.DB.prepare("INSERT INTO push_subs (endpoint, token, p256dh, auth, created_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(endpoint) DO UPDATE SET token = excluded.token, p256dh = excluded.p256dh, auth = excluded.auth")
+        .bind(endpoint, "crew:" + me.id, String(keys.p256dh), String(keys.auth), now).run();
+      await sendPush(env, ev, { endpoint, p256dh: String(keys.p256dh), auth: String(keys.auth) }, { title: "Crew notifications are on 🔔", body: "You'll get announcements, tasks and shifts here.", url: "/crew", tag: "crew-hello" });
+      return json({ ok: true });
     }
     case "me": {
       const going = ["yes", "maybe", "no"].includes(body.going) ? body.going : "";

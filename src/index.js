@@ -1,5 +1,5 @@
 import { pushTick, apiPush } from "./push.js";
-import { apiCrew, crewDm, crewApprovedDms } from "./crew.js";
+import { apiCrew, crewDm, crewApprovedDms, crewNewsPush } from "./crew.js";
 // PerugiaParty site worker: serves the static site and a small JSON API.
 // Guests only ever see their own record, looked up by a long random token.
 // All organizer actions happen in the private admin panel, never through this API.
@@ -569,8 +569,9 @@ function codeFrom(text) {
   return raw;
 }
 async function doorStats(env, tag) {
+  const ev = await getEvent(env).catch(() => null);
   const r = await env.DB.prepare("SELECT SUM(status='in') AS inside, SUM(status='paid') AS waiting FROM guests WHERE event = ?").bind(tag).first();
-  return { inside: r?.inside || 0, waiting: r?.waiting || 0 };
+  return { inside: r?.inside || 0, waiting: r?.waiting || 0, max: ev && Number(ev.venue_max) > 0 ? Number(ev.venue_max) : null };
 }
 async function findByCode(env, tag, text) {
   const norm = codeFrom(text) || String(text || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
@@ -763,10 +764,11 @@ async function apiPoster(env) {
 // Installable app: the start page is the guest's own ticket when the manifest is requested from it.
 function manifest(url) {
   const t = url.searchParams.get("t");
-  const start = t && TOKEN_RE.test(t) ? `/ticket.html?t=${t}&app=1` : "/ticket?app=1";
+  const crew = url.searchParams.get("crew") === "1"; // the crew dashboard installs as its own app
+  const start = crew ? "/crew" : t && TOKEN_RE.test(t) ? `/ticket.html?t=${t}&app=1` : "/ticket?app=1";
   return new Response(JSON.stringify({
-    name: "PerugiaParty", short_name: "PerugiaParty", id: "/ticket",
-    description: "Your PerugiaParty ticket, status and the programme on the night.",
+    name: crew ? "PerugiaParty Crew" : "PerugiaParty", short_name: crew ? "PP Crew" : "PerugiaParty", id: crew ? "/crew" : "/ticket",
+    description: crew ? "Tasks, shopping list, shifts and announcements for the PerugiaParty crew." : "Your PerugiaParty ticket, status and the programme on the night.",
     start_url: start, scope: "/", display: "standalone", orientation: "portrait",
     background_color: "#141210", theme_color: "#141210",
     icons: [
@@ -853,7 +855,7 @@ async function repriceLate(env) {
 async function tickIfDue(env) {
   const now = Date.now();
   const r = await env.DB.prepare("UPDATE event SET tick_at = ? WHERE id = 1 AND (tick_at IS NULL OR tick_at < ?)").bind(now, now - 55000).run();
-  if (r.meta && r.meta.changes) { await pushTick(env, getEvent, parseProgram); await repriceLate(env); await igStatusDms(env); await igReminders(env); await crewApprovedDms(env, await getEvent(env), igSend).catch(() => {}); }
+  if (r.meta && r.meta.changes) { await pushTick(env, getEvent, parseProgram); await repriceLate(env); await igStatusDms(env); await igReminders(env); const evNow = await getEvent(env); await crewApprovedDms(env, evNow, igSend).catch(() => {}); await crewNewsPush(env, evNow).catch(() => {}); }
 }
 
 // Security headers on every response the site sends.

@@ -35,6 +35,9 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
 .net i{width:8px;height:8px;border-radius:50%;background:var(--go)}
 .net.off{color:#ff8a7f}.net.off i{background:#ff5a4f;animation:blink 1s infinite}
 
+/* venue full warning (max set in the admin panel) */
+.full{border-radius:14px;padding:10px 14px;margin:-2px 0 10px;font-weight:800;font-size:15px;display:flex;align-items:center;gap:10px;background:#3a2c08;color:var(--warn)}
+.full.stop{background:#ff3b30;color:#fff;animation:blink 1.2s infinite}
 /* stats */
 .stats{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px;margin-bottom:10px}
 .st{background:var(--card);border-radius:16px;padding:10px 12px}
@@ -181,6 +184,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);ov
       <div class="st"><small>To come</small><b id="s-wait">0</b></div>
       <div class="st"><small>Total</small><b id="s-tot">0</b></div>
     </div>
+    <div class="full hide" id="full" role="alert"></div>
     <div class="cam idle" id="cam">
       <video id="video" playsinline muted></video>
       <div class="shade"></div>
@@ -254,7 +258,13 @@ function stats(s){
   if (lastIn != null && inside > lastIn) { b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); }
   lastIn = inside; b.textContent = inside; $("s-wait").textContent = wait; $("s-tot").textContent = tot;
   $("s-bar").style.width = (tot ? Math.round(inside / tot * 100) : 0) + "%";
+  if ("max" in s) MAX = Number(s.max) || null;
+  const f = $("full");
+  if (MAX && inside >= MAX) { f.className = "full stop"; f.textContent = `Venue full · ${inside}/${MAX} inside · stop entry`; }
+  else if (MAX && inside >= MAX * 0.9) { f.className = "full"; f.textContent = `Almost full · ${inside}/${MAX} · ${MAX - inside} left`; }
+  else f.className = "full hide";
 }
+let MAX = null;
 
 /* ---------- offline guest list + sync queue ---------- */
 // codes look like PP-XXXX-XXXX; compare them without dashes, like the server does
