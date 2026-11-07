@@ -706,10 +706,26 @@ async function homepage(req, env) {
   try { ev1 = await getEvent(env); ld = eventJsonLd(ev1); } catch (e) {}
   const closed = !(ev1 && ev1.published && ev1.requests_open);
   let rw = new HTMLRewriter();
+  // "Nights you missed": every party closed in the admin panel, newest first, colours cycling black / red / cream
+  const nights = await pastNightsHtml(env).catch(() => null);
+  if (nights) rw = rw.on("#nights-track", { element(el) { el.setInnerContent(nights, { html: true }); } });
   // no party taking requests: mark the page so the request form is hidden from the first paint
   if (closed) rw = rw.on("html", { element(el) { el.setAttribute("data-closed", ""); } });
   if (ld) rw = rw.on("head", { element(el) { el.append(`<script type="application/ld+json">${ld}</script>`, { html: true }); } });
-  return (closed || ld) ? rw.transform(res) : res;
+  return (closed || ld || nights) ? rw.transform(res) : res;
+}
+async function pastNightsHtml(env) {
+  const rows = (await env.DB.prepare("SELECT name, site_title, starts_at, closed_at FROM history ORDER BY closed_at DESC LIMIT 20").all()).results || [];
+  if (!rows.length) return null;
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const title = (h) => {
+    if (h.site_title) return h.site_title;
+    let n = String(h.name || "").trim();
+    if (n && n === n.toUpperCase()) n = n.charAt(0) + n.slice(1).toLowerCase(); // HALCOWEEN -> Halcoween
+    const d = new Date(h.starts_at || Number(h.closed_at) || Date.now());
+    return `${n} ’${String(d.getUTCFullYear()).slice(2)}`;
+  };
+  return rows.map((h, i) => `<article class="night n${(i % 3) + 1}"><p class="when">${i === 0 ? "Last edition" : "Past edition"}</p><h3>${esc(title(h))}</h3></article>`).join("");
 }
 
 // AI assistants and answer engines: a plain-text summary of PerugiaParty, with the next party when one is published.
