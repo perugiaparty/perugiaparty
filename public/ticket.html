@@ -791,22 +791,15 @@ function receiptHTML(d, tierName, tip){
   const total = (Number(d.price) || 0) + tip;
   const line = (q, item, v) => `<div class="rc-l"><span class="q">${q}</span><span class="i">${item}</span><span class="v">${v}</span></div>`;
   return `<section class="rcpt" aria-label="Your receipt">
-    <div class="rc-h"><b>PerugiaParty</b><span>${esc(d.event || "")}${d.date_label ? " · " + esc(d.date_label) : ""}</span><span>OPEN BAR · 18+ · GUEST LIST ONLY</span></div>
+    <div class="rc-h"><b>PerugiaParty</b><span>${esc(d.event || "")}${d.date_label ? " · " + esc(d.date_label) : ""}</span></div>
     <div class="rc-d"></div>
-    ${line("1X", "OPEN BAR, ALL NIGHT", "INCL.")}
-    ${line("1X", "BEST PARTY EVER", "INCL.")}
-    ${line("1X", "TILL TOO LATE", "INCL.")}
-    ${line("∞", "NEW FRIENDS", "INCL.")}
-    ${line("0X", "REGRETS", "0")}
-    <div class="rc-d"></div>
+    ${line("1X", "OPEN BAR + DJS", "INCL.")}
     ${line("1X", "TICKET · " + esc(String(tierName).toUpperCase()), euro(d.price))}
     <div class="rc-l rc-tip"><span class="q">+</span><span class="i">CONTRIBUTION<small>OPTIONAL</small></span>
       <span class="v rc-step"><button type="button" data-tip="-1" aria-label="Less" ${tip ? "" : "disabled"}>−</button><b id="tip-v">${euro(tip)}</b><button type="button" data-tip="1" aria-label="Add €1">+</button></span></div>
-    <p class="rc-why">We keep the price low so every student can come. Clubs here charge more for meh music and watered-down drinks. If you can, add a little: it goes to the drinks and baristas, the DJs, the venue and the organisation. Every euro helps ♥</p>
+    <p class="rc-why">Helps us keep it cheap for every student ♥</p>
     <div class="rc-d"></div>
     <div class="rc-tot"><span>TOTAL</span><b id="tip-tot">${euro(total)}</b></div>
-    <div class="rc-d"></div>
-    <p class="rc-f">PAY BY BANK TRANSFER ↓<br>* SEE YOU ON THE DANCEFLOOR *</p>
   </section>`;
 }
 let tipTimer = null;
