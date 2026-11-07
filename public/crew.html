@@ -26,6 +26,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);fo
 .bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0 14px}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
 .brand img{width:36px;height:36px;border-radius:9px;flex:none}
+.brand img.wm{width:auto;height:22px;border-radius:0}
 .brand b{display:block;font-weight:800;font-size:16px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .icon{width:42px;height:42px;flex:none;border-radius:50%;border:1.5px solid var(--hair);background:var(--card);color:var(--soft);display:grid;place-items:center;cursor:pointer}
@@ -34,7 +35,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);fo
 /* sign in / join: one calm centred column, no top bar */
 body.auth .bar{display:none}
 .login{min-height:calc(100dvh - 120px);display:flex;flex-direction:column;justify-content:center;gap:10px;max-width:340px;margin:0 auto;width:100%;text-align:center}
-.login .logo{width:64px;height:64px;border-radius:16px;margin:0 auto 14px;display:block}
+.login .logo{width:250px;max-width:80%;height:auto;margin:0 auto 18px;display:block}
 .login h1{font-family:var(--f-body);font-weight:800;font-size:26px;letter-spacing:-.01em;line-height:1.1;margin:0 0 14px;color:var(--txt)}
 .login p.sub{margin:-8px 0 14px;color:var(--soft);font-size:14px}
 .login input{text-align:left}
@@ -198,12 +199,12 @@ textarea{font:inherit;resize:vertical;line-height:1.5}
 <body class="auth">
 <div class="app">
   <div class="bar">
-    <div class="brand"><img src="/apple-touch-icon.png" alt=""><div><b id="evname">Crew</b><span class="mono" id="evsub">PerugiaParty</span></div></div>
+    <div class="brand"><img class="wm" src="/brand/wordmark-4.png" alt="PerugiaParty"><div><b id="evname">Crew</b><span class="mono" id="evsub">PerugiaParty</span></div></div>
     <button class="icon hide" id="lockbtn" type="button" aria-label="Log out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></button>
   </div>
 
   <form class="login" id="login" novalidate>
-    <img class="logo" src="/apple-touch-icon.png" alt="">
+    <img class="logo" src="/brand/wordmark-2.png" alt="PerugiaParty">
     <h1>Crew</h1>
     <input id="user" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Username" aria-label="Username">
     <input id="pw" type="password" autocomplete="current-password" placeholder="Password" aria-label="Password" enterkeyhint="go">
@@ -213,7 +214,7 @@ textarea{font:inherit;resize:vertical;line-height:1.5}
   </form>
 
   <form class="login hide" id="signup" novalidate>
-    <img class="logo" src="/apple-touch-icon.png" alt="">
+    <img class="logo" src="/brand/wordmark-2.png" alt="PerugiaParty">
     <h1>Join the crew</h1>
     <input id="s-name" autocomplete="name" placeholder="Full name" maxlength="60">
     <input id="s-ig" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="@instagram" maxlength="60">
@@ -225,7 +226,7 @@ textarea{font:inherit;resize:vertical;line-height:1.5}
   </form>
 
   <section class="login hide" id="pending">
-    <img class="logo" src="/apple-touch-icon.png" alt="">
+    <img class="logo" src="/brand/wordmark-2.png" alt="PerugiaParty">
     <h1>One last step</h1>
     <div id="pend-body"></div>
     <button class="linkbtn" type="button" data-go-login>Back to <b>log in</b></button>

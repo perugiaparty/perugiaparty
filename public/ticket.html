@@ -343,7 +343,7 @@ h1{font-size:clamp(40px,8vw,64px)}
 .ww-go{margin-top:14px;width:100%;justify-content:center}
 /* clean login: centred column, logo, no extra text */
 .auth{max-width:340px;margin:0 auto;text-align:center;padding:6vh 0 4vh}
-.auth-logo{width:64px;height:64px;border-radius:16px;display:block;margin:0 auto 14px}
+.auth-logo{width:250px;max-width:80%;height:auto;display:block;margin:0 auto 18px}
 .auth h1{font-family:var(--f-body);font-weight:800;font-size:26px;letter-spacing:-.01em;margin:0 0 18px}
 .auth .login{display:grid;gap:10px}
 .auth .login input{width:100%;box-sizing:border-box}
@@ -356,7 +356,7 @@ h1{font-size:clamp(40px,8vw,64px)}
 <body>
 <header class="top">
   <div class="wrap">
-    <a class="mark" href="/">Perugia<span>Party</span></a>
+    <a class="mark" href="/"><img src="/brand/wordmark-2.png" alt="PerugiaParty" width="851" height="160"></a>
     <nav aria-label="Main"><a href="/#rules">House rules</a><a class="keep" href="/#faq">FAQ</a><a class="btn" id="nav-cta" href="/#request">Request a place</a></nav>
   </div>
 </header>
@@ -587,7 +587,7 @@ function verifyHTML(d){
 }
 function loginView(msg){
   $("page").innerHTML = `<div class="auth">
-    <img class="auth-logo" src="/apple-touch-icon.png" alt="">
+    <img class="auth-logo" src="/brand/wordmark-2.png" alt="PerugiaParty">
     <h1>My ticket</h1>
     <form class="login" id="login" novalidate>
       <input id="l-ig" placeholder="@instagram" aria-label="Instagram" autocapitalize="off" autocomplete="username" maxlength="40">
