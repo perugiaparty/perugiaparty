@@ -334,6 +334,26 @@ h1{font-size:clamp(40px,8vw,64px)}
 .appc .steps{font-size:13px;color:var(--ink-2);margin:4px 0 0;padding-left:18px}
 @media (max-width:420px){.appc{flex-wrap:wrap}.appc .btn{width:100%}}
 
+/* receipt (scontrino) with the optional crew tip */
+.rcpt{--zz:10px;background:#fff;color:#111;margin:16px 0;padding:30px 22px 26px;font-family:var(--f-mono);font-size:13.5px;letter-spacing:.04em;text-transform:uppercase;position:relative;
+  -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/calc(var(--zz)*2) 51% repeat-x,conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/calc(var(--zz)*2) 51% repeat-x;
+  mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/calc(var(--zz)*2) 51% repeat-x,conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/calc(var(--zz)*2) 51% repeat-x}
+.rc-h{text-align:center;display:grid;gap:4px;margin-bottom:6px}
+.rc-h b{font-family:var(--f-display);font-weight:400;font-size:32px;letter-spacing:-.01em;text-transform:none;line-height:1}
+.rc-d{border-top:1.5px dashed #111;margin:12px 0}
+.rc-l{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;padding:4px 0}
+.rc-l .v{text-align:right;white-space:nowrap}
+.rc-l small{display:block;font-size:10.5px;color:#666;letter-spacing:.1em}
+.rc-tip{background:#fff6d6;margin:6px -10px 0;padding:8px 10px;border-radius:10px}
+.rc-step{display:inline-flex;align-items:center;gap:8px}
+.rc-step button{width:34px;height:34px;border-radius:50%;border:2px solid #111;background:#fff;color:#111;font:700 18px/1 var(--f-body);display:grid;place-items:center;cursor:pointer;padding:0}
+.rc-step button[data-tip="1"]{background:#111;color:#fff}
+.rc-step button:disabled{opacity:.25;cursor:default}
+.rc-step b{min-width:52px;text-align:center;font-weight:500}
+.rc-why{text-transform:none;letter-spacing:0;font-family:var(--f-body);font-size:13px;color:#555;margin:8px 0 0;line-height:1.45}
+.rc-tot{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--f-display);font-size:30px;letter-spacing:0;text-transform:uppercase}
+.rc-tot b{font-weight:400}
+.rc-f{text-align:center;margin:0;line-height:1.8}
 /* when & where: the first thing a guest needs */
 .ww{background:var(--ink);color:var(--cream);border-radius:22px;padding:6px 20px 18px;margin:16px 0}
 .ww-r{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:14px 0;border-bottom:1px solid rgba(244,234,215,.14)}
@@ -766,6 +786,44 @@ function whenWhereHTML(d){
       <a class="btn ww-go" href="${maps}" target="_blank" rel="noopener">Open in Maps ↗</a>` : ""}
   </section>`;
 }
+// ---- the receipt: what you get, what you pay, and an optional tip for the crew ----
+function receiptHTML(d, tierName, tip){
+  const total = (Number(d.price) || 0) + tip;
+  const line = (q, item, v) => `<div class="rc-l"><span class="q">${q}</span><span class="i">${item}</span><span class="v">${v}</span></div>`;
+  return `<section class="rcpt" aria-label="Your receipt">
+    <div class="rc-h"><b>PerugiaParty</b><span>${esc(d.event || "")}${d.date_label ? " · " + esc(d.date_label) : ""}</span><span>OPEN BAR · 18+ · GUEST LIST ONLY</span></div>
+    <div class="rc-d"></div>
+    ${line("1X", "OPEN BAR, ALL NIGHT", "INCL.")}
+    ${line("1X", "BEST PARTY EVER", "INCL.")}
+    ${line("1X", "TILL TOO LATE", "INCL.")}
+    ${line("∞", "NEW FRIENDS", "INCL.")}
+    ${line("0X", "REGRETS", "0")}
+    <div class="rc-d"></div>
+    ${line("1X", "TICKET · " + esc(String(tierName).toUpperCase()), euro(d.price))}
+    <div class="rc-l rc-tip"><span class="q">+</span><span class="i">TIP THE CREW<small>OPTIONAL</small></span>
+      <span class="v rc-step"><button type="button" data-tip="-1" aria-label="Less tip" ${tip ? "" : "disabled"}>−</button><b id="tip-v">${euro(tip)}</b><button type="button" data-tip="1" aria-label="Add €1 tip">+</button></span></div>
+    <p class="rc-why">We organise this for free. A tip goes to the crew: baristas, setup, organisation. Totally optional, every euro helps ♥</p>
+    <div class="rc-d"></div>
+    <div class="rc-tot"><span>TOTAL</span><b id="tip-tot">${euro(total)}</b></div>
+    <div class="rc-d"></div>
+    <p class="rc-f">PAY BY BANK TRANSFER ↓<br>* SEE YOU ON THE DANCEFLOOR *</p>
+  </section>`;
+}
+let tipTimer = null;
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-tip]"); if (!b || !window.__payD) return;
+  const d = window.__payD;
+  window.__tip = Math.max(0, Math.min(50, (window.__tip || 0) + Number(b.dataset.tip)));
+  const tip = window.__tip, total = (Number(d.price) || 0) + tip;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set("tip-v", euro(tip)); set("tip-tot", euro(total)); set("pay-h", euro(total));
+  const minus = document.querySelector('[data-tip="-1"]'); if (minus) minus.disabled = !tip;
+  const row = document.getElementById("amt-row"); if (row) row.innerHTML = payRow("Amount", euro(total), String(total).replace(".", ","));
+  const all = document.getElementById("pay-all"); if (all) all.dataset.copy = all.dataset.copy.replace(/^Amount: .*$/m, "Amount: " + euro(total));
+  const tag = document.querySelector(".pay .tier-tag"); if (tag) tag.textContent = tag.textContent.replace(/ \+ tip$/, "") + (tip ? " + tip" : "");
+  clearTimeout(tipTimer);
+  tipTimer = setTimeout(() => { const t = token; if (t) fetch("/api/ticket/tip", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ t, tip }) }).catch(() => {}); }, 600);
+});
 function render(d){
   const P = $("page"), first = esc(String(d.name || "").split(" ")[0]);
   if (d.status === "requested" || d.status === "waitlist") {
@@ -813,25 +871,29 @@ function render(d){
     const ibanCC = (d.iban || "").replace(/\s+/g, "").slice(0, 2).toUpperCase();
     const CC = {IT:"Italy",LT:"Lithuania",DE:"Germany",NL:"Netherlands",BE:"Belgium",FR:"France",ES:"Spain",IE:"Ireland",GB:"United Kingdom",AT:"Austria",LU:"Luxembourg",PT:"Portugal",EE:"Estonia",LV:"Latvia",FI:"Finland",MT:"Malta",SM:"San Marino",CH:"Switzerland",PL:"Poland"};
     const bankCountry = /^[A-Z]{2}$/.test(ibanCC) ? (CC[ibanCC] ? `${CC[ibanCC]} (${ibanCC})` : ibanCC) : "";
-    const allText = `Amount: ${euro(d.price)}\nIBAN: ${d.iban || ""}\nBeneficiary: ${d.beneficiary || ""}${bankCountry ? `\nBank country: ${bankCountry}` : ""}\nReference: ${d.reference}`;
+    const tip = Math.max(0, Math.min(50, Math.round(Number(window.__tip != null ? window.__tip : d.tip) || 0)));
+    window.__tip = tip; window.__payD = d;
+    const total = (Number(d.price) || 0) + tip;
+    const allText = `Amount: ${euro(total)}\nIBAN: ${d.iban || ""}\nBeneficiary: ${d.beneficiary || ""}${bankCountry ? `\nBank country: ${bankCountry}` : ""}\nReference: ${d.reference}`;
     P.innerHTML = `<div class="hero-ok"><span class="state">Accepted</span>
         <h1>You're in, ${first}.</h1>
         <p class="lead"><b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " · " + esc(d.date_label) : ""}. Pay below to lock your place.</p>
         ${stepsHTML(2, "on-red")}</div>
+      ${receiptHTML(d, tierName, tip)}
       <section class="pay" aria-labelledby="pay-h">
-        <span class="tier-tag">${esc(tierName)}</span>
+        <span class="tier-tag">${esc(tierName)}${tip ? " + tip" : ""}</span>
         <p class="eyebrow">Bank transfer</p>
-        <h2 id="pay-h">${euro(d.price)}</h2>
+        <h2 id="pay-h">${euro(total)}</h2>
         ${d.deadline ? `<div class="deadline" id="pay-left" data-dl="${d.deadline}" style="margin:6px 0 12px;background:rgba(244,234,215,.08);padding:11px 14px;border-radius:14px;font-size:15px;font-weight:600;line-height:1.4">${payLeftHTML(d.deadline)}</div>` : ""}
         <p class="pay-hint">Tap a line to copy it.</p>
         <div class="prow-list">
           ${payRow("IBAN", d.iban ? d.iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim() : "—", d.iban ? d.iban.replace(/\s+/g, "") : "")}
           ${payRow("Name", d.beneficiary || "—", d.beneficiary || "")}
           ${bankCountry ? payRow("Bank country", bankCountry, bankCountry.replace(/ \([A-Z]{2}\)$/, "")) : ""}
-          ${payRow("Amount", euro(d.price), String(d.price).replace(".", ","))}
+          <span id="amt-row">${payRow("Amount", euro(total), String(total).replace(".", ","))}</span>
           ${payRow("Description", d.reference, d.reference, true)}
         </div>
-        <button class="btn pay-all" type="button" data-copy="${esc(allText)}">Copy all</button>
+        <button class="btn pay-all" id="pay-all" type="button" data-copy="${esc(allText)}">Copy all</button>
       </section>
       <div class="pay-faq">
         <h3>Good to know</h3>

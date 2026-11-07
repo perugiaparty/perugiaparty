@@ -28,7 +28,7 @@ function priceRange(ev) {
 }
 
 // ---- rate limits: stop bots and code-guessing (counts per IP, stored as a hash, never the IP itself) ----
-const LIMITS = { short: [30, 600], request: [6, 600], rerequest: [6, 600], login: [8, 600], invite: [40, 600], door: [20, 600], crew: [10, 600], crewsign: [5, 3600] };
+const LIMITS = { short: [30, 600], request: [6, 600], rerequest: [6, 600], login: [8, 600], invite: [40, 600], door: [20, 600], crew: [10, 600], crewsign: [5, 3600], tip: [60, 600] };
 // Matt tests the site a lot: his own Instagram never hits the "too many tries" limit
 const TESTERS = ["@mattheovanderlee"];
 async function isTester(req) {
@@ -490,6 +490,14 @@ async function apiRerequest(req, env) {
   return json({ ok: true, token, waitlist: status === "waitlist" });
 }
 
+// optional tip for the crew, chosen on the pay screen (whole euros, 0–50); only while the guest still has to pay
+async function apiTip(req, env) {
+  let b; try { b = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
+  const t = String(b.t || ""), tip = Math.round(Number(b.tip));
+  if (!TOKEN_RE.test(t) || !Number.isFinite(tip) || tip < 0 || tip > 50) return json({ error: "Bad request" }, 400);
+  const r = await env.DB.prepare("UPDATE guests SET tip = ? WHERE token = ? AND status = 'approved'").bind(tip, t).run();
+  return json({ ok: !!(r.meta && r.meta.changes), tip });
+}
 async function apiTicket(url, env) {
   const t = url.searchParams.get("t") || "";
   if (!TOKEN_RE.test(t)) return json({ error: "This link isn't valid." }, 404);
@@ -501,7 +509,7 @@ async function apiTicket(url, env) {
   const out = { status: g.status, name: g.name, event: sameEvent ? ev.name : g.event, ig: g.ig, vcode: g.vcode, link: shortUrl(await shortFor(env, g), g.token), verified: Number(g.verified) === 1, mismatch: !!g.ig_mismatch, ig_auto: !!(ev.ig_token && ev.ig_app_secret) };
   if (g.status === "approved") {
     Object.assign(out, {
-      code: g.code, price: g.price, ticket: g.ticket,
+      code: g.code, price: g.price, ticket: g.ticket, tip: Number(g.tip) || 0,
       iban: sameEvent ? ev.iban : null, beneficiary: sameEvent ? ev.beneficiary : null,
       reference: `${g.name} ${g.code}`,
       approved_at: g.approved_at,
@@ -944,6 +952,7 @@ async function route(req, env) {
         if (url.pathname === "/api/invite" && (await tooMany(req, env, "invite"))) return slowDown();
         if (url.pathname === "/api/request" && req.method === "POST") return await apiRequest(req, env);
         if (url.pathname === "/api/ticket" && req.method === "GET") return await apiTicket(url, env);
+        if (url.pathname === "/api/ticket/tip" && req.method === "POST") { if (await tooMany(req, env, "tip")) return slowDown(); return await apiTip(req, env); }
         if (url.pathname === "/api/poster" && req.method === "GET") return await apiPoster(env);
         if (url.pathname === "/api/invite" && req.method === "GET") return await apiInvite(url, env);
         if (url.pathname === "/api/rerequest" && req.method === "POST") return await apiRerequest(req, env);
