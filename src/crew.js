@@ -21,6 +21,38 @@ export async function crewHash(password, saltHex) {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
   return hex(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: unhex(saltHex), iterations: ITER }, key, 256));
 }
+const normIg = (ig) => { const h = String(ig || "").trim().replace(/^@+/, "").replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/[/?#].*$/, "").toLowerCase(); return h ? "@" + h : ""; };
+// same code shape the Instagram webhook already reads: PREFIX-XXXXXX
+function newCrewCode() {
+  const alph = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  return "CREW-" + Array.from(crypto.getRandomValues(new Uint8Array(6)), (b) => alph[b % alph.length]).join("");
+}
+
+// Instagram DM with a CREW-XXXXXX code: proves the Instagram account is theirs. Matt still approves them after.
+export async function crewDm(env, ev, igsid, code, { igSend, igUsername, igLog }) {
+  const c = await env.DB.prepare("SELECT * FROM crew WHERE vcode = ?").bind(code).first();
+  if (!c) { await igSend(env, ev, igsid, "Crew code not found. Copy it again from perugiaparty.com/crew and send it here."); return; }
+  const username = await igUsername(env, ev, igsid);
+  await igLog(env, "crew-dm", `code=${code} username=${username}`);
+  if (!username) return;
+  const first = String(c.name || "").split(" ")[0];
+  if (normIg(username) !== normIg(c.ig)) { await igSend(env, ev, igsid, `This crew code belongs to another Instagram account. Send it from ${c.ig}.`); return; }
+  await env.DB.prepare("UPDATE crew SET ig_ok = 1, igsid = ?, notified = CASE WHEN approved = 1 THEN 1 ELSE notified END WHERE id = ?").bind(igsid, c.id).run();
+  await igSend(env, ev, igsid, Number(c.approved) === 1
+    ? `Confirmed, ${first}! You can log in at perugiaparty.com/crew`
+    : `Confirmed, ${first}! Your Instagram is verified. Matt still has to approve you as crew. You'll get a message here when you're in.`);
+}
+// once Matt approves someone in the admin panel: tell them on Instagram (runs with the minute tick)
+export async function crewApprovedDms(env, ev, igSend) {
+  if (!ev || !ev.ig_token || Number(ev.ig_dms_off) === 1) return;
+  const rows = (await env.DB.prepare("SELECT id, name, user, igsid FROM crew WHERE approved = 1 AND ig_ok = 1 AND igsid IS NOT NULL AND COALESCE(notified, 1) = 0 LIMIT 10").all()).results || [];
+  for (const c of rows) {
+    const r = await env.DB.prepare("UPDATE crew SET notified = 1 WHERE id = ? AND notified = 0").bind(c.id).run();
+    if (!r.meta || !r.meta.changes) continue;
+    await igSend(env, ev, c.igsid, `You're in, ${String(c.name || "").split(" ")[0]}! Matt approved you as crew${ev.name ? " for " + ev.name : ""}.\nLog in at perugiaparty.com/crew with username ${c.user} and your password.`);
+  }
+}
+
 function newToken() {
   const alph = "abcdefghijkmnpqrstuvwxyz23456789";
   return Array.from(crypto.getRandomValues(new Uint8Array(32)), (b) => alph[b % 32]).join("");
@@ -80,6 +112,23 @@ export async function apiCrew(req, env, action, { getEvent, json }) {
   const ev = await getEvent(env);
   if (!ev || !ev.tag) return json({ error: "There is no party set up right now." }, 403);
 
+  if (action === "signup") {
+    const name = clean(body.name, 60), ig = normIg(clean(body.ig, 60)), user = clean(body.user, 40).toLowerCase().replace(/^@+/, "");
+    const pw = String(body.password || "");
+    if (name.length < 2) return json({ error: "Write your full name." }, 400);
+    if (!/^@[a-z0-9._]{1,30}$/.test(ig)) return json({ error: "Write your Instagram username." }, 400);
+    if (!/^[a-z0-9._]{3,30}$/.test(user)) return json({ error: "Username: 3 to 30 letters, numbers, dots or underscores." }, 400);
+    if (pw.length < 8 || pw.length > 200) return json({ error: "Password: at least 8 characters." }, 400);
+    if (await env.DB.prepare("SELECT 1 FROM crew WHERE user = ?").bind(user).first()) return json({ error: "That username is taken. Pick another one." }, 409);
+    const same = await env.DB.prepare("SELECT ig_ok, approved FROM crew WHERE lower(ig) = ?").bind(ig).first();
+    if (same) return json({ error: Number(same.approved) === 1 ? "This Instagram already has a crew account. Log in instead." : "This Instagram already signed up. Wait for Matt to approve you." }, 409);
+    const salt = hex(crypto.getRandomValues(new Uint8Array(16)));
+    const vcode = newCrewCode();
+    await env.DB.prepare("INSERT INTO crew (name, user, salt, pw_hash, lead, created_at, ig, ig_ok, vcode, approved, notified) VALUES (?, ?, ?, ?, 0, ?, ?, 0, ?, 0, 0)")
+      .bind(name, user, salt, await crewHash(pw, salt), Date.now(), ig, vcode).run();
+    return json({ ok: true, vcode, ig });
+  }
+
   if (action === "login") {
     const user = clean(body.user, 40).toLowerCase().replace(/^@+/, "");
     const pw = String(body.password || "").slice(0, 200);
@@ -87,6 +136,9 @@ export async function apiCrew(req, env, action, { getEvent, json }) {
     // always do the slow hash, so a wrong username takes as long as a wrong password
     const h = await crewHash(pw, c && c.salt ? c.salt : "00".repeat(16));
     if (!c || !c.pw_hash || !pw || !same(h, c.pw_hash)) { await sleep(600); return json({ error: "Wrong username or password." }, 401); }
+    // signed up themselves: first prove the Instagram, then wait for Matt
+    if (c.vcode && Number(c.ig_ok) !== 1) return json({ error: "Confirm your Instagram first: send your code to @perugiaparty.", pending: "ig", vcode: c.vcode, ig: c.ig }, 403);
+    if (Number(c.approved) !== 1) return json({ error: "Your Instagram is confirmed. Matt still has to approve you as crew. You'll get a DM when you're in.", pending: "approve" }, 403);
     const me = await onCrew(env, c.id, ev.tag);
     if (!me) return json({ error: "You're not on the crew for this party. Ask Matt to add you." }, 403);
     const token = newToken(), now = Date.now();

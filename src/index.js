@@ -1,5 +1,5 @@
 import { pushTick, apiPush } from "./push.js";
-import { apiCrew } from "./crew.js";
+import { apiCrew, crewDm, crewApprovedDms } from "./crew.js";
 // PerugiaParty site worker: serves the static site and a small JSON API.
 // Guests only ever see their own record, looked up by a long random token.
 // All organizer actions happen in the private admin panel, never through this API.
@@ -28,7 +28,7 @@ function priceRange(ev) {
 }
 
 // ---- rate limits: stop bots and code-guessing (counts per IP, stored as a hash, never the IP itself) ----
-const LIMITS = { short: [30, 600], request: [6, 600], rerequest: [6, 600], login: [8, 600], invite: [40, 600], door: [20, 600], crew: [10, 600] };
+const LIMITS = { short: [30, 600], request: [6, 600], rerequest: [6, 600], login: [8, 600], invite: [40, 600], door: [20, 600], crew: [10, 600], crewsign: [5, 3600] };
 // Matt tests the site a lot: his own Instagram never hits the "too many tries" limit
 const TESTERS = ["@mattheovanderlee"];
 async function isTester(req) {
@@ -272,6 +272,9 @@ async function retryBlockedDms(env, igsid) {
 }
 async function igHandleDm(env, ev, igsid, text) {
   const found = [...String(text).toUpperCase().matchAll(/(?<![A-Z0-9])([A-Z0-9]{1,5})[-\s]?([A-HJ-NP-Z2-9]{6})(?![A-Z0-9])/g)];
+  // crew sign-up codes (CREW-XXXXXX) are handled by the crew module
+  const crewCode = found.find((m) => m[1] === "CREW");
+  if (crewCode) { await crewDm(env, ev, igsid, `CREW-${crewCode[2]}`, { igSend, igUsername, igLog }); return; }
   let g = null;
   for (const m of found) {
     g = await env.DB.prepare("SELECT * FROM guests WHERE vcode = ?").bind(`${m[1]}-${m[2]}`).first();
@@ -850,7 +853,7 @@ async function repriceLate(env) {
 async function tickIfDue(env) {
   const now = Date.now();
   const r = await env.DB.prepare("UPDATE event SET tick_at = ? WHERE id = 1 AND (tick_at IS NULL OR tick_at < ?)").bind(now, now - 55000).run();
-  if (r.meta && r.meta.changes) { await pushTick(env, getEvent, parseProgram); await repriceLate(env); await igStatusDms(env); await igReminders(env); }
+  if (r.meta && r.meta.changes) { await pushTick(env, getEvent, parseProgram); await repriceLate(env); await igStatusDms(env); await igReminders(env); await crewApprovedDms(env, await getEvent(env), igSend).catch(() => {}); }
 }
 
 // Security headers on every response the site sends.
@@ -935,6 +938,7 @@ async function route(req, env) {
         if (url.pathname.startsWith("/api/crew/") && req.method === "POST") {
           const action = url.pathname.slice(10);
           if (action === "login" && (await tooMany(req, env, "crew"))) return slowDown();
+          if (action === "signup" && (await tooMany(req, env, "crewsign"))) return slowDown();
           return await apiCrew(req, env, action, { getEvent, json });
         }
         if (url.pathname === "/api/door/login" && req.method === "POST") return await apiDoor(req, env, "login");

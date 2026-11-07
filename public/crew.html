@@ -31,6 +31,10 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);fo
 .login{min-height:70dvh;display:flex;flex-direction:column;justify-content:center;gap:12px;max-width:380px;margin:0 auto;width:100%}
 .login h1{font-family:var(--f-display);font-weight:400;font-size:56px;line-height:.9;margin:0 0 4px;color:var(--txt)}
 .login p.sub{margin:0 0 10px;color:var(--soft)}
+.linkbtn{font:inherit;font-weight:700;font-size:15px;background:none;border:0;color:var(--soft);padding:10px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.code{font-family:var(--f-mono);font-size:28px;letter-spacing:.08em;text-align:center;background:var(--card);border:1.5px dashed var(--soft);border-radius:16px;padding:18px;color:var(--txt);user-select:all}
+.steps{margin:0;padding-left:20px;color:var(--soft);display:grid;gap:6px}
+.steps b{color:var(--txt)}
 input,select,textarea{font:inherit;color:var(--txt);background:var(--card);border:1.5px solid var(--hair);border-radius:14px;padding:13px 14px;width:100%;box-sizing:border-box;min-width:0}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--soft)}
 input::placeholder,textarea::placeholder{color:var(--dim)}
@@ -151,7 +155,26 @@ textarea{font:inherit;resize:vertical;line-height:1.5}
     <input id="pw" type="password" autocomplete="current-password" placeholder="Password" aria-label="Password" enterkeyhint="go">
     <p class="err" id="lerr" role="alert"></p>
     <button class="big" type="submit" id="lbtn">Log in</button>
+    <button class="linkbtn" type="button" data-go-signup>New crew? Sign up</button>
   </form>
+
+  <form class="login hide" id="signup" novalidate>
+    <h1>Join</h1>
+    <p class="sub">Sign up, confirm your Instagram, then Matt approves you.</p>
+    <input id="s-name" autocomplete="name" placeholder="Full name" maxlength="60">
+    <input id="s-ig" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Instagram (@yourname)" maxlength="60">
+    <input id="s-user" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Pick a username" maxlength="30">
+    <input id="s-pw" type="password" autocomplete="new-password" placeholder="Pick a password (min. 8)" maxlength="200">
+    <p class="err" id="serr" role="alert"></p>
+    <button class="big" type="submit" id="sbtn">Sign up</button>
+    <button class="linkbtn" type="button" data-go-login>I already have an account</button>
+  </form>
+
+  <section class="login hide" id="pending">
+    <h1>Almost</h1>
+    <div id="pend-body"></div>
+    <button class="linkbtn" type="button" data-go-login>Back to log in</button>
+  </section>
 
   <main id="view" class="hide"></main>
 </div>
@@ -203,7 +226,7 @@ function lock(msg) {
   if (token) fetch("/api/crew/logout", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token }), keepalive: true }).catch(() => {});
   token = null; S = null; clearInterval(timer); openId = null; adding = null;
   $("#view").classList.add("hide"); $("#view").innerHTML = ""; $("#tabs").classList.add("hide"); $("#lockbtn").classList.add("hide");
-  $("#login").classList.remove("hide"); $("#pw").value = ""; $("#lerr").textContent = msg || "";
+  screen("login"); $("#pw").value = ""; $("#lerr").textContent = msg || "";
   $("#evname").textContent = "Crew"; $("#evsub").textContent = "PerugiaParty";
 }
 $("#login").addEventListener("submit", async (e) => {
@@ -214,15 +237,49 @@ $("#login").addEventListener("submit", async (e) => {
   try {
     const r = await fetch("/api/crew/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ user, password }), cache: "no-store" });
     const d = await r.json().catch(() => ({}));
+    if (!r.ok && d.pending === "ig") { $("#pw").value = ""; showCode(d.vcode, d.ig); return; }
+    if (!r.ok && d.pending === "approve") { $("#pend-body").innerHTML = `<p class="sub" style="font-size:16px">${esc(d.error)}</p>`; $("#pw").value = ""; screen("pending"); return; }
     if (!r.ok) { $("#lerr").textContent = d.error || "Could not log in."; return; }
     token = d.token; delete d.token; S = d; $("#pw").value = "";
-    $("#login").classList.add("hide"); $("#view").classList.remove("hide"); $("#tabs").classList.remove("hide"); $("#lockbtn").classList.remove("hide");
+    $("#login").classList.add("hide"); $("#signup").classList.add("hide"); $("#pending").classList.add("hide"); $("#view").classList.remove("hide"); $("#tabs").classList.remove("hide"); $("#lockbtn").classList.remove("hide");
     tab = "home"; draw();
     clearInterval(timer); timer = setInterval(refresh, 20000);
   } catch (err) { $("#lerr").textContent = "No connection. Try again."; }
   finally { $("#lbtn").disabled = false; }
 });
 $("#lockbtn").addEventListener("click", () => lock());
+
+/* ---------- sign up: own password, Instagram code, then Matt approves ---------- */
+function screen(id) { for (const x of ["login", "signup", "pending"]) $("#" + x).classList.toggle("hide", x !== id); const f = $("#" + id + " input"); if (f) f.focus(); }
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-go-signup]")) { history.replaceState(null, "", "#join"); screen("signup"); }
+  if (e.target.closest("[data-go-login]")) { history.replaceState(null, "", location.pathname); screen("login"); }
+});
+if (location.hash === "#join") screen("signup");
+function showCode(vcode, ig) {
+  $("#pend-body").innerHTML = `<ol class="steps">
+      <li>Send this code to <b>@perugiaparty</b> on Instagram from <b>${esc(ig)}</b>.</li>
+      <li>You get an automatic reply when it's confirmed.</li>
+      <li>Then Matt approves you. You get a DM when you're in.</li></ol>
+    <div class="code">${esc(vcode)}</div>
+    <a class="big" style="text-align:center;text-decoration:none;display:block;box-sizing:border-box" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(vcode)}" target="_blank" rel="noopener" id="sendcode">Send code on Instagram ↗</a>`;
+  const b = $("#sendcode"); if (b) b.addEventListener("click", () => { try { navigator.clipboard.writeText(vcode); } catch (x) {} });
+  screen("pending");
+}
+$("#signup").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const body = { name: $("#s-name").value.trim(), ig: $("#s-ig").value.trim(), user: $("#s-user").value.trim(), password: $("#s-pw").value };
+  if (!body.name || !body.ig || !body.user || !body.password) { $("#serr").textContent = "Fill in everything."; return; }
+  $("#sbtn").disabled = true; $("#serr").textContent = "";
+  try {
+    const r = await fetch("/api/crew/signup", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), cache: "no-store" });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) { $("#serr").textContent = d.error || "Could not sign up."; return; }
+    $("#s-pw").value = ""; $("#user").value = body.user.toLowerCase();
+    showCode(d.vcode, d.ig);
+  } catch (x) { $("#serr").textContent = "No connection. Try again."; }
+  finally { $("#sbtn").disabled = false; }
+});
 // away for more than 5 minutes: ask the password again (notes are saved first)
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) { hiddenAt = Date.now(); if (noteDirty) saveNote(true); return; }
