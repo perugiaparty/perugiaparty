@@ -57,7 +57,7 @@ ER_FAQ = [
 ]
 def erasmus_post(s):
     rows = "".join(f'<li><b>{h}</b><span>{p}</span></li>' for h, p in NEW_HERE)
-    guide = f"""<div class="wrap"><section class="sec nh" id="new" aria-labelledby="new-h">
+    guide = f"""<div class="wrap o-new"><section class="sec nh" id="new" aria-labelledby="new-h">
       <div class="nh-head"><p class="nh-k">For Erasmus</p><h2 id="new-h">New in <span>Perugia?</span></h2><p>Six things to know before your first night out.</p></div>
       <ol class="nh-list">{rows}</ol></section></div>
 """

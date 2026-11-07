@@ -338,6 +338,15 @@ body.locked{overflow:hidden}
 .hero-meta .hm-red:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:9px;vertical-align:2px}
 /* no party taking requests: the form and everything pointing to it disappears */
 html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
+/* page order: a published party jumps right under the top */
+main#top{display:flex;flex-direction:column}main#top>*{width:100%;box-sizing:border-box}
+.o-hero{order:0}.o-new{order:1}.o-why{order:2}.o-next{order:3}.o-main{order:4}.o-faq{order:5}.o-nights{order:6}
+html[data-live] .o-next{order:0}
+/* past nights: small strip */
+#nights{padding-block:28px 40px}#nights .sec-head h2{font-size:clamp(22px,3vw,30px)}#nights .sec-head{margin-bottom:14px}
+#nights .nights .night{flex:0 0 clamp(170px,22%,220px);min-height:0;padding:16px 18px;gap:10px;border-radius:16px}
+#nights .night h3{font-size:19px}#nights .night .when{font-size:10px}
+#nights .slide-btn{transform:scale(.8)}
 .hero-art{display:block;width:100%;height:auto;border-radius:24px;box-shadow:12px 12px 0 var(--red);transform:rotate(-2deg)}
 </style>
 </head>
@@ -353,7 +362,7 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
 </header>
 
 <main id="top">
-  <div class="wrap">
+  <div class="wrap o-hero">
     <div class="hero">
       <div>
         <p class="hero-meta"><span class="hm-red">Solo su invito</span><span aria-hidden="true">·</span>Perugia<span aria-hidden="true">·</span>18+</p>
@@ -369,7 +378,7 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
     </div>
   </div>
 
-  <section class="band-red" id="next" aria-label="Next party">
+  <section class="band-red o-next" id="next" aria-label="Next party">
     <div class="wrap sec next-sec">
       <div class="sec-head" id="next-head">
         <h2>Prossima festa.</h2>
@@ -385,7 +394,7 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
     </div>
   </section>
 
-  <div class="wrap">
+  <div class="wrap o-why">
     <section class="sec" id="why" aria-labelledby="why-h">
       <h2 id="why-h" class="why-big">Serata da club. Vibe da centro. <span>Il meglio dei due mondi.</span></h2>
       <div class="vs">
@@ -397,6 +406,9 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
       <p class="mission">PerugiaParty è organizzata da volontari che vogliono rendere la vita da studenti a Perugia un po’ più aperta e inclusiva. Con la musica e un posto accogliente uniamo gente dell’Umbria e di tutto il mondo, studenti italiani ed Erasmus, per condividere una notte.</p>
     </section>
 
+  </div>
+
+  <div class="wrap o-main">
     <section class="sec" id="how" aria-labelledby="how-h">
       <div class="sec-head">
         <h2 id="how-h">Come funziona.</h2>
@@ -485,7 +497,7 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
 
   </div>
 
-  <div class="wrap">
+  <div class="wrap o-nights">
     <section class="sec" id="nights" aria-labelledby="nights-h">
       <div class="sec-head">
         <h2 id="nights-h">Le notti che ti sei perso.</h2>
@@ -504,6 +516,9 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
     </section>
 
 
+  </div>
+
+  <div class="wrap o-faq">
     <section class="sec" id="faq" aria-labelledby="faq-h">
       <div class="sec-head"><h2 id="faq-h">Da sapere.</h2></div>
       <div class="faq">
@@ -592,6 +607,7 @@ function renderNext(ev){
   const el = $("next-card");
   if (!ev || !ev.published) return; // keep the static heading and "announcing soon" card
   const head = $("next-head"); if (head) head.hidden = true;
+  document.documentElement.setAttribute("data-live", "");
   const price = ev.price ? "From " + euro(ev.price.min) : null;
   const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]].filter(f => f[1]);
   const cta = ev.requests_open ? `<a class="btn" href="#request">${ev.sold_out ? "Entra in lista d’attesa" : "Richiedi un posto"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Seguici su Instagram ↗</a>`;
@@ -603,7 +619,7 @@ function renderNext(ev){
       ${facts.length ? `<dl>${facts.map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>` : ""}
       <div class="count" id="count" ${ev.starts_at ? "" : "hidden"} aria-label="Countdown to the party"></div>
       <div class="next-cta">${cta}</div></div>${art}
-    ${ev.poster ? `<a class="poster" href="${ev.requests_open ? "#request" : "https://www.instagram.com/perugiaparty/"}" aria-label="${esc(ev.name || "Party")} poster"><img src="${esc(ev.poster)}" alt="${esc(ev.name || "Party")} poster" loading="lazy" decoding="async"></a>` : cta}`;
+    ${ev.poster ? `<a class="poster" href="${ev.requests_open ? "#request" : "https://www.instagram.com/perugiaparty/"}" aria-label="${esc(ev.name || "Party")} poster"><img src="${esc(ev.poster)}" alt="${esc(ev.name || "Party")} poster" loading="lazy" decoding="async"></a>` : ""}`;
   if (ev.starts_at) { tick(); clearInterval(timer); timer = setInterval(tick, 1000); }
 }
 function tick(){
