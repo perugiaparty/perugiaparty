@@ -195,7 +195,7 @@ h1{font-size:clamp(40px,8vw,64px)}
 .cine{position:relative;background:#111;color:#f5f5f0;border-radius:10px;padding:40px 24px 36px;display:grid;gap:16px;justify-items:center;text-align:center;box-shadow:10px 10px 0 var(--red)}
 .cine .holes{position:absolute;left:14px;right:14px;height:12px;background:radial-gradient(circle,var(--cream) 4px,transparent 4.5px) 0 50%/20px 12px repeat-x}
 .cine .holes.t{top:10px}.cine .holes.b{bottom:10px}
-.cine .logo{width:150px}
+.cine .logo{width:240px;height:auto}
 .cine .ev{font-family:var(--f-display);font-size:32px;line-height:1.05;color:#f5f5f0}
 .cine .meta{color:#a9a9a2;font-size:15px}
 .cine .perf{position:relative;border-top:2px dashed #444;width:calc(100% + 48px);margin:4px -24px}
@@ -343,7 +343,8 @@ h1{font-size:clamp(40px,8vw,64px)}
 .ww-go{margin-top:14px;width:100%;justify-content:center}
 /* clean login: centred column, logo, no extra text */
 .auth{max-width:340px;margin:0 auto;text-align:center;padding:6vh 0 4vh}
-.auth-logo{width:250px;max-width:80%;height:auto;display:block;margin:0 auto 18px}
+.auth-tile{background:var(--ink);border-radius:20px;padding:22px 20px;margin:0 auto 18px}
+.auth-logo{width:240px;max-width:100%;height:auto;display:block;margin:0 auto}
 .auth h1{font-family:var(--f-body);font-weight:800;font-size:26px;letter-spacing:-.01em;margin:0 0 18px}
 .auth .login{display:grid;gap:10px}
 .auth .login input{width:100%;box-sizing:border-box}
@@ -356,7 +357,7 @@ h1{font-size:clamp(40px,8vw,64px)}
 <body>
 <header class="top">
   <div class="wrap">
-    <a class="mark" href="/"><img src="/brand/wordmark-2.png" alt="PerugiaParty" width="851" height="160"></a>
+    <a class="mark" href="/"><img src="/brand/wordmark-4.png" alt="PerugiaParty" width="851" height="160"></a>
     <nav aria-label="Main"><a href="/#rules">House rules</a><a class="keep" href="/#faq">FAQ</a><a class="btn" id="nav-cta" href="/#request">Request a place</a></nav>
   </div>
 </header>
@@ -429,7 +430,7 @@ async function ticketCanvas(d){
   x.fillStyle = "#f4ead7"; x.fillRect(0, 0, W, H);
   x.fillStyle = "#111"; x.beginPath(); x.roundRect ? x.roundRect(40, 40, W-80, H-80, 28) : x.rect(40, 40, W-80, H-80); x.fill();
   x.fillStyle = "#f4ead7"; for (let px = 90; px < W-60; px += 40) { x.beginPath(); x.arc(px, 70, 8, 0, 7); x.fill(); x.beginPath(); x.arc(px, H-70, 8, 0, 7); x.fill(); }
-  try { const logo = await loadImage("/logo.png"); const lw = 380, lh = lw * logo.height / logo.width; x.drawImage(logo, (W-lw)/2, 130, lw, lh); } catch(e){}
+  try { const logo = await loadImage("/brand/wordmark-4.png"); const lw = 720, lh = lw * logo.height / logo.width; x.drawImage(logo, (W-lw)/2, 290 - lh/2, lw, lh); } catch(e){}
   x.textAlign = "center"; x.fillStyle = "#f5f5f0";
   x.font = `68px "Bowlby One", Impact, sans-serif`; x.fillText(d.event || "PerugiaParty", W/2, 510);
   x.fillStyle = "#a9a9a2"; x.font = `500 34px "Figtree", sans-serif`;
@@ -587,7 +588,7 @@ function verifyHTML(d){
 }
 function loginView(msg){
   $("page").innerHTML = `<div class="auth">
-    <img class="auth-logo" src="/brand/wordmark-2.png" alt="PerugiaParty">
+    <div class="auth-tile"><img class="auth-logo" src="/brand/wordmark-4.png" alt="PerugiaParty"></div>
     <h1>My ticket</h1>
     <form class="login" id="login" novalidate>
       <input id="l-ig" placeholder="@instagram" aria-label="Instagram" autocapitalize="off" autocomplete="username" maxlength="40">
@@ -861,7 +862,7 @@ function render(d){
       <div class="cine${inside ? "" : " shine"}${d.crew ? " crew" : ""}">${d.crew ? `<span class="crewband">Crew pass</span>` : ""}
         <span class="holes t" aria-hidden="true"></span><span class="holes b" aria-hidden="true"></span>
         ${inside ? `<span class="instamp">CHECKED IN</span>` : ""}
-        <img class="logo" src="/logo.png" alt="PerugiaParty" width="150" height="106" decoding="async">
+        <img class="logo" src="/brand/wordmark-4.png" alt="PerugiaParty" width="851" height="160" decoding="async">
         <div><p class="ev">${esc(d.event)}</p><p class="meta">${esc([d.date_label, d.doors && "doors " + d.doors].filter(Boolean).join(" · "))}</p></div>
         <div class="perf" aria-hidden="true"></div>
         <div class="qr"><canvas id="qr" aria-label="Your entry QR code"></canvas></div>
