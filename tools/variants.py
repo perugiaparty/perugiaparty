@@ -27,6 +27,7 @@ def build(path, lang, pairs, hero_art, hero_alt, post=None):
         {"@type": "WebPage", "@id": f"https://perugiaparty.com{path}#page", "url": f"https://perugiaparty.com{path}", "name": title, "inLanguage": lang,
          "isPartOf": {"@id": "https://perugiaparty.com/#website"}, "about": {"@id": "https://perugiaparty.com/#org"}},
         {"@type": "FAQPage", "@id": f"https://perugiaparty.com{path}#faq", "mainEntity": faq}]}
+    if ".o-faq,.o-nights{display:none" in s and 'class="hd-chat"' not in s: ld["@graph"].pop()  # FAQ hidden on this landing page
     s = re.sub(r'<script type="application/ld\+json">.*?</script>', '<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False).replace("<", "\\u003c") + "</script>", s, count=1, flags=re.S)
     open(os.path.join(ROOT, path.strip("/") + ".html"), "w", encoding="utf-8").write(s)
     if miss: print(path, "not found:", *miss, sep="\n  ", file=sys.stderr)
@@ -144,7 +145,6 @@ build("/erasmus", "en", COMMON_HEAD("/erasmus", "Erasmus parties in Perugia · P
     ('<link rel="alternate" hreflang="en" href="https://perugiaparty.com/">\n<link rel="alternate" hreflang="it" href="https://perugiaparty.com/it">\n<link rel="alternate" hreflang="x-default" href="https://perugiaparty.com/">\n', ""),
     ('Student parties <em>in Perugia.</em>', 'Erasmus parties <em>in Perugia.</em>'),
     ('Your people. Your night. Open bar, DJs and new people to meet, at a student price.', 'Just arrived in Perugia? Meet students from here and from all over the world. Open bar, DJs, student price.'),
-    ('<a class="btn outline" href="/erasmus">Erasmus in Perugia</a>', '<a class="btn outline" href="/">Home</a>'),
     ('<p>Six steps to the door.</p>', '<p>From your phone to the party. No Italian needed.</p>'),
     ('<h3>Request</h3><p>Fill in 30 seconds.</p>', '<h3>Request</h3><p>Your name and Instagram. 30 seconds.</p>'),
     ('<h3>DM the code</h3><p>Send it on Instagram.</p>', '<h3>DM the code</h3><p>Send it to @perugiaparty on Instagram.</p>'),
@@ -159,6 +159,20 @@ build("/erasmus", "en", COMMON_HEAD("/erasmus", "Erasmus parties in Perugia · P
 def it_post(s):
     s = re.sub(r'<img class="hero-art"[^>]*>', '', s, count=1)
     s = s.replace('<link rel="preload" href="/ill/hero-it.svg" as="image">', "")
+    cta = """<div class="wrap o-go"><section class="go" aria-labelledby="go-h">
+      <h2 id="go-h">Pronto per la <span>prossima notte?</span></h2>
+      <p>Data, richiesta del posto e tutto il resto sono sulla pagina principale.</p>
+      <div class="go-b"><a class="btn" href="/#request">Richiedi un posto</a><a class="btn outline" href="/">Vai a PerugiaParty →</a></div>
+    </section></div>
+"""
+    s = s.replace('<div class="wrap o-main">', cta + '<div class="wrap o-main">', 1)
+    s = s.replace('href="#request"', 'href="/#request"').replace('a.href = "#request"', 'a.href = "/#request"')
+    s = s.replace("</style>", """.o-go{order:3}.o-main,.o-faq,.o-nights{display:none!important}
+.go{text-align:center;padding:clamp(40px,7vw,80px) 0 clamp(56px,8vw,96px)}
+.go h2{font-size:clamp(34px,5vw,58px);line-height:.95;margin:0 0 12px}.go h2 span{color:var(--red)}
+.go p{color:var(--muted);margin:0 auto 24px;max-width:40ch}
+.go-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+</style>""", 1)
     s = s.replace("</style>", """.hero{grid-template-columns:1fr!important;padding-block:clamp(28px,5vw,56px) 0!important;gap:0!important}
 .hero .lede{max-width:46ch}
 .o-why #why{padding-top:clamp(28px,4vw,44px)}
@@ -168,7 +182,6 @@ def it_post(s):
 
 # ---------- Italiano
 IT = [
-    ('<b aria-current="true">EN</b><a href="/it" hreflang="it" lang="it">IT</a>', '<a href="/" hreflang="en" lang="en">EN</a><b aria-current="true">IT</b>'),
     ('<html lang="en">', '<html lang="it">'),
     ('Request a place</a>', 'Richiedi un posto</a>'),
     ('Student parties <em>in Perugia.</em>', 'Feste universitarie <em>a Perugia.</em>'),
@@ -242,7 +255,6 @@ IT = [
     ('<b>Leave the music alone.</b> Respect the vibe and whoever is playing.', '<b>La musica non si tocca.</b> Rispetta la vibe e chi suona.'),
     ('<b>No mess.</b> Use the bags. Leave the place as you found it.', '<b>Niente casino.</b> Usa i sacchi. Lascia il posto come l’hai trovato.'),
     ("<b>Respect the staff.</b> They're the reason the night happens.", '<b>Rispetta lo staff.</b> È grazie a loro che la notte esiste.'),
-    ('<a class="btn outline" href="/it" hreflang="it" lang="it">In italiano</a>', '<a class="btn outline" href="/" hreflang="en" lang="en">In English</a>'),
     ('<p>Independent nights · Perugia, Italia</p>', '<p>Serate indipendenti · Perugia, Italia</p>'),
     ('rel="noopener">Contact ↗</a>', 'rel="noopener">Contatti ↗</a>'),
     # live texts from the script

@@ -31,7 +31,7 @@
 <meta name="apple-mobile-web-app-title" content="PerugiaParty">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://perugiaparty.com/it#page", "url": "https://perugiaparty.com/it", "name": "Feste universitarie ed Erasmus a Perugia · PerugiaParty", "inLanguage": "it", "isPartOf": {"@id": "https://perugiaparty.com/#website"}, "about": {"@id": "https://perugiaparty.com/#org"}}, {"@type": "FAQPage", "@id": "https://perugiaparty.com/it#faq", "mainEntity": [{"@type": "Question", "name": "Perché costa così poco?", "acceptedAnswer": {"@type": "Answer", "text": "Le discoteche a Perugia sono care e lontane, e il centro finisce presto. PerugiaParty è organizzata da volontari: teniamo il prezzo basso perché ogni studente possa venire."}}, {"@type": "Question", "name": "Chi può venire?", "acceptedAnswer": {"@type": "Answer", "text": "Studenti, Erasmus e chiunque abbia 18+ anni. Ogni festa richiede una nuova richiesta, anche se sei già venuto. Gli amici fanno la loro richiesta. Porta un documento."}}, {"@type": "Question", "name": "Come entro in lista?", "acceptedAnswer": {"@type": "Answer", "text": "Richiedi un posto qui, poi manda il tuo codice in DM a @perugiaparty su Instagram. Controlliamo ogni richiesta: richiedere non garantisce il posto."}}, {"@type": "Question", "name": "Quanto costa e come pago?", "acceptedAnswer": {"@type": "Answer", "text": "Il prezzo appare sulla tua pagina dopo l’approvazione. Paghi con bonifico, con nome e codice come causale."}}, {"@type": "Question", "name": "Dove si fa la festa?", "acceptedAnswer": {"@type": "Answer", "text": "Nel centro di Perugia. Il luogo esatto appare sul biglietto dopo la conferma del pagamento."}}, {"@type": "Question", "name": "Biglietto perso, rimborsi?", "acceptedAnswer": {"@type": "Answer", "text": "Link perso? Vai su perugiaparty.com/ticket e accedi con Instagram e codice. I biglietti sono personali, non trasferibili né rimborsabili. Se annulliamo, ti contattiamo noi."}}, {"@type": "Question", "name": "Quali sono le regole della casa?", "acceptedAnswer": {"@type": "Answer", "text": "In lista o fuori. Niente lista, niente ingresso. I biglietti sono personali. Paga prima di venire. Bonifico con nome e codice PP come causale. Con calma. Un drink alla volta. Non sprecarli. La musica non si tocca. Rispetta la vibe e chi suona. Niente casino. Usa i sacchi. Lascia il posto come l’hai trovato. Rispetta lo staff. È grazie a loro che la notte esiste."}}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://perugiaparty.com/it#page", "url": "https://perugiaparty.com/it", "name": "Feste universitarie ed Erasmus a Perugia · PerugiaParty", "inLanguage": "it", "isPartOf": {"@id": "https://perugiaparty.com/#website"}, "about": {"@id": "https://perugiaparty.com/#org"}}]}</script>
 <link rel="preload" href="/fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/bowlby-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css?v=1">
@@ -362,6 +362,11 @@ html:not([data-live]) .o-next{display:none}
 /* bigger countdown */
 .count b{font-size:clamp(34px,5vw,52px)}.count div{min-width:92px;padding:14px 16px}
 .hero-art{display:block;width:100%;height:auto;border-radius:24px;box-shadow:12px 12px 0 var(--red);transform:rotate(-2deg)}
+.o-go{order:3}.o-main,.o-faq,.o-nights{display:none!important}
+.go{text-align:center;padding:clamp(40px,7vw,80px) 0 clamp(56px,8vw,96px)}
+.go h2{font-size:clamp(34px,5vw,58px);line-height:.95;margin:0 0 12px}.go h2 span{color:var(--red)}
+.go p{color:var(--muted);margin:0 auto 24px;max-width:40ch}
+.go-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .hero{grid-template-columns:1fr!important;padding-block:clamp(28px,5vw,56px) 0!important;gap:0!important}
 .hero .lede{max-width:46ch}
 .o-why #why{padding-top:clamp(28px,4vw,44px)}
@@ -373,8 +378,7 @@ html:not([data-live]) .o-next{display:none}
   <div class="wrap">
     <a class="mark" href="#top"><img src="/brand/wordmark-2.png" alt="PerugiaParty" width="851" height="160"></a>
     <nav aria-label="Main">
-      <span class="lang" aria-label="Language"><a href="/" hreflang="en" lang="en">EN</a><b aria-current="true">IT</b></span>
-      <a class="btn" id="nav-cta" href="#request" data-req>Richiedi un posto</a>
+      <a class="btn" id="nav-cta" href="/#request" data-req>Richiedi un posto</a>
     </nav>
   </div>
 </header>
@@ -387,7 +391,7 @@ html:not([data-live]) .o-next{display:none}
         <h1 style="margin-top:22px">Feste universitarie <em>a Perugia.</em></h1>
         <p class="lede">La tua gente. La tua notte. Open bar, DJ e gente nuova da conoscere, a prezzo studenti.</p>
         <div class="ctas">
-          <a class="btn" href="#request" data-req>Richiedi un posto</a>
+          <a class="btn" href="/#request" data-req>Richiedi un posto</a>
         </div>
       </div>
       
@@ -424,7 +428,12 @@ html:not([data-live]) .o-next{display:none}
 
   </div>
 
-  <div class="wrap o-main">
+  <div class="wrap o-go"><section class="go" aria-labelledby="go-h">
+      <h2 id="go-h">Pronto per la <span>prossima notte?</span></h2>
+      <p>Data, richiesta del posto e tutto il resto sono sulla pagina principale.</p>
+      <div class="go-b"><a class="btn" href="/#request">Richiedi un posto</a><a class="btn outline" href="/">Vai a PerugiaParty →</a></div>
+    </section></div>
+<div class="wrap o-main">
     <section class="sec" id="how" aria-labelledby="how-h">
       <div class="sec-head">
         <h2 id="how-h">Come funziona.</h2>
@@ -546,7 +555,6 @@ html:not([data-live]) .o-next{display:none}
         <details><summary>Biglietto perso, rimborsi?</summary><p>Link perso? Vai su <a href="/ticket">perugiaparty.com/ticket</a> e accedi con Instagram e codice. I biglietti sono personali, non trasferibili né rimborsabili. Se annulliamo, ti contattiamo noi.</p></details>
         <details id="rules"><summary>Quali sono le regole della casa?</summary><ol class="rl"><li><b>In lista o fuori.</b> Niente lista, niente ingresso. I biglietti sono personali.</li><li><b>Paga prima di venire.</b> Bonifico con nome e codice PP come causale.</li><li><b>Con calma.</b> Un drink alla volta. Non sprecarli.</li><li><b>La musica non si tocca.</b> Rispetta la vibe e chi suona.</li><li><b>Niente casino.</b> Usa i sacchi. Lascia il posto come l’hai trovato.</li><li><b>Rispetta lo staff.</b> È grazie a loro che la notte esiste.</li></ol></details>
       </div>
-      <nav class="langs" aria-label="Other pages"><a class="btn outline" href="/" hreflang="en" lang="en">In English</a><a class="btn outline" href="/erasmus">Erasmus in Perugia</a></nav>
     </section>
   </div>
 </main>
@@ -567,7 +575,7 @@ html:not([data-live]) .o-next{display:none}
   </div>
 </footer>
 
-<a class="mbar" id="mbar" href="#request" hidden>Richiedi un posto</a>
+<a class="mbar" id="mbar" href="/#request" hidden>Richiedi un posto</a>
 
 <div class="saveov" id="saveov" role="dialog" aria-modal="true" aria-labelledby="save-h" hidden>
   <div class="savebox">
@@ -617,7 +625,7 @@ function applyOpen(ev){
   document.querySelectorAll("[data-req]").forEach(a => {
     if (!a.dataset.label) a.dataset.label = a.textContent;
     if (closed) { a.href = "https://www.instagram.com/perugiaparty/"; a.target = "_blank"; a.rel = "noopener"; if (a.classList.contains("btn")) a.textContent = a.id === "nav-cta" ? "Instagram ↗" : "Seguici su Instagram ↗"; }
-    else { a.href = "#request"; a.removeAttribute("target"); if (a.classList.contains("btn")) a.textContent = ev.sold_out ? "Entra in lista d’attesa" : a.dataset.label; }
+    else { a.href = "/#request"; a.removeAttribute("target"); if (a.classList.contains("btn")) a.textContent = ev.sold_out ? "Entra in lista d’attesa" : a.dataset.label; }
   });
 }
 function renderNext(ev){
@@ -631,7 +639,7 @@ function renderNext(ev){
   const ts = $("tk-sub"); if (ts && ev.name) ts.textContent = ev.name + (ev.date_label ? " · " + ev.date_label : "");
   const price = ev.price ? "From " + euro(ev.price.min) : null;
   const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]].filter(f => f[1]);
-  const cta = ev.requests_open ? `<a class="btn" href="#request">${ev.sold_out ? "Entra in lista d’attesa" : "Richiedi un posto"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Seguici su Instagram ↗</a>`;
+  const cta = ev.requests_open ? `<a class="btn" href="/#request">${ev.sold_out ? "Entra in lista d’attesa" : "Richiedi un posto"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Seguici su Instagram ↗</a>`;
   el.classList.toggle("has-poster", !!ev.poster);
   const art = ev.poster ? "" : `<img class="next-art" src="/ill/${ev.sold_out ? "waitlist" : "hero-party"}.svg" alt="" width="360" height="200">`;
   el.innerHTML = `<div class="next-main"><span class="status"><i></i>${statusLine(ev)}</span>
