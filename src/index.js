@@ -702,7 +702,7 @@ function eventJsonLd(ev) {
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     description: `${ev.name}: a private student and Erasmus party in Perugia${ev.date_label ? " on " + ev.date_label : ""}${ev.doors ? ", doors " + ev.doors : ""}. Request your place on the guest list. 18+.`,
-    image: [ev.poster && /^https?:/.test(ev.poster) ? ev.poster : "https://perugiaparty.com/og-image.png", "https://perugiaparty.com/logo.png"],
+    image: [ev.poster && /^https?:/.test(ev.poster) ? ev.poster : "https://perugiaparty.com/og-image.png?v=2", "https://perugiaparty.com/logo.png"],
     url: "https://perugiaparty.com/",
     inLanguage: "en",
     isAccessibleForFree: false,
@@ -735,20 +735,22 @@ async function homepage(req, env) {
     }
   }
   // one event read (reused from above), and the page + past nights fetched at the same time
-  const [res, nights] = await Promise.all([env.ASSETS.fetch(req), pastNightsHtml(env, u.pathname === "/it" ? "it" : "en").catch(() => null)]);
+  const [res, nights, proof] = await Promise.all([env.ASSETS.fetch(req), pastNightsHtml(env, u.pathname === "/it" ? "it" : "en").catch(() => null), lastNightProof(env, u.pathname === "/it" ? "it" : "en").catch(() => null)]);
   if (!res.ok || !(res.headers.get("content-type") || "").includes("text/html")) return res;
   let ld = null; const ev1 = ev0;
   try { if (ev1) ld = eventJsonLd(ev1); } catch (e) {}
   const closed = !(ev1 && ev1.published && ev1.requests_open);
   let rw = new HTMLRewriter();
   // "Nights you missed": every party closed in the admin panel, newest first, colours cycling black / red / cream
+  // social proof in the top line: how many came last time
+  if (proof) rw = rw.on("#proof", { element(el) { el.setInnerContent(proof); } });
   if (nights) rw = rw.on("#nights-track", { element(el) { el.setInnerContent(nights, { html: true }); } });
   // no party taking requests: mark the page so the request form is hidden from the first paint
   if (closed) rw = rw.on("html", { element(el) { el.setAttribute("data-closed", ""); } });
   // a party is out: show it right under the top, before everything else
   if (ev1 && ev1.published) rw = rw.on("html", { element(el) { el.setAttribute("data-live", ""); } });
   if (ld) rw = rw.on("head", { element(el) { el.append(`<script type="application/ld+json">${ld}</script>`, { html: true }); } });
-  return (closed || ld || nights || (ev1 && ev1.published)) ? rw.transform(res) : res;
+  return (closed || ld || nights || proof || (ev1 && ev1.published)) ? rw.transform(res) : res;
 }
 // Past parties: one shared list for the homepage slider, the /nights/<slug> pages and the sitemap
 async function pastNights(env) {
@@ -772,6 +774,15 @@ async function pastNightsHtml(env, lang = "en") {
   if (!rows.length) return null;
   return rows.map((h, i) => `<article class="night n${(i % 3) + 1}"><p class="when">${lang === "it" ? (i === 0 ? "Ultima edizione" : "Edizione passata") : (i === 0 ? "Last edition" : "Past edition")}</p><div><h3>${escH(h.title)}</h3></div></article>`).join("");
 }
+async function lastNightProof(env, lang) {
+  const h = await env.DB.prepare("SELECT tag, name, site_title FROM history WHERE tag IS NOT NULL ORDER BY closed_at DESC LIMIT 1").first();
+  if (!h) return null;
+  const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND status = 'in' AND COALESCE(ticket,'') <> 'crew'").bind(h.tag).first();
+  const n = (r && r.n) || 0;
+  if (n < 20) return null;
+  const t = h.site_title || h.name;
+  return lang === "it" ? `${n} persone a ${t}` : `${n} came to ${t}`;
+}
 async function nightPage(env, slug) {
   const rows = await pastNights(env);
   const h = rows.find((r) => r.slug === slug);
@@ -790,9 +801,9 @@ async function nightPage(env, slug) {
 <title>${escH(h.title)} · PerugiaParty, student party in Perugia</title>
 <meta name="description" content="${escH(desc)}">
 <link rel="canonical" href="${url}"><meta name="theme-color" content="#141210">
-<meta property="og:type" content="website"><meta property="og:title" content="${escH(h.title)} · PerugiaParty"><meta property="og:description" content="${escH(desc)}"><meta property="og:url" content="${url}"><meta property="og:image" content="https://perugiaparty.com/og-image.png"><meta name="twitter:card" content="summary_large_image">
+<meta property="og:type" content="website"><meta property="og:title" content="${escH(h.title)} · PerugiaParty"><meta property="og:description" content="${escH(desc)}"><meta property="og:url" content="${url}"><meta property="og:image" content="https://perugiaparty.com/og-image.png?v=2"><meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" sizes="48x48" href="/favicon-v2.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="preload" href="/fonts/bowlby-400.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/fonts/fonts.css?v=1"><link rel="stylesheet" href="/site.css?v=20261023a">
+<link rel="preload" href="/fonts/bowlby-400.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/fonts/fonts.css?v=1"><link rel="stylesheet" href="/site.css?v=20261108a">
 <style>.np{max-width:640px;padding:9vh 0 10vh}.np .k{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 14px}.np h1{font-size:clamp(44px,9vw,84px);margin:0 0 16px}.np .l{font-size:clamp(18px,2.4vw,22px);margin:0 0 30px}.np .cta{display:flex;gap:10px;flex-wrap:wrap}.np .seo{font-size:15px;line-height:1.6;color:var(--muted);margin:0 0 30px;max-width:60ch}.np .more{margin-top:44px;color:var(--muted);font-size:15px}.np .stub{display:block;width:min(360px,100%);height:auto;border-radius:20px;margin:0 0 28px}</style>
 ${ld ? `<script type="application/ld+json">${ld}</script>` : ""}
 </head><body><header class="top"><div class="wrap"><a class="mark" href="/"><img src="/brand/wordmark-2.png" alt="PerugiaParty" width="851" height="160"></a><nav aria-label="Main"><a class="btn" href="/#next">Next party</a></nav></div></header>

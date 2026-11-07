@@ -9,11 +9,11 @@ def build(path, lang, pairs, hero_art, hero_alt, post=None):
     for a, b in pairs:
         if a not in s: miss.append(a[:60])
         s = s.replace(a, b)
-    if post: s = post(s)
     # hero: own illustration instead of the example ticket
     s = re.sub(r'<a class="ticket".*?</a>', f'<img class="hero-art" src="/ill/{hero_art}.svg" alt="{hero_alt}" width="360" height="200" fetchpriority="high">', s, count=1, flags=re.S)
     s = s.replace('<link rel="preload" href="/logo.png" as="image">', f'<link rel="preload" href="/ill/{hero_art}.svg" as="image">')
     s = s.replace("</style>", ".hero-art{display:block;width:100%;height:auto;border-radius:24px;box-shadow:12px 12px 0 var(--red);transform:rotate(-2deg)}\n</style>", 1)
+    if post: s = post(s)
     # structured data: this page + its own visible FAQ
     if 'class="hd-chat"' in s:
         hd = s[s.index('class="hd-chat"'):]; hd = hd[:hd.index("</ul>")]
@@ -154,15 +154,25 @@ build("/erasmus", "en", COMMON_HEAD("/erasmus", "Erasmus parties in Perugia · P
     ('<h3>Party</h3><p>QR and photo ID at the door.</p>', '<h3>Party</h3><p>Show the QR and your passport or ID card.</p>'),
 ], "hero-erasmus", "People from all over the world meeting in Perugia", erasmus_post)
 
+
+# Italian page: the comparison is the hook, so it comes right after the title
+def it_post(s):
+    s = re.sub(r'<img class="hero-art"[^>]*>', '', s, count=1)
+    s = s.replace('<link rel="preload" href="/ill/hero-it.svg" as="image">', "")
+    s = s.replace("</style>", """.hero{grid-template-columns:1fr!important;padding-block:clamp(28px,5vw,56px) 0!important;gap:0!important}
+.hero .lede{max-width:46ch}
+.o-why #why{padding-top:clamp(28px,4vw,44px)}
+.o-why .why-big{font-size:clamp(28px,4vw,48px);margin-bottom:clamp(18px,3vw,32px)}
+</style>""", 1)
+    return s
+
 # ---------- Italiano
 IT = [
     ('<b aria-current="true">EN</b><a href="/it" hreflang="it" lang="it">IT</a>', '<a href="/" hreflang="en" lang="en">EN</a><b aria-current="true">IT</b>'),
     ('<html lang="en">', '<html lang="it">'),
     ('Request a place</a>', 'Richiedi un posto</a>'),
-    ('<span class="hm-red">Invite only</span>', '<span class="hm-red">Solo su invito</span>'),
     ('Student parties <em>in Perugia.</em>', 'Feste universitarie <em>a Perugia.</em>'),
     ('Your people. Your night. Open bar, DJs and new people to meet, at a student price.', 'La tua gente. La tua notte. Open bar, DJ e gente nuova da conoscere, a prezzo studenti.'),
-    ('<p class="ig-note">Questions? DM', '<p class="ig-note">Domande? Scrivi a'),
     ('<h2>Next party.</h2>', '<h2>Prossima festa.</h2>'),
     ('<p>New list every edition.</p>', '<p>Lista nuova a ogni edizione.</p>'),
     ('Announcing soon', 'In arrivo'),
@@ -236,7 +246,9 @@ IT = [
     ('<p>Independent nights · Perugia, Italia</p>', '<p>Serate indipendenti · Perugia, Italia</p>'),
     ('rel="noopener">Contact ↗</a>', 'rel="noopener">Contatti ↗</a>'),
     # live texts from the script
-    ('a.id === "nav-cta" ? "Instagram ↗" : "Follow for the next date ↗"', 'a.id === "nav-cta" ? "Instagram ↗" : "Segui per la prossima data ↗"'),
+    ('ev.sold_out ? "Join the waitlist" : a.dataset.label', 'ev.sold_out ? "Entra in lista d’attesa" : a.dataset.label'),
+    ('mb.textContent = ev.sold_out ? "Join the waitlist" : "Request a place"', 'mb.textContent = ev.sold_out ? "Entra in lista d’attesa" : "Richiedi un posto"'),
+    ('<span class="hm-red" id="proof">Invite only</span>', '<span class="hm-red" id="proof">Solo su invito</span>'),
     ('"Join the waitlist" : "Request a place"', '"Entra in lista d’attesa" : "Richiedi un posto"'),
     ('"Join the waitlist" : "Send request"', '"Entra in lista d’attesa" : "Invia richiesta"'),
     ('<p>Request below. Once approved, pay to unlock your ticket.</p>', '<p>Richiedi qui sotto. Se approvato, paghi e sblocchi il biglietto.</p>'),
@@ -244,5 +256,5 @@ IT = [
 build("/it", "it", COMMON_HEAD("/it", "Feste universitarie ed Erasmus a Perugia · PerugiaParty",
         "Feste private per studenti universitari ed Erasmus nel centro di Perugia. Open bar, DJ e gente nuova da conoscere, a prezzo studenti. 18+.",
         "Feste universitarie a Perugia · PerugiaParty", "Serata da club. Vibe da centro. Il meglio dei due mondi. Open bar, prezzi bassi. 18+.", "it_IT") + IT,
-      "hero-it", "Perugia di notte, con una festa accesa")
+      "hero-it", "Perugia di notte, con una festa accesa", it_post)
 print("built /it and /erasmus")
