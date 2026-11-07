@@ -154,8 +154,9 @@ textarea{resize:vertical;min-height:88px}
 .night.n4 .when{color:#6b5300}
 .night.n4 h3{color:var(--ink)}
 .slider{position:relative}
-.slide-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:48px;height:48px;border-radius:50%;border:0;background:var(--ink);color:var(--cream);display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 18px rgba(20,18,16,.25);transition:opacity .2s}
-.slide-btn svg{width:22px;height:22px}
+.slide-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:50px;height:50px;padding:0;margin:0;border-radius:50%;border:3px solid var(--cream);background:var(--ink);color:var(--cream);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 18px rgba(20,18,16,.25);transition:opacity .2s,transform .15s;line-height:0}
+.slide-btn:hover{transform:translateY(-50%) scale(1.06)}
+.slide-btn svg{width:22px;height:22px;display:block;flex:none;margin:0}
 .slide-btn.prev{left:-20px}.slide-btn.next{right:-20px}
 .slide-btn:disabled{opacity:0;pointer-events:none}
 @media (max-width:840px){.slide-btn{width:40px;height:40px}.slide-btn.prev{left:-8px}.slide-btn.next{right:-8px}}
