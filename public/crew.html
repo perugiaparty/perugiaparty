@@ -61,6 +61,13 @@ h2{font-family:var(--f-body);font-weight:800;font-size:26px;letter-spacing:-.01e
 .chip{flex:none;font:inherit;font-weight:700;font-size:13.5px;border-radius:99px;border:1.5px solid var(--hair);background:none;color:var(--soft);padding:8px 13px;cursor:pointer;white-space:nowrap}
 .chip.on{background:var(--txt);color:var(--bg);border-color:var(--txt)}
 .chip i{font-style:normal;opacity:.6;margin-left:4px}
+.blk{display:inline-block;font:500 10px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;background:#ff3b30;color:#fff;border-radius:6px;padding:2px 6px;vertical-align:2px}
+.it.b .dot{border-color:#ff3b30}
+.here{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#5fd893}
+.risk{padding:12px 0;border-top:1px solid var(--hair)}.risk:first-child{border-top:0}
+.risk b{display:block}.risk span{color:var(--soft);font-size:14px}
+.info{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15.5px;line-height:1.6;margin:0}
+.info a{color:var(--txt)}
 .due{color:var(--soft)}.due.late{color:#ff8a7f;font-weight:700}
 .acts .lbl{font-size:12px;font-family:var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-top:2px}
 .acts input[type=date]{padding:10px 12px;color-scheme:dark}
@@ -219,6 +226,10 @@ const day = (t) => t ? new Date(t).toLocaleDateString("en-GB", { day: "numeric",
 const when = (t) => { if (!t) return ""; const m = Math.round((Date.now() - t) / 60000); return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : day(t); };
 const hm = (t) => t ? new Date(t).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }) : "";
 const today = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+const partyDay = () => { const t = S && S.event.starts_at ? new Date(S.event.starts_at) : null; return t && !isNaN(t) ? new Date(t.getTime() - t.getTimezoneOffset() * 60000).toISOString().slice(0, 10) : null; };
+const addDays = (iso, n) => { const d = new Date(iso + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const dueOf = (n) => n.due || (n.doff != null && n.doff !== "" && partyDay() ? addDays(partyDay(), Number(n.doff)) : null);
+const dLabel = (n) => n.doff == null || n.doff === "" ? "" : Number(n.doff) === 0 ? "D-day" : "D" + (Number(n.doff) > 0 ? "+" : "−") + Math.abs(Number(n.doff));
 const dueTxt = (d) => { if (!d) return ""; const t = today(); if (d < t) return "overdue · " + new Date(d + "T12:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" }); if (d === t) return "due today"; return "due " + new Date(d + "T12:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }); };
 const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>';
 const CHEV = '<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
@@ -368,28 +379,29 @@ function draw() {
   const f = document.querySelector("[data-autofocus]"); if (f) f.focus();
 }
 const list = (kind, done) => S.needs.filter((n) => (n.kind || "buy") === kind && !!Number(n.done) === done)
-  .sort((a, b) => done ? 0 : (a.due || "9999") < (b.due || "9999") ? -1 : (a.due || "9999") > (b.due || "9999") ? 1 : 0);
+  .sort((a, b) => done ? 0 : (Number(b.blocker) - Number(a.blocker)) || ((dueOf(a) || "9999") < (dueOf(b) || "9999") ? -1 : (dueOf(a) || "9999") > (dueOf(b) || "9999") ? 1 : 0));
 const plus = (k, label) => `<button class="plus ${adding === k ? "off" : ""}" data-add="${k}">${adding === k ? "Cancel" : "+ " + label}</button>`;
 
 function itemRow(n) {
   const done = Number(n.done) === 1, mine = n.owner === S.me.id, todo = n.kind === "todo", open = openId === n.id;
   const canDel = S.me.lead || n.created_by === S.me.id;
   const dot = done ? `<span class="dot ok">${CHECK}</span>` : n.owner ? `<span class="dot ${mine ? "mine" : "who"}">${esc(ini(who(n.owner)))}</span>` : `<span class="dot"></span>`;
-  const sub = [todo ? "" : n.shop ? n.shop : "", !done && n.due ? "\u0000" : "", done ? (todo ? "done by " : "got it: ") + first(who(n.done_by)) : n.owner ? (mine ? "you're on it" : first(who(n.owner)) + (todo ? " is on it" : " gets it")) : ""].filter(Boolean).join(" · ");
+  const sub = [todo ? "" : n.shop ? n.shop : "", !done && dueOf(n) ? "\u0000" : "", done ? (todo ? "done by " : "got it: ") + first(who(n.done_by)) : n.owner ? (mine ? "you're on it" : first(who(n.owner)) + (todo ? " is on it" : " gets it")) : ""].filter(Boolean).join(" · ");
   let acts = "";
   if (open) {
     const claim = !done && (!n.owner || mine || S.me.lead) ? `<button class="ghost" data-claim="${n.id}">${mine ? "I can't anymore" : n.owner ? "Free it up" : todo ? "I'll do it" : "I'll get it"}</button>` : "";
     const del = canDel ? `<button class="ghost bad" data-del="${n.id}">Remove</button>` : "";
-    const more = done ? "" : `<div class="lbl">Due date</div><input type="date" data-due="${n.id}" value="${esc(n.due || "")}">${S.me.lead ? `<div class="lbl">Give to</div><select data-assign="${n.id}"><option value="">Nobody yet</option>${S.crew.map((c) => `<option value="${c.id}" ${n.owner === c.id ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select>` : ""}`;
+    const more = done ? "" : `<div class="lbl">Due date</div><input type="date" data-due="${n.id}" value="${esc(dueOf(n) || "")}">${S.me.lead ? `<button type="button" class="ghost" data-blk="${n.id}" data-v="${Number(n.blocker) ? 0 : 1}">${Number(n.blocker) ? "Not a blocker" : "Mark as blocker"}</button>` : ""}${S.me.lead ? `<div class="lbl">Give to</div><select data-assign="${n.id}"><option value="">Nobody yet</option>${S.crew.map((c) => `<option value="${c.id}" ${n.owner === c.id ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select>` : ""}`;
     acts = done
       ? `<div class="acts"><div class="r"><button class="ghost" data-undo="${n.id}">${todo ? "Not done after all" : "Not bought after all"}</button>${del}</div></div>`
       : todo
         ? `<div class="acts"><button class="yes" data-did="${n.id}">Yes, it's done ✓</button><div class="r">${claim}${del}</div>${more}</div>`
         : `<form class="acts" data-f="got" data-id="${n.id}"><input name="price" inputmode="decimal" placeholder="Paid yourself? €"><button class="yes">Yes, I got it ✓</button><div class="r">${claim}${del}</div>${more}</form>`;
   }
-  const dueHtml = !done && n.due ? `<span class="due ${n.due < today() ? "late" : ""}">${esc(dueTxt(n.due))}</span>` : "";
+  const dd = dueOf(n);
+  const dueHtml = !done && dd ? `<span class="due ${dd < today() ? "late" : ""}">${esc(dueTxt(dd))}${dLabel(n) ? " · " + dLabel(n) : ""}</span>` : "";
   const subHtml = sub ? esc(sub).replace("\u0000", dueHtml) : "";
-  return `<div class="it ${done ? "done" : ""} ${open ? "open" : ""}"><button class="item" data-open="${n.id}">${dot}<div class="main"><b>${esc(n.item)}${n.qty ? ` <span style="font-weight:500">× ${esc(n.qty)}</span>` : ""}</b>${subHtml ? `<span>${subHtml}</span>` : ""}</div>${CHEV}</button>${acts}</div>`;
+  return `<div class="it ${done ? "done" : ""} ${open ? "open" : ""} ${!done && Number(n.blocker) ? "b" : ""}"><button class="item" data-open="${n.id}">${dot}<div class="main"><b>${!done && Number(n.blocker) ? '<span class="blk">Blocker</span> ' : ""}${esc(n.item)}${n.qty ? ` <span style="font-weight:500">× ${esc(n.qty)}</span>` : ""}</b>${subHtml ? `<span>${subHtml}</span>` : ""}</div>${CHEV}</button>${acts}</div>`;
 }
 function doneBlock(items, label) {
   return items.length ? `<details ${openId && items.some((n) => n.id === openId) ? "open" : ""}><summary>${label} · ${items.length} ▾</summary><div class="card list">${items.map(itemRow).join("")}</div></details>` : "";
@@ -454,11 +466,38 @@ function notesView() {
 }
 
 function moreView() {
-  const tabs = [["notes", "Notes"], ["spend", "Receipts"], ["pal", "Palette"]].filter(([k]) => k !== "pal" || S.event.palette);
+  const tabs = [["notes", "Notes"], ["spend", "Receipts"], ["info", "Info"], ["risk", "Plan B"], ["dec", "Decisions"], ["retro", "Retro"]];
   if (!tabs.some(([k]) => k === sub)) sub = "notes";
+  const v = sub === "spend" ? spendView() : sub === "info" ? infoView() : sub === "risk" ? riskView() : sub === "dec" ? decView() : sub === "retro" ? retroView() : notesView();
   return `<h2>More</h2>
-  <div class="subnav" style="grid-template-columns:repeat(${tabs.length},1fr)">${tabs.map(([k, l]) => `<button data-sub="${k}" class="${sub === k ? "on" : ""}">${l}</button>`).join("")}</div>
-  ${sub === "spend" ? spendView() : sub === "pal" ? paletteBlock() : notesView()}`;
+  <div class="chips" style="margin-top:8px;margin-bottom:14px">${tabs.map(([k, l]) => `<button class="chip ${sub === k ? "on" : ""}" data-sub="${k}">${l}</button>`).join("")}</div>${v}`;
+}
+function infoView() {
+  const info = S.event.info;
+  const linked = esc(info).replace(/(\+?\d[\d ]{6,}\d)/g, (m) => `<a href="tel:${m.replace(/\s/g, "")}">${m}</a>`);
+  return `<h3 style="margin-top:0">Emergency & info</h3>
+  <div class="card">${info ? `<p class="info">${linked}</p>` : `<div class="empty">Nothing yet</div>`}<p class="info" style="margin-top:10px;color:var(--soft)">Emergency: <a href="tel:112">112</a></p></div>
+  ${S.event.palette ? `<h3>Colour palette</h3>${paletteBlock()}` : ""}`;
+}
+function riskView() {
+  return `<div class="shd" style="margin-top:0"><p class="lead" style="margin:0">If this happens, we do this</p>${S.me.lead ? plus("risk", "Add") : ""}</div>
+  ${adding === "risk" ? `<form class="addbox" data-f="risk"><input name="risk" placeholder="What could go wrong?" maxlength="120" data-autofocus><input name="plan" placeholder="Plan B" maxlength="300"><button class="big" style="padding:12px">Add</button></form>` : ""}
+  <div class="card" style="margin-top:10px">${S.risks.map((r) => `<div class="risk" style="display:flex;gap:10px"><div style="flex:1"><b>${esc(r.risk)}</b><span>→ ${esc(r.plan || "No plan yet")}</span></div>${S.me.lead ? `<button class="x" data-delrisk="${r.id}" aria-label="Remove">×</button>` : ""}</div>`).join("") || `<div class="empty">No risks listed</div>`}</div>`;
+}
+function decView() {
+  return `<div class="shd" style="margin-top:0"><p class="lead" style="margin:0">What we agreed</p>${S.me.lead ? plus("dec", "Add") : ""}</div>
+  ${adding === "dec" ? `<form class="addbox" data-f="dec"><input name="body" placeholder="e.g. Open bar ends at 03:30" maxlength="300" data-autofocus><button class="big" style="padding:12px">Log decision</button></form>` : ""}
+  <div class="card" style="margin-top:10px">${S.decisions.map((x) => `<div class="risk" style="display:flex;gap:10px"><div style="flex:1"><b style="font-weight:600">${esc(x.body)}</b><span>${esc(first(x.author))} · ${day(x.created_at)}</span></div>${S.me.lead ? `<button class="x" data-deldec="${x.id}" aria-label="Remove">×</button>` : ""}</div>`).join("") || `<div class="empty">No decisions yet</div>`}</div>`;
+}
+function retroView() {
+  const r = S.retro;
+  return `<p class="lead">After the party · only Matt sees your answers</p>
+  <form class="addbox" data-f="retro" style="border-color:var(--hair)">
+    <div class="lbl" style="font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">What went well?</div><textarea name="good" rows="3" maxlength="1000">${esc(r.good)}</textarea>
+    <div class="lbl" style="font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">What went wrong?</div><textarea name="bad" rows="3" maxlength="1000">${esc(r.bad)}</textarea>
+    <div class="lbl" style="font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)">What do we change next time?</div><textarea name="change" rows="3" maxlength="1000">${esc(r.change)}</textarea>
+    <button class="big" style="padding:12px">${r.updated_at ? "Update" : "Send"}</button>
+  </form>`;
 }
 function spendView() {
   const mine = S.spends, owed = mine.filter((x) => !Number(x.repaid)).reduce((a, x) => a + Number(x.amount || 0), 0);
@@ -476,18 +515,22 @@ function spendView() {
   }).join("") : `<div class="empty">No receipts yet</div>`}</div>`;
 }
 
+// check-in shows from 6 hours before the doors until 12 hours after
+function nightOn() { const t = S.event.starts_at ? new Date(S.event.starts_at).getTime() : 0; return t && Date.now() > t - 6 * 36e5 && Date.now() < t + 12 * 36e5; }
+const myHere = () => (S.crew.find((c) => c.id === S.me.id) || {}).here_at;
 function attView() {
   const a = S.attendance, cap = S.event.capacity, going = a.paid;
   const cnt = (v) => S.crew.filter((c) => (c.going || "") === v).length;
   const label = { yes: ["Coming", "ok"], maybe: ["Maybe", "due"], no: ["Not coming", ""], "": ["No answer", ""] };
   const me = S.me;
   return `<h2>Attendance</h2>
-  <p class="lead">${cnt("yes")} of ${S.crew.length} crew coming · ${going} guests paid</p>
+  <p class="lead">${cnt("yes")} of ${S.crew.length} crew coming${nightOn() ? ` · ${S.crew.filter((c) => c.here_at).length} here` : ""} · ${going} guests paid</p>
   <h3>You</h3>
   <div class="card">
     <div class="seg">${[["yes", "Coming"], ["maybe", "Maybe"], ["no", "Can't"]].map(([v, l]) => `<button data-go="${v}" class="${me.going === v ? "on" : ""}">${l}</button>`).join("")}</div>
     <form class="buy" data-f="arrive"><input name="arrive" value="${esc(me.arrive)}" placeholder="Arriving at… (20:30)" maxlength="40"><button class="btn2">Save</button></form>
     ${me.role ? `<p class="muted" style="margin:10px 0 0;font-size:14px">Your job: <b style="color:var(--txt)">${esc(me.role)}</b></p>` : ""}
+    ${nightOn() ? (myHere() ? `<button class="ghost" style="width:100%;margin-top:10px" data-here="0">✓ Checked in at ${hm(myHere())} · undo</button>` : `<button class="yes" style="margin-top:10px" data-here="1">I'm here</button>`) : ""}
   </div>
   <div class="shd"><h3>Shifts</h3>${me.lead ? plus("shift", "Add") : ""}</div>
   ${adding === "shift" ? `<form class="addbox" data-f="shift"><select name="crew_id" aria-label="Who">${S.crew.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select>
@@ -511,7 +554,7 @@ function attView() {
   <div class="card">${S.crew.map((c) => {
     const [l, k] = label[c.going || ""] || label[""];
     return `<div class="row"><div class="main"><b>${esc(c.name)} <span class="pill ${k}">${l}</span>${Number(c.lead) ? ' <span class="pill">lead</span>' : ""}</b>
-      <span>${c.role ? esc(c.role) : "No job yet"}${c.arrive ? " · there at " + esc(c.arrive) : ""}</span>
+      <span>${c.role ? esc(c.role) : "No job yet"}${c.arrive ? " · there at " + esc(c.arrive) : ""}</span>${c.here_at ? ` <span class="here">✓ here ${hm(c.here_at)}</span>` : ""}
       ${S.me.lead ? `<form class="buy" data-f="role" data-id="${c.id}"><input name="role" value="${esc(c.role || "")}" placeholder="Job (bar, door, DJ…)" maxlength="40"><button class="btn2 sm">Save</button></form>` : ""}</div>
       </div>`;
   }).join("")}</div>`;
@@ -523,6 +566,10 @@ document.addEventListener("click", (e) => {
   const d = t.dataset;
   if (d.tab) { if (noteDirty) saveNote(); tab = d.tab; openId = null; adding = null; draw(); window.scrollTo(0, 0); return; }
   if (d.push) { enablePush(); return; }
+  if (d.blk) { return act("need_blocker", { id: Number(d.blk), v: d.v === "1" }, d.v === "1" ? "Marked as blocker" : "Not a blocker"); }
+  if (d.here) return act("here", { v: d.here === "1" }, d.here === "1" ? "Checked in" : "Check-in undone");
+  if (d.delrisk) { if (confirmTwice(t)) act("risk_del", { id: d.delrisk }, "Removed"); return; }
+  if (d.deldec) { if (confirmTwice(t)) act("decision_del", { id: d.deldec }, "Removed"); return; }
   if (d.delshift) { if (confirmTwice(t)) act("shift_del", { id: d.delshift }, "Shift removed"); return; }
   if (d.phase) { phase = d.phase; openId = null; draw(); return; }
   if (d.sub) { if (noteDirty) saveNote(); sub = d.sub; adding = null; draw(); return; }
@@ -555,6 +602,9 @@ document.addEventListener("submit", (e) => {
   if (k === "news") { if (!need(v.body)) return; adding = null; return act("news_add", { body: v.body }, "Posted to everyone"); }
   if (k === "spend") { if (!need(v.item) || !need(v.amount)) return; adding = null; return act("spend_add", v, "Receipt added"); }
   if (k === "got") { openId = null; return act("need_done", { id: Number(f.dataset.id), v: true, price: v.price }, v.price ? "Got it ✓ · added to your receipts" : "Got it ✓"); }
+  if (k === "risk") { if (!need(v.risk)) return; adding = null; return act("risk_add", v, "Added"); }
+  if (k === "dec") { if (!need(v.body)) return; adding = null; return act("decision_add", v, "Logged"); }
+  if (k === "retro") return act("retro", v, "Thanks! Sent to Matt");
   if (k === "shift") { if (!need(v.role)) return; if (!v.start) { toast("Add the start time", true); return; } adding = null; return act("shift_add", { ...v, crew_id: Number(v.crew_id) }, "Shift added"); }
   if (k === "arrive") return act("me", { going: S.me.going, arrive: v.arrive }, "Saved");
   if (k === "role") return act("role", { id: Number(f.dataset.id), role: v.role }, "Job saved");

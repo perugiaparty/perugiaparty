@@ -113,20 +113,23 @@ function palette(raw) {
 
 async function state(env, ev, me) {
   const tag = ev.tag;
-  const [crew, spends, needs, st, news, note, shifts] = await Promise.all([
-    env.DB.prepare("SELECT c.id, c.name, c.lead, p.role, p.going, p.arrive FROM crew c JOIN crew_party p ON p.crew_id = c.id WHERE p.event = ? ORDER BY c.lead DESC, c.name").bind(tag).all(),
+  const [crew, spends, needs, st, news, note, shifts, risks, decisions, retro] = await Promise.all([
+    env.DB.prepare("SELECT c.id, c.name, c.lead, p.role, p.going, p.arrive, p.here_at FROM crew c JOIN crew_party p ON p.crew_id = c.id WHERE p.event = ? ORDER BY c.lead DESC, c.name").bind(tag).all(),
     env.DB.prepare("SELECT id, item, amount, cat, shop, repaid, created_at FROM crew_spend WHERE event = ? AND crew_id = ? ORDER BY created_at DESC").bind(tag, me.id).all(),
-    env.DB.prepare("SELECT id, COALESCE(kind,'buy') AS kind, phase, due, item, qty, cat, shop, owner, done, done_by, done_at, created_at, created_by FROM crew_need WHERE event = ? ORDER BY done, created_at").bind(tag).all(),
+    env.DB.prepare("SELECT id, COALESCE(kind,'buy') AS kind, phase, due, doff, COALESCE(blocker,0) AS blocker, item, qty, cat, shop, owner, done, done_by, done_at, created_at, created_by FROM crew_need WHERE event = ? ORDER BY done, created_at").bind(tag).all(),
     env.DB.prepare(
       "SELECT SUM(status IN ('requested','waitlist')) AS requested, SUM(status = 'approved') AS approved, SUM(status IN ('paid','in')) AS paid, SUM(status = 'in') AS inside, SUM(ticket = 'crew' AND status IN ('approved','paid','in')) AS crew_tickets FROM guests WHERE event = ?"
     ).bind(tag).first(),
     env.DB.prepare("SELECT id, body, author, crew_id, created_at FROM crew_news WHERE event = ? ORDER BY created_at DESC LIMIT 30").bind(tag).all(),
     env.DB.prepare("SELECT body, updated_at FROM crew_note WHERE crew_id = ?").bind(me.id).first(),
     env.DB.prepare("SELECT id, crew_id, role, start, end FROM crew_shift WHERE event = ? ORDER BY CASE WHEN start < '12:00' THEN 1 ELSE 0 END, start, end").bind(tag).all(),
+    env.DB.prepare("SELECT id, risk, plan FROM crew_risk WHERE event = ? ORDER BY id").bind(tag).all(),
+    env.DB.prepare("SELECT id, body, author, created_at FROM crew_decision WHERE event = ? ORDER BY created_at DESC").bind(tag).all(),
+    env.DB.prepare("SELECT good, bad, change, updated_at FROM crew_retro WHERE crew_id = ? AND event = ?").bind(me.id, tag).first(),
   ]);
   const a = st || {};
   const out = {
-    event: { name: ev.name || "", tag, date: ev.date_label || "", starts_at: ev.starts_at || "", doors: ev.doors || "", capacity: Number(ev.capacity) || null, palette: palette(ev.crew_palette) },
+    event: { name: ev.name || "", tag, date: ev.date_label || "", starts_at: ev.starts_at || "", doors: ev.doors || "", capacity: Number(ev.capacity) || null, palette: palette(ev.crew_palette), starts_at: ev.starts_at || "", info: String(ev.crew_info || "").slice(0, 2000) },
     me: { id: me.id, name: me.name, lead: Number(me.lead) === 1, role: me.role || "", going: me.going || "", arrive: me.arrive || "" },
     crew: crew.results || [],
     spends: spends.results || [],
@@ -134,6 +137,9 @@ async function state(env, ev, me) {
     cats: CATS,
     news: news.results || [],
     shifts: shifts.results || [],
+    risks: risks.results || [],
+    decisions: decisions.results || [],
+    retro: retro || { good: "", bad: "", change: "", updated_at: null },
     note: note ? { body: note.body || "", at: note.updated_at } : { body: "", at: null },
     attendance: { requested: a.requested || 0, approved: a.approved || 0, paid: a.paid || 0, inside: a.inside || 0, crew_tickets: a.crew_tickets || 0 },
   };
@@ -268,6 +274,46 @@ export async function apiCrew(req, env, action, { getEvent, json }) {
     case "news_del": {
       if (!lead) return json({ error: "Only a lead can remove announcements." }, 403);
       await env.DB.prepare("DELETE FROM crew_news WHERE id = ? AND event = ?").bind(id, tag).run();
+      return ok();
+    }
+    case "need_blocker": {
+      if (!lead) return json({ error: "Only a lead can mark blockers." }, 403);
+      await env.DB.prepare("UPDATE crew_need SET blocker = ? WHERE id = ? AND event = ?").bind(body.v ? 1 : 0, id, tag).run();
+      return ok();
+    }
+    case "here": {
+      // crew check-in on the night
+      await env.DB.prepare("UPDATE crew_party SET here_at = ? WHERE crew_id = ? AND event = ?").bind(body.v === false ? null : now, me.id, tag).run();
+      return ok();
+    }
+    case "risk_add": {
+      if (!lead) return json({ error: "Only a lead can add risks." }, 403);
+      const risk = clean(body.risk, 120), plan = clean(body.plan, 300);
+      if (!risk) return json({ error: "What could go wrong?" }, 400);
+      await env.DB.prepare("INSERT INTO crew_risk (event, risk, plan, created_at) VALUES (?, ?, ?, ?)").bind(tag, risk, plan, now).run();
+      return ok();
+    }
+    case "risk_del": {
+      if (!lead) return json({ error: "Only a lead can remove risks." }, 403);
+      await env.DB.prepare("DELETE FROM crew_risk WHERE id = ? AND event = ?").bind(id, tag).run();
+      return ok();
+    }
+    case "decision_add": {
+      if (!lead) return json({ error: "Only a lead can log decisions." }, 403);
+      const text = clean(body.body, 300);
+      if (!text) return json({ error: "Write the decision first." }, 400);
+      await env.DB.prepare("INSERT INTO crew_decision (event, body, author, created_at) VALUES (?, ?, ?, ?)").bind(tag, text, me.name, now).run();
+      return ok();
+    }
+    case "decision_del": {
+      if (!lead) return json({ error: "Only a lead can remove decisions." }, 403);
+      await env.DB.prepare("DELETE FROM crew_decision WHERE id = ? AND event = ?").bind(id, tag).run();
+      return ok();
+    }
+    case "retro": {
+      const g = clean(body.good, 1000), b = clean(body.bad, 1000), c = clean(body.change, 1000);
+      await env.DB.prepare("INSERT INTO crew_retro (crew_id, event, good, bad, change, updated_at) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(crew_id, event) DO UPDATE SET good = excluded.good, bad = excluded.bad, change = excluded.change, updated_at = excluded.updated_at")
+        .bind(me.id, tag, g, b, c, now).run();
       return ok();
     }
     case "need_due": {
