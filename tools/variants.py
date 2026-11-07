@@ -234,7 +234,6 @@ IT = [
     ("<b>Respect the staff.</b> They're the reason the night happens.", '<b>Rispetta lo staff.</b> È grazie a loro che la notte esiste.'),
     ('<a class="btn outline" href="/it" hreflang="it" lang="it">In italiano</a>', '<a class="btn outline" href="/" hreflang="en" lang="en">In English</a>'),
     ('<p>Independent nights · Perugia, Italia</p>', '<p>Serate indipendenti · Perugia, Italia</p>'),
-    ('<a href="#rules">House rules</a>', '<a href="#rules">Regole</a>'),
     ('rel="noopener">Contact ↗</a>', 'rel="noopener">Contatti ↗</a>'),
     # live texts from the script
     ('a.id === "nav-cta" ? "Instagram ↗" : "Follow for the next date ↗"', 'a.id === "nav-cta" ? "Instagram ↗" : "Segui per la prossima data ↗"'),
