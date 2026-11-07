@@ -28,7 +28,7 @@
 <meta name="apple-mobile-web-app-title" content="PerugiaParty">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preload" href="/ill/hero-erasmus.svg" as="image">
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://perugiaparty.com/erasmus#page", "url": "https://perugiaparty.com/erasmus", "name": "Erasmus parties in Perugia · PerugiaParty", "inLanguage": "en", "isPartOf": {"@id": "https://perugiaparty.com/#website"}, "about": {"@id": "https://perugiaparty.com/#org"}}, {"@type": "FAQPage", "@id": "https://perugiaparty.com/erasmus#faq", "mainEntity": [{"@type": "Question", "name": "I just arrived. What is PerugiaParty?", "acceptedAnswer": {"@type": "Answer", "text": "Private parties for university and Erasmus students in Perugia’s centre: open bar, DJs and new people, at a student price. Run by volunteers. 18+."}}, {"@type": "Question", "name": "Do I need to speak Italian?", "acceptedAnswer": {"@type": "Answer", "text": "No. The website, your ticket and our Instagram are in English."}}, {"@type": "Question", "name": "How do I join?", "acceptedAnswer": {"@type": "Answer", "text": "Request a place on this page, then DM your code to @perugiaparty on Instagram. We check every request and send you your ticket page."}}, {"@type": "Question", "name": "I don’t have an Italian bank account.", "acceptedAnswer": {"@type": "Answer", "text": "No problem. A normal SEPA transfer in euro from any European account works. Use your name and code as the reference."}}, {"@type": "Question", "name": "How do I get there?", "acceptedAnswer": {"@type": "Answer", "text": "It’s in the city centre, so you can walk from most student areas in town. The exact place is on your ticket after payment."}}, {"@type": "Question", "name": "What do I bring?", "acceptedAnswer": {"@type": "Answer", "text": "Your ticket QR on your phone and a photo ID (passport or ID card). You must be 18+."}}, {"@type": "Question", "name": "What are the house rules?", "acceptedAnswer": {"@type": "Answer", "text": "On the list or not in. No list, no entry. Tickets are personal. Pay before you come. Bank transfer with your name and PP code as the reference. Pace yourself. One drink at a time. Don't waste them. Leave the music alone. Respect the vibe and whoever is playing. No mess. Use the bags. Leave the place as you found it. Respect the staff. They're the reason the night happens."}}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://perugiaparty.com/erasmus#page", "url": "https://perugiaparty.com/erasmus", "name": "Erasmus parties in Perugia · PerugiaParty", "inLanguage": "en", "isPartOf": {"@id": "https://perugiaparty.com/#website"}, "about": {"@id": "https://perugiaparty.com/#org"}}, {"@type": "FAQPage", "@id": "https://perugiaparty.com/erasmus#faq", "mainEntity": [{"@type": "Question", "name": "When do bars close here?", "acceptedAnswer": {"@type": "Answer", "text": "Around 01:30 in the centre, and you're standing outside."}}, {"@type": "Question", "name": "Can I go to a club?", "acceptedAnswer": {"@type": "Answer", "text": "They're out of town. No car, no club."}}, {"@type": "Question", "name": "Where is PerugiaParty?", "acceptedAnswer": {"@type": "Answer", "text": "In the centre, walking distance. The exact place is on your ticket."}}, {"@type": "Question", "name": "Do I need Italian?", "acceptedAnswer": {"@type": "Answer", "text": "No. The site, your ticket and our DMs are in English."}}, {"@type": "Question", "name": "Why DM my code?", "acceptedAnswer": {"@type": "Answer", "text": "That's how we check you're a real person."}}, {"@type": "Question", "name": "My bank isn't Italian.", "acceptedAnswer": {"@type": "Answer", "text": "No problem: a SEPA transfer in euro works from any European account."}}]}]}</script>
 <link rel="preload" href="/fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/bowlby-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css?v=1">
@@ -358,6 +358,11 @@ html:not([data-live]) .o-next{display:none}
 .hd-chat .a b{display:block;font-family:var(--f-mono);font-weight:500;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#ffd23f;margin-bottom:3px}
 .hd-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:24px;color:#b9ab98}
 @media (max-width:760px){.hd-chat{grid-template-columns:1fr}}
+.o-go{order:2}.o-why,.o-main,.o-faq,.o-nights{display:none!important}
+.go{text-align:center;padding:clamp(40px,7vw,80px) 0 clamp(56px,8vw,96px)}
+.go h2{font-size:clamp(34px,5vw,58px);line-height:.95;margin:0 0 12px}.go h2 span{color:var(--red)}
+.go p{color:var(--muted);margin:0 auto 24px;max-width:40ch}
+.go-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .hero-art{display:block;width:100%;height:auto;border-radius:24px;box-shadow:12px 12px 0 var(--red);transform:rotate(-2deg)}
 </style>
 </head>
@@ -367,7 +372,7 @@ html:not([data-live]) .o-next{display:none}
     <a class="mark" href="#top"><img src="/brand/wordmark-2.png" alt="PerugiaParty" width="851" height="160"></a>
     <nav aria-label="Main">
       <span class="lang" aria-label="Language"><b aria-current="true">EN</b><a href="/it" hreflang="it" lang="it">IT</a></span>
-      <a class="btn" id="nav-cta" href="#request" data-req>Request a place</a>
+      <a class="btn" id="nav-cta" href="/#request" data-req>Request a place</a>
     </nav>
   </div>
 </header>
@@ -380,7 +385,7 @@ html:not([data-live]) .o-next{display:none}
         <h1 style="margin-top:22px">Erasmus parties <em>in Perugia.</em></h1>
         <p class="lede">Just arrived in Perugia? Meet students from here and from all over the world. Open bar, DJs, student price.</p>
         <div class="ctas">
-          <a class="btn" href="#request" data-req>Request a place</a>
+          <a class="btn" href="/#request" data-req>Request a place</a>
           <a class="btn outline" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Instagram ↗</a>
         </div>
         <p class="ig-note">Questions? DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</p>
@@ -411,7 +416,12 @@ html:not([data-live]) .o-next{display:none}
     </div>
   </section>
 
-  <div class="wrap o-why">
+  <div class="wrap o-go"><section class="go" aria-labelledby="go-h">
+      <h2 id="go-h">Ready for your <span>first night?</span></h2>
+      <p>Everything else, the next date and the request form, is on our main page.</p>
+      <div class="go-b"><a class="btn" href="/#request">Request a place</a><a class="btn outline" href="/">Go to PerugiaParty →</a></div>
+    </section></div>
+<div class="wrap o-why">
     <section class="sec" id="why" aria-labelledby="why-h">
       <h2 class="why-q" id="why-h">Who <span>we are.</span></h2>
       <p class="mission">PerugiaParty is run by volunteers who want to make student life in Perugia a little more open and inclusive. Through music and a welcoming space, we bring people from Umbria and from all over the world together, Italian and Erasmus students alike, to share one night.</p>
@@ -611,7 +621,7 @@ function applyOpen(ev){
   document.querySelectorAll("[data-req]").forEach(a => {
     if (!a.dataset.label) a.dataset.label = a.textContent;
     if (closed) { a.href = "https://www.instagram.com/perugiaparty/"; a.target = "_blank"; a.rel = "noopener"; if (a.classList.contains("btn")) a.textContent = a.id === "nav-cta" ? "Instagram ↗" : "Follow for the next date ↗"; }
-    else { a.href = "#request"; a.removeAttribute("target"); if (a.classList.contains("btn")) a.textContent = a.dataset.label; }
+    else { a.href = "/#request"; a.removeAttribute("target"); if (a.classList.contains("btn")) a.textContent = a.dataset.label; }
   });
 }
 function renderNext(ev){
@@ -621,7 +631,7 @@ function renderNext(ev){
   document.documentElement.setAttribute("data-live", "");
   const price = ev.price ? "From " + euro(ev.price.min) : null;
   const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]].filter(f => f[1]);
-  const cta = ev.requests_open ? `<a class="btn" href="#request">${ev.sold_out ? "Join the waitlist" : "Request a place"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram ↗</a>`;
+  const cta = ev.requests_open ? `<a class="btn" href="/#request">${ev.sold_out ? "Join the waitlist" : "Request a place"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram ↗</a>`;
   el.classList.toggle("has-poster", !!ev.poster);
   const art = ev.poster ? "" : `<img class="next-art" src="/ill/${ev.sold_out ? "waitlist" : "hero-party"}.svg" alt="" width="360" height="200">`;
   el.innerHTML = `<div class="next-main"><span class="status"><i></i>${statusLine(ev)}</span>

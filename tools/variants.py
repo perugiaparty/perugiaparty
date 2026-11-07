@@ -15,9 +15,13 @@ def build(path, lang, pairs, hero_art, hero_alt, post=None):
     s = s.replace('<link rel="preload" href="/logo.png" as="image">', f'<link rel="preload" href="/ill/{hero_art}.svg" as="image">')
     s = s.replace("</style>", ".hero-art{display:block;width:100%;height:auto;border-radius:24px;box-shadow:12px 12px 0 var(--red);transform:rotate(-2deg)}\n</style>", 1)
     # structured data: this page + its own visible FAQ
-    sec = s[s.index('id="faq"'):]
-    faq = [{"@type": "Question", "name": re.sub("<[^>]+>", "", q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"\s+", " ", re.sub("<[^>]+>", " ", a)).strip()}}
-           for q, a in re.findall(r"<summary>(.*?)</summary>(.*?)</details>", sec[:sec.index("</section>")], re.S)]
+    if 'class="hd-chat"' in s:
+        hd = s[s.index('class="hd-chat"'):]; hd = hd[:hd.index("</ul>")]
+        faq = [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in re.findall(r'<p class="q">(.*?)</p><p class="a"><b>PerugiaParty</b>(.*?)</p>', hd)]
+    else:
+      sec = s[s.index('id="faq"'):]
+      faq = [{"@type": "Question", "name": re.sub("<[^>]+>", "", q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"\s+", " ", re.sub("<[^>]+>", " ", a)).strip()}}
+             for q, a in re.findall(r"<summary>(.*?)</summary>(.*?)</details>", sec[:sec.index("</section>")], re.S)]
     title = re.search(r"<title>(.*?)</title>", s).group(1).replace("&amp;", "&")
     ld = {"@context": "https://schema.org", "@graph": [
         {"@type": "WebPage", "@id": f"https://perugiaparty.com{path}#page", "url": f"https://perugiaparty.com{path}", "name": title, "inLanguage": lang,
@@ -80,6 +84,20 @@ def erasmus_post(s):
 .hd-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:24px;color:#b9ab98}
 @media (max-width:760px){.hd-chat{grid-template-columns:1fr}}
 </style>""", 1)
+    cta = """<div class="wrap o-go"><section class="go" aria-labelledby="go-h">
+      <h2 id="go-h">Ready for your <span>first night?</span></h2>
+      <p>Everything else, the next date and the request form, is on our main page.</p>
+      <div class="go-b"><a class="btn" href="/#request">Request a place</a><a class="btn outline" href="/">Go to PerugiaParty →</a></div>
+    </section></div>
+"""
+    s = s.replace('<div class="wrap o-why">', cta + '<div class="wrap o-why">', 1)
+    s = s.replace("</style>", """.o-go{order:2}.o-why,.o-main,.o-faq,.o-nights{display:none!important}
+.go{text-align:center;padding:clamp(40px,7vw,80px) 0 clamp(56px,8vw,96px)}
+.go h2{font-size:clamp(34px,5vw,58px);line-height:.95;margin:0 0 12px}.go h2 span{color:var(--red)}
+.go p{color:var(--muted);margin:0 auto 24px;max-width:40ch}
+.go-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+</style>""", 1)
+    s = s.replace('href="#request"', 'href="/#request"').replace('a.href = "#request"', 'a.href = "/#request"')
     # Erasmus page: no club / centro comparison, keep the mission as "Who we are"
     a = s.index('<h2 id="why-h"'); b = s.index('<h3 class="why-q">', a)
     s = s[:a] + s[b:]
