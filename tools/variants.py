@@ -106,6 +106,37 @@ def erasmus_post(s):
     s = s[:a] + '<div class="faq">\n' + "".join(f"        <details><summary>{q}</summary><p>{x}</p></details>\n" for q, x in ER_FAQ) + "        " + s[b:]
     return s
 
+
+# Alternative Erasmus block: the three places cards, with the help desk answers built in
+def erasmus_cards(s):
+    vs = s[s.index('<div class="vs">'):]; vs = vs[:vs.index('</div>\n') + 6]
+    svgs = re.findall(r"<svg.*?</svg>", vs, re.S)
+    def card(cls, svg, title, items, mark):
+        li = "".join(f"<li><i>{mark}</i>{x}</li>" for x in items)
+        return f'<figure class="ec {cls}">{svg}<figcaption><p class="vs-t">{title}</p><ul>{li}</ul></figcaption></figure>'
+    club = card("", svgs[0], "The club", ["Expensive", "Light drinks", "Out of town: no car, no club"], "✕")
+    us = card("us", svgs[1], "PerugiaParty", ["Student prices", "Open bar", "In the centre, walk there", "Till late", "All in English", "Pay from any European bank", "Real guests, checked on Instagram"], "✓")
+    centro = card("", svgs[2], "The centro", ["Outside, in the cold", "No music", "Bars close around 01:30"], "✕")
+    return f"""<div class="wrap o-new"><section class="sec" id="new" aria-labelledby="new-h">
+      <p class="hd-k2">New in Perugia?</p><h2 id="new-h" class="why-big">Three ways to go out. <span>One makes sense.</span></h2>
+      <div class="ecs">{club}{us}{centro}</div>
+      <p class="ec-help">Still lost? <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Ask us on Instagram ↗</a></p>
+    </section></div>
+""", """.hd-k2{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 10px}
+.ecs{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:clamp(8px,2vw,22px);align-items:center}
+.ec{margin:0;border-radius:20px;overflow:hidden;background:#e9dfcc;color:#6d6252}
+.ec svg{display:block;width:100%;height:auto}
+.ec figcaption{padding:clamp(10px,1.6vw,20px)}
+.ec ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.ec li{display:grid;grid-template-columns:18px 1fr;gap:6px;font-weight:700;font-size:clamp(12px,1.5vw,16px);line-height:1.3}
+.ec li i{font-style:normal;color:#a5776a}
+.ec.us{background:var(--ink);color:var(--cream);box-shadow:0 0 0 2px var(--red),0 18px 40px -16px rgba(232,57,43,.6)}
+.ec.us .vs-t{color:#ffd23f}.ec.us li i{color:#7bd389}
+.ec .vs-t{margin-bottom:10px}
+.ec-help{margin:22px 0 0;color:var(--muted)}.ec-help a{color:var(--red-deep);font-weight:700}
+@media (max-width:640px){.ecs{grid-template-columns:1fr}.ec{display:grid;grid-template-columns:40% 1fr;align-items:center}.ec.us{order:-1}}
+"""
+
 # ---------- Erasmus (English)
 build("/erasmus", "en", COMMON_HEAD("/erasmus", "Erasmus parties in Perugia · PerugiaParty",
         "New in Perugia on Erasmus? PerugiaParty runs private student parties in the city centre: open bar, DJs and people from all over the world, at a student price. 18+.",
