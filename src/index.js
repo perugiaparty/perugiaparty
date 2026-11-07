@@ -900,6 +900,14 @@ async function route(req, env) {
       if (r) return r;
       return env.ASSETS.fetch(new Request(new URL("/404-not-found", url), req));
     }
+    // "Door scanner off" switch in the admin panel: the door page and its API answer a plain 404
+    if (/^\/door(\.html|\/)?$/.test(url.pathname) || url.pathname.startsWith("/api/door/")) {
+      const ev = await getEvent(env).catch(() => null);
+      if (ev && Number(ev.door_off) === 1) {
+        const nf = await env.ASSETS.fetch(new Request(new URL("/404-not-found", url), req));
+        return new Response(nf.body, { status: 404, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
+      }
+    }
     if (url.pathname === "/admin" || url.pathname === "/admin/") {
       return Response.redirect(PANEL_URL, 302); // private panel; only Matt's Claude account can open it
     }
