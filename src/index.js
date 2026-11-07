@@ -734,14 +734,14 @@ async function homepage(req, env) {
       return new Response(soon.body, { status: 200, headers: h });
     }
   }
-  const res = await env.ASSETS.fetch(req);
+  // one event read (reused from above), and the page + past nights fetched at the same time
+  const [res, nights] = await Promise.all([env.ASSETS.fetch(req), pastNightsHtml(env).catch(() => null)]);
   if (!res.ok || !(res.headers.get("content-type") || "").includes("text/html")) return res;
-  let ld = null, ev1 = null;
-  try { ev1 = await getEvent(env); ld = eventJsonLd(ev1); } catch (e) {}
+  let ld = null; const ev1 = ev0;
+  try { if (ev1) ld = eventJsonLd(ev1); } catch (e) {}
   const closed = !(ev1 && ev1.published && ev1.requests_open);
   let rw = new HTMLRewriter();
   // "Nights you missed": every party closed in the admin panel, newest first, colours cycling black / red / cream
-  const nights = await pastNightsHtml(env).catch(() => null);
   if (nights) rw = rw.on("#nights-track", { element(el) { el.setInnerContent(nights, { html: true }); } });
   // no party taking requests: mark the page so the request form is hidden from the first paint
   if (closed) rw = rw.on("html", { element(el) { el.setAttribute("data-closed", ""); } });

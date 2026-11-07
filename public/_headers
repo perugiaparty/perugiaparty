@@ -32,3 +32,13 @@
 /photos*
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-cache
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+
+/vendor/*
+  Cache-Control: public, max-age=2592000
+
+/posters/*
+  Cache-Control: public, max-age=604800
