@@ -150,15 +150,15 @@ textarea{resize:vertical;min-height:88px}
 .nights::-webkit-scrollbar{display:none}
 .nights .night{flex:0 0 clamp(250px,31%,360px);scroll-snap-align:start;min-height:260px}
 @media (max-width:840px){.nights .night{flex-basis:78%}}
-.night.n4{position:relative;overflow:hidden;color:var(--cream);background:#120806 url(/posters/halcoween.jpg) center 30%/cover no-repeat}
-.night.n4::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,5,.7) 0%,rgba(10,6,5,.2) 38%,rgba(10,6,5,.88) 100%)}
-.night.n4 > *{position:relative}
-.night.n4 .when{color:#ffcf9e}
-.night.n4 h3{color:#fff}
-.slide-nav{display:flex;gap:8px;align-items:center}
-.slide-nav button{width:44px;height:44px;border-radius:50%;border:2px solid var(--ink);background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer;transition:opacity .2s}
-.slide-nav button:disabled{opacity:.3;cursor:default}
-.slide-nav svg{width:20px;height:20px}
+.night.n4{background:#ffd23f;color:var(--ink)}
+.night.n4 .when{color:#6b5300}
+.night.n4 h3{color:var(--ink)}
+.slider{position:relative}
+.slide-btn{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:48px;height:48px;border-radius:50%;border:0;background:var(--ink);color:var(--cream);display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 18px rgba(20,18,16,.25);transition:opacity .2s}
+.slide-btn svg{width:22px;height:22px}
+.slide-btn.prev{left:-20px}.slide-btn.next{right:-20px}
+.slide-btn:disabled{opacity:0;pointer-events:none}
+@media (max-width:840px){.slide-btn{width:40px;height:40px}.slide-btn.prev{left:-8px}.slide-btn.next{right:-8px}}
 .night{border-radius:22px;padding:26px;min-height:200px;display:flex;flex-direction:column;justify-content:space-between;gap:28px}
 .night .when{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
 .night h3{font-size:32px}
@@ -441,14 +441,17 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
     <section class="sec" id="nights" aria-labelledby="nights-h">
       <div class="sec-head">
         <h2 id="nights-h">Nights you missed.</h2>
-        <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap"><p><a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">See the real nights on Instagram ↗</a></p>
-          <div class="slide-nav" aria-label="Scroll past nights"><button type="button" id="nprev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button><button type="button" id="nnext" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></div>
+        <p><a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">See the real nights on Instagram ↗</a></p>
       </div>
+      <div class="slider">
+      <button type="button" class="slide-btn prev" id="nprev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button type="button" class="slide-btn next" id="nnext" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
       <div class="nights" id="nights-track" tabindex="0" aria-label="Past nights">
         <article class="night n4"><p class="when">Last edition · 31 Oct</p><h3>Halcoween ’26</h3></article>
         <article class="night n1"><p class="when">Past edition</p><h3>Alcoholiday ’26</h3></article>
         <article class="night n2"><p class="when">Past edition</p><h3>The Final Night ’26</h3></article>
         <article class="night n3"><p class="when">Past edition</p><h3>Koningsdag ’26</h3></article>
+      </div>
       </div>
     </section>
 
