@@ -4,11 +4,12 @@ import re, json, sys, os
 ROOT = os.path.join(os.path.dirname(__file__), "..", "public")
 SRC = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
 
-def build(path, lang, pairs, hero_art, hero_alt):
+def build(path, lang, pairs, hero_art, hero_alt, post=None):
     s, miss = SRC, []
     for a, b in pairs:
         if a not in s: miss.append(a[:60])
         s = s.replace(a, b)
+    if post: s = post(s)
     # hero: own illustration instead of the example ticket
     s = re.sub(r'<a class="ticket".*?</a>', f'<img class="hero-art" src="/ill/{hero_art}.svg" alt="{hero_alt}" width="360" height="200" fetchpriority="high">', s, count=1, flags=re.S)
     s = s.replace('<link rel="preload" href="/logo.png" as="image">', f'<link rel="preload" href="/ill/{hero_art}.svg" as="image">')
@@ -36,20 +37,50 @@ COMMON_HEAD = lambda path, title, desc, ogt, ogd, loc: [
     ('<meta property="og:locale" content="en_GB">', f'<meta property="og:locale" content="{loc}">'),
 ]
 
+
+# ---------- Erasmus: a "new here" guide and an FAQ for people who have never been to Perugia
+NEW_HERE = [
+    ("Going out here", "Bars in the centro close around 01:30 and you stand outside. Clubs are out of town: you need a car or a taxi."),
+    ("Where we are", "In the city centre, walking distance from the bars. The exact place is on your ticket after you pay."),
+    ("No Italian needed", "Everything works in English: the site, the tickets, the DMs. The crowd is international."),
+    ("Come alone", "Fine. It's a guest list of students from Perugia and from all over the world: easy to meet people."),
+    ("Why Instagram", "We confirm every guest with a DM on Instagram. That's how we know you're a real person."),
+    ("Paying", "Bank transfer in euro, also from a foreign account (SEPA). The details show up after you're approved."),
+]
+ER_FAQ = [
+    ("I just arrived. What is PerugiaParty?", "Private parties for university and Erasmus students in Perugia’s centre: open bar, DJs and new people, at a student price. Run by volunteers. 18+."),
+    ("Do I need to speak Italian?", "No. The website, your ticket and our Instagram are in English."),
+    ("How do I join?", "Request a place on this page, then DM your code to @perugiaparty on Instagram. We check every request and send you your ticket page."),
+    ("I don’t have an Italian bank account.", "No problem. A normal SEPA transfer in euro from any European account works. Use your name and code as the reference."),
+    ("How do I get there?", "It’s in the city centre, so you can walk from most student areas in town. The exact place is on your ticket after payment."),
+    ("What do I bring?", "Your ticket QR on your phone and a photo ID (passport or ID card). You must be 18+."),
+]
+def erasmus_post(s):
+    tiles = "".join(f'<li><h3>{h}</h3><p>{p}</p></li>' for h, p in NEW_HERE)
+    guide = f"""<div class="wrap"><section class="sec" id="new" aria-labelledby="new-h">
+      <div class="sec-head"><h2 id="new-h">New in Perugia? <span style="color:var(--red)">Start here.</span></h2><p>Six things nobody tells you.</p></div>
+      <ol class="nh">{tiles}</ol></section></div>
+"""
+    s = s.replace('  <section class="band-red" id="next"', guide + '  <section class="band-red" id="next"', 1)
+    s = s.replace("</style>", ".nh{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;counter-reset:n}\n.nh li{counter-increment:n;background:#e9dfcc;border-radius:18px;padding:18px 20px}\n.nh li::before{content:'0' counter(n);font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:var(--red)}\n.nh h3{font-family:var(--f-body);font-weight:800;font-size:17px;margin:6px 0 6px}\n.nh p{font-size:15px;line-height:1.45;color:var(--muted);margin:0}\n@media (max-width:860px){.nh{grid-template-columns:1fr 1fr}}@media (max-width:520px){.nh{grid-template-columns:1fr}}\n</style>", 1)
+    a = s.index('<div class="faq">', s.index('id="faq"')); b = s.index('<details id="rules">', a)
+    s = s[:a] + '<div class="faq">\n' + "".join(f"        <details><summary>{q}</summary><p>{x}</p></details>\n" for q, x in ER_FAQ) + "        " + s[b:]
+    return s
+
 # ---------- Erasmus (English)
 build("/erasmus", "en", COMMON_HEAD("/erasmus", "Erasmus parties in Perugia · PerugiaParty",
         "New in Perugia on Erasmus? PerugiaParty runs private student parties in the city centre: open bar, DJs and people from all over the world, at a student price. 18+.",
         "Erasmus parties in Perugia · PerugiaParty", "New in town? Open bar, DJs and people from all over the world, at a student price. 18+.", "en_GB") + [
     ('<link rel="alternate" hreflang="en" href="https://perugiaparty.com/">\n<link rel="alternate" hreflang="it" href="https://perugiaparty.com/it">\n<link rel="alternate" hreflang="x-default" href="https://perugiaparty.com/">\n', ""),
     ('Student parties <em>in Perugia.</em>', 'Erasmus parties <em>in Perugia.</em>'),
-    ('Your people. Your night. Open bar, DJs and new people to meet, at a student price.', 'New in town? Meet people from Umbria and from all over the world. Open bar, DJs, student price.'),
-    ('<a href="/erasmus">Erasmus in Perugia →</a>', '<a href="/">Home →</a>'),
-], "hero-erasmus", "People from all over the world meeting in Perugia")
+    ('Your people. Your night. Open bar, DJs and new people to meet, at a student price.', 'Just arrived in Perugia? Meet students from here and from all over the world. Open bar, DJs, student price.'),
+    ('<a class="btn outline" href="/erasmus">Erasmus in Perugia</a>', '<a class="btn outline" href="/">Home</a>'),
+], "hero-erasmus", "People from all over the world meeting in Perugia", erasmus_post)
 
 # ---------- Italiano
 IT = [
+    ('<b aria-current="true">EN</b><a href="/it" hreflang="it" lang="it">IT</a>', '<a href="/" hreflang="en" lang="en">EN</a><b aria-current="true">IT</b>'),
     ('<html lang="en">', '<html lang="it">'),
-    ('<a class="keep" href="#faq">FAQ</a>', '<a class="keep" href="#faq">Domande</a>'),
     ('Request a place</a>', 'Richiedi un posto</a>'),
     ('<span class="hm-red">Invite only</span>', '<span class="hm-red">Solo su invito</span>'),
     ('Student parties <em>in Perugia.</em>', 'Feste universitarie <em>a Perugia.</em>'),
@@ -61,12 +92,12 @@ IT = [
     ('<h3>The next edition is in the works.</h3>', '<h3>La prossima edizione è in preparazione.</h3>'),
     ('<p>Date and theme drop on Instagram first.</p>', '<p>Data e tema escono prima su Instagram.</p>'),
     ('Follow on Instagram ↗', 'Seguici su Instagram ↗'),
-    ('Club night. Centro vibes. <span>Best of both.</span>', 'Serata da club. Vibe da centro. <span>Il meglio di entrambi.</span>'),
+    ('Club night. Centro vibes. <span>Best of both.</span>', 'Serata da club. Vibe da centro. <span>Il meglio dei due mondi.</span>'),
     ('<p class="vs-t">The club</p>', '<p class="vs-t">La discoteca</p>'),
-    ('Expensive.<br>Light drinks.<br>Far away.', 'Cara.<br>Drink leggeri.<br>Lontana.'),
-    ('Student prices.<br>Open bar.<br>In the centre.<br>Till late.', 'Prezzi studenti.<br>Open bar.<br>In centro.<br>Fino a tardi.'),
+    ('Expensive.<br>Light drinks.<br>Far away.', 'Prezzi alti.<br>Drink annacquati.<br>Fuori mano.'),
+    ('Student prices.<br>Open bar.<br>In the centre.<br>Till late.', 'Prezzi bassi.<br>Open bar.<br>In centro.<br>Fino a tardi.'),
     ('<p class="vs-t">The centro</p>', '<p class="vs-t">Il centro</p>'),
-    ('In the cold.<br>No music.<br>Ends early.', 'Al freddo.<br>Niente musica.<br>Finisce presto.'),
+    ('In the cold.<br>No music.<br>Ends early.', 'Al freddo.<br>Niente musica.<br>Chiude presto.'),
     ('But <span>why?</span>', 'Ma <span>perché?</span>'),
     ('PerugiaParty is run by volunteers who want to make student life in Perugia a little more open and inclusive. Through music and a welcoming space, we bring people from Umbria and from all over the world together, Italian and Erasmus students alike, to share one night.',
      'PerugiaParty è organizzata da volontari che vogliono rendere la vita da studenti a Perugia un po’ più aperta e inclusiva. Con la musica e un posto accogliente uniamo gente dell’Umbria e di tutto il mondo, studenti italiani ed Erasmus, per condividere una notte.'),
@@ -101,7 +132,7 @@ IT = [
     ('id="copy-link">Copy code</button>', 'id="copy-link">Copia codice</button>'),
     ('Send code on Instagram ↗', 'Manda il codice su Instagram ↗'),
     ('<h2 id="nights-h">Nights you missed.</h2>', '<h2 id="nights-h">Le notti che ti sei perso.</h2>'),
-    ('See the real nights on Instagram ↗', 'Le notti vere su Instagram ↗'),
+    ('See everything on Instagram ↗', 'Vedi tutto su Instagram ↗'),
     ('<p class="when">Last edition</p>', '<p class="when">Ultima edizione</p>'),
     ('<p class="when">Past edition</p>', '<p class="when">Edizione passata</p>'),
     ('<h2 id="faq-h">Good to know.</h2>', '<h2 id="faq-h">Da sapere.</h2>'),
@@ -124,8 +155,7 @@ IT = [
     ('<b>Leave the music alone.</b> Respect the vibe and whoever is playing.', '<b>La musica non si tocca.</b> Rispetta la vibe e chi suona.'),
     ('<b>No mess.</b> Use the bags. Leave the place as you found it.', '<b>Niente casino.</b> Usa i sacchi. Lascia il posto come l’hai trovato.'),
     ("<b>Respect the staff.</b> They're the reason the night happens.", '<b>Rispetta lo staff.</b> È grazie a loro che la notte esiste.'),
-    ('<a href="/it" hreflang="it" lang="it">In italiano: feste universitarie a Perugia →</a>', '<a href="/" hreflang="en" lang="en">In English →</a>'),
-    ('<p class="sign">Tonight we party. Tomorrow we forget. <span>Later, it\'s the best night you\'ve ever had.</span></p>', '<p class="sign">Stanotte si balla. Domani si dimentica. <span>Poi è la notte più bella di sempre.</span></p>'),
+    ('<a class="btn outline" href="/it" hreflang="it" lang="it">In italiano</a>', '<a class="btn outline" href="/" hreflang="en" lang="en">In English</a>'),
     ('<p>Independent nights · Perugia, Italia</p>', '<p>Serate indipendenti · Perugia, Italia</p>'),
     ('<a href="#rules">House rules</a>', '<a href="#rules">Regole</a>'),
     ('rel="noopener">Contact ↗</a>', 'rel="noopener">Contatti ↗</a>'),
@@ -137,6 +167,6 @@ IT = [
 ]
 build("/it", "it", COMMON_HEAD("/it", "Feste universitarie ed Erasmus a Perugia · PerugiaParty",
         "Feste private per studenti universitari ed Erasmus nel centro di Perugia. Open bar, DJ e gente nuova da conoscere, a prezzo studenti. 18+.",
-        "Feste universitarie a Perugia · PerugiaParty", "Serata da club. Vibe da centro. Il meglio di entrambi. Open bar, prezzi studenti. 18+.", "it_IT") + IT,
+        "Feste universitarie a Perugia · PerugiaParty", "Serata da club. Vibe da centro. Il meglio dei due mondi. Open bar, prezzi bassi. 18+.", "it_IT") + IT,
       "hero-it", "Perugia di notte, con una festa accesa")
 print("built /it and /erasmus")

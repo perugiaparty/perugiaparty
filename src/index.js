@@ -750,7 +750,7 @@ async function homepage(req, env) {
 }
 // Past parties: one shared list for the homepage slider, the /nights/<slug> pages and the sitemap
 async function pastNights(env) {
-  const rows = (await env.DB.prepare("SELECT name, site_title, site_line, starts_at, closed_at FROM history ORDER BY closed_at DESC LIMIT 40").all()).results || [];
+  const rows = (await env.DB.prepare("SELECT name, site_title, site_line, site_line_it, starts_at, closed_at FROM history ORDER BY closed_at DESC LIMIT 40").all()).results || [];
   return rows.map((h) => {
     let t = h.site_title;
     if (!t) {
@@ -761,14 +761,14 @@ async function pastNights(env) {
     }
     const slug = t.toLowerCase().replace(/’(\d\d)\b/g, "20$1").normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const when = new Date(h.starts_at || Number(h.closed_at) || Date.now());
-    return { title: t, slug, line: h.site_line || "", when, exact: !!h.starts_at, closed: Number(h.closed_at) || 0 };
+    return { title: t, slug, line: h.site_line || "", line_it: h.site_line_it || h.site_line || "", when, exact: !!h.starts_at, closed: Number(h.closed_at) || 0 };
   });
 }
 const escH = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 async function pastNightsHtml(env, lang = "en") {
   const rows = await pastNights(env);
   if (!rows.length) return null;
-  return rows.map((h, i) => `<a class="night n${(i % 3) + 1}" href="/nights/${h.slug}"><p class="when">${lang === "it" ? (i === 0 ? "Ultima edizione" : "Edizione passata") : (i === 0 ? "Last edition" : "Past edition")}</p><div><h3>${escH(h.title)}</h3>${h.line ? `<p class="nl">${escH(h.line)}</p>` : ""}</div></a>`).join("");
+  return rows.map((h, i) => `<a class="night n${(i % 3) + 1}" href="/nights/${h.slug}"><p class="when">${lang === "it" ? (i === 0 ? "Ultima edizione" : "Edizione passata") : (i === 0 ? "Last edition" : "Past edition")}</p><div><h3>${escH(h.title)}</h3>${(lang === "it" ? h.line_it : h.line) ? `<p class="nl">${escH(lang === "it" ? h.line_it : h.line)}</p>` : ""}</div></a>`).join("");
 }
 async function nightPage(env, slug) {
   const rows = await pastNights(env);

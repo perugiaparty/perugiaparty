@@ -28,7 +28,7 @@
 <meta name="apple-mobile-web-app-title" content="PerugiaParty">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preload" href="/ill/hero-erasmus.svg" as="image">
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://perugiaparty.com/erasmus#page", "url": "https://perugiaparty.com/erasmus", "name": "Erasmus parties in Perugia · PerugiaParty", "inLanguage": "en", "isPartOf": {"@id": "https://perugiaparty.com/#website"}, "about": {"@id": "https://perugiaparty.com/#org"}}, {"@type": "FAQPage", "@id": "https://perugiaparty.com/erasmus#faq", "mainEntity": [{"@type": "Question", "name": "Why is it so cheap?", "acceptedAnswer": {"@type": "Answer", "text": "Clubs in Perugia are expensive and far away, and the centre ends early. PerugiaParty is run by volunteers, so we keep the price low and every student can come."}}, {"@type": "Question", "name": "Who can come?", "acceptedAnswer": {"@type": "Answer", "text": "Students, Erasmus and anyone aged 18+. Every party needs a new request, even if you came before. Friends request their own place. Bring photo ID."}}, {"@type": "Question", "name": "How do I get on the list?", "acceptedAnswer": {"@type": "Answer", "text": "Request a place here, then DM your code to @perugiaparty on Instagram. We check every request; a request isn’t a guaranteed place."}}, {"@type": "Question", "name": "How much is it and how do I pay?", "acceptedAnswer": {"@type": "Answer", "text": "Your price appears on your ticket page once you’re approved. Pay by bank transfer with your name and code as the reference."}}, {"@type": "Question", "name": "Where is the party?", "acceptedAnswer": {"@type": "Answer", "text": "In Perugia’s city centre. The exact place appears on your ticket once we confirm your payment."}}, {"@type": "Question", "name": "Lost my ticket, refunds?", "acceptedAnswer": {"@type": "Answer", "text": "Lost the link? Go to perugiaparty.com/ticket and log in with your Instagram and code. Tickets are personal and can’t be transferred or refunded. If we cancel, we contact you directly."}}, {"@type": "Question", "name": "What are the house rules?", "acceptedAnswer": {"@type": "Answer", "text": "On the list or not in. No list, no entry. Tickets are personal. Pay before you come. Bank transfer with your name and PP code as the reference. Pace yourself. One drink at a time. Don't waste them. Leave the music alone. Respect the vibe and whoever is playing. No mess. Use the bags. Leave the place as you found it. Respect the staff. They're the reason the night happens."}}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://perugiaparty.com/erasmus#page", "url": "https://perugiaparty.com/erasmus", "name": "Erasmus parties in Perugia · PerugiaParty", "inLanguage": "en", "isPartOf": {"@id": "https://perugiaparty.com/#website"}, "about": {"@id": "https://perugiaparty.com/#org"}}, {"@type": "FAQPage", "@id": "https://perugiaparty.com/erasmus#faq", "mainEntity": [{"@type": "Question", "name": "I just arrived. What is PerugiaParty?", "acceptedAnswer": {"@type": "Answer", "text": "Private parties for university and Erasmus students in Perugia’s centre: open bar, DJs and new people, at a student price. Run by volunteers. 18+."}}, {"@type": "Question", "name": "Do I need to speak Italian?", "acceptedAnswer": {"@type": "Answer", "text": "No. The website, your ticket and our Instagram are in English."}}, {"@type": "Question", "name": "How do I join?", "acceptedAnswer": {"@type": "Answer", "text": "Request a place on this page, then DM your code to @perugiaparty on Instagram. We check every request and send you your ticket page."}}, {"@type": "Question", "name": "I don’t have an Italian bank account.", "acceptedAnswer": {"@type": "Answer", "text": "No problem. A normal SEPA transfer in euro from any European account works. Use your name and code as the reference."}}, {"@type": "Question", "name": "How do I get there?", "acceptedAnswer": {"@type": "Answer", "text": "It’s in the city centre, so you can walk from most student areas in town. The exact place is on your ticket after payment."}}, {"@type": "Question", "name": "What do I bring?", "acceptedAnswer": {"@type": "Answer", "text": "Your ticket QR on your phone and a photo ID (passport or ID card). You must be 18+."}}, {"@type": "Question", "name": "What are the house rules?", "acceptedAnswer": {"@type": "Answer", "text": "On the list or not in. No list, no entry. Tickets are personal. Pay before you come. Bank transfer with your name and PP code as the reference. Pace yourself. One drink at a time. Don't waste them. Leave the music alone. Respect the vibe and whoever is playing. No mess. Use the bags. Leave the place as you found it. Respect the staff. They're the reason the night happens."}}]}]}</script>
 <link rel="preload" href="/fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/bowlby-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css?v=1">
@@ -122,8 +122,8 @@
 .jr{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;list-style:none;padding:0;margin:0;counter-reset:s}
 .jr li{counter-increment:s;margin:0;border-radius:16px;overflow:hidden;background:#e9dfcc;min-width:0}
 .jr img{display:block;width:100%;height:auto}
-.jr h3{font-family:var(--f-body);font-weight:800;font-size:15px;margin:10px 12px 2px}
-.jr h3::before{content:counter(s) " · ";color:var(--red);font-family:var(--f-mono);font-weight:500}
+.jr h3{font-family:var(--f-body);font-weight:800;font-size:15px;line-height:1.15;margin:10px 12px 3px}
+.jr h3::before{content:"0" counter(s);display:block;color:var(--red);font-family:var(--f-mono);font-weight:500;font-size:11px;letter-spacing:.1em;margin-bottom:3px}
 .jr p{font-size:13px;line-height:1.35;color:var(--muted);margin:0 12px 12px}
 .jr .us{background:var(--ink);box-shadow:0 0 0 2px var(--red)}.jr .us h3,.jr .us p{color:var(--cream)}
 @media (max-width:860px){.jr{grid-template-columns:repeat(3,1fr)}}
@@ -241,6 +241,13 @@ textarea{resize:vertical;min-height:88px}
 @media (max-width:640px){.rules-band .sec{padding-block:52px}}
 /* faq */
 .faq{max-width:780px}
+.lang{display:inline-flex;border:1.5px solid #4a423b;border-radius:99px;padding:3px;gap:2px;font-family:var(--f-mono);font-size:12px;letter-spacing:.06em}
+.lang b,.lang a{display:grid;place-items:center;min-width:34px;height:28px;border-radius:99px;font-weight:500;text-decoration:none}
+header.top nav .lang a{display:grid!important}
+@media (max-width:640px){header.top nav{gap:10px}.lang b,.lang a{min-width:30px;height:26px}}
+.lang b{background:var(--cream);color:var(--ink)}.lang a{color:#b9ab98}.lang a:hover{color:var(--cream)}
+.langs{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.langs .btn{font-size:14px;padding:10px 18px}
 .faq .rl{margin:0 0 14px;padding-left:22px;display:grid;gap:6px}
 details{border-bottom:1.5px solid var(--line);padding:20px 0}
 summary{cursor:pointer;font-weight:700;font-size:18px;list-style:none;display:flex;justify-content:space-between;gap:16px}
@@ -328,6 +335,12 @@ body.locked{overflow:hidden}
 .hero-meta .hm-red:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:9px;vertical-align:2px}
 /* no party taking requests: the form and everything pointing to it disappears */
 html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
+.nh{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;counter-reset:n}
+.nh li{counter-increment:n;background:#e9dfcc;border-radius:18px;padding:18px 20px}
+.nh li::before{content:'0' counter(n);font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:var(--red)}
+.nh h3{font-family:var(--f-body);font-weight:800;font-size:17px;margin:6px 0 6px}
+.nh p{font-size:15px;line-height:1.45;color:var(--muted);margin:0}
+@media (max-width:860px){.nh{grid-template-columns:1fr 1fr}}@media (max-width:520px){.nh{grid-template-columns:1fr}}
 .hero-art{display:block;width:100%;height:auto;border-radius:24px;box-shadow:12px 12px 0 var(--red);transform:rotate(-2deg)}
 </style>
 </head>
@@ -336,7 +349,7 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
   <div class="wrap">
     <a class="mark" href="#top"><img src="/brand/wordmark-2.png" alt="PerugiaParty" width="851" height="160"></a>
     <nav aria-label="Main">
-      <a class="keep" href="#faq">FAQ</a>
+      <span class="lang" aria-label="Language"><b aria-current="true">EN</b><a href="/it" hreflang="it" lang="it">IT</a></span>
       <a class="btn" id="nav-cta" href="#request" data-req>Request a place</a>
     </nav>
   </div>
@@ -348,7 +361,7 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
       <div>
         <p class="hero-meta"><span class="hm-red">Invite only</span><span aria-hidden="true">·</span>Perugia<span aria-hidden="true">·</span>18+</p>
         <h1 style="margin-top:22px">Erasmus parties <em>in Perugia.</em></h1>
-        <p class="lede">New in town? Meet people from Umbria and from all over the world. Open bar, DJs, student price.</p>
+        <p class="lede">Just arrived in Perugia? Meet students from here and from all over the world. Open bar, DJs, student price.</p>
         <div class="ctas">
           <a class="btn" href="#request" data-req>Request a place</a>
           <a class="btn outline" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Instagram ↗</a>
@@ -359,6 +372,9 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
     </div>
   </div>
 
+<div class="wrap"><section class="sec" id="new" aria-labelledby="new-h">
+      <div class="sec-head"><h2 id="new-h">New in Perugia? <span style="color:var(--red)">Start here.</span></h2><p>Six things nobody tells you.</p></div>
+      <ol class="nh"><li><h3>Going out here</h3><p>Bars in the centro close around 01:30 and you stand outside. Clubs are out of town: you need a car or a taxi.</p></li><li><h3>Where we are</h3><p>In the city centre, walking distance from the bars. The exact place is on your ticket after you pay.</p></li><li><h3>No Italian needed</h3><p>Everything works in English: the site, the tickets, the DMs. The crowd is international.</p></li><li><h3>Come alone</h3><p>Fine. It's a guest list of students from Perugia and from all over the world: easy to meet people.</p></li><li><h3>Why Instagram</h3><p>We confirm every guest with a DM on Instagram. That's how we know you're a real person.</p></li><li><h3>Paying</h3><p>Bank transfer in euro, also from a foreign account (SEPA). The details show up after you're approved.</p></li></ol></section></div>
   <section class="band-red" id="next" aria-label="Next party">
     <div class="wrap sec next-sec">
       <div class="sec-head" id="next-head">
@@ -370,7 +386,7 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
           <h3>The next edition is in the works.</h3>
           <p>Date and theme drop on Instagram first.</p>
         <a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener" style="margin-top:22px">Follow on Instagram ↗</a></div>
-        <img class="next-art" src="/ill/soon.svg" alt="" width="360" height="200">
+        <img class="next-art" src="/ill/soon.svg" alt="" width="360" height="220">
       </div>
     </div>
   </section>
@@ -479,7 +495,7 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
     <section class="sec" id="nights" aria-labelledby="nights-h">
       <div class="sec-head">
         <h2 id="nights-h">Nights you missed.</h2>
-        <p><a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">See the real nights on Instagram ↗</a></p>
+        <p><a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">See everything on Instagram ↗</a></p>
       </div>
       <div class="slider">
       <button type="button" class="slide-btn prev" id="nprev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
@@ -497,15 +513,15 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
     <section class="sec" id="faq" aria-labelledby="faq-h">
       <div class="sec-head"><h2 id="faq-h">Good to know.</h2></div>
       <div class="faq">
-        <details><summary>Why is it so cheap?</summary><p>Clubs in Perugia are expensive and far away, and the centre ends early. PerugiaParty is run by volunteers, so we keep the price low and every student can come.</p></details>
-        <details><summary>Who can come?</summary><p>Students, Erasmus and anyone aged 18+. Every party needs a new request, even if you came before. Friends request their own place. Bring photo ID.</p></details>
-        <details><summary>How do I get on the list?</summary><p>Request a place here, then DM your code to @perugiaparty on Instagram. We check every request; a request isn’t a guaranteed place.</p></details>
-        <details><summary>How much is it and how do I pay?</summary><p>Your price appears on your ticket page once you’re approved. Pay by bank transfer with your name and code as the reference.</p></details>
-        <details><summary>Where is the party?</summary><p>In Perugia’s city centre. The exact place appears on your ticket once we confirm your payment.</p></details>
-        <details><summary>Lost my ticket, refunds?</summary><p>Lost the link? Go to <a href="/ticket">perugiaparty.com/ticket</a> and log in with your Instagram and code. Tickets are personal and can’t be transferred or refunded. If we cancel, we contact you directly.</p></details>
+        <details><summary>I just arrived. What is PerugiaParty?</summary><p>Private parties for university and Erasmus students in Perugia’s centre: open bar, DJs and new people, at a student price. Run by volunteers. 18+.</p></details>
+        <details><summary>Do I need to speak Italian?</summary><p>No. The website, your ticket and our Instagram are in English.</p></details>
+        <details><summary>How do I join?</summary><p>Request a place on this page, then DM your code to @perugiaparty on Instagram. We check every request and send you your ticket page.</p></details>
+        <details><summary>I don’t have an Italian bank account.</summary><p>No problem. A normal SEPA transfer in euro from any European account works. Use your name and code as the reference.</p></details>
+        <details><summary>How do I get there?</summary><p>It’s in the city centre, so you can walk from most student areas in town. The exact place is on your ticket after payment.</p></details>
+        <details><summary>What do I bring?</summary><p>Your ticket QR on your phone and a photo ID (passport or ID card). You must be 18+.</p></details>
         <details id="rules"><summary>What are the house rules?</summary><ol class="rl"><li><b>On the list or not in.</b> No list, no entry. Tickets are personal.</li><li><b>Pay before you come.</b> Bank transfer with your name and PP code as the reference.</li><li><b>Pace yourself.</b> One drink at a time. Don't waste them.</li><li><b>Leave the music alone.</b> Respect the vibe and whoever is playing.</li><li><b>No mess.</b> Use the bags. Leave the place as you found it.</li><li><b>Respect the staff.</b> They're the reason the night happens.</li></ol></details>
       </div>
-      <p style="margin-top:22px"><a href="/it" hreflang="it" lang="it">In italiano: feste universitarie a Perugia →</a> · <a href="/">Home →</a></p>
+      <nav class="langs" aria-label="Other pages"><a class="btn outline" href="/it" hreflang="it" lang="it">In italiano</a><a class="btn outline" href="/">Home</a></nav>
     </section>
   </div>
 </main>

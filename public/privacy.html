@@ -16,56 +16,73 @@
 <link rel="stylesheet" href="/site.css?v=20261023a">
 <script src="/notify.js?v=20261013g" defer></script>
 <style>
-main{padding-block:56px 80px}
-.doc{max-width:720px;margin-inline:auto;display:grid;gap:26px}
-.doc h1{font-size:clamp(44px,9vw,72px)}
-.doc h2{font-size:26px;margin-bottom:8px}
-.doc p,.doc li{color:var(--ink-2)}
-.doc ul{margin:8px 0 0;padding-left:20px;display:grid;gap:6px}
-.doc .card{background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:20px}
+main{padding-block:clamp(40px,7vh,72px) 80px}
+.pv{max-width:860px;margin-inline:auto;display:grid;gap:clamp(28px,4vw,44px)}
+.pv h1{font-size:clamp(44px,9vw,76px);margin:6px 0 0}
+.pv .k{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.pv h2{font-family:var(--f-body);font-weight:800;font-size:19px;margin:0 0 12px}
+.promise{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.promise div{background:var(--ink);color:var(--cream);border-radius:18px;padding:18px}
+.promise b{display:block;font-family:var(--f-display);font-weight:400;font-size:22px;line-height:1.05;margin-bottom:6px}
+.promise b span{color:#ff4a3d}.promise p{font-size:14px;color:#b9ab98;margin:0}
+.rows{display:grid;gap:8px}
+.rows div{display:grid;grid-template-columns:170px 1fr;gap:16px;background:#e9dfcc;border-radius:14px;padding:14px 16px;font-size:15px;line-height:1.45}
+.rows dt{font-weight:800}.rows dd{margin:0;color:var(--ink-2)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.box{background:#e9dfcc;border-radius:18px;padding:18px 20px;font-size:15px;line-height:1.5}
+.box h2{font-size:16px;margin-bottom:6px}
+.del{background:var(--red);color:var(--cream);border-radius:20px;padding:22px 24px;display:grid;gap:10px}
+.del h2{font-family:var(--f-display);font-weight:400;font-size:26px;margin:0}
+.del p{margin:0;font-size:15px}.del code{background:rgba(0,0,0,.2);padding:2px 8px;border-radius:6px;font-family:var(--f-mono)}
+.del .btn{justify-self:start;background:var(--cream);color:var(--ink);border-color:var(--cream)}
+.small{font-size:14px;color:var(--muted)}
+@media (max-width:720px){.promise,.two{grid-template-columns:1fr}.rows div{grid-template-columns:1fr;gap:2px}}
 </style>
 </head>
 <body>
 <header class="top">
   <div class="wrap">
     <a class="mark" href="/"><img src="/brand/wordmark-2.png" alt="PerugiaParty" width="851" height="160"></a>
-    <nav aria-label="Main"><a class="keep" href="/#faq">FAQ</a><a class="btn" id="nav-cta" href="/#request">Request a place</a></nav>
+    <nav aria-label="Main"><a class="btn" id="nav-cta" href="/#request">Request a place</a></nav>
   </div>
 </header>
 <main class="wrap">
-  <article class="doc">
-    <p class="eyebrow">Last updated 13 October 2026</p>
-    <h1>Privacy.</h1>
-    <p>PerugiaParty organises private student parties in Perugia, Italy. This page explains what we collect when you request a place, why, and what you can ask us to do with it. Short version: we only use your details to run the guest list, we never sell them, and you can ask us to delete them at any time.</p>
+  <article class="pv">
+    <header>
+      <p class="k">Updated 13 October 2026</p>
+      <h1>Privacy.</h1>
+    </header>
+
+    <div class="promise">
+      <div><b>Only for the <span>guest list.</span></b><p>We use your details to run our parties. Nothing else.</p></div>
+      <div><b>Never <span>sold.</span></b><p>No ads, no tracking cookies, no selling or sharing.</p></div>
+      <div><b>Deleted <span>on request.</span></b><p>One DM and everything is gone within 7 days.</p></div>
+    </div>
 
     <section><h2>What we collect</h2>
-      <ul>
-        <li><b>Your request:</b> full name, Instagram handle, WhatsApp number (optional) and the message you write to us (optional).</li>
-        <li><b>Approximate location:</b> the city and country your request was sent from, worked out from your internet connection. We don't store your IP address.</li>
-        <li><b>Your ticket:</b> your status (requested, approved, paid, checked in), your ticket code, price, payment deadline and when you were checked in at the door.</li>
-        <li><b>Payment:</b> we see your bank transfer in our own bank account to match it to your code. We don't store bank or card details on this website.</li>
-        <li><b>Instagram messages:</b> when you DM your personal code to @perugiaparty, we receive your Instagram username and the message, to confirm the account is yours and reply to you.</li>
-        <li><b>On your phone:</b> your personal ticket link and the details you typed are saved in your own browser, so you don't have to type them again. We don't use tracking or advertising cookies.</li>
-      </ul>
+      <dl class="rows">
+        <div><dt>Your request</dt><dd>Full name, Instagram, WhatsApp (optional) and your message (optional).</dd></div>
+        <div><dt>Rough location</dt><dd>City and country the request came from, from your connection. We don't store your IP address.</dd></div>
+        <div><dt>Your ticket</dt><dd>Status, ticket code, price, payment deadline and check-in time at the door.</dd></div>
+        <div><dt>Payment</dt><dd>We see your transfer in our own bank account to match it to your code. No bank or card details on this website.</dd></div>
+        <div><dt>Instagram DMs</dt><dd>Your username and message when you send us your code, to confirm the account is yours and reply.</dd></div>
+        <div><dt>On your phone</dt><dd>Your ticket link and what you typed, saved in your own browser so you don't type it again.</dd></div>
+      </dl>
     </section>
 
-    <section><h2>Why we use it</h2>
-      <p>To review your request, check that you're 18+ and that the Instagram account is really yours, send you your price and ticket, recognise you at the door, give returning guests priority, keep the nights safe, and see roughly where our guests come from. We use your Instagram and WhatsApp only to contact you about your request and our parties.</p>
+    <section class="two">
+      <div class="box"><h2>Why</h2><p>To review your request, check you're 18+ and the Instagram is really yours, send your price and ticket, recognise you at the door, give returning guests priority, keep the nights safe and see roughly where guests come from. Instagram and WhatsApp are only used to contact you about your request and our parties.</p></div>
+      <div class="box"><h2>Who sees it</h2><p>Only the PerugiaParty team. The site runs on Cloudflare (hosting and database, servers in the EU and worldwide) and DMs go through Meta. They process data for us and don't use it themselves.</p>
+        <h2 style="margin-top:14px">How long</h2><p>As long as we organise parties, so we can recognise returning guests. Past guest lists are cleaned up regularly.</p></div>
     </section>
 
-    <section><h2>Who sees it</h2>
-      <p>Only the PerugiaParty team. The website runs on Cloudflare (hosting and database, servers in the EU and worldwide) and Instagram messages go through Meta. They process data for us and don't use it for their own purposes. We never sell or share your details with anyone else.</p>
+    <section class="del" id="delete">
+      <h2>Delete your data</h2>
+      <p>DM <b>@perugiaparty</b> on Instagram: <code>delete my data</code> + your Instagram handle. We delete everything within 7 days and confirm in the chat.</p>
+      <a class="btn" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Send a DM ↗</a>
     </section>
 
-    <section><h2>How long we keep it</h2>
-      <p>We keep your details for as long as we organise parties, so we can recognise returning guests and give them priority. Ask us and we delete them, usually within a few days. Guest lists of past parties are cleaned up regularly.</p>
-    </section>
-
-    <section id="delete"><h2>Your rights and deleting your data</h2>
-      <p>Under the GDPR you can ask to see, correct, export or delete your data, and you can object to how we use it. To have your data deleted, send a DM to @perugiaparty on Instagram with "delete my data" and your Instagram handle. We delete everything within 7 days and confirm in the chat. You can also complain to the Italian data protection authority (Garante per la protezione dei dati personali).</p>
-    </section>
-
-    <div class="card"><h2>Contact</h2><p>Send a DM to <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a> on Instagram with "privacy" and what you'd like us to do. We reply as soon as we can.</p></div>
+    <p class="small">Under the GDPR you can also ask to see, correct or export your data, or object to how we use it: DM us with "privacy". You can complain to the Italian data protection authority (Garante per la protezione dei dati personali).</p>
   </article>
 </main>
 <footer>
