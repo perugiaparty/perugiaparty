@@ -800,9 +800,9 @@ function receiptHTML(d, tierName, tip){
     ${line("0X", "REGRETS", "0")}
     <div class="rc-d"></div>
     ${line("1X", "TICKET · " + esc(String(tierName).toUpperCase()), euro(d.price))}
-    <div class="rc-l rc-tip"><span class="q">+</span><span class="i">TIP THE CREW<small>OPTIONAL</small></span>
-      <span class="v rc-step"><button type="button" data-tip="-1" aria-label="Less tip" ${tip ? "" : "disabled"}>−</button><b id="tip-v">${euro(tip)}</b><button type="button" data-tip="1" aria-label="Add €1 tip">+</button></span></div>
-    <p class="rc-why">We organise this for free. A tip goes to the crew: baristas, setup, organisation. Totally optional, every euro helps ♥</p>
+    <div class="rc-l rc-tip"><span class="q">+</span><span class="i">CONTRIBUTION<small>OPTIONAL</small></span>
+      <span class="v rc-step"><button type="button" data-tip="-1" aria-label="Less" ${tip ? "" : "disabled"}>−</button><b id="tip-v">${euro(tip)}</b><button type="button" data-tip="1" aria-label="Add €1">+</button></span></div>
+    <p class="rc-why">We keep the price low so every student can come. Clubs here charge more for meh music and watered-down drinks. If you can, add a little: it goes to the drinks and baristas, the DJs, the venue and the organisation. Every euro helps ♥</p>
     <div class="rc-d"></div>
     <div class="rc-tot"><span>TOTAL</span><b id="tip-tot">${euro(total)}</b></div>
     <div class="rc-d"></div>
@@ -820,7 +820,7 @@ document.addEventListener("click", e => {
   const minus = document.querySelector('[data-tip="-1"]'); if (minus) minus.disabled = !tip;
   const row = document.getElementById("amt-row"); if (row) row.innerHTML = payRow("Amount", euro(total), String(total).replace(".", ","));
   const all = document.getElementById("pay-all"); if (all) all.dataset.copy = all.dataset.copy.replace(/^Amount: .*$/m, "Amount: " + euro(total));
-  const tag = document.querySelector(".pay .tier-tag"); if (tag) tag.textContent = tag.textContent.replace(/ \+ tip$/, "") + (tip ? " + tip" : "");
+  const tag = document.querySelector(".pay .tier-tag"); if (tag) tag.textContent = tag.textContent.replace(/ \+ contribution$/, "") + (tip ? " + contribution" : "");
   clearTimeout(tipTimer);
   tipTimer = setTimeout(() => { const t = token; if (t) fetch("/api/ticket/tip", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ t, tip }) }).catch(() => {}); }, 600);
 });
@@ -898,6 +898,7 @@ function render(d){
       <div class="pay-faq">
         <h3>Good to know</h3>
         <dl>
+          <div><dt>Contribution</dt><dd>Optional. It helps us keep prices low for everyone.</dd></div>
           <div><dt>After paying</dt><dd>Nothing to send. Your ticket and the place appear here${d.verified ? " and we DM you" : ""}.</dd></div>
           <div><dt>How long</dt><dd>Instant transfer: right away. Normal: 1–2 working days.</dd></div>
           ${bankCountry && ibanCC !== "IT" ? `<div><dt>Foreign account</dt><dd>Normal SEPA transfer in euro. Bank country: ${esc(CC[ibanCC] || ibanCC)}.</dd></div>` : ""}
