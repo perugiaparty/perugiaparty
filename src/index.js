@@ -237,10 +237,13 @@ async function apiPhotos(req, env) {
   if (!ig) return json({ error: "We couldn't find you." }, 404);
   const blocked = await env.DB.prepare("SELECT 1 FROM people WHERE lower(ig) = ? AND blocked = 1").bind(ig).first();
   const rows = blocked ? [] : ((await env.DB.prepare(
-    "SELECT h.name, h.site_title, h.photos_url, h.closed_at FROM history h WHERE h.photos_url IS NOT NULL AND h.tag IN (SELECT event FROM guests WHERE lower(ig) = ? AND verified = 1) ORDER BY h.closed_at DESC"
+    "SELECT h.name, h.site_title, h.photos_url, h.photos_until, h.closed_at FROM history h WHERE h.photos_url IS NOT NULL AND h.tag IN (SELECT event FROM guests WHERE lower(ig) = ? AND verified = 1) ORDER BY h.closed_at DESC"
   ).bind(ig).all()).results || []);
   if (!rows.length) return json({ error: "No photos for you yet. Photos are only for people who signed up for that party." }, 403);
-  return json({ albums: rows.map((r) => ({ title: r.site_title || r.name, url: r.photos_url })) });
+  // albums are online for a limited time (photos_until), then the link is gone
+  const live = rows.filter((r) => !Number(r.photos_until) || Number(r.photos_until) > Date.now());
+  if (!live.length) return json({ error: "The photos aren't online anymore. They were up for 7 days." }, 410);
+  return json({ albums: live.map((r) => ({ title: r.site_title || r.name, url: r.photos_url, until: Number(r.photos_until) || null })) });
 }
 async function apiLogin(req, env) {
   let body; try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }

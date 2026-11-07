@@ -24,6 +24,8 @@
 .albums{display:grid;gap:10px;margin-top:6px}
 .album{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--ink);color:var(--cream);border-radius:20px;padding:20px 22px;text-decoration:none;font-family:var(--f-display);font-size:24px}
 .album span{font-family:var(--f-body);font-size:14px;font-weight:700;background:var(--red);border-radius:99px;padding:9px 14px;white-space:nowrap}
+.album .until{display:block;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:#b9ab98;margin-top:6px}
+.album{text-align:left}
 .ph .note{margin-top:18px;font-size:13.5px;color:var(--muted)}
 </style>
 </head>
@@ -37,7 +39,7 @@
 <main class="wrap">
   <section class="ph" id="ph">
     <h1>Photos</h1>
-    <p class="sub">For everyone who signed up for the party.</p>
+    <p class="sub">For everyone who signed up for the party. Online for 7 days.</p>
     <form id="f" novalidate>
       <input id="ig" placeholder="@instagram" aria-label="Instagram" autocapitalize="off" autocomplete="username" maxlength="40">
       <input id="code" placeholder="Code (H26-XXXXXX)" aria-label="Your code" autocapitalize="characters" maxlength="20" style="font-family:var(--f-mono);letter-spacing:.06em">
@@ -53,7 +55,7 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 function show(albums) {
   $("ph").innerHTML = `<h1>Photos</h1><p class="sub">Thanks for coming ♥</p>
-    <div class="albums">${albums.map((a) => `<a class="album" href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.title)}<span>Open ↗</span></a>`).join("")}</div>
+    <div class="albums">${albums.map((a) => `<a class="album" href="${esc(a.url)}" target="_blank" rel="noopener"><div>${esc(a.title)}${a.until ? `<small class="until">Online until ${new Date(a.until).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/Rome" })}</small>` : ""}</div><span>Open ↗</span></a>`).join("")}</div>
     <p class="note">Tag <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">@perugiaparty</a> if you post one.</p>`;
 }
 async function ask(body) {
