@@ -302,10 +302,8 @@ $("#login").addEventListener("submit", async (e) => {
     if (!r.ok && d.pending === "ig") { $("#pw").value = ""; showCode(d.vcode, d.ig); return; }
     if (!r.ok && d.pending === "approve") { $("#pend-body").innerHTML = `<p class="sub" style="font-size:16px">${esc(d.error)}</p>`; $("#pw").value = ""; screen("pending"); return; }
     if (!r.ok) { $("#lerr").textContent = d.error || "Could not log in."; return; }
-    token = d.token; delete d.token; S = d; $("#pw").value = "";
-    document.body.classList.remove("auth"); $("#login").classList.add("hide"); $("#signup").classList.add("hide"); $("#pending").classList.add("hide"); $("#view").classList.remove("hide"); $("#tabs").classList.remove("hide"); $("#lockbtn").classList.remove("hide");
-    tab = "home"; draw(); checkPush().then(() => { if (token) draw(); });
-    clearInterval(timer); timer = setInterval(refresh, 20000);
+    token = d.token; delete d.token; $("#pw").value = "";
+    enter(d);
   } catch (err) { $("#lerr").textContent = "No connection. Try again."; }
   finally { $("#lbtn").disabled = false; }
 });
@@ -317,6 +315,26 @@ document.addEventListener("click", (e) => {
   if (e.target.closest("[data-go-signup]")) { history.replaceState(null, "", "#join"); screen("signup"); }
   if (e.target.closest("[data-go-login]")) { history.replaceState(null, "", location.pathname); screen("login"); }
 });
+function enter(d) {
+  S = d;
+  document.body.classList.remove("auth"); $("#login").classList.add("hide"); $("#signup").classList.add("hide"); $("#pending").classList.add("hide"); $("#view").classList.remove("hide"); $("#tabs").classList.remove("hide"); $("#lockbtn").classList.remove("hide");
+  tab = "home"; draw(); checkPush().then(() => { if (token) draw(); });
+  clearInterval(timer); timer = setInterval(refresh, 20000);
+}
+// one-time pass from Matt's admin panel: /crew#s=<session>. The hash never reaches the server and is removed at once.
+(async () => {
+  const m = location.hash.match(/^#s=([a-z0-9]{32})$/);
+  if (!m) return;
+  history.replaceState(null, "", location.pathname);
+  token = m[1];
+  // the panel writes the session while this tab opens: give it a moment
+  for (let i = 0; i < 6; i++) {
+    try { const r = await fetch("/api/crew/state", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token }), cache: "no-store" });
+      if (r.ok) { enter(await r.json()); return; } } catch (e) {}
+    await new Promise((r) => setTimeout(r, 700));
+  }
+  token = null; screen("login"); $("#lerr").textContent = "That link expired. Open /crew from the admin panel again.";
+})();
 if (location.hash === "#join") screen("signup");
 function showCode(vcode, ig) {
   $("#pend-body").innerHTML = `<p class="sub" style="margin:-8px 0 14px">Send this code to <b style="color:var(--txt)">@perugiaparty</b> from ${esc(ig)}</p>
