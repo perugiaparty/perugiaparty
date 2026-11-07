@@ -342,6 +342,7 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
 main#top{display:flex;flex-direction:column}main#top>*{width:100%;box-sizing:border-box}
 .o-hero{order:0}.o-new{order:1}.o-why{order:2}.o-next{order:3}.o-main{order:4}.o-faq{order:5}.o-nights{order:6}
 html[data-live] .o-next{order:0}
+html:not([data-live]) .o-next{display:none}
 /* past nights: small strip */
 #nights{padding-block:28px 40px}#nights .sec-head h2{font-size:clamp(22px,3vw,30px)}#nights .sec-head{margin-bottom:14px}
 #nights .nights .night{flex:0 0 clamp(170px,22%,220px);min-height:0;padding:16px 18px;gap:10px;border-radius:16px}

@@ -40,12 +40,12 @@ COMMON_HEAD = lambda path, title, desc, ogt, ogd, loc: [
 
 # ---------- Erasmus: a "new here" guide and an FAQ for people who have never been to Perugia
 NEW_HERE = [
-    ("Nights end early", "Bars in the centre close around 01:30, and you're standing outside."),
-    ("Clubs are far", "They're out of town. No car, no club."),
-    ("We're in the centre", "Walk there. The exact place is on your ticket."),
-    ("English is fine", "Site, ticket and DMs are all in English."),
-    ("Instagram is your check", "DM us your code. That's how we know you're real."),
-    ("Pay from abroad", "Bank transfer in euro (SEPA), also from a foreign account."),
+    ("When do bars close here?", "Around 01:30 in the centre, and you're standing outside."),
+    ("Can I go to a club?", "They're out of town. No car, no club."),
+    ("Where is PerugiaParty?", "In the centre, walking distance. The exact place is on your ticket."),
+    ("Do I need Italian?", "No. The site, your ticket and our DMs are in English."),
+    ("Why DM my code?", "That's how we check you're a real person."),
+    ("My bank isn't Italian.", "No problem: a SEPA transfer in euro works from any European account."),
 ]
 ER_FAQ = [
     ("I just arrived. What is PerugiaParty?", "Private parties for university and Erasmus students in Perugia’s centre: open bar, DJs and new people, at a student price. Run by volunteers. 18+."),
@@ -56,23 +56,34 @@ ER_FAQ = [
     ("What do I bring?", "Your ticket QR on your phone and a photo ID (passport or ID card). You must be 18+."),
 ]
 def erasmus_post(s):
-    rows = "".join(f'<li><b>{h}</b><span>{p}</span></li>' for h, p in NEW_HERE)
-    guide = f"""<div class="wrap o-new"><section class="sec nh" id="new" aria-labelledby="new-h">
-      <div class="nh-head"><p class="nh-k">For Erasmus</p><h2 id="new-h">New in <span>Perugia?</span></h2><p>Six things to know before your first night out.</p></div>
-      <ol class="nh-list">{rows}</ol></section></div>
+    rows = "".join(f'<li><p class="q">{h}</p><p class="a"><b>PerugiaParty</b>{p}</p></li>' for h, p in NEW_HERE)
+    guide = f"""<div class="wrap o-new"><section class="sec hd" id="new" aria-labelledby="new-h">
+      <div class="hd-top"><span class="hd-dot"></span><div><p class="hd-k">Erasmus help desk</p><h2 id="new-h">New in <span>Perugia?</span></h2></div></div>
+      <p class="hd-sub">The questions every new student asks us.</p>
+      <ul class="hd-chat">{rows}</ul>
+      <div class="hd-foot"><span>Still lost?</span><a class="btn" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Ask us on Instagram ↗</a></div>
+    </section></div>
 """
-    s = s.replace('  <section class="band-red" id="next"', guide + '  <section class="band-red" id="next"', 1)
-    s = s.replace("</style>", """.nh{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:clamp(24px,5vw,72px);align-items:start}
-.nh-k{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 10px}
-.nh-head h2{font-size:clamp(36px,5vw,60px);line-height:.95;margin:0 0 12px}.nh-head h2 span{color:var(--red)}
-.nh-head p:last-child{color:var(--muted);font-size:17px;margin:0}
-.nh-list{list-style:none;margin:0;padding:0;counter-reset:n;border-top:2px solid var(--ink)}
-.nh-list li{counter-increment:n;display:grid;grid-template-columns:44px 1fr;column-gap:14px;padding:16px 0;border-bottom:1px solid #d8ccb6}
-.nh-list li::before{content:counter(n);grid-row:span 2;font-family:var(--f-display);font-size:26px;line-height:1;color:var(--red)}
-.nh-list b{font-size:18px;font-weight:800;line-height:1.2}
-.nh-list span{font-size:15px;color:var(--muted);line-height:1.45;margin-top:2px}
-@media (max-width:820px){.nh{grid-template-columns:1fr}}
+    s = s.replace('  <section class="band-red o-next" id="next"', guide + '  <section class="band-red o-next" id="next"', 1)
+    assert 'id="new"' in s
+    s = s.replace("</style>", """.hd{background:var(--ink);color:var(--cream);border-radius:28px;padding:clamp(22px,4vw,44px);margin-block:12px}
+.hd-top{display:flex;align-items:center;gap:14px}
+.hd-dot{width:12px;height:12px;border-radius:50%;background:#7bd389;box-shadow:0 0 0 5px rgba(123,211,137,.18);flex:none}
+.hd-k{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#7bd389;margin:0 0 4px}
+.hd h2{font-size:clamp(32px,4.6vw,54px);line-height:.95;margin:0}.hd h2 span{color:#ff4a3d}
+.hd-sub{color:#b9ab98;margin:12px 0 24px}
+.hd-chat{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
+.hd-chat li{display:grid;gap:6px;background:#1f1a17;border-radius:20px;padding:14px}
+.hd-chat .q{justify-self:end;max-width:90%;background:var(--red);color:var(--cream);border-radius:16px 16px 4px 16px;padding:9px 13px;font-weight:700;font-size:15px;margin:0}
+.hd-chat .a{justify-self:start;max-width:92%;background:#2e2723;color:var(--cream);border-radius:16px 16px 16px 4px;padding:9px 13px;font-size:15px;line-height:1.4;margin:0}
+.hd-chat .a b{display:block;font-family:var(--f-mono);font-weight:500;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#ffd23f;margin-bottom:3px}
+.hd-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:24px;color:#b9ab98}
+@media (max-width:760px){.hd-chat{grid-template-columns:1fr}}
 </style>""", 1)
+    # Erasmus page: no club / centro comparison, keep the mission as "Who we are"
+    a = s.index('<h2 id="why-h"'); b = s.index('<h3 class="why-q">', a)
+    s = s[:a] + s[b:]
+    s = s.replace('<h3 class="why-q">But <span>why?</span></h3>', '<h2 class="why-q" id="why-h">Who <span>we are.</span></h2>', 1)
     a = s.index('<div class="faq">', s.index('id="faq"')); b = s.index('<details id="rules">', a)
     s = s[:a] + '<div class="faq">\n' + "".join(f"        <details><summary>{q}</summary><p>{x}</p></details>\n" for q, x in ER_FAQ) + "        " + s[b:]
     return s
@@ -85,6 +96,13 @@ build("/erasmus", "en", COMMON_HEAD("/erasmus", "Erasmus parties in Perugia · P
     ('Student parties <em>in Perugia.</em>', 'Erasmus parties <em>in Perugia.</em>'),
     ('Your people. Your night. Open bar, DJs and new people to meet, at a student price.', 'Just arrived in Perugia? Meet students from here and from all over the world. Open bar, DJs, student price.'),
     ('<a class="btn outline" href="/erasmus">Erasmus in Perugia</a>', '<a class="btn outline" href="/">Home</a>'),
+    ('<p>Six steps to the door.</p>', '<p>From your phone to the party. No Italian needed.</p>'),
+    ('<h3>Request</h3><p>Fill in 30 seconds.</p>', '<h3>Request</h3><p>Your name and Instagram. 30 seconds.</p>'),
+    ('<h3>DM the code</h3><p>Send it on Instagram.</p>', '<h3>DM the code</h3><p>Send it to @perugiaparty on Instagram.</p>'),
+    ('<h3>Approved</h3><p>We check every request.</p>', '<h3>Approved</h3><p>We reply in your DMs with your page.</p>'),
+    ('<h3>Pay</h3><p>Bank transfer, tap to copy.</p>', '<h3>Pay</h3><p>Bank transfer in euro, any European bank.</p>'),
+    ('<h3>Your QR</h3><p>Ticket and place unlock.</p>', '<h3>Your QR</h3><p>Your ticket and the address appear.</p>'),
+    ('<h3>Party</h3><p>QR and photo ID at the door.</p>', '<h3>Party</h3><p>Show the QR and your passport or ID card.</p>'),
 ], "hero-erasmus", "People from all over the world meeting in Perugia", erasmus_post)
 
 # ---------- Italiano
