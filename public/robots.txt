@@ -6,5 +6,7 @@ Disallow: /ticket
 Disallow: /door
 Disallow: /admin
 Disallow: /soon
+Disallow: /crew
+Disallow: /photos
 
 Sitemap: https://perugiaparty.com/sitemap.xml
