@@ -178,7 +178,7 @@ textarea{font:inherit;resize:vertical;line-height:1.5}
 
   <form class="login hide" id="signup" novalidate>
     <h1>Join</h1>
-    <p class="sub">Sign up, confirm your Instagram, then Matt approves you.</p>
+    <p class="sub">Sign up, confirm on Instagram, done.</p>
     <input id="s-name" autocomplete="name" placeholder="Full name" maxlength="60">
     <input id="s-ig" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Instagram (@yourname)" maxlength="60">
     <input id="s-user" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Pick a username" maxlength="30">
@@ -278,9 +278,8 @@ document.addEventListener("click", (e) => {
 if (location.hash === "#join") screen("signup");
 function showCode(vcode, ig) {
   $("#pend-body").innerHTML = `<ol class="steps">
-      <li>Send this code to <b>@perugiaparty</b> on Instagram from <b>${esc(ig)}</b>.</li>
-      <li>You get an automatic reply when it's confirmed.</li>
-      <li>Then Matt approves you. You get a DM when you're in.</li></ol>
+      <li>Send this code to <b>@perugiaparty</b> from <b>${esc(ig)}</b>.</li>
+      <li>Matt approves you. You get a DM.</li></ol>
     <div class="code">${esc(vcode)}</div>
     <a class="big" style="text-align:center;text-decoration:none;display:block;box-sizing:border-box" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(vcode)}" target="_blank" rel="noopener" id="sendcode">Send code on Instagram ↗</a>`;
   const b = $("#sendcode"); if (b) b.addEventListener("click", () => { try { navigator.clipboard.writeText(vcode); } catch (x) {} });
@@ -386,7 +385,7 @@ function itemRow(n) {
       ? `<div class="acts"><div class="r"><button class="ghost" data-undo="${n.id}">${todo ? "Not done after all" : "Not bought after all"}</button>${del}</div></div>`
       : todo
         ? `<div class="acts"><button class="yes" data-did="${n.id}">Yes, it's done ✓</button><div class="r">${claim}${del}</div>${more}</div>`
-        : `<form class="acts" data-f="got" data-id="${n.id}"><input name="price" inputmode="decimal" placeholder="€ if you paid yourself (optional)"><button class="yes">Yes, I got it ✓</button><div class="r">${claim}${del}</div>${more}</form>`;
+        : `<form class="acts" data-f="got" data-id="${n.id}"><input name="price" inputmode="decimal" placeholder="Paid yourself? €"><button class="yes">Yes, I got it ✓</button><div class="r">${claim}${del}</div>${more}</form>`;
   }
   const dueHtml = !done && n.due ? `<span class="due ${n.due < today() ? "late" : ""}">${esc(dueTxt(n.due))}</span>` : "";
   const subHtml = sub ? esc(sub).replace("\u0000", dueHtml) : "";
@@ -405,7 +404,7 @@ function homeView() {
   return `<h2>To do</h2>${notifBox()}
   <p class="lead">${todo.length ? `${todo.length} open${mine ? ` · ${mine} on you` : ""}` : "All done for now"}${me.role ? ` · your job: <b style="color:var(--txt)">${esc(me.role)}</b>` : ""}</p>
   ${S.news.length || me.lead ? `<div class="shd"><h3>Announcements</h3>${me.lead ? plus("news", "Post") : ""}</div>` : ""}
-  ${adding === "news" ? `<form class="addbox" data-f="news"><textarea name="body" rows="3" maxlength="1000" placeholder="Message for the whole crew" data-autofocus></textarea><button class="big" style="padding:12px">Post to everyone</button></form>` : ""}
+  ${adding === "news" ? `<form class="addbox" data-f="news"><textarea name="body" rows="3" maxlength="1000" placeholder="Message for everyone" data-autofocus></textarea><button class="big" style="padding:12px">Post to everyone</button></form>` : ""}
   ${S.news.map((x) => `<div class="news"><small>${esc(x.author || "Matt")} · ${when(x.created_at)}</small><p>${esc(x.body)}</p>${me.lead ? `<button class="x" data-delnews="${x.id}" aria-label="Remove">×</button>` : ""}</div>`).join("")}
   <div class="shd"><h3>Tasks</h3>${plus("todo", "Add")}</div>
   <div class="chips">${[["all", "All"], ...PHASES].map(([k, l]) => { const n = k === "all" ? todo.length : todo.filter((x) => phaseOf(x) === k).length; return `<button class="chip ${phase === k ? "on" : ""}" data-phase="${k}">${l}<i>${n}</i></button>`; }).join("")}</div>
@@ -415,7 +414,7 @@ function homeView() {
     <button class="big" style="padding:12px">Add task</button></form>` : ""}
   ${shown.map(([k, l]) => { const items = todo.filter((x) => phaseOf(x) === k);
     if (phase === "all" && !items.length) return "";
-    return `${phase === "all" ? `<div class="shop">${l} <span class="pill">${items.length}</span></div>` : ""}<div class="card list">${items.map(itemRow).join("") || `<div class="empty">Nothing open here</div>`}</div>`; }).join("") || `<div class="card empty">No open tasks</div>`}
+    return `${phase === "all" ? `<div class="shop">${l} <span class="pill">${items.length}</span></div>` : ""}<div class="card list">${items.map(itemRow).join("") || `<div class="empty">Nothing here</div>`}</div>`; }).join("") || `<div class="card empty">No open tasks</div>`}
   ${doneBlock(phase === "all" ? done : done.filter((x) => phaseOf(x) === phase), "Done")}`;
 }
 
@@ -427,14 +426,14 @@ function paletteBlock() {
 const SHOPS = ["Lidl", "Penny", "Eurospin", "MD", "Conad", "Esselunga", "Carrefour", "Coop", "Flying Tiger", "Amazon", "From NL", "Borrow"];
 function notifBox() {
   if (pushState === "on" || pushState === "unsupported" || pushState === null) return "";
-  if (pushState === "ios") return `<div class="notif"><p><b>Get notifications:</b> tap Share → “Add to Home Screen”, then open PP Crew from there.</p></div>`;
+  if (pushState === "ios") return `<div class="notif"><p><b>Notifications:</b> Share → Add to Home Screen, then open PP Crew.</p></div>`;
   if (pushState === "denied") return "";
-  return `<div class="notif"><p><b>Notifications</b> for announcements, tasks and shifts</p><button class="plus" data-push="on">Turn on</button></div>`;
+  return `<div class="notif"><p><b>Get notified</b> about news, tasks and shifts</p><button class="plus" data-push="on">Turn on</button></div>`;
 }
 function needView() {
   const open = list("buy", false);
   return `<div class="shd" style="margin-top:6px"><h2 style="margin:0">To buy</h2>${plus("buy", "Add")}</div>
-  <p class="lead">${open.length} item${open.length === 1 ? "" : "s"} left · tap one when you have it</p>
+  <p class="lead">${open.length} left</p>
   ${adding === "buy" ? `<form class="addbox" data-f="buy"><input name="item" placeholder="What do we need?" maxlength="120" data-autofocus>
     <div class="two"><input name="qty" placeholder="How many" maxlength="30"><input name="shop" list="shops" placeholder="Where? (Lidl, Penny…)" maxlength="40"></div>
     <datalist id="shops">${SHOPS.map((x) => `<option value="${x}">`).join("")}</datalist>
@@ -450,8 +449,8 @@ function groups(items) {
 }
 
 function notesView() {
-  return `<div class="shd" style="margin-top:0"><p class="lead" style="margin:0">Private. Saves while you type.</p><span class="saved ${S.note.at ? "ok" : ""}" id="saved">${S.note.at ? "Saved · " + (Date.now() - S.note.at < 864e5 ? hm(S.note.at) : day(S.note.at)) : "Saves by itself"}</span></div>
-  <textarea style="margin-top:10px" id="note" class="notes" maxlength="20000" placeholder="Ideas, phone numbers, what to remember for the night…">${esc(S.note.body)}</textarea>`;
+  return `<div class="shd" style="margin-top:0"><p class="lead" style="margin:0">Only you see this</p><span class="saved ${S.note.at ? "ok" : ""}" id="saved">${S.note.at ? "Saved · " + (Date.now() - S.note.at < 864e5 ? hm(S.note.at) : day(S.note.at)) : "Saves by itself"}</span></div>
+  <textarea style="margin-top:10px" id="note" class="notes" maxlength="20000" placeholder="Your notes…">${esc(S.note.body)}</textarea>`;
 }
 
 function moreView() {
@@ -463,7 +462,7 @@ function moreView() {
 }
 function spendView() {
   const mine = S.spends, owed = mine.filter((x) => !Number(x.repaid)).reduce((a, x) => a + Number(x.amount || 0), 0);
-  return `<div class="shd" style="margin-top:0"><p class="lead" style="margin:0">Paid yourself? Add it and Matt pays you back. Only you and Matt see this.</p>${plus("spend", "Add")}</div>
+  return `<div class="shd" style="margin-top:0"><p class="lead" style="margin:0">Paid yourself? Matt pays you back.</p>${plus("spend", "Add")}</div>
   <div style="height:10px"></div>
   ${adding === "spend" ? `<form class="addbox" data-f="spend"><input name="item" placeholder="What did you buy?" maxlength="120" data-autofocus>
     <div class="two"><input name="amount" inputmode="decimal" placeholder="€ amount"><select name="cat" aria-label="Category">${S.cats.map((c) => `<option>${c}</option>`).join("")}</select></div>
@@ -487,7 +486,7 @@ function attView() {
   <h3>You</h3>
   <div class="card">
     <div class="seg">${[["yes", "Coming"], ["maybe", "Maybe"], ["no", "Can't"]].map(([v, l]) => `<button data-go="${v}" class="${me.going === v ? "on" : ""}">${l}</button>`).join("")}</div>
-    <form class="buy" data-f="arrive"><input name="arrive" value="${esc(me.arrive)}" placeholder="Arriving at (e.g. 20:30)" maxlength="40"><button class="btn2">Save</button></form>
+    <form class="buy" data-f="arrive"><input name="arrive" value="${esc(me.arrive)}" placeholder="Arriving at… (20:30)" maxlength="40"><button class="btn2">Save</button></form>
     ${me.role ? `<p class="muted" style="margin:10px 0 0;font-size:14px">Your job: <b style="color:var(--txt)">${esc(me.role)}</b></p>` : ""}
   </div>
   <div class="shd"><h3>Shifts</h3>${me.lead ? plus("shift", "Add") : ""}</div>
@@ -495,7 +494,7 @@ function attView() {
     <input name="role" placeholder="Job (door, bar, DJ…)" maxlength="30" data-autofocus>
     <div class="two"><input type="time" name="start" aria-label="From" style="color-scheme:dark"><input type="time" name="end" aria-label="Until" style="color-scheme:dark"></div>
     <button class="big" style="padding:12px">Add shift</button></form>` : ""}
-  <div class="card">${S.shifts.length ? S.shifts.map((x) => `<div class="shift ${x.crew_id === me.id ? "me" : ""}"><span class="t">${esc(x.start)}${x.end ? "–" + esc(x.end) : ""}</span><div class="main"><b>${esc(x.role)}</b><span>${x.crew_id === me.id ? "You" : esc(who(x.crew_id))}</span></div>${me.lead ? `<button class="x" data-delshift="${x.id}" aria-label="Remove">×</button>` : ""}</div>`).join("") : `<div class="empty">No shifts planned yet</div>`}</div>
+  <div class="card">${S.shifts.length ? S.shifts.map((x) => `<div class="shift ${x.crew_id === me.id ? "me" : ""}"><span class="t">${esc(x.start)}${x.end ? "–" + esc(x.end) : ""}</span><div class="main"><b>${esc(x.role)}</b><span>${x.crew_id === me.id ? "You" : esc(who(x.crew_id))}</span></div>${me.lead ? `<button class="x" data-delshift="${x.id}" aria-label="Remove">×</button>` : ""}</div>`).join("") : `<div class="empty">No shifts yet</div>`}</div>
   <h3>Guests</h3>
   <div class="card">
     <div class="grid2">
