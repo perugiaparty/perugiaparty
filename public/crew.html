@@ -31,11 +31,18 @@ body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--f-body);fo
 .icon{width:42px;height:42px;flex:none;border-radius:50%;border:1.5px solid var(--hair);background:var(--card);color:var(--soft);display:grid;place-items:center;cursor:pointer}
 .icon svg{width:19px;height:19px}
 /* login */
-.login{min-height:70dvh;display:flex;flex-direction:column;justify-content:center;gap:12px;max-width:380px;margin:0 auto;width:100%}
-.login h1{font-family:var(--f-display);font-weight:400;font-size:56px;line-height:.9;margin:0 0 4px;color:var(--txt)}
-.login p.sub{margin:0 0 10px;color:var(--soft)}
-.linkbtn{font:inherit;font-weight:700;font-size:15px;background:none;border:0;color:var(--soft);padding:10px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
-.code{font-family:var(--f-mono);font-size:28px;letter-spacing:.08em;text-align:center;background:var(--card);border:1.5px dashed var(--soft);border-radius:16px;padding:18px;color:var(--txt);user-select:all}
+/* sign in / join: one calm centred column, no top bar */
+body.auth .bar{display:none}
+.login{min-height:calc(100dvh - 120px);display:flex;flex-direction:column;justify-content:center;gap:10px;max-width:340px;margin:0 auto;width:100%;text-align:center}
+.login .logo{width:64px;height:64px;border-radius:16px;margin:0 auto 14px;display:block}
+.login h1{font-family:var(--f-body);font-weight:800;font-size:26px;letter-spacing:-.01em;line-height:1.1;margin:0 0 14px;color:var(--txt)}
+.login p.sub{margin:-8px 0 14px;color:var(--soft);font-size:14px}
+.login input{text-align:left}
+.login .big{margin-top:4px}
+.login .err{min-height:0}.login .err:empty{display:none}
+.linkbtn{font:inherit;font-weight:600;font-size:14px;background:none;border:0;color:var(--soft);padding:12px;cursor:pointer}
+.linkbtn b{color:var(--txt)}
+.code{margin-bottom:6px;font-family:var(--f-mono);font-size:26px;letter-spacing:.08em;text-align:center;background:var(--card);border:1.5px dashed var(--soft);border-radius:16px;padding:18px;color:var(--txt);user-select:all}
 .steps{margin:0;padding-left:20px;color:var(--soft);display:grid;gap:6px}
 .steps b{color:var(--txt)}
 input,select,textarea{font:inherit;color:var(--txt);background:var(--card);border:1.5px solid var(--hair);border-radius:14px;padding:13px 14px;width:100%;box-sizing:border-box;min-width:0}
@@ -188,7 +195,7 @@ textarea{font:inherit;resize:vertical;line-height:1.5}
 .me{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-6px 0 4px}
 </style>
 </head>
-<body>
+<body class="auth">
 <div class="app">
   <div class="bar">
     <div class="brand"><img src="/apple-touch-icon.png" alt=""><div><b id="evname">Crew</b><span class="mono" id="evsub">PerugiaParty</span></div></div>
@@ -196,30 +203,32 @@ textarea{font:inherit;resize:vertical;line-height:1.5}
   </div>
 
   <form class="login" id="login" novalidate>
+    <img class="logo" src="/apple-touch-icon.png" alt="">
     <h1>Crew</h1>
     <input id="user" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Username" aria-label="Username">
     <input id="pw" type="password" autocomplete="current-password" placeholder="Password" aria-label="Password" enterkeyhint="go">
     <p class="err" id="lerr" role="alert"></p>
     <button class="big" type="submit" id="lbtn">Log in</button>
-    <button class="linkbtn" type="button" data-go-signup>New crew? Sign up</button>
+    <button class="linkbtn" type="button" data-go-signup>New here? <b>Join the crew</b></button>
   </form>
 
   <form class="login hide" id="signup" novalidate>
-    <h1>Join</h1>
-    <p class="sub">Sign up, confirm on Instagram, done.</p>
+    <img class="logo" src="/apple-touch-icon.png" alt="">
+    <h1>Join the crew</h1>
     <input id="s-name" autocomplete="name" placeholder="Full name" maxlength="60">
-    <input id="s-ig" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Instagram (@yourname)" maxlength="60">
-    <input id="s-user" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Pick a username" maxlength="30">
-    <input id="s-pw" type="password" autocomplete="new-password" placeholder="Pick a password (min. 8)" maxlength="200">
+    <input id="s-ig" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="@instagram" maxlength="60">
+    <input id="s-user" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Username" maxlength="30">
+    <input id="s-pw" type="password" autocomplete="new-password" placeholder="Password (min. 8)" maxlength="200">
     <p class="err" id="serr" role="alert"></p>
-    <button class="big" type="submit" id="sbtn">Sign up</button>
-    <button class="linkbtn" type="button" data-go-login>I already have an account</button>
+    <button class="big" type="submit" id="sbtn">Join</button>
+    <button class="linkbtn" type="button" data-go-login>Have an account? <b>Log in</b></button>
   </form>
 
   <section class="login hide" id="pending">
-    <h1>Almost</h1>
+    <img class="logo" src="/apple-touch-icon.png" alt="">
+    <h1>One last step</h1>
     <div id="pend-body"></div>
-    <button class="linkbtn" type="button" data-go-login>Back to log in</button>
+    <button class="linkbtn" type="button" data-go-login>Back to <b>log in</b></button>
   </section>
 
   <main id="view" class="hide"></main>
@@ -293,7 +302,7 @@ $("#login").addEventListener("submit", async (e) => {
     if (!r.ok && d.pending === "approve") { $("#pend-body").innerHTML = `<p class="sub" style="font-size:16px">${esc(d.error)}</p>`; $("#pw").value = ""; screen("pending"); return; }
     if (!r.ok) { $("#lerr").textContent = d.error || "Could not log in."; return; }
     token = d.token; delete d.token; S = d; $("#pw").value = "";
-    $("#login").classList.add("hide"); $("#signup").classList.add("hide"); $("#pending").classList.add("hide"); $("#view").classList.remove("hide"); $("#tabs").classList.remove("hide"); $("#lockbtn").classList.remove("hide");
+    document.body.classList.remove("auth"); $("#login").classList.add("hide"); $("#signup").classList.add("hide"); $("#pending").classList.add("hide"); $("#view").classList.remove("hide"); $("#tabs").classList.remove("hide"); $("#lockbtn").classList.remove("hide");
     tab = "home"; draw(); checkPush().then(() => { if (token) draw(); });
     clearInterval(timer); timer = setInterval(refresh, 20000);
   } catch (err) { $("#lerr").textContent = "No connection. Try again."; }
@@ -302,16 +311,14 @@ $("#login").addEventListener("submit", async (e) => {
 $("#lockbtn").addEventListener("click", () => lock());
 
 /* ---------- sign up: own password, Instagram code, then Matt approves ---------- */
-function screen(id) { for (const x of ["login", "signup", "pending"]) $("#" + x).classList.toggle("hide", x !== id); const f = $("#" + id + " input"); if (f) f.focus(); }
+function screen(id) { document.body.classList.add("auth"); for (const x of ["login", "signup", "pending"]) $("#" + x).classList.toggle("hide", x !== id); const f = $("#" + id + " input"); if (f) f.focus(); }
 document.addEventListener("click", (e) => {
   if (e.target.closest("[data-go-signup]")) { history.replaceState(null, "", "#join"); screen("signup"); }
   if (e.target.closest("[data-go-login]")) { history.replaceState(null, "", location.pathname); screen("login"); }
 });
 if (location.hash === "#join") screen("signup");
 function showCode(vcode, ig) {
-  $("#pend-body").innerHTML = `<ol class="steps">
-      <li>Send this code to <b>@perugiaparty</b> from <b>${esc(ig)}</b>.</li>
-      <li>Matt approves you. You get a DM.</li></ol>
+  $("#pend-body").innerHTML = `<p class="sub" style="margin:-8px 0 14px">Send this code to <b style="color:var(--txt)">@perugiaparty</b> from ${esc(ig)}</p>
     <div class="code">${esc(vcode)}</div>
     <a class="big" style="text-align:center;text-decoration:none;display:block;box-sizing:border-box" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(vcode)}" target="_blank" rel="noopener" id="sendcode">Send code on Instagram ↗</a>`;
   const b = $("#sendcode"); if (b) b.addEventListener("click", () => { try { navigator.clipboard.writeText(vcode); } catch (x) {} });
