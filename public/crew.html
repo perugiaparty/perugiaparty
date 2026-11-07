@@ -283,9 +283,10 @@ async function act(action, body, msg) {
   finally { busy = false; }
 }
 
+const isDev = () => { try { return !!token && token === localStorage.getItem("pp_crew_dev"); } catch (e) { return false; } };
 function lock(msg) {
   if (token && noteDirty) saveNote(true);
-  if (token) fetch("/api/crew/logout", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token }), keepalive: true }).catch(() => {});
+  if (token && !isDev()) fetch("/api/crew/logout", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token }), keepalive: true }).catch(() => {});
   token = null; S = null; clearInterval(timer); openId = null; adding = null;
   $("#view").classList.add("hide"); $("#view").innerHTML = ""; $("#tabs").classList.add("hide"); $("#lockbtn").classList.add("hide");
   screen("login"); $("#pw").value = ""; $("#lerr").textContent = msg || "";
@@ -303,11 +304,12 @@ $("#login").addEventListener("submit", async (e) => {
     if (!r.ok && d.pending === "approve") { $("#pend-body").innerHTML = `<p class="sub" style="font-size:16px">${esc(d.error)}</p>`; $("#pw").value = ""; screen("pending"); return; }
     if (!r.ok) { $("#lerr").textContent = d.error || "Could not log in."; return; }
     token = d.token; delete d.token; $("#pw").value = "";
+    if (d.device) { try { localStorage.setItem("pp_crew_dev", d.device); } catch (x) {} } delete d.device;
     enter(d);
   } catch (err) { $("#lerr").textContent = "No connection. Try again."; }
   finally { $("#lbtn").disabled = false; }
 });
-$("#lockbtn").addEventListener("click", () => lock());
+$("#lockbtn").addEventListener("click", () => { try { localStorage.removeItem("pp_crew_dev"); } catch (x) {} lock(); });
 
 /* ---------- sign up: own password, Instagram code, then Matt approves ---------- */
 function screen(id) { document.body.classList.add("auth"); for (const x of ["login", "signup", "pending"]) $("#" + x).classList.toggle("hide", x !== id); const f = $("#" + id + " input"); if (f) f.focus(); }
@@ -321,6 +323,13 @@ function enter(d) {
   tab = "home"; draw(); checkPush().then(() => { if (token) draw(); });
   clearInterval(timer); timer = setInterval(refresh, 20000);
 }
+(async () => {
+  if (/^#s=/.test(location.hash)) return;
+  let dev = null; try { dev = localStorage.getItem("pp_crew_dev"); } catch (e) {}
+  if (!dev || !/^[a-z0-9]{32}$/.test(dev)) return;
+  try { const r = await fetch("/api/crew/state", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token: dev }), cache: "no-store" });
+    if (r.ok) { token = dev; enter(await r.json()); } else if (r.status === 401) { try { localStorage.removeItem("pp_crew_dev"); } catch (x) {} } } catch (e) {}
+})();
 // one-time pass from Matt's admin panel: /crew#s=<session>. The hash never reaches the server and is removed at once.
 (async () => {
   const m = location.hash.match(/^#s=([a-z0-9]{32})$/);
@@ -360,7 +369,7 @@ $("#signup").addEventListener("submit", async (e) => {
 // away for more than 5 minutes: ask the password again (notes are saved first)
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) { hiddenAt = Date.now(); if (noteDirty) saveNote(true); return; }
-  if (token && hiddenAt && Date.now() - hiddenAt > 5 * 60 * 1000) lock("Locked after 5 minutes away. Log in again.");
+  if (token && !isDev() && hiddenAt && Date.now() - hiddenAt > 5 * 60 * 1000) lock("Locked after 5 minutes away. Log in again.");
   else if (token) refresh();
 });
 window.addEventListener("pagehide", () => { if (noteDirty) saveNote(true); });

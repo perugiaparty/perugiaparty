@@ -97,7 +97,8 @@ async function onCrew(env, crewId, tag) {
 async function session(env, ev, token) {
   if (!/^[a-z0-9]{32}$/.test(String(token || ""))) return null;
   const s = await env.DB.prepare("SELECT * FROM crew_sess WHERE token = ?").bind(token).first();
-  if (!s || s.expires < Date.now() || s.event !== ev.tag) return null;
+  // event NULL = Matt's own remembered device (owner account only); otherwise the session is for this party only
+  if (!s || s.expires < Date.now() || (s.event !== null && s.event !== ev.tag)) return null;
   return onCrew(env, s.crew_id, ev.tag);
 }
 
@@ -186,7 +187,13 @@ export async function apiCrew(req, env, action, { getEvent, json }) {
       env.DB.prepare("INSERT INTO crew_sess (token, crew_id, event, expires) VALUES (?, ?, ?, ?)").bind(token, c.id, ev.tag, now + SESSION_MS),
       env.DB.prepare("UPDATE crew SET last_login = ? WHERE id = ?").bind(now, c.id),
     ]);
-    return json({ token, ...(await state(env, ev, me)) });
+    // the owner (Matt) stays logged in on his own device; everyone else types the password every time
+    let device = null;
+    if (Number(c.owner) === 1) {
+      device = newToken();
+      await env.DB.prepare("INSERT INTO crew_sess (token, crew_id, event, expires) VALUES (?, ?, NULL, ?)").bind(device, c.id, now + 90 * 864e5).run();
+    }
+    return json({ token, device, ...(await state(env, ev, me)) });
   }
 
   const me = await session(env, ev, body.token);

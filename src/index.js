@@ -219,6 +219,29 @@ function parseProgram(text) {
 }
 
 // Log in on any phone with Instagram + personal code.
+// party photos: only for people who signed up (confirmed on Instagram) for that party; the album link never sits in the page
+async function apiPhotos(req, env) {
+  let body; try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
+  let ig = "";
+  const t = String(body.t || "");
+  if (TOKEN_RE.test(t)) {
+    const g = await env.DB.prepare("SELECT ig FROM guests WHERE token = ?").bind(t).first();
+    ig = g ? normIg(g.ig) : "";
+  } else {
+    ig = normIg(clean(body.ig, 40));
+    const code = String(body.code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    if (!ig || code.length < 7) { await sleep(500); return json({ error: "Add your Instagram and your code." }, 400); }
+    const ok = await env.DB.prepare("SELECT 1 FROM guests WHERE lower(ig) = ? AND (replace(vcode, '-', '') = ? OR replace(code, '-', '') = ?) LIMIT 1").bind(ig, code, code).first();
+    if (!ok) { await sleep(800); return json({ error: "That Instagram and code don't match. Your code is in your DMs from @perugiaparty." }, 404); }
+  }
+  if (!ig) return json({ error: "We couldn't find you." }, 404);
+  const blocked = await env.DB.prepare("SELECT 1 FROM people WHERE lower(ig) = ? AND blocked = 1").bind(ig).first();
+  const rows = blocked ? [] : ((await env.DB.prepare(
+    "SELECT h.name, h.site_title, h.photos_url, h.closed_at FROM history h WHERE h.photos_url IS NOT NULL AND h.tag IN (SELECT event FROM guests WHERE lower(ig) = ? AND verified = 1) ORDER BY h.closed_at DESC"
+  ).bind(ig).all()).results || []);
+  if (!rows.length) return json({ error: "No photos for you yet. Photos are only for people who signed up for that party." }, 403);
+  return json({ albums: rows.map((r) => ({ title: r.site_title || r.name, url: r.photos_url })) });
+}
 async function apiLogin(req, env) {
   let body; try { body = await req.json(); } catch { return json({ error: "Bad request" }, 400); }
   const ig = normIg(clean(body.ig, 40));
@@ -957,6 +980,7 @@ async function route(req, env) {
         if (url.pathname === "/api/invite" && req.method === "GET") return await apiInvite(url, env);
         if (url.pathname === "/api/rerequest" && req.method === "POST") return await apiRerequest(req, env);
         if (url.pathname === "/api/login" && req.method === "POST") return await apiLogin(req, env);
+        if (url.pathname === "/api/photos" && req.method === "POST") { if (await tooMany(req, env, "login")) return slowDown(); return await apiPhotos(req, env); }
         if (url.pathname === "/api/push/key" && req.method === "GET") return await apiPush(req, env, url, getEvent, TOKEN_RE, json);
         if ((url.pathname === "/api/push/subscribe" || url.pathname === "/api/push/unsubscribe") && req.method === "POST") return await apiPush(req, env, url, getEvent, TOKEN_RE, json);
         if (url.pathname === "/api/ig/webhook" && req.method === "GET") return await igWebhookVerify(url, env);
