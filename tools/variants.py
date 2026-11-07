@@ -40,12 +40,12 @@ COMMON_HEAD = lambda path, title, desc, ogt, ogd, loc: [
 
 # ---------- Erasmus: a "new here" guide and an FAQ for people who have never been to Perugia
 NEW_HERE = [
-    ("Going out here", "Bars in the centro close around 01:30 and you stand outside. Clubs are out of town: you need a car or a taxi."),
-    ("Where we are", "In the city centre, walking distance from the bars. The exact place is on your ticket after you pay."),
-    ("No Italian needed", "Everything works in English: the site, the tickets, the DMs. The crowd is international."),
-    ("Come alone", "Fine. It's a guest list of students from Perugia and from all over the world: easy to meet people."),
-    ("Why Instagram", "We confirm every guest with a DM on Instagram. That's how we know you're a real person."),
-    ("Paying", "Bank transfer in euro, also from a foreign account (SEPA). The details show up after you're approved."),
+    ("Nights end early", "Bars in the centre close around 01:30, and you're standing outside."),
+    ("Clubs are far", "They're out of town. No car, no club."),
+    ("We're in the centre", "Walk there. The exact place is on your ticket."),
+    ("English is fine", "Site, ticket and DMs are all in English."),
+    ("Instagram is your check", "DM us your code. That's how we know you're real."),
+    ("Pay from abroad", "Bank transfer in euro (SEPA), also from a foreign account."),
 ]
 ER_FAQ = [
     ("I just arrived. What is PerugiaParty?", "Private parties for university and Erasmus students in Perugia’s centre: open bar, DJs and new people, at a student price. Run by volunteers. 18+."),
@@ -56,13 +56,23 @@ ER_FAQ = [
     ("What do I bring?", "Your ticket QR on your phone and a photo ID (passport or ID card). You must be 18+."),
 ]
 def erasmus_post(s):
-    tiles = "".join(f'<li><h3>{h}</h3><p>{p}</p></li>' for h, p in NEW_HERE)
-    guide = f"""<div class="wrap"><section class="sec" id="new" aria-labelledby="new-h">
-      <div class="sec-head"><h2 id="new-h">New in Perugia? <span style="color:var(--red)">Start here.</span></h2><p>Six things nobody tells you.</p></div>
-      <ol class="nh">{tiles}</ol></section></div>
+    rows = "".join(f'<li><b>{h}</b><span>{p}</span></li>' for h, p in NEW_HERE)
+    guide = f"""<div class="wrap"><section class="sec nh" id="new" aria-labelledby="new-h">
+      <div class="nh-head"><p class="nh-k">For Erasmus</p><h2 id="new-h">New in <span>Perugia?</span></h2><p>Six things to know before your first night out.</p></div>
+      <ol class="nh-list">{rows}</ol></section></div>
 """
     s = s.replace('  <section class="band-red" id="next"', guide + '  <section class="band-red" id="next"', 1)
-    s = s.replace("</style>", ".nh{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;counter-reset:n}\n.nh li{counter-increment:n;background:#e9dfcc;border-radius:18px;padding:18px 20px}\n.nh li::before{content:'0' counter(n);font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:var(--red)}\n.nh h3{font-family:var(--f-body);font-weight:800;font-size:17px;margin:6px 0 6px}\n.nh p{font-size:15px;line-height:1.45;color:var(--muted);margin:0}\n@media (max-width:860px){.nh{grid-template-columns:1fr 1fr}}@media (max-width:520px){.nh{grid-template-columns:1fr}}\n</style>", 1)
+    s = s.replace("</style>", """.nh{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:clamp(24px,5vw,72px);align-items:start}
+.nh-k{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 10px}
+.nh-head h2{font-size:clamp(36px,5vw,60px);line-height:.95;margin:0 0 12px}.nh-head h2 span{color:var(--red)}
+.nh-head p:last-child{color:var(--muted);font-size:17px;margin:0}
+.nh-list{list-style:none;margin:0;padding:0;counter-reset:n;border-top:2px solid var(--ink)}
+.nh-list li{counter-increment:n;display:grid;grid-template-columns:44px 1fr;column-gap:14px;padding:16px 0;border-bottom:1px solid #d8ccb6}
+.nh-list li::before{content:counter(n);grid-row:span 2;font-family:var(--f-display);font-size:26px;line-height:1;color:var(--red)}
+.nh-list b{font-size:18px;font-weight:800;line-height:1.2}
+.nh-list span{font-size:15px;color:var(--muted);line-height:1.45;margin-top:2px}
+@media (max-width:820px){.nh{grid-template-columns:1fr}}
+</style>""", 1)
     a = s.index('<div class="faq">', s.index('id="faq"')); b = s.index('<details id="rules">', a)
     s = s[:a] + '<div class="faq">\n' + "".join(f"        <details><summary>{q}</summary><p>{x}</p></details>\n" for q, x in ER_FAQ) + "        " + s[b:]
     return s

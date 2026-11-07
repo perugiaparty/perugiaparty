@@ -335,12 +335,16 @@ body.locked{overflow:hidden}
 .hero-meta .hm-red:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:9px;vertical-align:2px}
 /* no party taking requests: the form and everything pointing to it disappears */
 html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
-.nh{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;counter-reset:n}
-.nh li{counter-increment:n;background:#e9dfcc;border-radius:18px;padding:18px 20px}
-.nh li::before{content:'0' counter(n);font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:var(--red)}
-.nh h3{font-family:var(--f-body);font-weight:800;font-size:17px;margin:6px 0 6px}
-.nh p{font-size:15px;line-height:1.45;color:var(--muted);margin:0}
-@media (max-width:860px){.nh{grid-template-columns:1fr 1fr}}@media (max-width:520px){.nh{grid-template-columns:1fr}}
+.nh{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:clamp(24px,5vw,72px);align-items:start}
+.nh-k{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 10px}
+.nh-head h2{font-size:clamp(36px,5vw,60px);line-height:.95;margin:0 0 12px}.nh-head h2 span{color:var(--red)}
+.nh-head p:last-child{color:var(--muted);font-size:17px;margin:0}
+.nh-list{list-style:none;margin:0;padding:0;counter-reset:n;border-top:2px solid var(--ink)}
+.nh-list li{counter-increment:n;display:grid;grid-template-columns:44px 1fr;column-gap:14px;padding:16px 0;border-bottom:1px solid #d8ccb6}
+.nh-list li::before{content:counter(n);grid-row:span 2;font-family:var(--f-display);font-size:26px;line-height:1;color:var(--red)}
+.nh-list b{font-size:18px;font-weight:800;line-height:1.2}
+.nh-list span{font-size:15px;color:var(--muted);line-height:1.45;margin-top:2px}
+@media (max-width:820px){.nh{grid-template-columns:1fr}}
 .hero-art{display:block;width:100%;height:auto;border-radius:24px;box-shadow:12px 12px 0 var(--red);transform:rotate(-2deg)}
 </style>
 </head>
@@ -372,9 +376,9 @@ html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
     </div>
   </div>
 
-<div class="wrap"><section class="sec" id="new" aria-labelledby="new-h">
-      <div class="sec-head"><h2 id="new-h">New in Perugia? <span style="color:var(--red)">Start here.</span></h2><p>Six things nobody tells you.</p></div>
-      <ol class="nh"><li><h3>Going out here</h3><p>Bars in the centro close around 01:30 and you stand outside. Clubs are out of town: you need a car or a taxi.</p></li><li><h3>Where we are</h3><p>In the city centre, walking distance from the bars. The exact place is on your ticket after you pay.</p></li><li><h3>No Italian needed</h3><p>Everything works in English: the site, the tickets, the DMs. The crowd is international.</p></li><li><h3>Come alone</h3><p>Fine. It's a guest list of students from Perugia and from all over the world: easy to meet people.</p></li><li><h3>Why Instagram</h3><p>We confirm every guest with a DM on Instagram. That's how we know you're a real person.</p></li><li><h3>Paying</h3><p>Bank transfer in euro, also from a foreign account (SEPA). The details show up after you're approved.</p></li></ol></section></div>
+<div class="wrap"><section class="sec nh" id="new" aria-labelledby="new-h">
+      <div class="nh-head"><p class="nh-k">For Erasmus</p><h2 id="new-h">New in <span>Perugia?</span></h2><p>Six things to know before your first night out.</p></div>
+      <ol class="nh-list"><li><b>Nights end early</b><span>Bars in the centre close around 01:30, and you're standing outside.</span></li><li><b>Clubs are far</b><span>They're out of town. No car, no club.</span></li><li><b>We're in the centre</b><span>Walk there. The exact place is on your ticket.</span></li><li><b>English is fine</b><span>Site, ticket and DMs are all in English.</span></li><li><b>Instagram is your check</b><span>DM us your code. That's how we know you're real.</span></li><li><b>Pay from abroad</b><span>Bank transfer in euro (SEPA), also from a foreign account.</span></li></ol></section></div>
   <section class="band-red" id="next" aria-label="Next party">
     <div class="wrap sec next-sec">
       <div class="sec-head" id="next-head">
