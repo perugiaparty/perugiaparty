@@ -735,22 +735,20 @@ async function homepage(req, env) {
     }
   }
   // one event read (reused from above), and the page + past nights fetched at the same time
-  const [res, nights, proof] = await Promise.all([env.ASSETS.fetch(req), pastNightsHtml(env, u.pathname === "/it" ? "it" : "en").catch(() => null), lastNightProof(env, u.pathname === "/it" ? "it" : "en").catch(() => null)]);
+  const [res, nights] = await Promise.all([env.ASSETS.fetch(req), pastNightsHtml(env, u.pathname === "/it" ? "it" : "en").catch(() => null)])
   if (!res.ok || !(res.headers.get("content-type") || "").includes("text/html")) return res;
   let ld = null; const ev1 = ev0;
   try { if (ev1) ld = eventJsonLd(ev1); } catch (e) {}
   const closed = !(ev1 && ev1.published && ev1.requests_open);
   let rw = new HTMLRewriter();
   // "Nights you missed": every party closed in the admin panel, newest first, colours cycling black / red / cream
-  // social proof in the top line: how many came last time
-  if (proof) rw = rw.on("#proof", { element(el) { el.setInnerContent(proof); } });
   if (nights) rw = rw.on("#nights-track", { element(el) { el.setInnerContent(nights, { html: true }); } });
   // no party taking requests: mark the page so the request form is hidden from the first paint
   if (closed) rw = rw.on("html", { element(el) { el.setAttribute("data-closed", ""); } });
   // a party is out: show it right under the top, before everything else
   if (ev1 && ev1.published) rw = rw.on("html", { element(el) { el.setAttribute("data-live", ""); } });
   if (ld) rw = rw.on("head", { element(el) { el.append(`<script type="application/ld+json">${ld}</script>`, { html: true }); } });
-  return (closed || ld || nights || proof || (ev1 && ev1.published)) ? rw.transform(res) : res;
+  return (closed || ld || nights || (ev1 && ev1.published)) ? rw.transform(res) : res;
 }
 // Past parties: one shared list for the homepage slider, the /nights/<slug> pages and the sitemap
 async function pastNights(env) {

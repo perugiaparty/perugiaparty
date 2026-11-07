@@ -158,6 +158,7 @@ build("/erasmus", "en", COMMON_HEAD("/erasmus", "Erasmus parties in Perugia · P
 # Italian page: the comparison is the hook, so it comes right after the title
 def it_post(s):
     s = re.sub(r'<img class="hero-art"[^>]*>', '', s, count=1)
+    s = re.sub(r'\s*<div class="ctas">.*?</div>', '', s, count=1, flags=re.S)  # no button under the title
     s = s.replace('<link rel="preload" href="/ill/hero-it.svg" as="image">', "")
     cta = """<div class="wrap o-go"><section class="go" aria-labelledby="go-h">
       <h2 id="go-h">Pronto per la <span>prossima notte?</span></h2>
