@@ -30,12 +30,11 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="PerugiaParty">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://perugiaparty.com/it#page", "url": "https://perugiaparty.com/it", "name": "Feste universitarie ed Erasmus a Perugia · PerugiaParty", "inLanguage": "it", "isPartOf": {"@id": "https://perugiaparty.com/#website"}, "about": {"@id": "https://perugiaparty.com/#org"}}]}</script>
 <link rel="preload" href="/fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/bowlby-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css?v=1">
-<link rel="stylesheet" href="/site.css?v=20261108a">
+<link rel="stylesheet" href="/site.css?v=20261108b">
 <script src="/notify.js?v=20261013g" defer></script>
 <style>
 /* hero */
@@ -174,6 +173,7 @@ textarea{resize:vertical;min-height:88px}
 .side .mini .perf{position:relative;border-top:2px dashed #444;margin:24px -28px 22px}
 .side .mini .perf::before,.side .mini .perf::after{content:"";position:absolute;top:-13px;width:24px;height:24px;border-radius:50%;background:var(--cream)}
 .side .mini .perf::before{left:-12px}.side .mini .perf::after{right:-12px}
+.side .mini .pv-checks li span{display:inline-block;width:11px;height:11px;border:1.5px solid currentColor;border-radius:3px;margin-right:6px;vertical-align:-1px}.side .mini .pv-checks li.on span{background:currentColor}
 .side .mini .pv-checks{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .side .mini .pv-checks li{color:#8a8a84}
 .side .mini .pv-checks li.on{color:#f5f5f0}
@@ -345,9 +345,11 @@ html[data-live] .o-next{order:0}
 html:not([data-live]) .o-next{display:none}
 /* past nights: small strip */
 #nights{padding-block:28px 40px}#nights .sec-head h2{font-size:clamp(22px,3vw,30px)}#nights .sec-head{margin-bottom:14px}
-#nights .nights .night{flex:0 0 clamp(170px,22%,220px);min-height:0;padding:16px 18px;gap:10px;border-radius:16px}
-#nights .night h3{font-size:19px}#nights .night .when{font-size:10px}
-#nights .slide-btn{transform:scale(.8)}
+#nights .nights{flex-wrap:wrap;overflow:visible;gap:8px}
+#nights .nights .night{flex:0 0 auto;min-height:0;padding:9px 16px;border-radius:99px;background:transparent!important;border:1.5px solid #cfc3ae!important;color:var(--ink)!important}
+#nights .night .when{display:none}#nights .night h3{font-family:var(--f-body);font-weight:800;font-size:15px;color:var(--ink)!important}
+#nights .night:first-child{border-color:var(--ink)!important}
+#nights .slide-btn{display:none}
 /* design pass */
 .mbar{display:none}
 @media (max-width:720px){.mbar:not([hidden]){display:flex;position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:20;justify-content:center;align-items:center;height:52px;border-radius:99px;background:var(--red);color:var(--cream);font-weight:800;text-decoration:none;box-shadow:0 10px 30px rgba(0,0,0,.35)}body{padding-bottom:76px}}
@@ -374,10 +376,25 @@ html:not([data-live]) .o-next{display:none}
 .o-hero .ticket .sub,.o-hero .ticket .tiny{color:#7a6e5d}.o-hero .ticket .perf{border-color:#cfc3ae}
 .o-hero .ticket .code b{color:var(--red)}.o-hero .ticket .stamp{border-color:var(--red);color:var(--red)}
 .o-hero .hero-art{box-shadow:12px 12px 0 var(--red)}
+/* hero receipt (scontrino) */
+.ticket.rcpt{background:#fffaf0;color:var(--ink);border-radius:6px 6px 0 0;padding:28px 30px 34px;transform:rotate(-2.5deg);box-shadow:12px 12px 0 var(--red);font-family:var(--f-mono);max-width:380px;
+  -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/18px 100%;mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/18px 100%}
+.ticket.rcpt::before,.ticket.rcpt::after{display:none}
+.o-hero .ticket.rcpt{background:#fffaf0;box-shadow:none;filter:drop-shadow(12px 12px 0 var(--red))}
+.rc-h{font-family:var(--f-display);font-size:32px;line-height:1;text-align:center;margin:0}
+.rc-s{text-align:center;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7a6e5d;margin:8px 0 0;padding-bottom:16px;border-bottom:2px dashed #d8ccb6}
+.rc-l{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:9px}
+.rc-l li{display:grid;grid-template-columns:30px 1fr auto;align-items:baseline;gap:8px;font-size:14px;letter-spacing:.04em;text-transform:uppercase}
+.rc-l li span:first-child{color:#7a6e5d}.rc-l li span:last-child{color:var(--red);font-weight:500}
+.rc-t{display:flex;justify-content:space-between;align-items:baseline;border-top:2px dashed #d8ccb6;margin:16px 0 0;padding-top:14px;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+.rc-t span:last-child{font-family:var(--f-display);font-size:22px;letter-spacing:0;text-transform:none;color:var(--red)}
+.rc-bar{display:flex;gap:2px;height:42px;justify-content:center;margin:18px 0 8px}.rc-bar i{background:var(--ink);display:block}
+.rc-f{text-align:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7a6e5d;margin:0}
+@media (max-width:720px){.ticket.rcpt{padding:22px 20px 30px}.rc-l li{font-size:13px}}
 .hero-art{display:block;width:100%;height:auto;border-radius:24px;box-shadow:12px 12px 0 var(--red);transform:rotate(-2deg)}
 .o-go{order:3}.o-main,.o-faq,.o-nights{display:none!important}
 .go{text-align:center;padding:clamp(40px,7vw,80px) 0 clamp(56px,8vw,96px)}
-.go h2{font-size:clamp(34px,5vw,58px);line-height:.95;margin:0 0 12px}.go h2 span{color:var(--red)}
+.go h2{font-size:clamp(30px,4vw,46px);line-height:1;margin:0 auto 12px;max-width:14ch}.go h2 span{color:var(--red)}
 .go p{color:var(--muted);margin:0 auto 24px;max-width:40ch}
 .go-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .hero{grid-template-columns:1fr!important;padding-block:clamp(36px,6vw,72px) clamp(40px,6vw,72px)!important;gap:0!important}
@@ -418,7 +435,7 @@ html:not([data-live]) .o-next{display:none}
         <div><span class="status"><i></i>In arrivo</span>
           <h3>La prossima edizione è in preparazione.</h3>
           <p>Data e tema escono prima su Instagram.</p>
-        <a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener" style="margin-top:22px">Seguici su Instagram ↗</a></div>
+        <a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener" style="margin-top:22px">Seguici su Instagram</a></div>
         <img class="next-art" src="/ill/soon.svg" alt="" width="360" height="220">
       </div>
     </div>
@@ -440,8 +457,8 @@ html:not([data-live]) .o-next{display:none}
 
   <div class="wrap o-go"><section class="go" aria-labelledby="go-h">
       <h2 id="go-h">Pronto per la <span>prossima notte?</span></h2>
-      <p>Data, richiesta del posto e tutto il resto sono sulla pagina principale.</p>
-      <div class="go-b"><a class="btn" href="/#request">Richiedi un posto</a><a class="btn outline" href="/">Vai a PerugiaParty →</a></div>
+      <p>La prossima data e la richiesta sono sulla pagina principale.</p>
+      <div class="go-b"><a class="btn" href="/#request">Richiedi un posto</a><a class="btn outline" href="/">Vai a PerugiaParty</a></div>
     </section></div>
 <div class="wrap o-main">
     <section class="sec" id="how" aria-labelledby="how-h">
@@ -502,8 +519,8 @@ html:not([data-live]) .o-next{display:none}
             </div>
             <div class="perf"></div>
             <ul class="pv-checks">
-              <li id="pv-age"><span>☐</span> 18+ con documento</li>
-              <li id="pv-rules"><span>☐</span> Regole lette</li>
+              <li id="pv-age"><span></span> 18+ con documento</li>
+              <li id="pv-rules"><span></span> Regole lette</li>
             </ul>
             <div class="grp">
               <p class="pv-code" id="pv-code">PP-XXX-XXXX</p>
@@ -522,7 +539,7 @@ html:not([data-live]) .o-next{display:none}
             <h3>Non ancora inviata: mandaci questo codice.</h3>
             <p style="margin-top:8px">Send it to <b>@perugiaparty</b> from <b id="my-ig">your Instagram</b>. We reply with your link.</p>
             <p class="linkbox codebox" id="my-link" style="margin-top:12px"></p>
-            <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="copy-link">Copia codice</button><a class="btn outline" id="dm-link" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Manda il codice su Instagram ↗</a></div>
+            <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="copy-link">Copia codice</button><a class="btn outline" id="dm-link" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Manda il codice su Instagram</a></div>
             <p class="toast" id="toast" style="color:var(--red-deep)!important;margin-top:8px"></p>
             <div class="appbox" id="appbox" hidden></div>
           </div>
@@ -536,7 +553,7 @@ html:not([data-live]) .o-next{display:none}
     <section class="sec" id="nights" aria-labelledby="nights-h">
       <div class="sec-head">
         <h2 id="nights-h">Le notti che ti sei perso.</h2>
-        <p><a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Vedi tutto su Instagram ↗</a></p>
+        <p><a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Vedi tutto su Instagram</a></p>
       </div>
       <div class="slider">
       <button type="button" class="slide-btn prev" id="nprev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
@@ -579,7 +596,7 @@ html:not([data-live]) .o-next{display:none}
         <a href="/it" hreflang="it">Italiano</a>
         <a href="/erasmus">Erasmus</a>
         <a href="/privacy">Privacy</a>
-        <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Contatti ↗</a>
+        <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Contatti</a>
       </nav>
     </div>
   </div>
@@ -593,7 +610,7 @@ html:not([data-live]) .o-next{display:none}
     <h3 id="save-h">Your request only counts once you DM this code.</h3>
     <p class="linkbox codebox" id="save-link"></p>
     <p>Send it to <b>@perugiaparty</b> from <b id="save-ig">your Instagram</b>. We reply with your link.</p>
-    <a class="btn" id="save-copy" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener" style="width:100%">Send code on Instagram</a>
+    <a class="btn" id="save-copy" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener" style="width:100%">Manda il codice su Instagram</a>
     <button class="btn outline done" type="button" id="save-done" disabled style="width:100%;margin-top:8px">I've sent it</button>
   </div>
 </div>
@@ -634,7 +651,7 @@ function applyOpen(ev){
   document.documentElement.toggleAttribute("data-closed", closed);
   document.querySelectorAll("[data-req]").forEach(a => {
     if (!a.dataset.label) a.dataset.label = a.textContent;
-    if (closed) { a.href = "https://www.instagram.com/perugiaparty/"; a.target = "_blank"; a.rel = "noopener"; if (a.classList.contains("btn")) a.textContent = a.id === "nav-cta" ? "Instagram ↗" : "Seguici su Instagram ↗"; }
+    if (closed) { a.href = "https://www.instagram.com/perugiaparty/"; a.target = "_blank"; a.rel = "noopener"; if (a.classList.contains("btn")) a.textContent = a.id === "nav-cta" ? "Instagram" : "Seguici su Instagram"; }
     else { a.href = "/#request"; a.removeAttribute("target"); if (a.classList.contains("btn")) a.textContent = ev.sold_out ? "Entra in lista d’attesa" : a.dataset.label; }
   });
 }
@@ -646,10 +663,10 @@ function renderNext(ev){
   // phones: one tap to the form while requests are open
   const mb = $("mbar"); if (mb && ev.requests_open) { mb.textContent = ev.sold_out ? "Entra in lista d’attesa" : "Richiedi un posto"; mb.hidden = false; }
   // the example ticket carries the real party
-  const ts = $("tk-sub"); if (ts && ev.name) ts.textContent = ev.name + (ev.date_label ? " · " + ev.date_label : "");
+  const ts = $("tk-sub"); if (ts && ev.name) ts.textContent = "Next: " + ev.name + (ev.date_label ? " · " + ev.date_label : "");
   const price = ev.price ? "From " + euro(ev.price.min) : null;
   const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]].filter(f => f[1]);
-  const cta = ev.requests_open ? `<a class="btn" href="/#request">${ev.sold_out ? "Entra in lista d’attesa" : "Richiedi un posto"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Seguici su Instagram ↗</a>`;
+  const cta = ev.requests_open ? `<a class="btn" href="/#request">${ev.sold_out ? "Entra in lista d’attesa" : "Richiedi un posto"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Seguici su Instagram</a>`;
   el.classList.toggle("has-poster", !!ev.poster);
   const art = ev.poster ? "" : `<img class="next-art" src="/ill/${ev.sold_out ? "waitlist" : "hero-party"}.svg" alt="" width="360" height="200">`;
   el.innerHTML = `<div class="next-main"><span class="status"><i></i>${statusLine(ev)}</span>
@@ -707,7 +724,7 @@ async function setupInvite(ev){
   }
   if (ev.returners_only) {
     const until = ev.returners_until ? new Date(ev.returners_until).toLocaleString("en-GB", { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) : null;
-    reqNote(`<b>★ Early access for returning guests.</b><span>Came to a PerugiaParty before? You get priority. Request with the same Instagram as last time.${until ? ` Everyone else can request from ${esc(until)}.` : ""}</span>`, "early");
+    reqNote(`<b>Early access for returning guests.</b><span>Came to a PerugiaParty before? You get priority. Request with the same Instagram as last time.${until ? ` Everyone else can request from ${esc(until)}.` : ""}</span>`, "early");
   }
 }
 function setupForm(ev){
@@ -730,11 +747,11 @@ function preview(e){
   const n = $("pv-name"); n.textContent = name || "Your name"; n.classList.toggle("dim", !name);
   const i = $("pv-ig"); i.textContent = "@" + (ig || "yourinstagram"); i.classList.toggle("dim", !ig);
   const h = $("pv-hi"); h.textContent = hi ? "“" + hi.slice(0, 120) + (hi.length > 120 ? "…" : "") + "”" : ""; h.hidden = !hi;
-  for (const [id, box] of [["pv-age","f-age"],["pv-rules","f-rules"]]) { const li = $(id), on = $(box).checked; li.classList.toggle("on", on); li.querySelector("span").textContent = on ? "■" : "☐"; }
+  for (const [id, box] of [["pv-age","f-age"],["pv-rules","f-rules"]]) { const li = $(id), on = $(box).checked; li.classList.toggle("on", on); li.querySelector("span").textContent = on ? "" : ""; }
 }
 // one tick covers both the 18+ and the house rules
 $("f-age").addEventListener("change", () => { $("f-rules").checked = $("f-age").checked; $("f-rules").dispatchEvent(new Event("change")); });
-// paste anything Instagram-ish: instagram.com/name, @name, name → @name
+// paste anything Instagram-ish: instagram.com/name, @name, name @name
 $("f-ig").addEventListener("blur", () => {
   const v = $("f-ig").value.trim(); if (!v) return;
   const m = v.match(/instagram\.com\/([A-Za-z0-9._]{1,30})/i) || v.match(/^@*([A-Za-z0-9._]{1,30})\/?$/);
@@ -841,7 +858,7 @@ function openSave(code, handle, waitlist){
 }
 // opens the DM with the code already typed in; the code is also copied in case the app drops the text
 function dmUrl(code){ return "https://ig.me/m/perugiaparty" + (code ? "?text=" + encodeURIComponent(code) : ""); }
-function unlockSave(){ saveCopied = true; $("save-done").disabled = false; $("save-copy").textContent = "Send code on Instagram"; }
+function unlockSave(){ saveCopied = true; $("save-done").disabled = false; $("save-copy").textContent = "Manda il codice su Instagram"; }
 $("save-copy").addEventListener("click", () => {
   const text = $("save-link").textContent;
   try { navigator.clipboard.writeText(text).then(unlockSave, unlockSave); } catch (e) { unlockSave(); }

@@ -14,7 +14,7 @@
 <link rel="preload" href="/fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/bowlby-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css?v=1">
-<link rel="stylesheet" href="/site.css?v=20261108a">
+<link rel="stylesheet" href="/site.css?v=20261108b">
 <style>
 /* Crew: announcements, to do, things to buy, notes, my receipts, team. Money overviews stay in Matt's admin panel. */
 :root{--bg:#0e0c0b;--card:#1b1715;--card2:#241f1c;--hair:#2f2825;--red:#e8392b;--go:#12a150;--warn:#ffd23f;--txt:#f4ead7;--soft:#b9ab98;--dim:#7d7064}
@@ -348,7 +348,7 @@ if (location.hash === "#join") screen("signup");
 function showCode(vcode, ig) {
   $("#pend-body").innerHTML = `<p class="sub" style="margin:-8px 0 14px">Send this code to <b style="color:var(--txt)">@perugiaparty</b> from ${esc(ig)}</p>
     <div class="code">${esc(vcode)}</div>
-    <a class="big" style="text-align:center;text-decoration:none;display:block;box-sizing:border-box" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(vcode)}" target="_blank" rel="noopener" id="sendcode">Send code on Instagram ↗</a>`;
+    <a class="big" style="text-align:center;text-decoration:none;display:block;box-sizing:border-box" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(vcode)}" target="_blank" rel="noopener" id="sendcode">Send code on Instagram</a>`;
   const b = $("#sendcode"); if (b) b.addEventListener("click", () => { try { navigator.clipboard.writeText(vcode); } catch (x) {} });
   screen("pending");
 }
@@ -451,8 +451,8 @@ function itemRow(n) {
     acts = done
       ? `<div class="acts"><div class="r"><button class="ghost" data-undo="${n.id}">${todo ? "Not done after all" : "Not bought after all"}</button>${del}</div></div>`
       : todo
-        ? `<div class="acts"><button class="yes" data-did="${n.id}">Yes, it's done ✓</button><div class="r">${claim}${del}</div>${more}</div>`
-        : `<form class="acts" data-f="got" data-id="${n.id}"><input name="price" inputmode="decimal" placeholder="Paid yourself? €"><button class="yes">Yes, I got it ✓</button><div class="r">${claim}${del}</div>${more}</form>`;
+        ? `<div class="acts"><button class="yes" data-did="${n.id}">Yes, it's done</button><div class="r">${claim}${del}</div>${more}</div>`
+        : `<form class="acts" data-f="got" data-id="${n.id}"><input name="price" inputmode="decimal" placeholder="Paid yourself? €"><button class="yes">Yes, I got it</button><div class="r">${claim}${del}</div>${more}</form>`;
   }
   const dd = dueOf(n);
   const dueHtml = !done && dd ? `<span class="due ${dd < today() ? "late" : ""}">${esc(dueTxt(dd))}${dLabel(n) ? " · " + dLabel(n) : ""}</span>` : "";
@@ -494,7 +494,7 @@ function paletteBlock() {
 const SHOPS = ["Lidl", "Penny", "Eurospin", "MD", "Conad", "Esselunga", "Carrefour", "Coop", "Flying Tiger", "Amazon", "From NL", "Borrow"];
 function notifBox() {
   if (pushState === "on" || pushState === "unsupported" || pushState === null) return "";
-  if (pushState === "ios") return `<div class="notif"><p><b>Notifications:</b> Share → Add to Home Screen, then open PP Crew.</p></div>`;
+  if (pushState === "ios") return `<div class="notif"><p><b>Notifications:</b> Share, then Add to Home Screen, then open PP Crew.</p></div>`;
   if (pushState === "denied") return "";
   return `<div class="notif"><p><b>Get notified</b> about news, tasks and shifts</p><button class="plus" data-push="on">Turn on</button></div>`;
 }
@@ -538,7 +538,7 @@ function infoView() {
 function riskView() {
   return `<div class="shd" style="margin-top:0"><p class="lead" style="margin:0">If this happens, we do this</p>${S.me.lead ? plus("risk", "Add") : ""}</div>
   ${adding === "risk" ? `<form class="addbox" data-f="risk"><input name="risk" placeholder="What could go wrong?" maxlength="120" data-autofocus><input name="plan" placeholder="Plan B" maxlength="300"><button class="big" style="padding:12px">Add</button></form>` : ""}
-  <div class="card" style="margin-top:10px">${S.risks.map((r) => `<div class="risk" style="display:flex;gap:10px"><div style="flex:1"><b>${esc(r.risk)}</b><span>→ ${esc(r.plan || "No plan yet")}</span></div>${S.me.lead ? `<button class="x" data-delrisk="${r.id}" aria-label="Remove">×</button>` : ""}</div>`).join("") || `<div class="empty">No risks listed</div>`}</div>`;
+  <div class="card" style="margin-top:10px">${S.risks.map((r) => `<div class="risk" style="display:flex;gap:10px"><div style="flex:1"><b>${esc(r.risk)}</b><span>Plan: ${esc(r.plan || "No plan yet")}</span></div>${S.me.lead ? `<button class="x" data-delrisk="${r.id}" aria-label="Remove">×</button>` : ""}</div>`).join("") || `<div class="empty">No risks listed</div>`}</div>`;
 }
 function decView() {
   return `<div class="shd" style="margin-top:0"><p class="lead" style="margin:0">What we agreed</p>${S.me.lead ? plus("dec", "Add") : ""}</div>
@@ -574,7 +574,7 @@ function spendView() {
     <button class="big" data-add="spend" style="margin:12px 0 4px">+ Add expense</button>
     ${mine.length ? `<div class="card list" style="margin-top:12px">${mine.map((x) => {
       const paid = Number(x.repaid) === 1;
-      return `<div class="tk-row"><span class="tk-ic">${CAT_ICON[x.cat] || "🧾"}</span><div class="main"><b>${esc(x.item)}</b><span>${day(x.created_at)}${paid ? ` · <i class="tk-ok">Paid${x.repaid_at ? " " + day(x.repaid_at) : ""} ✓</i>` : ` · <i class="tk-wait">Waiting</i>`}</span></div>
+      return `<div class="tk-row"><span class="tk-ic">${CAT_ICON[x.cat] || "🧾"}</span><div class="main"><b>${esc(x.item)}</b><span>${day(x.created_at)}${paid ? ` · <i class="tk-ok">Paid${x.repaid_at ? " " + day(x.repaid_at) : ""}</i>` : ` · <i class="tk-wait">Waiting</i>`}</span></div>
         <div class="amt ${paid ? "tk-done" : ""}">${eur(x.amount)}</div>${!paid ? `<button class="x" data-delspend="${x.id}" aria-label="Remove">×</button>` : ""}</div>`;
     }).join("")}</div>` : ""}`;
 }
@@ -594,7 +594,7 @@ function attView() {
     <div class="seg">${[["yes", "Coming"], ["maybe", "Maybe"], ["no", "Can't"]].map(([v, l]) => `<button data-go="${v}" class="${me.going === v ? "on" : ""}">${l}</button>`).join("")}</div>
     <form class="buy" data-f="arrive"><input name="arrive" value="${esc(me.arrive)}" placeholder="Arriving at… (20:30)" maxlength="40"><button class="btn2">Save</button></form>
     ${me.role ? `<p class="muted" style="margin:10px 0 0;font-size:14px">Your job: <b style="color:var(--txt)">${esc(me.role)}</b></p>` : ""}
-    ${nightOn() ? (myHere() ? `<button class="ghost" style="width:100%;margin-top:10px" data-here="0">✓ Checked in at ${hm(myHere())} · undo</button>` : `<button class="yes" style="margin-top:10px" data-here="1">I'm here</button>`) : ""}
+    ${nightOn() ? (myHere() ? `<button class="ghost" style="width:100%;margin-top:10px" data-here="0">Checked in at ${hm(myHere())} · undo</button>` : `<button class="yes" style="margin-top:10px" data-here="1">I'm here</button>`) : ""}
   </div>
   <div class="shd"><h3>Shifts</h3>${me.lead ? plus("shift", "Add") : ""}</div>
   ${adding === "shift" ? `<form class="addbox" data-f="shift"><select name="crew_id" aria-label="Who">${S.crew.map((c) => `<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select>
@@ -618,7 +618,7 @@ function attView() {
   <div class="card">${S.crew.map((c) => {
     const [l, k] = label[c.going || ""] || label[""];
     return `<div class="row"><div class="main"><b>${esc(c.name)} <span class="pill ${k}">${l}</span>${Number(c.lead) ? ' <span class="pill">lead</span>' : ""}</b>
-      <span>${c.role ? esc(c.role) : "No job yet"}${c.arrive ? " · there at " + esc(c.arrive) : ""}</span>${c.here_at ? ` <span class="here">✓ here ${hm(c.here_at)}</span>` : ""}
+      <span>${c.role ? esc(c.role) : "No job yet"}${c.arrive ? " · there at " + esc(c.arrive) : ""}</span>${c.here_at ? ` <span class="here">here ${hm(c.here_at)}</span>` : ""}
       ${S.me.lead ? `<form class="buy" data-f="role" data-id="${c.id}"><input name="role" value="${esc(c.role || "")}" placeholder="Job (bar, door, DJ…)" maxlength="40"><button class="btn2 sm">Save</button></form>` : ""}</div>
       </div>`;
   }).join("")}</div>`;
@@ -642,7 +642,7 @@ document.addEventListener("click", (e) => {
   if (d.hex) { try { navigator.clipboard.writeText(d.hex.toUpperCase()); toast(d.hex.toUpperCase() + " copied"); } catch (x) {} return; }
   if (d.go) return act("me", { going: d.go, arrive: S.me.arrive }, "Saved");
   if (d.claim) { openId = null; return act("need_claim", { id: d.claim }, "Saved"); }
-  if (d.did) { openId = null; return act("need_done", { id: d.did, v: true }, "Done ✓"); }
+  if (d.did) { openId = null; return act("need_done", { id: d.did, v: true }, "Done"); }
   if (d.undo) { openId = null; return act("need_done", { id: d.undo, v: false }, "Put back on the list"); }
   if (d.del) { if (confirmTwice(t)) { openId = null; act("need_del", { id: d.del }, "Removed"); } return; }
   if (d.delspend) { if (confirmTwice(t)) act("spend_del", { id: d.delspend }, "Removed"); return; }
@@ -665,7 +665,7 @@ document.addEventListener("submit", (e) => {
   if (k === "buy") { if (!need(v.item)) return; adding = null; return act("need_add", { ...v, kind: "buy" }, "Added to the list"); }
   if (k === "news") { if (!need(v.body)) return; adding = null; return act("news_add", { body: v.body }, "Posted to everyone"); }
   if (k === "spend") { if (!String(v.amount || "").trim() || !(Number(String(v.amount).replace(",", ".")) > 0)) { toast("Type the amount", true); return; } if (!need(v.item)) return; adding = null; return act("spend_add", v, "Expense added"); }
-  if (k === "got") { openId = null; return act("need_done", { id: Number(f.dataset.id), v: true, price: v.price }, v.price ? "Got it ✓ · added to your receipts" : "Got it ✓"); }
+  if (k === "got") { openId = null; return act("need_done", { id: Number(f.dataset.id), v: true, price: v.price }, v.price ? "Got it · added to your receipts" : "Got it"); }
   if (k === "risk") { if (!need(v.risk)) return; adding = null; return act("risk_add", v, "Added"); }
   if (k === "dec") { if (!need(v.body)) return; adding = null; return act("decision_add", v, "Logged"); }
   if (k === "retro") return act("retro", v, "Thanks! Sent to Matt");

@@ -27,12 +27,11 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="PerugiaParty">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="preload" href="/ill/hero-erasmus.svg" as="image">
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://perugiaparty.com/erasmus#page", "url": "https://perugiaparty.com/erasmus", "name": "Erasmus parties in Perugia · PerugiaParty", "inLanguage": "en", "isPartOf": {"@id": "https://perugiaparty.com/#website"}, "about": {"@id": "https://perugiaparty.com/#org"}}, {"@type": "FAQPage", "@id": "https://perugiaparty.com/erasmus#faq", "mainEntity": [{"@type": "Question", "name": "When do bars close here?", "acceptedAnswer": {"@type": "Answer", "text": "Around 01:30 in the centre, and you're standing outside."}}, {"@type": "Question", "name": "Can I go to a club?", "acceptedAnswer": {"@type": "Answer", "text": "They're out of town. No car, no club."}}, {"@type": "Question", "name": "Where is PerugiaParty?", "acceptedAnswer": {"@type": "Answer", "text": "In the centre, walking distance. The exact place is on your ticket."}}, {"@type": "Question", "name": "Do I need Italian?", "acceptedAnswer": {"@type": "Answer", "text": "No. The site, your ticket and our DMs are in English."}}, {"@type": "Question", "name": "Why DM my code?", "acceptedAnswer": {"@type": "Answer", "text": "That's how we check you're a real person."}}, {"@type": "Question", "name": "My bank isn't Italian.", "acceptedAnswer": {"@type": "Answer", "text": "No problem: a SEPA transfer in euro works from any European account."}}]}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://perugiaparty.com/erasmus#page", "url": "https://perugiaparty.com/erasmus", "name": "Erasmus parties in Perugia · PerugiaParty", "inLanguage": "en", "isPartOf": {"@id": "https://perugiaparty.com/#website"}, "about": {"@id": "https://perugiaparty.com/#org"}}]}</script>
 <link rel="preload" href="/fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/bowlby-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css?v=1">
-<link rel="stylesheet" href="/site.css?v=20261108a">
+<link rel="stylesheet" href="/site.css?v=20261108b">
 <script src="/notify.js?v=20261013g" defer></script>
 <style>
 /* hero */
@@ -171,6 +170,7 @@ textarea{resize:vertical;min-height:88px}
 .side .mini .perf{position:relative;border-top:2px dashed #444;margin:24px -28px 22px}
 .side .mini .perf::before,.side .mini .perf::after{content:"";position:absolute;top:-13px;width:24px;height:24px;border-radius:50%;background:var(--cream)}
 .side .mini .perf::before{left:-12px}.side .mini .perf::after{right:-12px}
+.side .mini .pv-checks li span{display:inline-block;width:11px;height:11px;border:1.5px solid currentColor;border-radius:3px;margin-right:6px;vertical-align:-1px}.side .mini .pv-checks li.on span{background:currentColor}
 .side .mini .pv-checks{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .side .mini .pv-checks li{color:#8a8a84}
 .side .mini .pv-checks li.on{color:#f5f5f0}
@@ -342,9 +342,11 @@ html[data-live] .o-next{order:0}
 html:not([data-live]) .o-next{display:none}
 /* past nights: small strip */
 #nights{padding-block:28px 40px}#nights .sec-head h2{font-size:clamp(22px,3vw,30px)}#nights .sec-head{margin-bottom:14px}
-#nights .nights .night{flex:0 0 clamp(170px,22%,220px);min-height:0;padding:16px 18px;gap:10px;border-radius:16px}
-#nights .night h3{font-size:19px}#nights .night .when{font-size:10px}
-#nights .slide-btn{transform:scale(.8)}
+#nights .nights{flex-wrap:wrap;overflow:visible;gap:8px}
+#nights .nights .night{flex:0 0 auto;min-height:0;padding:9px 16px;border-radius:99px;background:transparent!important;border:1.5px solid #cfc3ae!important;color:var(--ink)!important}
+#nights .night .when{display:none}#nights .night h3{font-family:var(--f-body);font-weight:800;font-size:15px;color:var(--ink)!important}
+#nights .night:first-child{border-color:var(--ink)!important}
+#nights .slide-btn{display:none}
 /* design pass */
 .mbar{display:none}
 @media (max-width:720px){.mbar:not([hidden]){display:flex;position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:20;justify-content:center;align-items:center;height:52px;border-radius:99px;background:var(--red);color:var(--cream);font-weight:800;text-decoration:none;box-shadow:0 10px 30px rgba(0,0,0,.35)}body{padding-bottom:76px}}
@@ -371,23 +373,43 @@ html:not([data-live]) .o-next{display:none}
 .o-hero .ticket .sub,.o-hero .ticket .tiny{color:#7a6e5d}.o-hero .ticket .perf{border-color:#cfc3ae}
 .o-hero .ticket .code b{color:var(--red)}.o-hero .ticket .stamp{border-color:var(--red);color:var(--red)}
 .o-hero .hero-art{box-shadow:12px 12px 0 var(--red)}
+/* hero receipt (scontrino) */
+.ticket.rcpt{background:#fffaf0;color:var(--ink);border-radius:6px 6px 0 0;padding:28px 30px 34px;transform:rotate(-2.5deg);box-shadow:12px 12px 0 var(--red);font-family:var(--f-mono);max-width:380px;
+  -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/18px 100%;mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/18px 100%}
+.ticket.rcpt::before,.ticket.rcpt::after{display:none}
+.o-hero .ticket.rcpt{background:#fffaf0;box-shadow:none;filter:drop-shadow(12px 12px 0 var(--red))}
+.rc-h{font-family:var(--f-display);font-size:32px;line-height:1;text-align:center;margin:0}
+.rc-s{text-align:center;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7a6e5d;margin:8px 0 0;padding-bottom:16px;border-bottom:2px dashed #d8ccb6}
+.rc-l{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:9px}
+.rc-l li{display:grid;grid-template-columns:30px 1fr auto;align-items:baseline;gap:8px;font-size:14px;letter-spacing:.04em;text-transform:uppercase}
+.rc-l li span:first-child{color:#7a6e5d}.rc-l li span:last-child{color:var(--red);font-weight:500}
+.rc-t{display:flex;justify-content:space-between;align-items:baseline;border-top:2px dashed #d8ccb6;margin:16px 0 0;padding-top:14px;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+.rc-t span:last-child{font-family:var(--f-display);font-size:22px;letter-spacing:0;text-transform:none;color:var(--red)}
+.rc-bar{display:flex;gap:2px;height:42px;justify-content:center;margin:18px 0 8px}.rc-bar i{background:var(--ink);display:block}
+.rc-f{text-align:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7a6e5d;margin:0}
+@media (max-width:720px){.ticket.rcpt{padding:22px 20px 30px}.rc-l li{font-size:13px}}
 .hero-art{display:block;width:100%;height:auto;border-radius:24px;box-shadow:12px 12px 0 var(--red);transform:rotate(-2deg)}
-.hd{background:var(--ink);color:var(--cream);border-radius:28px;padding:clamp(22px,4vw,44px);margin-block:12px}
-.hd-top{display:flex;align-items:center;gap:14px}
-.hd-dot{width:12px;height:12px;border-radius:50%;background:#7bd389;box-shadow:0 0 0 5px rgba(123,211,137,.18);flex:none}
-.hd-k{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#7bd389;margin:0 0 4px}
-.hd h2{font-size:clamp(32px,4.6vw,54px);line-height:.95;margin:0}.hd h2 span{color:#ff4a3d}
-.hd-sub{color:#b9ab98;margin:12px 0 24px}
-.hd-chat{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
-.hd-chat li{display:grid;gap:6px;background:#1f1a17;border-radius:20px;padding:14px}
-.hd-chat .q{justify-self:end;max-width:90%;background:var(--red);color:var(--cream);border-radius:16px 16px 4px 16px;padding:9px 13px;font-weight:700;font-size:15px;margin:0}
-.hd-chat .a{justify-self:start;max-width:92%;background:#2e2723;color:var(--cream);border-radius:16px 16px 16px 4px;padding:9px 13px;font-size:15px;line-height:1.4;margin:0}
-.hd-chat .a b{display:block;font-family:var(--f-mono);font-weight:500;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#ffd23f;margin-bottom:3px}
-.hd-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:24px;color:#b9ab98}
-@media (max-width:760px){.hd-chat{grid-template-columns:1fr}}
+.hd-k2{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 10px}
+.kitw{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr);gap:clamp(24px,5vw,64px);align-items:start}
+.kitw h2{font-size:clamp(36px,5vw,62px);line-height:.95;margin:0 0 14px}.kitw h2 span{color:var(--red)}
+.kit-sub{color:var(--muted);font-size:18px;margin:0}
+.kit{background:#fff;border:2px solid var(--ink);border-radius:22px;padding:clamp(16px,2.6vw,28px);box-shadow:8px 8px 0 var(--ink)}
+.kit-t{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7a6e5d;border-bottom:2px dashed #e6dbc7;padding-bottom:12px}
+.kit table{width:100%;border-collapse:collapse;margin-top:6px}
+.kit th,.kit td{padding:12px 6px;border-bottom:1px solid #f0e8da;text-align:center;font-size:15px}
+.kit tbody th{text-align:left;font-weight:800}
+.kit thead th{font-family:var(--f-mono);font-weight:500;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7a6e5d}
+.kit thead th.pp{color:var(--red)}
+.kit td.pp{background:#fdf0ec}
+.kit b.y,.kit b.n,.kit b.m{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:middle}
+.kit b.y{background:var(--red)}.kit b.n{border:2px solid #d8ccb6}.kit b.m{background:#c9bca6;transform:scale(.6)}
+.kit-legend{display:flex;gap:8px;align-items:center;font-size:12px;color:#7a6e5d;margin:12px 0 0}.kit-legend b{width:11px!important;height:11px!important;margin-left:6px}
+.kit-plus{margin:16px 0 0;font-size:14px;color:#5f5547}.kit-plus b{color:var(--red);margin-right:4px}
+.kit-help{display:inline-block;margin-top:14px;font-weight:800;color:var(--red-deep)}
+@media (max-width:820px){.kitw{grid-template-columns:1fr}.kit th,.kit td{padding:10px 3px;font-size:14px}.kit thead th{font-size:9.5px;letter-spacing:.04em}}
 .o-go{order:2}.o-why,.o-main,.o-faq,.o-nights{display:none!important}
 .go{text-align:center;padding:clamp(40px,7vw,80px) 0 clamp(56px,8vw,96px)}
-.go h2{font-size:clamp(34px,5vw,58px);line-height:.95;margin:0 0 12px}.go h2 span{color:var(--red)}
+.go h2{font-size:clamp(30px,4vw,46px);line-height:1;margin:0 auto 12px;max-width:14ch}.go h2 span{color:var(--red)}
 .go p{color:var(--muted);margin:0 auto 24px;max-width:40ch}
 .go-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 </style>
@@ -417,11 +439,15 @@ html:not([data-live]) .o-next{display:none}
     </div>
   </div>
 
-<div class="wrap o-new"><section class="sec hd" id="new" aria-labelledby="new-h">
-      <div class="hd-top"><span class="hd-dot"></span><div><p class="hd-k">Erasmus help desk</p><h2 id="new-h">New in <span>Perugia?</span></h2></div></div>
-      <p class="hd-sub">The questions every new student asks us.</p>
-      <ul class="hd-chat"><li><p class="q">When do bars close here?</p><p class="a"><b>PerugiaParty</b>Around 01:30 in the centre, and you're standing outside.</p></li><li><p class="q">Can I go to a club?</p><p class="a"><b>PerugiaParty</b>They're out of town. No car, no club.</p></li><li><p class="q">Where is PerugiaParty?</p><p class="a"><b>PerugiaParty</b>In the centre, walking distance. The exact place is on your ticket.</p></li><li><p class="q">Do I need Italian?</p><p class="a"><b>PerugiaParty</b>No. The site, your ticket and our DMs are in English.</p></li><li><p class="q">Why DM my code?</p><p class="a"><b>PerugiaParty</b>That's how we check you're a real person.</p></li><li><p class="q">My bank isn't Italian.</p><p class="a"><b>PerugiaParty</b>No problem: a SEPA transfer in euro works from any European account.</p></li></ul>
-      <div class="hd-foot"><span>Still lost?</span><a class="btn" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Ask us on Instagram ↗</a></div>
+<div class="wrap o-new"><section class="sec kitw" id="new" aria-labelledby="new-h">
+      <div><p class="hd-k2">New in Perugia?</p><h2 id="new-h">Your Erasmus <span>starter kit.</span></h2>
+      <p class="kit-sub">Three ways to go out in Perugia. Only one ticks every box. You're welcome.</p></div>
+      <div class="kit"><div class="kit-t"><span>Starter kit</span><span>Perugia · 2026</span></div>
+        <table><thead><tr><th></th><th scope="col">Club</th><th scope="col">Centro</th><th scope="col" class="pp">PerugiaParty</th></tr></thead><tbody><tr><th scope="row">Student prices</th><td><b class="n"></b></td><td><b class="m">–</b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Open bar</th><td><b class="n"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Walk there from the centre</th><td><b class="n"></b></td><td><b class="y"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Inside, not in the cold</th><td><b class="y"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Good music, every time</th><td><b class="m">–</b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Open till late</th><td><b class="y"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr></tbody></table>
+        <p class="kit-legend"><b class="y"></b> yes <b class="m"></b> sometimes <b class="n"></b> no</p>
+        <p class="kit-plus"><b>Plus</b> everything in English · pay from any European bank · every guest checked on Instagram</p>
+        <a class="kit-help" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Still lost? Ask us on Instagram</a>
+      </div>
     </section></div>
   <section class="band-red o-next" id="next" aria-label="Next party">
     <div class="wrap sec next-sec">
@@ -433,7 +459,7 @@ html:not([data-live]) .o-next{display:none}
         <div><span class="status"><i></i>Announcing soon</span>
           <h3>The next edition is in the works.</h3>
           <p>Date and theme drop on Instagram first.</p>
-        <a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener" style="margin-top:22px">Follow on Instagram ↗</a></div>
+        <a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener" style="margin-top:22px">Follow on Instagram</a></div>
         <img class="next-art" src="/ill/soon.svg" alt="" width="360" height="220">
       </div>
     </div>
@@ -441,8 +467,8 @@ html:not([data-live]) .o-next{display:none}
 
   <div class="wrap o-go"><section class="go" aria-labelledby="go-h">
       <h2 id="go-h">Ready for your <span>first night?</span></h2>
-      <p>Everything else, the next date and the request form, is on our main page.</p>
-      <div class="go-b"><a class="btn" href="/#request">Request a place</a><a class="btn outline" href="/">Go to PerugiaParty →</a></div>
+      <p>The next date and the request form are on the main page.</p>
+      <div class="go-b"><a class="btn" href="/#request">Request a place</a><a class="btn outline" href="/">Go to PerugiaParty</a></div>
     </section></div>
 <div class="wrap o-why">
     <section class="sec" id="why" aria-labelledby="why-h">
@@ -511,8 +537,8 @@ html:not([data-live]) .o-next{display:none}
             </div>
             <div class="perf"></div>
             <ul class="pv-checks">
-              <li id="pv-age"><span>☐</span> 18+ with photo ID</li>
-              <li id="pv-rules"><span>☐</span> House rules read</li>
+              <li id="pv-age"><span></span> 18+ with photo ID</li>
+              <li id="pv-rules"><span></span> House rules read</li>
             </ul>
             <div class="grp">
               <p class="pv-code" id="pv-code">PP-XXX-XXXX</p>
@@ -531,7 +557,7 @@ html:not([data-live]) .o-next{display:none}
             <h3>Not sent yet: DM us this code.</h3>
             <p style="margin-top:8px">Send it to <b>@perugiaparty</b> from <b id="my-ig">your Instagram</b>. We reply with your link.</p>
             <p class="linkbox codebox" id="my-link" style="margin-top:12px"></p>
-            <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="copy-link">Copy code</button><a class="btn outline" id="dm-link" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Send code on Instagram ↗</a></div>
+            <div class="acts" style="margin-top:12px"><button class="btn" type="button" id="copy-link">Copy code</button><a class="btn outline" id="dm-link" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Send code on Instagram</a></div>
             <p class="toast" id="toast" style="color:var(--red-deep)!important;margin-top:8px"></p>
             <div class="appbox" id="appbox" hidden></div>
           </div>
@@ -545,7 +571,7 @@ html:not([data-live]) .o-next{display:none}
     <section class="sec" id="nights" aria-labelledby="nights-h">
       <div class="sec-head">
         <h2 id="nights-h">Nights you missed.</h2>
-        <p><a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">See everything on Instagram ↗</a></p>
+        <p><a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">See everything on Instagram</a></p>
       </div>
       <div class="slider">
       <button type="button" class="slide-btn prev" id="nprev" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
@@ -588,7 +614,7 @@ html:not([data-live]) .o-next{display:none}
         <a href="/it" hreflang="it">Italiano</a>
         <a href="/erasmus">Erasmus</a>
         <a href="/privacy">Privacy</a>
-        <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Contact ↗</a>
+        <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Contact</a>
       </nav>
     </div>
   </div>
@@ -643,7 +669,7 @@ function applyOpen(ev){
   document.documentElement.toggleAttribute("data-closed", closed);
   document.querySelectorAll("[data-req]").forEach(a => {
     if (!a.dataset.label) a.dataset.label = a.textContent;
-    if (closed) { a.href = "https://www.instagram.com/perugiaparty/"; a.target = "_blank"; a.rel = "noopener"; if (a.classList.contains("btn")) a.textContent = a.id === "nav-cta" ? "Instagram ↗" : "Follow on Instagram ↗"; }
+    if (closed) { a.href = "https://www.instagram.com/perugiaparty/"; a.target = "_blank"; a.rel = "noopener"; if (a.classList.contains("btn")) a.textContent = a.id === "nav-cta" ? "Instagram" : "Follow on Instagram"; }
     else { a.href = "/#request"; a.removeAttribute("target"); if (a.classList.contains("btn")) a.textContent = ev.sold_out ? "Join the waitlist" : a.dataset.label; }
   });
 }
@@ -655,10 +681,10 @@ function renderNext(ev){
   // phones: one tap to the form while requests are open
   const mb = $("mbar"); if (mb && ev.requests_open) { mb.textContent = ev.sold_out ? "Join the waitlist" : "Request a place"; mb.hidden = false; }
   // the example ticket carries the real party
-  const ts = $("tk-sub"); if (ts && ev.name) ts.textContent = ev.name + (ev.date_label ? " · " + ev.date_label : "");
+  const ts = $("tk-sub"); if (ts && ev.name) ts.textContent = "Next: " + ev.name + (ev.date_label ? " · " + ev.date_label : "");
   const price = ev.price ? "From " + euro(ev.price.min) : null;
   const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]].filter(f => f[1]);
-  const cta = ev.requests_open ? `<a class="btn" href="/#request">${ev.sold_out ? "Join the waitlist" : "Request a place"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram ↗</a>`;
+  const cta = ev.requests_open ? `<a class="btn" href="/#request">${ev.sold_out ? "Join the waitlist" : "Request a place"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram</a>`;
   el.classList.toggle("has-poster", !!ev.poster);
   const art = ev.poster ? "" : `<img class="next-art" src="/ill/${ev.sold_out ? "waitlist" : "hero-party"}.svg" alt="" width="360" height="200">`;
   el.innerHTML = `<div class="next-main"><span class="status"><i></i>${statusLine(ev)}</span>
@@ -716,7 +742,7 @@ async function setupInvite(ev){
   }
   if (ev.returners_only) {
     const until = ev.returners_until ? new Date(ev.returners_until).toLocaleString("en-GB", { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) : null;
-    reqNote(`<b>★ Early access for returning guests.</b><span>Came to a PerugiaParty before? You get priority. Request with the same Instagram as last time.${until ? ` Everyone else can request from ${esc(until)}.` : ""}</span>`, "early");
+    reqNote(`<b>Early access for returning guests.</b><span>Came to a PerugiaParty before? You get priority. Request with the same Instagram as last time.${until ? ` Everyone else can request from ${esc(until)}.` : ""}</span>`, "early");
   }
 }
 function setupForm(ev){
@@ -739,11 +765,11 @@ function preview(e){
   const n = $("pv-name"); n.textContent = name || "Your name"; n.classList.toggle("dim", !name);
   const i = $("pv-ig"); i.textContent = "@" + (ig || "yourinstagram"); i.classList.toggle("dim", !ig);
   const h = $("pv-hi"); h.textContent = hi ? "“" + hi.slice(0, 120) + (hi.length > 120 ? "…" : "") + "”" : ""; h.hidden = !hi;
-  for (const [id, box] of [["pv-age","f-age"],["pv-rules","f-rules"]]) { const li = $(id), on = $(box).checked; li.classList.toggle("on", on); li.querySelector("span").textContent = on ? "■" : "☐"; }
+  for (const [id, box] of [["pv-age","f-age"],["pv-rules","f-rules"]]) { const li = $(id), on = $(box).checked; li.classList.toggle("on", on); li.querySelector("span").textContent = on ? "" : ""; }
 }
 // one tick covers both the 18+ and the house rules
 $("f-age").addEventListener("change", () => { $("f-rules").checked = $("f-age").checked; $("f-rules").dispatchEvent(new Event("change")); });
-// paste anything Instagram-ish: instagram.com/name, @name, name → @name
+// paste anything Instagram-ish: instagram.com/name, @name, name @name
 $("f-ig").addEventListener("blur", () => {
   const v = $("f-ig").value.trim(); if (!v) return;
   const m = v.match(/instagram\.com\/([A-Za-z0-9._]{1,30})/i) || v.match(/^@*([A-Za-z0-9._]{1,30})\/?$/);

@@ -16,7 +16,7 @@
 <link rel="preload" href="/fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/bowlby-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css?v=1">
-<link rel="stylesheet" href="/site.css?v=20261108a">
+<link rel="stylesheet" href="/site.css?v=20261108b">
 <script src="/notify.js?v=20261013g" defer></script>
 <style>
 main{padding-block:44px 80px}
@@ -411,10 +411,10 @@ if (token) { const c = document.getElementById("nav-cta"); c.textContent = "My t
 function payLeftHTML(dl){
   const ms = dl - Date.now();
   const when = new Date(dl).toLocaleString("en-GB", { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" });
-  if (ms <= 0) return `⏱ Your time to pay is up. <span>Pay now or DM us</span>, otherwise your place can go to someone on the waitlist.`;
+  if (ms <= 0) return `Your time to pay is up. <span>Pay now or DM us</span>, otherwise your place can go to someone on the waitlist.`;
   const m = Math.floor(ms / 60000), dd = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60;
   const txt = dd >= 2 ? `${dd} days` : dd === 1 ? `1 day ${h} h` : h ? `${h} h ${mm} min` : `${mm} min`;
-  return `⏱ Pay within <span>${txt}</span><br><small style="font-weight:500;opacity:.75">Before ${when}</small>`;
+  return `Pay within <span>${txt}</span><br><small style="font-weight:500;opacity:.75">Before ${when}</small>`;
 }
 function payRow(k, shown, value, key){
   if (!value) return `<div class="prow off"><span class="pk">${k}</span><span class="pv">${esc(shown)}</span></div>`;
@@ -485,7 +485,7 @@ function showTicketImage(src, d){
   const o = document.createElement("div"); o.className = "tsave"; o.setAttribute("role", "dialog"); o.setAttribute("aria-label", "Save your ticket");
   o.innerHTML = `<div class="tsave-in"><p class="tsave-h">Hold the ticket, then tap <b>Save image</b>.</p>
     <img src="${src}" alt="Your PerugiaParty ticket ${esc(d.code)}">
-    <p class="tsave-n">${IN_APP ? "Want the PDF? Open this page in Safari or Chrome (⋯ → Open in browser)." : "Saved to your photos, it works without signal at the door."}</p>
+    <p class="tsave-n">${IN_APP ? "Want the PDF? Open this page in Safari or Chrome (menu, then Open in browser)." : "Saved to your photos, it works without signal at the door."}</p>
     <button class="btn" type="button">Done</button></div>`;
   o.querySelector("button").addEventListener("click", () => o.remove());
   o.addEventListener("click", e => { if (e.target === o) o.remove(); });
@@ -576,15 +576,15 @@ function thanksHTML(d, first){
   return `<div class="thanks"><span class="state">That's a wrap</span>
     <h1>Thanks for coming, ${first}.</h1>
     <p>Got photos or videos from the night? Send them our way, the best ones end up on our page. And tell us how it was: we read every message.</p>
-    <div class="btns"><a class="btn" href="${DM}" target="_blank" rel="noopener">Send your photos ↗</a><a class="btn ghost" href="${DM}" target="_blank" rel="noopener">Tell us how it was ↗</a></div></div>`;
+    <div class="btns"><a class="btn" href="${DM}" target="_blank" rel="noopener">Send your photos</a><a class="btn ghost" href="${DM}" target="_blank" rel="noopener">Tell us how it was</a></div></div>`;
 }
 function nextHTML(d){
   const n = d.next; if (!n) return "";
   let action;
-  if (n.token) action = `<a class="btn" href="/ticket.html?t=${encodeURIComponent(n.token)}">Open my request →</a><p class="sub">You already requested a place for this one.</p>`;
-  else if (n.open) action = `<button class="btn" type="button" id="again">${n.early ? "Use my early access" : "Request my place"} →</button><p class="sub">${n.early ? "Early access is open for returning guests only. " : d.returner ? "Returning guests are first in line. " : ""}One tap. We use the same name and Instagram as last time.</p><p class="err" id="again-err" role="alert"></p>`;
+  if (n.token) action = `<a class="btn" href="/ticket.html?t=${encodeURIComponent(n.token)}">Open my request</a><p class="sub">You already requested a place for this one.</p>`;
+  else if (n.open) action = `<button class="btn" type="button" id="again">${n.early ? "Use my early access" : "Request my place"}</button><p class="sub">${n.early ? "Early access is open for returning guests only. " : d.returner ? "Returning guests are first in line. " : ""}One tap. We use the same name and Instagram as last time.</p><p class="err" id="again-err" role="alert"></p>`;
   else action = `<p class="sub">Requests aren't open yet. Follow <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">@perugiaparty</a> so you don't miss it.</p>`;
-  return `<section class="nextc"><span class="kick">Next party</span>${d.returner && !n.token ? `<span class="badge">★ Priority guest</span>` : ""}
+  return `<section class="nextc"><span class="kick">Next party</span>${d.returner && !n.token ? `<span class="badge">Priority guest</span>` : ""}
     <h2>${esc(n.event)}</h2>${n.date_label ? `<p class="date">${esc(n.date_label)}</p>` : ""}${action}</section>`;
 }
 function inviteHTML(d){
@@ -617,7 +617,7 @@ function verifyHTML(d){
     <p>DM this code to <b>@perugiaparty</b> from <b>${handle}</b>. It proves the account is yours${d.returner ? " and unlocks your priority as a returning guest" : ""}. ${d.ig_auto ? "You get an automatic reply within a minute." : "We confirm it as soon as we see it."}</p>
     <div class="vcode"><span>${esc(d.vcode)}</span>${copyBtn(d.vcode)}</div>
     ${d.mismatch ? `<p class="warn">We got this code from a different Instagram account. Send it from <b>${handle}</b>, the account in your request.</p>` : ""}
-    <a class="btn" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(d.vcode || "")}" target="_blank" rel="noopener" style="justify-self:start" onclick="try{navigator.clipboard.writeText(${esc(JSON.stringify(d.vcode || ""))})}catch(e){}">Send code on Instagram ↗</a>
+    <a class="btn" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(d.vcode || "")}" target="_blank" rel="noopener" style="justify-self:start" onclick="try{navigator.clipboard.writeText(${esc(JSON.stringify(d.vcode || ""))})}catch(e){}">Send code on Instagram</a>
     <p style="font-size:13px">Keep the code: with it you can log in at perugiaparty.com/ticket on any phone.</p></section>`;
 }
 function loginView(msg){
@@ -706,7 +706,7 @@ function keepPushOnThisTicket(){
   try { if (APP.push && Notification.permission === "granted" && localStorage.getItem("pp_push") && localStorage.getItem("pp_push") !== token) pushSubscribe(false).then(() => LAST && renderApp(LAST)).catch(() => {}); } catch(e){}
 }
 
-function prioHTML(title, text){ return `<div class="prio" role="note"><span class="star" aria-hidden="true">★</span><div><b>${title}</b><span>${text}</span></div></div>`; }
+function prioHTML(title, text){ return `<div class="prio" role="note"><span class="star" aria-hidden="true"></span><div><b>${title}</b><span>${text}</span></div></div>`; }
 function decorate(d){
   const P = $("page");
   const pre = d.status === "requested" || d.status === "waitlist" || d.status === "approved";
@@ -770,7 +770,7 @@ function celebrate(d, count){
   document.body.appendChild(box); setTimeout(() => box.remove(), 4200);
   try { navigator.vibrate && navigator.vibrate([30, 40, 30]); } catch(e){}
 }
-// progress bar shown on every step: Request → Review → Pay → Ticket → Party
+// progress bar shown on every step: Request, Review, Pay, Ticket Party
 function stepsHTML(stage, cls){
   const names = ["Request", "Review", "Pay", "Ticket", "Party"];
   return `<ol class="rq-steps ${cls || ""}" aria-label="Your progress">${names.map((n, i) => `<li class="${i < stage ? "done" : i === stage ? "now" : ""}"${i === stage ? ' aria-current="step"' : ""}><i></i><span>${n}</span></li>`).join("")}</ol>`;
@@ -797,7 +797,7 @@ function whenWhereHTML(d){
     ${date ? `<div class="ww-r"><span>Date</span><b>${esc(date)}</b></div>` : ""}
     ${time ? `<div class="ww-r"><span>Time</span><b>${esc(time)}</b></div>` : ""}
     ${d.location ? `<div class="ww-r"><span>Place</span><b><a href="${maps}" target="_blank" rel="noopener">${esc(d.location)}</a></b></div>
-      <a class="btn ww-go" href="${maps}" target="_blank" rel="noopener">Open in Maps ↗</a>` : ""}
+      <a class="btn ww-go" href="${maps}" target="_blank" rel="noopener">Open in Maps</a>` : ""}
   </section>`;
 }
 // ---- the receipt: what you get, what you pay, and an optional tip for the crew ----
@@ -811,7 +811,7 @@ function receiptHTML(d, tierName, tip, country){
     ${line("1X", "TICKET · " + esc(String(tierName).toUpperCase()), euro(d.price))}
     <div class="rc-l rc-tip"><span class="q">+</span><span class="i">CONTRIBUTION<small>OPTIONAL</small></span>
       <span class="v rc-step"><button type="button" data-tip="-1" aria-label="Less" ${tip ? "" : "disabled"}>−</button><b id="tip-v">${euro(tip)}</b><button type="button" data-tip="1" aria-label="Add €1">+</button></span></div>
-    <p class="rc-why">Helps us keep it cheap for every student ♥</p>
+    <p class="rc-why">Helps us keep it cheap for every student</p>
     <div class="rc-d"></div>
     <button class="rc-tot" type="button" id="tot-copy" data-copy="${String(total).replace(".", ",")}"><span>TOTAL</span><b id="tip-tot">${euro(total)}</b></button>
     <div class="rc-d"></div>
@@ -852,7 +852,7 @@ function render(d){
           <p class="lead">Send us this code on Instagram. Until then your request doesn't count.</p>
           <div class="vcode"><span>${esc(d.vcode)}</span>${copyBtn(d.vcode)}</div>
           ${d.mismatch ? `<p class="warn">We got this code from a different account. Send it from <b>${esc(d.ig || "your Instagram")}</b>.</p>` : ""}
-          <a class="btn pend-go" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(d.vcode || "")}" target="_blank" rel="noopener" onclick="try{navigator.clipboard.writeText(${esc(JSON.stringify(d.vcode || ""))})}catch(e){}">Send code on Instagram ↗</a>
+          <a class="btn pend-go" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(d.vcode || "")}" target="_blank" rel="noopener" onclick="try{navigator.clipboard.writeText(${esc(JSON.stringify(d.vcode || ""))})}catch(e){}">Send code on Instagram</a>
           <p class="pend-n">From <b>${esc(d.ig || "your Instagram")}</b>. This page updates by itself.</p>
           ${stepsHTML(0)}
         </div>`;

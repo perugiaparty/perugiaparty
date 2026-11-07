@@ -10,7 +10,7 @@ def build(path, lang, pairs, hero_art, hero_alt, post=None):
         if a not in s: miss.append(a[:60])
         s = s.replace(a, b)
     # hero: own illustration instead of the example ticket
-    s = re.sub(r'<a class="ticket".*?</a>', f'<img class="hero-art" src="/ill/{hero_art}.svg" alt="{hero_alt}" width="360" height="200" fetchpriority="high">', s, count=1, flags=re.S)
+    s = re.sub(r'<a class="ticket[^"]*".*?</a>', f'<img class="hero-art" src="/ill/{hero_art}.svg" alt="{hero_alt}" width="360" height="200" fetchpriority="high">', s, count=1, flags=re.S)
     s = s.replace('<link rel="preload" href="/logo.png" as="image">', f'<link rel="preload" href="/ill/{hero_art}.svg" as="image">')
     s = s.replace("</style>", ".hero-art{display:block;width:100%;height:auto;border-radius:24px;box-shadow:12px 12px 0 var(--red);transform:rotate(-2deg)}\n</style>", 1)
     if post: s = post(s)
@@ -61,40 +61,52 @@ ER_FAQ = [
     ("What do I bring?", "Your ticket QR on your phone and a photo ID (passport or ID card). You must be 18+."),
 ]
 def erasmus_post(s):
-    rows = "".join(f'<li><p class="q">{h}</p><p class="a"><b>PerugiaParty</b>{p}</p></li>' for h, p in NEW_HERE)
-    guide = f"""<div class="wrap o-new"><section class="sec hd" id="new" aria-labelledby="new-h">
-      <div class="hd-top"><span class="hd-dot"></span><div><p class="hd-k">Erasmus help desk</p><h2 id="new-h">New in <span>Perugia?</span></h2></div></div>
-      <p class="hd-sub">The questions every new student asks us.</p>
-      <ul class="hd-chat">{rows}</ul>
-      <div class="hd-foot"><span>Still lost?</span><a class="btn" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Ask us on Instagram ↗</a></div>
+    Y, N, M = '<b class="y"></b>', '<b class="n"></b>', '<b class="m">–</b>'
+    KIT = [("Student prices", N, M, Y), ("Open bar", N, N, Y), ("Walk there from the centre", N, Y, Y),
+           ("Inside, not in the cold", Y, N, Y), ("Good music, every time", M, N, Y), ("Open till late", Y, N, Y)]
+    rows = "".join(f'<tr><th scope="row">{k}</th><td>{c}</td><td>{z}</td><td class="pp">{p}</td></tr>' for k, c, z, p in KIT)
+    guide = f"""<div class="wrap o-new"><section class="sec kitw" id="new" aria-labelledby="new-h">
+      <div><p class="hd-k2">New in Perugia?</p><h2 id="new-h">Your Erasmus <span>starter kit.</span></h2>
+      <p class="kit-sub">Three ways to go out in Perugia. Only one ticks every box. You're welcome.</p></div>
+      <div class="kit"><div class="kit-t"><span>Starter kit</span><span>Perugia · 2026</span></div>
+        <table><thead><tr><th></th><th scope="col">Club</th><th scope="col">Centro</th><th scope="col" class="pp">PerugiaParty</th></tr></thead><tbody>{rows}</tbody></table>
+        <p class="kit-legend"><b class="y"></b> yes <b class="m"></b> sometimes <b class="n"></b> no</p>
+        <p class="kit-plus"><b>Plus</b> everything in English · pay from any European bank · every guest checked on Instagram</p>
+        <a class="kit-help" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Still lost? Ask us on Instagram</a>
+      </div>
     </section></div>
 """
     s = s.replace('  <section class="band-red o-next" id="next"', guide + '  <section class="band-red o-next" id="next"', 1)
     assert 'id="new"' in s
-    s = s.replace("</style>", """.hd{background:var(--ink);color:var(--cream);border-radius:28px;padding:clamp(22px,4vw,44px);margin-block:12px}
-.hd-top{display:flex;align-items:center;gap:14px}
-.hd-dot{width:12px;height:12px;border-radius:50%;background:#7bd389;box-shadow:0 0 0 5px rgba(123,211,137,.18);flex:none}
-.hd-k{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#7bd389;margin:0 0 4px}
-.hd h2{font-size:clamp(32px,4.6vw,54px);line-height:.95;margin:0}.hd h2 span{color:#ff4a3d}
-.hd-sub{color:#b9ab98;margin:12px 0 24px}
-.hd-chat{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
-.hd-chat li{display:grid;gap:6px;background:#1f1a17;border-radius:20px;padding:14px}
-.hd-chat .q{justify-self:end;max-width:90%;background:var(--red);color:var(--cream);border-radius:16px 16px 4px 16px;padding:9px 13px;font-weight:700;font-size:15px;margin:0}
-.hd-chat .a{justify-self:start;max-width:92%;background:#2e2723;color:var(--cream);border-radius:16px 16px 16px 4px;padding:9px 13px;font-size:15px;line-height:1.4;margin:0}
-.hd-chat .a b{display:block;font-family:var(--f-mono);font-weight:500;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#ffd23f;margin-bottom:3px}
-.hd-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:24px;color:#b9ab98}
-@media (max-width:760px){.hd-chat{grid-template-columns:1fr}}
+    s = s.replace("</style>", """.hd-k2{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 10px}
+.kitw{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr);gap:clamp(24px,5vw,64px);align-items:start}
+.kitw h2{font-size:clamp(36px,5vw,62px);line-height:.95;margin:0 0 14px}.kitw h2 span{color:var(--red)}
+.kit-sub{color:var(--muted);font-size:18px;margin:0}
+.kit{background:#fff;border:2px solid var(--ink);border-radius:22px;padding:clamp(16px,2.6vw,28px);box-shadow:8px 8px 0 var(--ink)}
+.kit-t{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7a6e5d;border-bottom:2px dashed #e6dbc7;padding-bottom:12px}
+.kit table{width:100%;border-collapse:collapse;margin-top:6px}
+.kit th,.kit td{padding:12px 6px;border-bottom:1px solid #f0e8da;text-align:center;font-size:15px}
+.kit tbody th{text-align:left;font-weight:800}
+.kit thead th{font-family:var(--f-mono);font-weight:500;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7a6e5d}
+.kit thead th.pp{color:var(--red)}
+.kit td.pp{background:#fdf0ec}
+.kit b.y,.kit b.n,.kit b.m{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:middle}
+.kit b.y{background:var(--red)}.kit b.n{border:2px solid #d8ccb6}.kit b.m{background:#c9bca6;transform:scale(.6)}
+.kit-legend{display:flex;gap:8px;align-items:center;font-size:12px;color:#7a6e5d;margin:12px 0 0}.kit-legend b{width:11px!important;height:11px!important;margin-left:6px}
+.kit-plus{margin:16px 0 0;font-size:14px;color:#5f5547}.kit-plus b{color:var(--red);margin-right:4px}
+.kit-help{display:inline-block;margin-top:14px;font-weight:800;color:var(--red-deep)}
+@media (max-width:820px){.kitw{grid-template-columns:1fr}.kit th,.kit td{padding:10px 3px;font-size:14px}.kit thead th{font-size:9.5px;letter-spacing:.04em}}
 </style>""", 1)
     cta = """<div class="wrap o-go"><section class="go" aria-labelledby="go-h">
       <h2 id="go-h">Ready for your <span>first night?</span></h2>
-      <p>Everything else, the next date and the request form, is on our main page.</p>
-      <div class="go-b"><a class="btn" href="/#request">Request a place</a><a class="btn outline" href="/">Go to PerugiaParty →</a></div>
+      <p>The next date and the request form are on the main page.</p>
+      <div class="go-b"><a class="btn" href="/#request">Request a place</a><a class="btn outline" href="/">Go to PerugiaParty</a></div>
     </section></div>
 """
     s = s.replace('<div class="wrap o-why">', cta + '<div class="wrap o-why">', 1)
     s = s.replace("</style>", """.o-go{order:2}.o-why,.o-main,.o-faq,.o-nights{display:none!important}
 .go{text-align:center;padding:clamp(40px,7vw,80px) 0 clamp(56px,8vw,96px)}
-.go h2{font-size:clamp(34px,5vw,58px);line-height:.95;margin:0 0 12px}.go h2 span{color:var(--red)}
+.go h2{font-size:clamp(30px,4vw,46px);line-height:1;margin:0 auto 12px;max-width:14ch}.go h2 span{color:var(--red)}
 .go p{color:var(--muted);margin:0 auto 24px;max-width:40ch}
 .go-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 </style>""", 1)
@@ -115,13 +127,13 @@ def erasmus_cards(s):
     def card(cls, svg, title, items, mark):
         li = "".join(f"<li><i>{mark}</i>{x}</li>" for x in items)
         return f'<figure class="ec {cls}">{svg}<figcaption><p class="vs-t">{title}</p><ul>{li}</ul></figcaption></figure>'
-    club = card("", svgs[0], "The club", ["Expensive", "Light drinks", "Out of town: no car, no club"], "✕")
-    us = card("us", svgs[1], "PerugiaParty", ["Student prices", "Open bar", "In the centre, walk there", "Till late", "All in English", "Pay from any European bank", "Real guests, checked on Instagram"], "✓")
-    centro = card("", svgs[2], "The centro", ["Outside, in the cold", "No music", "Bars close around 01:30"], "✕")
+    club = card("", svgs[0], "The club", ["Expensive", "Light drinks", "Out of town: no car, no club"], "")
+    us = card("us", svgs[1], "PerugiaParty", ["Student prices", "Open bar", "In the centre, walk there", "Till late", "All in English", "Pay from any European bank", "Real guests, checked on Instagram"], "")
+    centro = card("", svgs[2], "The centro", ["Outside, in the cold", "No music", "Bars close around 01:30"], "")
     return f"""<div class="wrap o-new"><section class="sec" id="new" aria-labelledby="new-h">
       <p class="hd-k2">New in Perugia?</p><h2 id="new-h" class="why-big">Three ways to go out. <span>One makes sense.</span></h2>
       <div class="ecs">{club}{us}{centro}</div>
-      <p class="ec-help">Still lost? <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Ask us on Instagram ↗</a></p>
+      <p class="ec-help">Still lost? <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Ask us on Instagram</a></p>
     </section></div>
 """, """.hd-k2{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 10px}
 .ecs{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:clamp(8px,2vw,22px);align-items:center}
@@ -162,15 +174,15 @@ def it_post(s):
     s = s.replace('<link rel="preload" href="/ill/hero-it.svg" as="image">', "")
     cta = """<div class="wrap o-go"><section class="go" aria-labelledby="go-h">
       <h2 id="go-h">Pronto per la <span>prossima notte?</span></h2>
-      <p>Data, richiesta del posto e tutto il resto sono sulla pagina principale.</p>
-      <div class="go-b"><a class="btn" href="/#request">Richiedi un posto</a><a class="btn outline" href="/">Vai a PerugiaParty →</a></div>
+      <p>La prossima data e la richiesta sono sulla pagina principale.</p>
+      <div class="go-b"><a class="btn" href="/#request">Richiedi un posto</a><a class="btn outline" href="/">Vai a PerugiaParty</a></div>
     </section></div>
 """
     s = s.replace('<div class="wrap o-main">', cta + '<div class="wrap o-main">', 1)
     s = s.replace('href="#request"', 'href="/#request"').replace('a.href = "#request"', 'a.href = "/#request"')
     s = s.replace("</style>", """.o-go{order:3}.o-main,.o-faq,.o-nights{display:none!important}
 .go{text-align:center;padding:clamp(40px,7vw,80px) 0 clamp(56px,8vw,96px)}
-.go h2{font-size:clamp(34px,5vw,58px);line-height:.95;margin:0 0 12px}.go h2 span{color:var(--red)}
+.go h2{font-size:clamp(30px,4vw,46px);line-height:1;margin:0 auto 12px;max-width:14ch}.go h2 span{color:var(--red)}
 .go p{color:var(--muted);margin:0 auto 24px;max-width:40ch}
 .go-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 </style>""", 1)
@@ -192,7 +204,7 @@ IT = [
     ('Announcing soon', 'In arrivo'),
     ('<h3>The next edition is in the works.</h3>', '<h3>La prossima edizione è in preparazione.</h3>'),
     ('<p>Date and theme drop on Instagram first.</p>', '<p>Data e tema escono prima su Instagram.</p>'),
-    ('Follow on Instagram ↗', 'Seguici su Instagram ↗'),
+    ('Follow on Instagram', 'Seguici su Instagram'),
     ('Club night. Centro vibes. <span>Best of both.</span>', 'Serata da club. Vibe da centro. <span>Il meglio dei due mondi.</span>'),
     ('<p class="vs-t">The club</p>', '<p class="vs-t">La discoteca</p>'),
     ('Expensive.<br>Light drinks.<br>Far away.', 'Prezzi alti.<br>Drink annacquati.<br>Fuori mano.'),
@@ -223,17 +235,17 @@ IT = [
     ('We only use your name, Instagram and WhatsApp to run our guest lists. DM us anytime to have them deleted.', 'Usiamo nome, Instagram e WhatsApp solo per le liste ospiti. Scrivici quando vuoi per cancellarli.'),
     ('<p class="dim" id="pv-ev">Guest request</p>', '<p class="dim" id="pv-ev">Richiesta ospite</p>'),
     ('<p class="pv-name" id="pv-name">Your name</p>', '<p class="pv-name" id="pv-name">Il tuo nome</p>'),
-    ('<span>☐</span> 18+ with photo ID', '<span>☐</span> 18+ con documento'),
-    ('<span>☐</span> House rules read', '<span>☐</span> Regole lette'),
+    ('<span></span> 18+ with photo ID', '<span></span> 18+ con documento'),
+    ('<span></span> House rules read', '<span></span> Regole lette'),
     ('<p class="tiny" id="pv-tiny">Your code arrives after approval</p>', '<p class="tiny" id="pv-tiny">Il codice arriva dopo l’approvazione</p>'),
     ('<li>Send it: you get a personal link straight away.</li>', '<li>Inviala: ricevi subito un link personale.</li>'),
     ('<li>We check your request on Instagram.</li>', '<li>Controlliamo la richiesta su Instagram.</li>'),
     ('<li>Once approved, your page shows your price and code.</li>', '<li>Se approvato, la tua pagina mostra prezzo e codice.</li>'),
     ('<h3>Not sent yet: DM us this code.</h3>', '<h3>Non ancora inviata: mandaci questo codice.</h3>'),
     ('id="copy-link">Copy code</button>', 'id="copy-link">Copia codice</button>'),
-    ('Send code on Instagram ↗', 'Manda il codice su Instagram ↗'),
+    ('Send code on Instagram', 'Manda il codice su Instagram'),
     ('<h2 id="nights-h">Nights you missed.</h2>', '<h2 id="nights-h">Le notti che ti sei perso.</h2>'),
-    ('See everything on Instagram ↗', 'Vedi tutto su Instagram ↗'),
+    ('See everything on Instagram', 'Vedi tutto su Instagram'),
     ('<p class="when">Last edition</p>', '<p class="when">Ultima edizione</p>'),
     ('<p class="when">Past edition</p>', '<p class="when">Edizione passata</p>'),
     ('<h2 id="faq-h">Good to know.</h2>', '<h2 id="faq-h">Da sapere.</h2>'),
@@ -257,7 +269,7 @@ IT = [
     ('<b>No mess.</b> Use the bags. Leave the place as you found it.', '<b>Niente casino.</b> Usa i sacchi. Lascia il posto come l’hai trovato.'),
     ("<b>Respect the staff.</b> They're the reason the night happens.", '<b>Rispetta lo staff.</b> È grazie a loro che la notte esiste.'),
     ('<p>Independent nights · Perugia, Italia</p>', '<p>Serate indipendenti · Perugia, Italia</p>'),
-    ('rel="noopener">Contact ↗</a>', 'rel="noopener">Contatti ↗</a>'),
+    ('rel="noopener">Contact</a>', 'rel="noopener">Contatti</a>'),
     # live texts from the script
     ('ev.sold_out ? "Join the waitlist" : a.dataset.label', 'ev.sold_out ? "Entra in lista d’attesa" : a.dataset.label'),
     ('mb.textContent = ev.sold_out ? "Join the waitlist" : "Request a place"', 'mb.textContent = ev.sold_out ? "Entra in lista d’attesa" : "Richiedi un posto"'),
