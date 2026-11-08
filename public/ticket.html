@@ -28,6 +28,9 @@ main{padding-block:44px 80px}
 h1{font-size:clamp(40px,8vw,64px)}
 .lead{font-size:18px;color:var(--muted);max-width:46ch}
 .card{background:var(--paper);border:1.5px solid var(--line);border-radius:20px;padding:22px;display:grid;gap:14px}
+.savep{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 20px}
+.savep b{display:block;font-size:16px;line-height:1.3}
+.savep span{font-size:13.5px;color:var(--muted)}
 .row{display:grid;grid-template-columns:130px 1fr auto;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:12px}
 .row:last-child{border-bottom:0;padding-bottom:0}
 .row dt{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
@@ -283,10 +286,9 @@ h1{font-size:clamp(40px,8vw,64px)}
 .invite .dots{display:flex;gap:6px}.invite .dots i{flex:1;max-width:56px;height:8px;border-radius:99px;background:var(--paper);border:1.5px solid var(--ink)}.invite .dots i.on{background:var(--red)}
 .invite .btn.outline{color:var(--ink);border-color:var(--ink)}
 /* priority for returning guests */
-.prio{display:flex;gap:14px;align-items:center;background:var(--ink);color:var(--cream);border-radius:18px;padding:16px 18px}
-.prio .star{flex:none;width:46px;height:46px;border-radius:50%;background:#ff4a3d;color:var(--ink);display:grid;place-items:center;font-family:var(--f-display);font-size:22px}
-.prio b{display:block;font-family:var(--f-display);font-weight:400;font-size:20px;line-height:1.1}
-.prio span{font-size:14px;color:var(--muted-dark)}
+.prio{background:var(--ink);color:var(--cream);border-radius:18px;padding:18px 20px;border-left:4px solid #ff4a3d}
+.prio .k{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#ff4a3d;margin-bottom:7px}
+.prio p{margin:0;font-size:15.5px;line-height:1.45;color:var(--cream)}
 /* confirm it's you (Instagram DM) */
 .verify{background:var(--ink);color:var(--cream);border-radius:22px;padding:24px 22px;display:grid;gap:12px;border:2px solid #ff4a3d}
 .verify .kick{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#ff4a3d}
@@ -344,21 +346,30 @@ h1{font-size:clamp(40px,8vw,64px)}
 .rc-l{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;padding:4px 0}
 .rc-l .v{text-align:right;white-space:nowrap}
 .rc-l small{display:block;font-size:10.5px;color:#666;letter-spacing:.1em}
-.rc-tip{background:#fff6d6;margin:6px -10px 0;padding:8px 10px;border-radius:10px}
+.rc-tip{margin-top:2px}
+.rc-i{width:18px;height:18px;margin-left:8px;border-radius:50%;border:1.5px solid #b9b2a4;background:none;color:#7a7268;font:500 11px/1 var(--f-mono);cursor:pointer;padding:0;vertical-align:1px}
+.rc-i[aria-expanded="true"]{background:#111;border-color:#111;color:#fff}
+.rc-info{text-transform:none;letter-spacing:0;font-family:var(--f-body);font-size:13px;color:#555;line-height:1.5;margin:10px 0 0;padding:12px 14px;background:#f6f2e8;border-radius:12px}
 .rc-step{display:inline-flex;align-items:center;gap:8px}
 .rc-step button{width:34px;height:34px;border-radius:50%;border:2px solid #111;background:#fff;color:#111;font:700 18px/1 var(--f-body);display:grid;place-items:center;cursor:pointer;padding:0}
 .rc-step button[data-tip="1"]{background:#111;color:#fff}
 .rc-step button:disabled{opacity:.25;cursor:default}
-.rc-step b{min-width:52px;text-align:center;font-weight:500}
+.rc-step b{min-width:48px;text-align:center;font-weight:500}
+.rc-l .i{display:flex;align-items:center}
 .rc-why{text-transform:none;letter-spacing:0;font-family:var(--f-body);font-size:13px;color:#555;margin:8px 0 0;line-height:1.45}
 .rc-tot{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--f-display);font-size:30px;letter-spacing:0;text-transform:uppercase}
 .rc-tot b{font-weight:400}
 .rc-tot{width:100%;border:0;background:none;padding:0;color:inherit;cursor:pointer;text-align:left}
 .rc-sub{text-align:center;margin:0 0 8px;font-size:11.5px;color:#666;letter-spacing:.12em}
-.rc-c{display:flex;justify-content:space-between;align-items:baseline;gap:14px;width:100%;border:0;background:none;padding:9px 0;border-bottom:1px dotted #bbb;color:#111;font:inherit;text-align:left;cursor:pointer}
-.rc-c span{font-size:11px;color:#666;letter-spacing:.12em;flex:none}
+.rc-c{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;border:0;background:none;padding:11px 0;border-bottom:1px dotted #cfc8bb;color:#111;font:inherit;text-align:left;cursor:pointer}
+.rc-c span{font-size:11px;color:#666;letter-spacing:.12em}
 .rc-c b{font-weight:500;text-align:right;overflow-wrap:anywhere;text-transform:none;letter-spacing:.02em}
-.rc-c:active,.rc-c.got{background:#e9f8ee}
+.rc-c i{font-style:normal;font-size:10px;letter-spacing:.1em;color:#7a7268;border:1px solid #d9d2c4;border-radius:7px;padding:4px 8px;white-space:nowrap}
+.rc-c i::after{content:"COPY"}
+.rc-c.got i{background:#12a150;border-color:#12a150;color:#fff}
+.rc-c.got i::after{content:"COPIED"}
+.rc-c.plain{grid-template-columns:auto 1fr;cursor:default}
+.rc-c:active{background:#f3efe4}
 .rc-tot.got b{color:#12a150}
 .rc-dl{margin-top:12px;text-align:center;font-family:var(--f-body);text-transform:none;letter-spacing:0;font-size:13.5px;color:#444}
 #pay-all{width:100%;justify-content:center;margin-top:4px}
@@ -706,7 +717,7 @@ function keepPushOnThisTicket(){
   try { if (APP.push && Notification.permission === "granted" && localStorage.getItem("pp_push") && localStorage.getItem("pp_push") !== token) pushSubscribe(false).then(() => LAST && renderApp(LAST)).catch(() => {}); } catch(e){}
 }
 
-function prioHTML(title, text){ return `<div class="prio" role="note"><span class="star" aria-hidden="true"></span><div><b>${title}</b><span>${text}</span></div></div>`; }
+function prioHTML(kick, text){ return `<div class="prio" role="note"><span class="k">${kick}</span><p>${text}</p></div>`; }
 function decorate(d){
   const P = $("page");
   const pre = d.status === "requested" || d.status === "waitlist" || d.status === "approved";
@@ -716,7 +727,7 @@ function decorate(d){
   }
   if (d.priority && !d.next && (d.status === "requested" || d.status === "waitlist")) {
     const h = P.querySelector(".rq") || P.querySelector("h1");
-    if (h) h.insertAdjacentHTML("afterend", prioHTML("Priority · you came before", d.status === "waitlist" ? "Returning guests are first in line when a place opens up." : "Returning guests are first in line. We look at your request before new ones."));
+    if (h) h.insertAdjacentHTML("afterend", prioHTML("Priority", d.status === "waitlist" ? "You came before, so you are first in line when a place opens up." : "You came before, so we look at your request before the new ones."));
   }
   if (d.next) P.insertAdjacentHTML("afterbegin", nextHTML(d) + inviteHTML(d)); // older ticket: the next party comes first
   else if (d.ref) P.insertAdjacentHTML("beforeend", refHTML(d));
@@ -809,13 +820,13 @@ function receiptHTML(d, tierName, tip, country){
     <div class="rc-d"></div>
     ${line("1X", "OPEN BAR + DJS", "INCL.")}
     ${line("1X", "TICKET · " + esc(String(tierName).toUpperCase()), euro(d.price))}
-    <div class="rc-l rc-tip"><span class="q">+</span><span class="i">CONTRIBUTION<small>OPTIONAL</small></span>
-      <span class="v rc-step"><button type="button" data-tip="-1" aria-label="Less" ${tip ? "" : "disabled"}>−</button><b id="tip-v">${euro(tip)}</b><button type="button" data-tip="1" aria-label="Add €1">+</button></span></div>
-    <p class="rc-why">Helps us keep it cheap for every student</p>
+    <div class="rc-l rc-tip"><span class="q">+</span><span class="i">CONTRIBUTION<button class="rc-i" type="button" id="tip-i" aria-expanded="false" aria-controls="tip-info" aria-label="What a contribution pays for">i</button></span>
+      <span class="v rc-step"><button type="button" data-tip="-1" aria-label="One euro less" ${tip ? "" : "disabled"}>−</button><b id="tip-v">${euro(tip)}</b><button type="button" data-tip="1" aria-label="One euro more">+</button></span></div>
+    <p class="rc-info" id="tip-info" hidden>Optional, from €1. It goes to the drinks and the baristas, the DJs, the venue and the next party. Everyone running the night is a volunteer.</p>
     <div class="rc-d"></div>
     <button class="rc-tot" type="button" id="tot-copy" data-copy="${String(total).replace(".", ",")}"><span>TOTAL</span><b id="tip-tot">${euro(total)}</b></button>
     <div class="rc-d"></div>
-    <p class="rc-sub">PAY BY BANK TRANSFER · TAP TO COPY</p>
+    <p class="rc-sub">Pay by bank transfer</p>
     ${copyLine("IBAN", d.iban ? d.iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim() : "—", d.iban ? d.iban.replace(/\s+/g, "") : "")}
     ${copyLine("NAME", d.beneficiary || "—", d.beneficiary || "")}
     ${country ? copyLine("BANK", country, country.replace(/ \([A-Z]{2}\)$/, "")) : ""}
@@ -824,8 +835,14 @@ function receiptHTML(d, tierName, tip, country){
   </section>`;
 }
 function copyLine(k, shown, value){
-  return value ? `<button class="rc-c" type="button" data-copy="${esc(value)}"><span>${k}</span><b>${esc(shown)}</b></button>` : `<div class="rc-c"><span>${k}</span><b>${esc(shown)}</b></div>`;
+  return value ? `<button class="rc-c" type="button" data-copy="${esc(value)}"><span>${k}</span><b>${esc(shown)}</b><i aria-hidden="true"></i></button>` : `<div class="rc-c plain"><span>${k}</span><b>${esc(shown)}</b></div>`;
 }
+document.addEventListener("click", e => {
+  const b = e.target.closest("#tip-i"); if (!b) return;
+  const panel = document.getElementById("tip-info"); if (!panel) return;
+  const open = panel.hasAttribute("hidden");
+  panel.toggleAttribute("hidden", !open); b.setAttribute("aria-expanded", String(open));
+});
 let tipTimer = null;
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-tip]"); if (!b || !window.__payD) return;
@@ -866,7 +883,7 @@ function render(d){
           : `We're checking your request for <b>${esc(d.event)}</b>. You'll see your price here.`}</p>
         ${stepsHTML(1)}
       </div>
-      ${d.verified ? `<div class="card"><p><b>Save this page.</b> The link is also in your DMs.</p><div>${copyBtn(d.link || location.href)}</div></div>` : ""}`;
+      ${d.verified ? `<div class="card savep"><div><b>Save this page</b><span>The link is also in your DMs.</span></div>${copyBtn(d.link || location.href)}</div>` : ""}`;
     celebrate(d);
     }
   } else if (d.status === "approved") {

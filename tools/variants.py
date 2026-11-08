@@ -96,7 +96,6 @@ def italian_post(s):
                  (">In the centre<", ">In centro<"), (">Till late<", ">Fino a tardi<"), (">New friends<", ">Gente nuova<"),
                  (">Best night of the month<", ">La notte del mese<"), (">Total<", ">Totale<"), (">Student price<", ">Prezzo studenti<"),
                  (">YES<", ">SÌ<"), (">FREE<", ">GRATIS<"), (">INCL.<", ">INCL.<"),
-                 ("Grazie · see you on the dancefloor", "Grazie · ci vediamo in pista"),
                  ('aria-label="Request a place: what a night includes"', 'aria-label="Richiedi un posto: cosa include la serata"')):
         s = s.replace(a, b)
     # the band: why this is not the usual student party
@@ -169,15 +168,12 @@ IT = [
     ('placeholder="Who you are, who you\'ll know there"', 'placeholder="Chi sei, chi conosci alla festa"'),
     ("I'm 18+, I'll bring photo ID and I accept the <a href=\"#rules\">house rules</a>.", 'Ho 18+ anni, porto un documento e accetto le <a href="#rules">regole della casa</a>.'),
     ('id="f-send">Send request</button>', 'id="f-send">Invia richiesta</button>'),
-    ('We only use your name, Instagram and WhatsApp to run our guest lists. DM us anytime to have them deleted.', 'Usiamo nome, Instagram e WhatsApp solo per le liste ospiti. Scrivici quando vuoi per cancellarli.'),
-    ('<p class="dim" id="pv-ev">Guest request</p>', '<p class="dim" id="pv-ev">Richiesta ospite</p>'),
+    ('Your details are only used for the guest list.', 'I tuoi dati servono solo per la lista ospiti.'),
+    ('<p class="rc-s" id="pv-ev">Guest request</p>', '<p class="rc-s" id="pv-ev">Richiesta ospite</p>'),
     ('<p class="pv-name" id="pv-name">Your name</p>', '<p class="pv-name" id="pv-name">Il tuo nome</p>'),
     ('<span></span> 18+ with photo ID', '<span></span> 18+ con documento'),
     ('<span></span> House rules read', '<span></span> Regole lette'),
     ('<p class="tiny" id="pv-tiny">Your code arrives after approval</p>', '<p class="tiny" id="pv-tiny">Il codice arriva dopo l’approvazione</p>'),
-    ('<li>Send it: you get a personal link straight away.</li>', '<li>Inviala: ricevi subito un link personale.</li>'),
-    ('<li>We check your request on Instagram.</li>', '<li>Controlliamo la richiesta su Instagram.</li>'),
-    ('<li>Once approved, your page shows your price and code.</li>', '<li>Se approvato, la tua pagina mostra prezzo e codice.</li>'),
     ('<h3>Not sent yet: DM us this code.</h3>', '<h3>Non ancora inviata: mandaci questo codice.</h3>'),
     ('id="copy-link">Copy code</button>', 'id="copy-link">Copia codice</button>'),
     ('Send code on Instagram', 'Manda il codice su Instagram'),
@@ -204,7 +200,6 @@ IT = [
     ('"Join the waitlist" : "Request a place"', '"Entra in lista d’attesa" : "Richiedi un posto"'),
     ('"Join the waitlist" : "Send request"', '"Entra in lista d’attesa" : "Invia richiesta"'),
     ('<p class="next-sub">Request below. Once approved, pay to unlock your ticket.</p>', '<p class="next-sub">Richiedi qui sotto. Se approvato, paghi e sblocchi il biglietto.</p>'),
-    ('<span class="nx-note">30 seconds to request. We reply on Instagram.</span>', '<span class="nx-note">30 secondi. Ti rispondiamo su Instagram.</span>'),
     ('[["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]]', '[["Data", ev.date_label], ["Porte", ev.doors], ["Biglietti", price]]'),
     ('"From " + euro(ev.price.min)', '"Da " + euro(ev.price.min)'),
     ('[[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]]', '[[d,"giorni"],[p(h),"ore"],[p(m),"min"],[p(s),"sec"]]'),
