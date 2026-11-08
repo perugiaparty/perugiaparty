@@ -820,9 +820,9 @@ function receiptHTML(d, tierName, tip, country){
     <div class="rc-d"></div>
     ${line("1X", "OPEN BAR + DJS", "INCL.")}
     ${line("1X", "TICKET · " + esc(String(tierName).toUpperCase()), euro(d.price))}
-    <div class="rc-l rc-tip"><span class="q">+</span><span class="i">CONTRIBUTION<button class="rc-i" type="button" id="tip-i" aria-expanded="false" aria-controls="tip-info" aria-label="What a contribution pays for">i</button></span>
+    <div class="rc-l rc-tip"><span class="q">+</span><span class="i">SUPPORT THE CREW<button class="rc-i" type="button" id="tip-i" aria-expanded="false" aria-controls="tip-info" aria-label="What this goes to">i</button></span>
       <span class="v rc-step"><button type="button" data-tip="-1" aria-label="One euro less" ${tip ? "" : "disabled"}>−</button><b id="tip-v">${euro(tip)}</b><button type="button" data-tip="1" aria-label="One euro more">+</button></span></div>
-    <p class="rc-info" id="tip-info" hidden>Optional, from €1. It goes to the drinks and the baristas, the DJs, the venue and the next party. Everyone running the night is a volunteer.</p>
+    <p class="rc-info" id="tip-info" hidden>Up to you, from €1. It goes to the people who make the night: the bar, the DJs, the door, the clean-up at 05:00. They are all volunteers.</p>
     <div class="rc-d"></div>
     <button class="rc-tot" type="button" id="tot-copy" data-copy="${String(total).replace(".", ",")}"><span>TOTAL</span><b id="tip-tot">${euro(total)}</b></button>
     <div class="rc-d"></div>

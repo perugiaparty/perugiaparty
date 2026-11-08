@@ -770,7 +770,7 @@ const escH = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&
 async function pastNightsHtml(env, lang = "en") {
   const rows = await pastNights(env);
   if (!rows.length) return null;
-  return rows.map((h, i) => `<article class="night n${(i % 3) + 1}"><p class="when">${lang === "it" ? (i === 0 ? "Ultima edizione" : "Edizione passata") : (i === 0 ? "Last edition" : "Past edition")}</p><div><h3>${escH(h.title)}</h3></div></article>`).join("");
+  return rows.map((h, i) => `<a class="night n${(i % 3) + 1}" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener"><p class="when">${lang === "it" ? (i === 0 ? "Ultima edizione" : "Edizione passata") : (i === 0 ? "Last edition" : "Past edition")}</p><div><h3>${escH(h.title)}</h3></div></a>`).join("");
 }
 async function nightPage(env, slug) {
   const rows = await pastNights(env);
@@ -799,7 +799,7 @@ ${ld ? `<script type="application/ld+json">${ld}</script>` : ""}
 <main class="wrap"><section class="np">${stub}<p class="k">Past edition · ${escH(month)}</p><h1>${escH(h.title)}</h1>${h.line ? `<p class="l">${escH(h.line)}</p>` : ""}<p class="seo">${escH(seo)}</p>
 <div class="cta"><a class="btn" href="/#next">See the next party</a><a class="btn outline" href="/#nights">All nights</a></div>
 ${others ? `<p class="more">More nights: ${others}</p>` : ""}</section></main>
-<footer><div class="wrap"><img class="foot-mark" src="/brand/wordmark-5.png" alt="PerugiaParty" width="851" height="160" loading="lazy"><div class="meta"><p>Student parties · Perugia, Italia</p><nav aria-label="Footer"><a href="/italian" hreflang="it">Italiano</a><a href="/erasmus">Erasmus</a><a href="/privacy">Privacy</a></nav></div></div></footer></body></html>`;
+<footer><div class="wrap"><a href="/" aria-label="PerugiaParty home"><img class="foot-mark" src="/brand/wordmark-5.png" alt="PerugiaParty" width="851" height="160" loading="lazy"></a><div class="meta"><p>Student parties · Perugia, Italia</p><nav aria-label="Footer"><a href="/italian" hreflang="it">Italiano</a><a href="/erasmus">Erasmus</a><a href="/privacy">Privacy</a></nav></div></div></footer></body></html>`;
   return new Response(html, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300" } });
 }
 async function sitemap(env) {

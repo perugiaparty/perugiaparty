@@ -97,9 +97,19 @@ def italian_post(s):
                  ('aria-label="Request a place: what a night includes"', 'aria-label="Richiedi un posto: cosa include la serata"')):
         s = s.replace(a, b)
     # the band: why this is not the usual student party
-    FATTI = [("Open bar vero", "Bevi quanto vuoi."), ("DJ veri", "Niente playlist dal telefono."),
-             ("Lista privata", "Chiedi il posto su Instagram."), ("In centro", "Ci arrivi a piedi.")]
-    fatti = "".join(f'<li><i aria-hidden="true"></i><b>{h}</b><span>{x}</span></li>' for h, x in FATTI)
+    GLASS = ('<svg class="ic" viewBox="0 0 48 48" aria-hidden="true"><path d="M11 10h26L25.5 24v9H31v3H17v-3h5.5v-9z" fill="#f4ead7"/>'
+             '<path d="M14.8 13.2h18.4L24 24z" fill="#ff4a3d"/><circle cx="36" cy="8.5" r="3" fill="#ffd23f"/></svg>')
+    DECK = ('<svg class="ic" viewBox="0 0 48 48" aria-hidden="true"><circle cx="21" cy="27" r="14" fill="#f4ead7"/>'
+            '<circle cx="21" cy="27" r="9" fill="none" stroke="#cbbfae" stroke-width="1.2"/><circle cx="21" cy="27" r="4" fill="#ff4a3d"/>'
+            '<rect x="31.5" y="7" width="3.4" height="19" rx="1.7" transform="rotate(20 33 16)" fill="#f4ead7"/><circle cx="36.5" cy="8" r="2.8" fill="#ff4a3d"/></svg>')
+    PHONE = ('<svg class="ic" viewBox="0 0 48 48" aria-hidden="true"><rect x="12" y="6" width="24" height="36" rx="5" fill="#f4ead7"/>'
+             '<rect x="16" y="12" width="16" height="7" rx="3.5" fill="#ff4a3d"/><rect x="16" y="24" width="11" height="3" rx="1.5" fill="#cbbfae"/>'
+             '<rect x="16" y="30" width="14" height="3" rx="1.5" fill="#cbbfae"/></svg>')
+    ARCH = ('<svg class="ic" viewBox="0 0 48 48" aria-hidden="true"><path d="M7 39V23a17 17 0 0 1 34 0v16z" fill="#f4ead7"/>'
+            '<path d="M17 39V28a7 7 0 0 1 14 0v11z" fill="#ff4a3d"/><rect x="4" y="39" width="40" height="3.4" rx="1.7" fill="#f4ead7"/></svg>')
+    FATTI = [(GLASS, "Open bar vero", "Bevi quanto vuoi."), (DECK, "DJ veri", "Niente playlist dal telefono."),
+             (PHONE, "Lista privata", "Chiedi il posto su Instagram."), (ARCH, "In centro", "Ci arrivi a piedi.")]
+    fatti = "".join(f'<li>{ic}<b>{h}</b><span>{x}</span></li>' for ic, h, x in FATTI)
     band = f'''  <section class="band-ink o-fat" aria-labelledby="fat-h"><div class="wrap"><div class="fat">
       <div><p class="fat-k">Perugia · 18+</p><h2 id="fat-h">Non la <span>solita</span> festa universitaria.</h2>
       <p class="fat-b"><a class="btn" href="#request" data-req>Richiedi un posto</a></p></div>
@@ -119,9 +129,11 @@ def italian_post(s):
 .fat h2{font-size:clamp(30px,4.2vw,52px);line-height:.98;margin:0;max-width:13ch}.fat h2 span{color:#ff4a3d}
 .fat .fat-b{margin:26px 0 0}
 .fat ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.fat li{background:#1c1816;border:1px solid #2d2724;border-radius:16px;padding:18px}
-.fat li i{display:block;width:9px;height:9px;border-radius:50%;background:#ff4a3d;margin-bottom:13px}
-.fat li b{display:block;font-size:17px;font-weight:800;margin-bottom:5px}
+.fat ul{gap:14px}
+.fat li{position:relative;overflow:hidden;background:linear-gradient(165deg,#221c19,#17130f);border:1px solid #322a25;border-radius:20px;padding:22px 22px 24px}
+.fat li::after{content:"";position:absolute;right:-34px;top:-34px;width:130px;height:130px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,74,61,.17),transparent);pointer-events:none}
+.fat li .ic{display:block;width:44px;height:44px;margin-bottom:16px}
+.fat li b{display:block;font-size:18px;font-weight:800;margin-bottom:6px}
 .fat li span{color:#b9ab98;font-size:14.5px;line-height:1.45}
 @media (max-width:820px){.fat{grid-template-columns:1fr;gap:28px}}
 @media (max-width:420px){.fat ul{grid-template-columns:1fr}}
