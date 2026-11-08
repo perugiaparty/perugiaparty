@@ -206,7 +206,19 @@ h1{font-size:clamp(40px,8vw,64px)}
 .cine .perf::before{left:-12px}.cine .perf::after{right:-12px}
 .cine .code{font-family:var(--f-mono);font-size:20px;letter-spacing:.06em;color:#f5f5f0}
 .cine .who{font-family:var(--f-mono);font-size:14px;color:#a9a9a2}
-.cine .qr{background:#f5f5f0;padding:14px;border-radius:12px;line-height:0}
+.cine .qr{background:#f5f5f0;padding:14px;border-radius:12px;line-height:0;border:0;cursor:pointer;display:block}
+.cine .qr:active{transform:scale(.985)}
+.noscroll{overflow:hidden}
+.qrfs{position:fixed;inset:0;z-index:200;background:#fffaf0;display:grid;place-items:center;padding:24px;overscroll-behavior:contain}
+.qrfs-in{display:grid;justify-items:center;gap:12px;width:100%;max-width:560px}
+.qrfs img{width:min(84vw,460px);height:auto;display:block;border-radius:14px;image-rendering:pixelated;box-shadow:0 10px 40px rgba(20,18,16,.14)}
+.qrfs-c{font-family:var(--f-mono);font-size:22px;letter-spacing:.08em;color:var(--ink);margin:6px 0 0}
+.qrfs-n{font-family:var(--f-mono);font-size:14px;color:var(--muted);margin:0}
+.qrfs-b{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.qrfs-b .btn.outline{color:var(--ink);border-color:var(--ink)}
+.qrfs-h{font-size:13px;color:var(--muted);text-align:center;margin:2px 0 0}
+@media (max-height:700px){.qrfs img{width:min(70vw,360px)}}
+.cine .qr-hint{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:#a9a9a2;margin-top:-4px}
 .cine .qr canvas{display:block;width:min(228px,58vw);height:auto;image-rendering:pixelated}
 .where{background:var(--red);color:var(--cream);border-radius:20px;padding:20px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
 .where p{font-size:20px;font-weight:700;margin-top:2px}
@@ -426,7 +438,7 @@ if (token) { const c = document.getElementById("nav-cta"); c.textContent = "My t
 function payLeftHTML(dl){
   const ms = dl - Date.now();
   const when = new Date(dl).toLocaleString("en-GB", { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" });
-  if (ms <= 0) return `Your time to pay is up. <span>Pay now or DM us</span>, otherwise your place can go to someone on the waitlist.`;
+  if (ms <= 0) return `Your time to pay is up.`;
   const m = Math.floor(ms / 60000), dd = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60;
   const txt = dd >= 2 ? `${dd} days` : dd === 1 ? `1 day ${h} h` : h ? `${h} h ${mm} min` : `${mm} min`;
   return `Pay within <span>${txt}</span><br><small style="font-weight:500;opacity:.75">Before ${when}</small>`;
@@ -471,6 +483,36 @@ function drawQR(text, canvas){
   for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) x.fillRect((c+q)*cell, (r+q)*cell, cell, cell);
 }
 
+
+/* the QR, full screen: biggest possible, savable, screen kept awake */
+function qrBigCanvas(text, scale){
+  const base = document.createElement("canvas"); drawQR(text, base);
+  const c = document.createElement("canvas"); c.width = base.width * scale; c.height = base.height * scale;
+  const x = c.getContext("2d"); x.imageSmoothingEnabled = false; x.drawImage(base, 0, 0, c.width, c.height);
+  return c;
+}
+async function openQR(d){
+  let lock = null;
+  try { if (navigator.wakeLock) lock = await navigator.wakeLock.request("screen"); } catch (e) {}
+  const url = qrBigCanvas(d.qr, 3).toDataURL("image/png");
+  const o = document.createElement("div"); o.className = "qrfs"; o.setAttribute("role", "dialog"); o.setAttribute("aria-label", "Your entry QR");
+  o.innerHTML = `<div class="qrfs-in">
+      <img src="${url}" alt="Entry QR ${esc(d.code)}" draggable="false">
+      <p class="qrfs-c">${esc(d.code)}</p>
+      <p class="qrfs-n">${esc(d.name)}</p>
+      <div class="qrfs-b"><button class="btn" type="button" data-save>Save image</button><button class="btn outline" type="button" data-close>Done</button></div>
+      <p class="qrfs-h">Hold the code to save it, or screenshot this screen.</p>
+    </div>`;
+  const close = () => { document.body.classList.remove("noscroll"); o.remove(); document.removeEventListener("keydown", esckey); try { lock && lock.release(); } catch (e) {} };
+  const esckey = e => { if (e.key === "Escape") close(); };
+  o.addEventListener("click", e => { if (e.target === o || e.target.closest("[data-close]")) close(); });
+  o.querySelector("[data-save]").addEventListener("click", e => {
+    const a = document.createElement("a"); a.href = url; a.download = `PerugiaParty-${d.code}.png`;
+    document.body.appendChild(a); a.click(); a.remove(); e.currentTarget.textContent = "Saved";
+  });
+  document.addEventListener("keydown", esckey);
+  document.body.classList.add("noscroll"); document.body.appendChild(o);
+}
 function loadImage(src){ return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
 async function ticketCanvas(d){
   try { await document.fonts.ready; } catch(e){}
@@ -692,7 +734,7 @@ function pushIsOn(){ try { return APP.push && Notification.permission === "grant
 function appHTML(d){
   // only once they've paid, and not on iPhone (installing there takes too many steps)
   if (!["paid","in"].includes(d.status) || partyOver(d) || APP.ios) return "";
-  if (pushIsOn()) return `<div class="appc on" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>🔔 You're all set</b><span>We'll ping you for the programme on the night.</span></div></div>`;
+  if (pushIsOn()) return "";
   if (!APP.push && !APP.installEvt) return "";
   if (APP.push && Notification.permission === "denied" && !APP.installEvt) return "";
   const label = APP.installEvt && !APP.standalone ? "Add to home screen" : "Turn on notifications";
@@ -947,7 +989,8 @@ function render(d){
         <img class="logo" src="/brand/wordmark-4.png" alt="PerugiaParty" width="851" height="160" decoding="async">
         <div><p class="ev">${esc(d.event)}</p><p class="meta">${esc([d.date_label, d.doors && "doors " + d.doors].filter(Boolean).join(" · "))}</p></div>
         <div class="perf" aria-hidden="true"></div>
-        <div class="qr"><canvas id="qr" aria-label="Your entry QR code"></canvas></div>
+        <button class="qr" type="button" id="qr-open" aria-label="Open your QR full screen"><canvas id="qr" aria-label="Your entry QR code"></canvas></button>
+        <span class="qr-hint">Tap the code to open it big</span>
         <p class="code">${esc(d.code)}</p>
         <p class="who">${esc(d.name)}</p>
         <p class="meta">Show this QR and your photo ID at the door</p>
@@ -964,6 +1007,7 @@ function render(d){
     if ($("pdf")) $("pdf").addEventListener("click", e => downloadTicket(d, e.currentTarget));
     if ($("share")) $("share").addEventListener("click", e => shareParty(d, e.currentTarget));
     if ($("cal")) $("cal").addEventListener("click", () => addToCalendar(d));
+    if ($("qr-open")) $("qr-open").addEventListener("click", () => openQR(d));
     startCount(d.starts_at);
   } else if (d.status === "declined") {
     empty("Not this time.", "We couldn't give you a place for this edition. Keep an eye on Instagram for the next one.");
