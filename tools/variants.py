@@ -1,33 +1,27 @@
-"""Builds /it and /erasmus from the homepage (public/index.html), so all three share one design.
+"""Builds /italian and /erasmus from the homepage (public/index.html), so all three share one design.
 Run after every homepage change:  python3 tools/variants.py"""
 import re, json, sys, os
 ROOT = os.path.join(os.path.dirname(__file__), "..", "public")
 SRC = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
 
-def build(path, lang, pairs, hero_art, hero_alt, post=None):
+def build(path, lang, pairs, post=None):
     s, miss = SRC, []
     for a, b in pairs:
         if a not in s: miss.append(a[:60])
         s = s.replace(a, b)
-    # hero: own illustration instead of the example ticket
-    if hero_art:
-        s = re.sub(r'<a class="ticket[^"]*".*?</a>', f'<img class="hero-art" src="/ill/{hero_art}.svg" alt="{hero_alt}" width="360" height="200" fetchpriority="high">', s, count=1, flags=re.S)
-    s = s.replace("</style>", ".hero-art{display:block;width:100%;height:auto;border-radius:24px;box-shadow:12px 12px 0 var(--red);transform:rotate(-2deg)}\n</style>", 1)
     if post: s = post(s)
     # structured data: this page + its own visible FAQ
-    if 'class="hd-chat"' in s:
-        hd = s[s.index('class="hd-chat"'):]; hd = hd[:hd.index("</ul>")]
-        faq = [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in re.findall(r'<p class="q">(.*?)</p><p class="a"><b>PerugiaParty</b>(.*?)</p>', hd)]
-    else:
-      sec = s[s.index('id="faq"'):]
-      faq = [{"@type": "Question", "name": re.sub("<[^>]+>", "", q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"\s+", " ", re.sub("<[^>]+>", " ", a)).strip()}}
-             for q, a in re.findall(r"<summary>(.*?)</summary>(.*?)</details>", sec[:sec.index("</section>")], re.S)]
+    faq = []
+    if 'id="faq"' in s and "rules-sec" not in s:
+        sec = s[s.index('id="faq"'):]
+        faq = [{"@type": "Question", "name": re.sub("<[^>]+>", "", q), "acceptedAnswer": {"@type": "Answer", "text": re.sub(r"\s+", " ", re.sub("<[^>]+>", " ", a)).strip()}}
+               for q, a in re.findall(r"<summary>(.*?)</summary>(.*?)</details>", sec[:sec.index("</section>")], re.S)]
     title = re.search(r"<title>(.*?)</title>", s).group(1).replace("&amp;", "&")
     ld = {"@context": "https://schema.org", "@graph": [
         {"@type": "WebPage", "@id": f"https://perugiaparty.com{path}#page", "url": f"https://perugiaparty.com{path}", "name": title, "inLanguage": lang,
          "isPartOf": {"@id": "https://perugiaparty.com/#website"}, "about": {"@id": "https://perugiaparty.com/#org"}},
         {"@type": "FAQPage", "@id": f"https://perugiaparty.com{path}#faq", "mainEntity": faq}]}
-    if ".o-faq,.o-nights{display:none" in s and 'class="hd-chat"' not in s: ld["@graph"].pop()  # FAQ hidden on this landing page
+    if not faq: ld["@graph"].pop()
     s = re.sub(r'<script type="application/ld\+json">.*?</script>', '<script type="application/ld+json">' + json.dumps(ld, ensure_ascii=False).replace("<", "\\u003c") + "</script>", s, count=1, flags=re.S)
     open(os.path.join(ROOT, path.strip("/") + ".html"), "w", encoding="utf-8").write(s)
     if miss: print(path, "not found:", *miss, sep="\n  ", file=sys.stderr)
@@ -42,16 +36,10 @@ COMMON_HEAD = lambda path, title, desc, ogt, ogd, loc: [
     ('<meta property="og:locale" content="en_GB">', f'<meta property="og:locale" content="{loc}">'),
 ]
 
+HERO_TICKET = r'<a class="ticket[^"]*".*?</a>\s*'
 
-# ---------- Erasmus: a "new here" guide and an FAQ for people who have never been to Perugia
-NEW_HERE = [
-    ("When do bars close here?", "Around 01:30 in the centre, and you're standing outside."),
-    ("Can I go to a club?", "They're out of town. No car, no club."),
-    ("Where is PerugiaParty?", "In the centre, walking distance. The exact place is on your ticket."),
-    ("Do I need Italian?", "No. The site, your ticket and our DMs are in English."),
-    ("Why DM my code?", "That's how we check you're a real person."),
-    ("My bank isn't Italian.", "No problem: a SEPA transfer in euro works from any European account."),
-]
+
+# ---------- Erasmus: the starter kit sits next to the title, the FAQ answers the "new here" questions
 ER_FAQ = [
     ("I just arrived. What is PerugiaParty?", "Private parties for university and Erasmus students in Perugia’s centre: open bar, DJs and new people, at a student price. Run by volunteers. 18+."),
     ("Do I need to speak Italian?", "No. The website, your ticket and our Instagram are in English."),
@@ -62,41 +50,41 @@ ER_FAQ = [
 ]
 def erasmus_post(s):
     Y, N = '<b class="y"></b>', '<b class="n"></b>'
-    KIT = [("Student prices", N, N, Y), ("Open bar", N, N, Y), ("Reachable from the centre", N, Y, Y),
+    KIT = [("Student prices", N, N, Y), ("Open bar", N, N, Y), ("Reachable on foot", N, Y, Y),
            ("Inside, not in the cold", Y, N, Y), ("Good music, every time", N, N, Y), ("Open till late", Y, N, Y),
            ("Everything in English", N, N, Y)]
     rows = "".join(f'<tr><th scope="row">{k}</th><td>{c}</td><td>{z}</td><td class="pp">{p}</td></tr>' for k, c, z, p in KIT)
-    guide = f"""<div class="wrap o-new"><section class="sec kitw" id="new" aria-labelledby="new-h">
-      <div><p class="hd-k2">New in Perugia?</p><h2 id="new-h">Your Erasmus <span>starter kit.</span></h2>
-      <p class="kit-sub">Three ways to go out in Perugia. Only one ticks every box. You're welcome.</p></div>
-      <div class="kit"><div class="kit-t"><span>Starter kit</span><span>Perugia · 2026</span></div>
-        <table><thead><tr><th></th><th scope="col">Club</th><th scope="col">Centro</th><th scope="col" class="pp">PerugiaParty</th></tr></thead><tbody>{rows}</tbody></table>
-        <div class="kit-cta"><a class="btn" href="#request" data-req>Request a place</a>
-        <a class="kit-help" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Still lost? Ask us</a></div>
+    kit = f'''<div class="kit" role="group" aria-label="Three ways to go out in Perugia">
+        <div class="kit-t"><span>Starter kit</span><span>Perugia · 2026</span></div>
+        <table><thead><tr><th><span class="vh">What you get</span></th><th scope="col">Club</th><th scope="col">Centro</th><th scope="col" class="pp">Us</th></tr></thead><tbody>{rows}</tbody></table>
       </div>
-    </section></div>
-"""
-    s = s.replace('  <section class="band-red o-next" id="next"', guide + '  <section class="band-red o-next" id="next"', 1)
-    assert 'id="new"' in s
-    s = s.replace("</style>", """.hd-k2{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 10px}
-.kitw{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr);gap:clamp(24px,5vw,64px);align-items:start}
-.kitw h2{font-size:clamp(36px,5vw,62px);line-height:.95;margin:0 0 14px}.kitw h2 span{color:var(--red)}
-.kit-sub{color:var(--muted);font-size:18px;margin:0}
-.kit{background:#fff;border:2px solid var(--ink);border-radius:22px;padding:clamp(16px,2.6vw,28px);box-shadow:8px 8px 0 var(--ink)}
-.kit-t{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7a6e5d;border-bottom:2px dashed #e6dbc7;padding-bottom:12px}
-.kit table{width:100%;border-collapse:collapse;margin-top:6px}
-.kit th,.kit td{padding:12px 6px;border-bottom:1px solid #f0e8da;text-align:center;font-size:15px}
-.kit tbody th{text-align:left;font-weight:800}
-.kit thead th{font-family:var(--f-mono);font-weight:500;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7a6e5d}
+'''
+    # the kit replaces the receipt beside the title
+    s = re.sub(HERO_TICKET, kit, s, count=1, flags=re.S)
+    assert 'class="kit"' in s
+    s = s.replace('<a class="btn" href="#request" data-req>Request a place</a>\n        </div>',
+                  '<a class="btn" href="#request" data-req>Request a place</a>\n          <a class="kit-help" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">New here? Ask us</a>\n        </div>', 1)
+    s = s.replace("</style>", """.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.o-hero .hero{grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);gap:clamp(28px,4vw,56px)}
+.kit{background:#fbf7ef;color:var(--ink);border-radius:20px;padding:clamp(16px,1.8vw,22px) clamp(16px,2vw,24px) clamp(10px,1.4vw,14px);box-shadow:12px 12px 0 var(--red);transform:rotate(-1.2deg);width:100%;max-width:490px;justify-self:center}
+.kit-t{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7e6c;border-bottom:2px dashed #e6dbc7;padding-bottom:11px}
+.kit table{width:100%;border-collapse:collapse;margin-top:4px;table-layout:fixed}
+.kit th,.kit td{padding:9px 2px;border-bottom:1px solid #efe7d9;text-align:center;font-size:13.5px}
+.kit tbody tr:last-child th,.kit tbody tr:last-child td{border-bottom:0}
+.kit tbody th{text-align:left;font-weight:800;width:52%;line-height:1.25}
+.kit thead th + th{width:16%}
+.kit thead th{font-family:var(--f-mono);font-weight:500;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a7e6c;padding-top:12px}
 .kit thead th.pp{color:var(--red)}
-.kit td.pp,.kit thead th.pp{background:#fbe4df}
-.kit b{display:inline-block;width:18px;height:18px;position:relative;vertical-align:middle}
+.kit td.pp,.kit thead th.pp{background:#f7e3dd}
+.kit tbody tr:last-child td.pp{border-radius:0 0 8px 8px}
+.kit thead th.pp{border-radius:8px 8px 0 0}
+.kit b{display:inline-block;width:15px;height:15px;position:relative;vertical-align:middle}
 .kit b.y{border-radius:50%;background:var(--red)}
-.kit b.n::before,.kit b.n::after{content:"";position:absolute;left:50%;top:1px;width:2.4px;height:16px;border-radius:2px;background:#cbbfa9}
+.kit b.n::before,.kit b.n::after{content:"";position:absolute;left:50%;top:1px;width:2.2px;height:13px;border-radius:2px;background:#cdc1ab}
 .kit b.n::before{transform:translateX(-50%) rotate(45deg)}.kit b.n::after{transform:translateX(-50%) rotate(-45deg)}
-.kit-cta{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:20px}
-.kit-help{font-weight:800;color:var(--red-deep)}
-@media (max-width:820px){.kitw{grid-template-columns:1fr}.kit th,.kit td{padding:10px 3px;font-size:14px}.kit thead th{font-size:9.5px;letter-spacing:.04em}}
+.kit-help{font-weight:800;color:#ff8a7d;text-underline-offset:3px}
+@media (max-width:840px){.o-hero .hero{grid-template-columns:1fr}.kit{transform:none;box-shadow:8px 8px 0 var(--red);max-width:none}}
+@media (max-width:380px){.kit th,.kit td{font-size:12.5px;padding:8px 1px}}
 </style>""", 1)
     cta = """<div class="wrap o-go"><section class="go" aria-labelledby="go-h">
       <h2 id="go-h">Ready for your <span>first night?</span></h2>
@@ -120,44 +108,13 @@ def erasmus_post(s):
     s = s[:a] + '<div class="faq">\n' + "".join(f"        <details><summary>{q}</summary><p>{x}</p></details>\n" for q, x in ER_FAQ) + "        " + s[b:]
     return s
 
-
-# Alternative Erasmus block: the three places cards, with the help desk answers built in
-def erasmus_cards(s):
-    vs = s[s.index('<div class="vs">'):]; vs = vs[:vs.index('</div>\n') + 6]
-    svgs = re.findall(r"<svg.*?</svg>", vs, re.S)
-    def card(cls, svg, title, items, mark):
-        li = "".join(f"<li><i>{mark}</i>{x}</li>" for x in items)
-        return f'<figure class="ec {cls}">{svg}<figcaption><p class="vs-t">{title}</p><ul>{li}</ul></figcaption></figure>'
-    club = card("", svgs[0], "The club", ["Expensive", "Light drinks", "Out of town: no car, no club"], "")
-    us = card("us", svgs[1], "PerugiaParty", ["Student prices", "Open bar", "In the centre, walk there", "Till late", "All in English", "Pay from any European bank", "Real guests, checked on Instagram"], "")
-    centro = card("", svgs[2], "The centro", ["Outside, in the cold", "No music", "Bars close around 01:30"], "")
-    return f"""<div class="wrap o-new"><section class="sec" id="new" aria-labelledby="new-h">
-      <p class="hd-k2">New in Perugia?</p><h2 id="new-h" class="why-big">Three ways to go out. <span>One makes sense.</span></h2>
-      <div class="ecs">{club}{us}{centro}</div>
-      <p class="ec-help">Still lost? <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Ask us on Instagram</a></p>
-    </section></div>
-""", """.hd-k2{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 10px}
-.ecs{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:clamp(8px,2vw,22px);align-items:center}
-.ec{margin:0;border-radius:20px;overflow:hidden;background:#e9dfcc;color:#6d6252}
-.ec svg{display:block;width:100%;height:auto}
-.ec figcaption{padding:clamp(10px,1.6vw,20px)}
-.ec ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-.ec li{display:grid;grid-template-columns:18px 1fr;gap:6px;font-weight:700;font-size:clamp(12px,1.5vw,16px);line-height:1.3}
-.ec li i{font-style:normal;color:#a5776a}
-.ec.us{background:var(--ink);color:var(--cream);box-shadow:0 0 0 2px var(--red),0 18px 40px -16px rgba(232,57,43,.6)}
-.ec.us .vs-t{color:#ffd23f}.ec.us li i{color:#7bd389}
-.ec .vs-t{margin-bottom:10px}
-.ec-help{margin:22px 0 0;color:var(--muted)}.ec-help a{color:var(--red-deep);font-weight:700}
-@media (max-width:640px){.ecs{grid-template-columns:1fr}.ec{display:grid;grid-template-columns:40% 1fr;align-items:center}.ec.us{order:-1}}
-"""
-
 # ---------- Erasmus (English)
 build("/erasmus", "en", COMMON_HEAD("/erasmus", "Erasmus parties in Perugia · PerugiaParty",
         "New in Perugia on Erasmus? PerugiaParty runs private student parties in the city centre: open bar, DJs and people from all over the world, at a student price. 18+.",
         "Erasmus parties in Perugia · PerugiaParty", "New in town? Open bar, DJs and people from all over the world, at a student price. 18+.", "en_GB") + [
-    ('<link rel="alternate" hreflang="en" href="https://perugiaparty.com/">\n<link rel="alternate" hreflang="it" href="https://perugiaparty.com/it">\n<link rel="alternate" hreflang="x-default" href="https://perugiaparty.com/">\n', ""),
+    ('<link rel="alternate" hreflang="en" href="https://perugiaparty.com/">\n<link rel="alternate" hreflang="it" href="https://perugiaparty.com/italian">\n<link rel="alternate" hreflang="x-default" href="https://perugiaparty.com/">\n', ""),
     ('Student parties <em>in Perugia.</em>', 'Erasmus parties <em>in Perugia.</em>'),
-    ('Your people. Your night. Open bar, DJs and new people to meet, at a student price.', 'Just arrived in Perugia? Meet students from here and from all over the world. Open bar, DJs, student price.'),
+    ('Your people. Your night. Open bar, DJs and new people to meet, at a student price.', 'Just arrived? Three ways to go out in Perugia. Only one ticks every box.'),
     ('<p>Six steps to the door.</p>', '<p>From your phone to the party. No Italian needed.</p>'),
     ('<h3>Request</h3><p>Fill in 30 seconds.</p>', '<h3>Request</h3><p>Your name and Instagram. 30 seconds.</p>'),
     ('<h3>DM the code</h3><p>Send it on Instagram.</p>', '<h3>DM the code</h3><p>Send it to @perugiaparty on Instagram.</p>'),
@@ -165,62 +122,54 @@ build("/erasmus", "en", COMMON_HEAD("/erasmus", "Erasmus parties in Perugia · P
     ('<h3>Pay</h3><p>Bank transfer, tap to copy.</p>', '<h3>Pay</h3><p>Bank transfer in euro, any European bank.</p>'),
     ('<h3>Your QR</h3><p>Ticket and place unlock.</p>', '<h3>Your QR</h3><p>Your ticket and the address appear.</p>'),
     ('<h3>Party</h3><p>QR and photo ID at the door.</p>', '<h3>Party</h3><p>Show the QR and your passport or ID card.</p>'),
-], "hero-erasmus", "People from all over the world meeting in Perugia", erasmus_post)
+], erasmus_post)
 
 
-# Italian page: the comparison is the hook, so it comes right after the title
-def it_post(s):
-    s = re.sub(r'\s*<div class="ctas">.*?</div>', '', s, count=1, flags=re.S)  # no button under the title
+# ---------- Italiano: the whole homepage in Italian, without the FAQ
+def italian_post(s):
     # the receipt, in Italian
-    for a, b in (("Student night", "Serata studenti"), (">Open bar<", ">Open bar<"), (">Real DJs<", ">DJ veri<"),
+    for a, b in ((">Student night", ">Serata studenti"), (">Real DJs<", ">DJ veri<"),
                  (">In the centre<", ">In centro<"), (">Till late<", ">Fino a tardi<"), (">New friends<", ">Gente nuova<"),
                  (">Best night of the month<", ">La notte del mese<"), (">Total<", ">Totale<"), (">Student price<", ">Prezzo studenti<"),
-                 (">YES<", ">SÌ<"), (">FREE<", ">GRATIS<"),
+                 (">YES<", ">SÌ<"), (">FREE<", ">GRATIS<"), (">INCL.<", ">INCL.<"),
                  ("Grazie · see you on the dancefloor", "Grazie · ci vediamo in pista"),
                  ('aria-label="Request a place: what a night includes"', 'aria-label="Richiedi un posto: cosa include la serata"')):
         s = s.replace(a, b)
-    cta = """<div class="wrap o-go"><section class="go" aria-labelledby="go-h">
-      <h2 id="go-h">Pronto per la <span>prossima notte?</span></h2>
-      <p>La prossima data e la richiesta sono sulla pagina principale.</p>
-      <div class="go-b"><a class="btn" href="#request" data-req>Richiedi un posto</a><a class="btn outline" href="/">Vai a PerugiaParty</a></div>
-    </section></div>
-"""
-    s = s.replace('<div class="wrap o-main">', cta + '<div class="wrap o-main">', 1)
-    FATTI = [("Open bar vero", "Bevi quanto vuoi. Non due drink e poi paghi."),
-             ("DJ veri", "Niente playlist a caso dal telefono."),
-             ("Lista privata", "Chiedi il posto, ti rispondiamo su Instagram."),
-             ("In centro", "Ci arrivi a piedi. Torni a casa a piedi.")]
-    fatti = "".join(f'<li><b>{h}</b><span>{x}</span></li>' for h, x in FATTI)
-    band = f'''<section class="band-ink o-fat"><div class="wrap"><div class="fat">
-      <h2>Non la <span>solita</span> festa universitaria.</h2>
-      <ul>{fatti}</ul></div></div></section>
+    # the band: why this is not the usual student party
+    FATTI = [("Open bar vero", "Bevi quanto vuoi."), ("DJ veri", "Niente playlist dal telefono."),
+             ("Lista privata", "Chiedi il posto su Instagram."), ("In centro", "Ci arrivi a piedi.")]
+    fatti = "".join(f'<li><em>0{i}</em><div><b>{h}</b><span>{x}</span></div></li>' for i, (h, x) in enumerate(FATTI, 1))
+    band = f'''  <section class="band-ink o-fat" aria-labelledby="fat-h"><div class="wrap"><div class="fat">
+      <div><p class="fat-k">Perugia · 18+</p><h2 id="fat-h">Non la <span>solita</span> festa universitaria.</h2></div>
+      <ul>{fatti}</ul>
+    </div></div></section>
 '''
-    s = s.replace('<div class="wrap o-go">', band + '<div class="wrap o-go">', 1)
-    s = s.replace('href="#request"', 'href="/#request"').replace('a.href = "#request"', 'a.href = "/#request"')
-    s = s.replace("</style>", """.o-go{order:3}.o-main,.o-faq,.o-nights{display:none!important}
-.go{text-align:center;padding:clamp(40px,7vw,80px) 0 clamp(56px,8vw,96px)}
-.go h2{font-size:clamp(30px,4vw,46px);line-height:1;margin:0 auto 12px;max-width:14ch}.go h2 span{color:var(--red)}
-.go p{color:var(--muted);margin:0 auto 24px;max-width:40ch}
-.go-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-</style>""", 1)
-    s = s.replace('href="#request"', 'href="/#request"').replace('a.href = "#request"', 'a.href = "/#request"')
-    s = s.replace("</style>", """.o-fat{order:3}.o-go{order:4}
+    s = s.replace('  <div class="wrap o-main">', band + '  <div class="wrap o-main">', 1)
+    # no FAQ: only the house rules stay, so the box on the request form still links to them
+    rules = re.search(r'<details id="rules">.*?</details>', s, re.S).group(0)
+    a = s.index('<div class="wrap o-faq">')
+    b = s.index("</div>", s.index("</section>", a)) + 6
+    s = s[:a] + f'''<div class="wrap o-faq rules-sec">
+    <section class="sec" aria-label="Regole della casa">
+      <div class="faq">{rules}</div>
+    </section>
+  </div>''' + s[b:]
+    s = s.replace("</style>", """.o-fat{order:3}.o-next{order:4}.o-main{order:5}.o-faq{order:6}.o-nights{order:7}
 .band-ink{background:var(--ink);color:var(--cream)}
-.fat{padding-block:clamp(40px,6vw,72px)}
-.fat h2{font-size:clamp(30px,4.4vw,52px);line-height:.98;margin:0 0 clamp(22px,3vw,34px);max-width:16ch}.fat h2 span{color:#ff4a3d}
-.fat ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#2a2420;border:1px solid #2a2420;border-radius:18px;overflow:hidden}
-.fat li{background:var(--ink);padding:20px}
-.fat li b{display:block;font-size:18px;font-weight:800;margin-bottom:6px}
-.fat li span{color:#b9ab98;font-size:15px;line-height:1.45}
-@media (max-width:820px){.fat ul{grid-template-columns:1fr 1fr}}@media (max-width:480px){.fat ul{grid-template-columns:1fr}}
-.hero{grid-template-columns:1fr!important;padding-block:clamp(36px,6vw,72px) clamp(40px,6vw,72px)!important;gap:0!important}
-.hero .lede{max-width:46ch}
-.o-why #why{padding-top:clamp(28px,4vw,44px)}
-.o-why .why-big{font-size:clamp(28px,4vw,48px);margin-bottom:clamp(18px,3vw,32px)}
+.fat{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(26px,5vw,72px);align-items:center;padding-block:clamp(48px,7vw,88px)}
+.fat-k{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#ff4a3d;margin:0 0 14px}
+.fat h2{font-size:clamp(30px,4.2vw,52px);line-height:.98;margin:0;max-width:13ch}.fat h2 span{color:#ff4a3d}
+.fat ul{list-style:none;margin:0;padding:0}
+.fat li{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:baseline;padding:15px 0;border-top:1px solid #2d2724}
+.fat li:last-child{border-bottom:1px solid #2d2724}
+.fat li em{font-family:var(--f-mono);font-style:normal;font-size:12px;color:#6f665c}
+.fat li b{display:block;font-size:18px;font-weight:800}
+.fat li span{color:#b9ab98;font-size:15px}
+.rules-sec .sec{padding-block:0 clamp(48px,7vw,80px)}
+@media (max-width:820px){.fat{grid-template-columns:1fr;gap:26px}}
 </style>""", 1)
     return s
 
-# ---------- Italiano
 IT = [
     ('<html lang="en">', '<html lang="it">'),
     ('Request a place</a>', 'Richiedi un posto</a>'),
@@ -275,20 +224,7 @@ IT = [
     ('See everything on Instagram', 'Vedi tutto su Instagram'),
     ('<p class="when">Last edition</p>', '<p class="when">Ultima edizione</p>'),
     ('<p class="when">Past edition</p>', '<p class="when">Edizione passata</p>'),
-    ('<h2 id="faq-h">Good to know.</h2>', '<h2 id="faq-h">Da sapere.</h2>'),
-    ('<summary>Why is it so cheap?</summary><p>Clubs in Perugia are expensive and far away, and the centre ends early. PerugiaParty is run by volunteers, so we keep the price low and every student can come.</p>',
-     '<summary>Perché costa così poco?</summary><p>Le discoteche a Perugia sono care e lontane, e il centro finisce presto. PerugiaParty è organizzata da volontari: teniamo il prezzo basso perché ogni studente possa venire.</p>'),
-    ('<summary>Who can come?</summary><p>Students, Erasmus and anyone aged 18+. Every party needs a new request, even if you came before. Friends request their own place. Bring photo ID.</p>',
-     '<summary>Chi può venire?</summary><p>Studenti, Erasmus e chiunque abbia 18+ anni. Ogni festa richiede una nuova richiesta, anche se sei già venuto. Gli amici fanno la loro richiesta. Porta un documento.</p>'),
-    ('<summary>How do I get on the list?</summary><p>Request a place here, then DM your code to @perugiaparty on Instagram. We check every request; a request isn’t a guaranteed place.</p>',
-     '<summary>Come entro in lista?</summary><p>Richiedi un posto qui, poi manda il tuo codice in DM a @perugiaparty su Instagram. Controlliamo ogni richiesta: richiedere non garantisce il posto.</p>'),
-    ('<summary>How much is it and how do I pay?</summary><p>Your price appears on your ticket page once you’re approved. Pay by bank transfer with your name and code as the reference.</p>',
-     '<summary>Quanto costa e come pago?</summary><p>Il prezzo appare sulla tua pagina dopo l’approvazione. Paghi con bonifico, con nome e codice come causale.</p>'),
-    ('<summary>Where is the party?</summary><p>In Perugia’s city centre. The exact place appears on your ticket once we confirm your payment.</p>',
-     '<summary>Dove si fa la festa?</summary><p>Nel centro di Perugia. Il luogo esatto appare sul biglietto dopo la conferma del pagamento.</p>'),
-    ('<summary>Lost my ticket, refunds?</summary><p>Lost the link? Go to <a href="/ticket">perugiaparty.com/ticket</a> and log in with your Instagram and code. Tickets are personal and can’t be transferred or refunded. If we cancel, we contact you directly.</p>',
-     '<summary>Biglietto perso, rimborsi?</summary><p>Link perso? Vai su <a href="/ticket">perugiaparty.com/ticket</a> e accedi con Instagram e codice. I biglietti sono personali, non trasferibili né rimborsabili. Se annulliamo, ti contattiamo noi.</p>'),
-    ('<summary>What are the house rules?</summary>', '<summary>Quali sono le regole della casa?</summary>'),
+    ('<summary>What are the house rules?</summary>', '<summary>Regole della casa</summary>'),
     ('<b>On the list or not in.</b> No list, no entry. Tickets are personal.', '<b>In lista o fuori.</b> Niente lista, niente ingresso. I biglietti sono personali.'),
     ('<b>Pay before you come.</b> Bank transfer with your name and PP code as the reference.', '<b>Paga prima di venire.</b> Bonifico con nome e codice PP come causale.'),
     ("<b>Pace yourself.</b> One drink at a time. Don't waste them.", '<b>Con calma.</b> Un drink alla volta. Non sprecarli.'),
@@ -296,7 +232,10 @@ IT = [
     ('<b>No mess.</b> Use the bags. Leave the place as you found it.', '<b>Niente casino.</b> Usa i sacchi. Lascia il posto come l’hai trovato.'),
     ("<b>Respect the staff.</b> They're the reason the night happens.", '<b>Rispetta lo staff.</b> È grazie a loro che la notte esiste.'),
     ('<p>Independent nights · Perugia, Italia</p>', '<p>Serate indipendenti · Perugia, Italia</p>'),
+    ('<a href="/italian" hreflang="it">Italiano</a>', '<a href="/" hreflang="en">English</a>'),
     ('rel="noopener">Contact</a>', 'rel="noopener">Contatti</a>'),
+    ('Tonight we party. Tomorrow we forget. <span>Later, it\'s the best night you\'ve ever had.</span>',
+     'Stanotte si balla. Domani non ricordiamo. <span>Poi diventa la notte più bella di sempre.</span>'),
     # live texts from the script
     ('ev.sold_out ? "Join the waitlist" : a.dataset.label', 'ev.sold_out ? "Entra in lista d’attesa" : a.dataset.label'),
     ('mb.textContent = ev.sold_out ? "Join the waitlist" : "Request a place"', 'mb.textContent = ev.sold_out ? "Entra in lista d’attesa" : "Richiedi un posto"'),
@@ -305,8 +244,8 @@ IT = [
     ('"Join the waitlist" : "Send request"', '"Entra in lista d’attesa" : "Invia richiesta"'),
     ('<p>Request below. Once approved, pay to unlock your ticket.</p>', '<p>Richiedi qui sotto. Se approvato, paghi e sblocchi il biglietto.</p>'),
 ]
-build("/it", "it", COMMON_HEAD("/it", "Feste universitarie ed Erasmus a Perugia · PerugiaParty",
+build("/italian", "it", COMMON_HEAD("/italian", "Feste universitarie ed Erasmus a Perugia · PerugiaParty",
         "Feste private per studenti universitari ed Erasmus nel centro di Perugia. Open bar, DJ e gente nuova da conoscere, a prezzo studenti. 18+.",
         "Feste universitarie a Perugia · PerugiaParty", "Serata da club. Vibe da centro. Il meglio dei due mondi. Open bar, prezzi bassi. 18+.", "it_IT") + IT,
-      None, "", it_post)
-print("built /it and /erasmus")
+      italian_post)
+print("built /italian and /erasmus")

@@ -735,7 +735,7 @@ async function homepage(req, env) {
     }
   }
   // one event read (reused from above), and the page + past nights fetched at the same time
-  const [res, nights] = await Promise.all([env.ASSETS.fetch(req), pastNightsHtml(env, u.pathname === "/it" ? "it" : "en").catch(() => null)])
+  const [res, nights] = await Promise.all([env.ASSETS.fetch(req), pastNightsHtml(env, u.pathname === "/italian" ? "it" : "en").catch(() => null)])
   if (!res.ok || !(res.headers.get("content-type") || "").includes("text/html")) return res;
   let ld = null; const ev1 = ev0;
   try { if (ev1) ld = eventJsonLd(ev1); } catch (e) {}
@@ -799,7 +799,7 @@ ${ld ? `<script type="application/ld+json">${ld}</script>` : ""}
 <main class="wrap"><section class="np">${stub}<p class="k">Past edition · ${escH(month)}</p><h1>${escH(h.title)}</h1>${h.line ? `<p class="l">${escH(h.line)}</p>` : ""}<p class="seo">${escH(seo)}</p>
 <div class="cta"><a class="btn" href="/#next">See the next party</a><a class="btn outline" href="/#nights">All nights</a></div>
 ${others ? `<p class="more">More nights: ${others}</p>` : ""}</section></main>
-<footer><div class="wrap"><img class="foot-mark" src="/brand/wordmark-5.png" alt="PerugiaParty" width="851" height="160" loading="lazy"><div class="meta"><p>Student parties · Perugia, Italia</p><nav aria-label="Footer"><a href="/it" hreflang="it">Italiano</a><a href="/erasmus">Erasmus</a><a href="/privacy">Privacy</a></nav></div></div></footer></body></html>`;
+<footer><div class="wrap"><img class="foot-mark" src="/brand/wordmark-5.png" alt="PerugiaParty" width="851" height="160" loading="lazy"><div class="meta"><p>Student parties · Perugia, Italia</p><nav aria-label="Footer"><a href="/italian" hreflang="it">Italiano</a><a href="/erasmus">Erasmus</a><a href="/privacy">Privacy</a></nav></div></div></footer></body></html>`;
   return new Response(html, { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300" } });
 }
 async function sitemap(env) {
@@ -807,10 +807,10 @@ async function sitemap(env) {
   const today = day(Date.now());
   let nights = []; try { nights = await pastNights(env); } catch (e) {}
   const u = (loc, mod, pri, alt) => `  <url><loc>https://perugiaparty.com${loc}</loc><lastmod>${mod}</lastmod><priority>${pri}</priority>${alt || ""}</url>`;
-  const alt = `<xhtml:link rel="alternate" hreflang="en" href="https://perugiaparty.com/"/><xhtml:link rel="alternate" hreflang="it" href="https://perugiaparty.com/it"/>`;
+  const alt = `<xhtml:link rel="alternate" hreflang="en" href="https://perugiaparty.com/"/><xhtml:link rel="alternate" hreflang="it" href="https://perugiaparty.com/italian"/>`;
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-${[u("/", today, "1.0", alt), u("/it", today, "0.8", alt), u("/erasmus", today, "0.8"), u("/privacy", "2026-10-13", "0.2")].join("\n")}
+${[u("/", today, "1.0", alt), u("/italian", today, "0.8", alt), u("/erasmus", today, "0.8"), u("/privacy", "2026-10-13", "0.2")].join("\n")}
 </urlset>`;
   return new Response(body, { headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" } });
 }
@@ -1067,7 +1067,8 @@ async function route(req, env) {
     if (url.pathname === "/sitemap.xml") return sitemap(env);
 
     if (url.pathname === "/index.html") return Response.redirect(url.origin + "/" + url.search, 301);
-    if (url.pathname === "/" || url.pathname === "/it" || url.pathname === "/erasmus") return homepage(req, env);
+    if (url.pathname === "/it") return Response.redirect(new URL("/italian", url).toString(), 301);
+    if (url.pathname === "/" || url.pathname === "/italian" || url.pathname === "/erasmus") return homepage(req, env);
     return env.ASSETS.fetch(req);
   }
 }

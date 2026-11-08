@@ -27,7 +27,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="apple-mobile-web-app-title" content="PerugiaParty">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://perugiaparty.com/erasmus#page", "url": "https://perugiaparty.com/erasmus", "name": "Erasmus parties in Perugia · PerugiaParty", "inLanguage": "en", "isPartOf": {"@id": "https://perugiaparty.com/#website"}, "about": {"@id": "https://perugiaparty.com/#org"}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://perugiaparty.com/erasmus#page", "url": "https://perugiaparty.com/erasmus", "name": "Erasmus parties in Perugia · PerugiaParty", "inLanguage": "en", "isPartOf": {"@id": "https://perugiaparty.com/#website"}, "about": {"@id": "https://perugiaparty.com/#org"}}, {"@type": "FAQPage", "@id": "https://perugiaparty.com/erasmus#faq", "mainEntity": [{"@type": "Question", "name": "I just arrived. What is PerugiaParty?", "acceptedAnswer": {"@type": "Answer", "text": "Private parties for university and Erasmus students in Perugia’s centre: open bar, DJs and new people, at a student price. Run by volunteers. 18+."}}, {"@type": "Question", "name": "Do I need to speak Italian?", "acceptedAnswer": {"@type": "Answer", "text": "No. The website, your ticket and our Instagram are in English."}}, {"@type": "Question", "name": "How do I join?", "acceptedAnswer": {"@type": "Answer", "text": "Request a place on this page, then DM your code to @perugiaparty on Instagram. We check every request and send you your ticket page."}}, {"@type": "Question", "name": "I don’t have an Italian bank account.", "acceptedAnswer": {"@type": "Answer", "text": "No problem. A normal SEPA transfer in euro from any European account works. Use your name and code as the reference."}}, {"@type": "Question", "name": "How do I get there?", "acceptedAnswer": {"@type": "Answer", "text": "It’s in the city centre, so you can walk from most student areas in town. The exact place is on your ticket after payment."}}, {"@type": "Question", "name": "What do I bring?", "acceptedAnswer": {"@type": "Answer", "text": "Your ticket QR on your phone and a photo ID (passport or ID card). You must be 18+."}}, {"@type": "Question", "name": "What are the house rules?", "acceptedAnswer": {"@type": "Answer", "text": "On the list or not in. No list, no entry. Tickets are personal. Pay before you come. Bank transfer with your name and PP code as the reference. Pace yourself. One drink at a time. Don't waste them. Leave the music alone. Respect the vibe and whoever is playing. No mess. Use the bags. Leave the place as you found it. Respect the staff. They're the reason the night happens."}}]}]}</script>
 <link rel="preload" href="/fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/bowlby-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/fonts/fonts.css?v=1">
@@ -388,26 +388,27 @@ html:not([data-live]) .o-next{display:none}
 .rc-bar{display:flex;gap:2px;height:42px;justify-content:center;margin:18px 0 8px}.rc-bar i{background:var(--ink);display:block}
 .rc-f{text-align:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7a6e5d;margin:0}
 @media (max-width:720px){.ticket.rcpt{padding:22px 20px 30px}.rc-l li{font-size:13px}}
-.hero-art{display:block;width:100%;height:auto;border-radius:24px;box-shadow:12px 12px 0 var(--red);transform:rotate(-2deg)}
-.hd-k2{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--red);margin:0 0 10px}
-.kitw{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.4fr);gap:clamp(24px,5vw,64px);align-items:start}
-.kitw h2{font-size:clamp(36px,5vw,62px);line-height:.95;margin:0 0 14px}.kitw h2 span{color:var(--red)}
-.kit-sub{color:var(--muted);font-size:18px;margin:0}
-.kit{background:#fff;border:2px solid var(--ink);border-radius:22px;padding:clamp(16px,2.6vw,28px);box-shadow:8px 8px 0 var(--ink)}
-.kit-t{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7a6e5d;border-bottom:2px dashed #e6dbc7;padding-bottom:12px}
-.kit table{width:100%;border-collapse:collapse;margin-top:6px}
-.kit th,.kit td{padding:12px 6px;border-bottom:1px solid #f0e8da;text-align:center;font-size:15px}
-.kit tbody th{text-align:left;font-weight:800}
-.kit thead th{font-family:var(--f-mono);font-weight:500;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7a6e5d}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.o-hero .hero{grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);gap:clamp(28px,4vw,56px)}
+.kit{background:#fbf7ef;color:var(--ink);border-radius:20px;padding:clamp(16px,1.8vw,22px) clamp(16px,2vw,24px) clamp(10px,1.4vw,14px);box-shadow:12px 12px 0 var(--red);transform:rotate(-1.2deg);width:100%;max-width:490px;justify-self:center}
+.kit-t{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7e6c;border-bottom:2px dashed #e6dbc7;padding-bottom:11px}
+.kit table{width:100%;border-collapse:collapse;margin-top:4px;table-layout:fixed}
+.kit th,.kit td{padding:9px 2px;border-bottom:1px solid #efe7d9;text-align:center;font-size:13.5px}
+.kit tbody tr:last-child th,.kit tbody tr:last-child td{border-bottom:0}
+.kit tbody th{text-align:left;font-weight:800;width:52%;line-height:1.25}
+.kit thead th + th{width:16%}
+.kit thead th{font-family:var(--f-mono);font-weight:500;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a7e6c;padding-top:12px}
 .kit thead th.pp{color:var(--red)}
-.kit td.pp,.kit thead th.pp{background:#fbe4df}
-.kit b{display:inline-block;width:18px;height:18px;position:relative;vertical-align:middle}
+.kit td.pp,.kit thead th.pp{background:#f7e3dd}
+.kit tbody tr:last-child td.pp{border-radius:0 0 8px 8px}
+.kit thead th.pp{border-radius:8px 8px 0 0}
+.kit b{display:inline-block;width:15px;height:15px;position:relative;vertical-align:middle}
 .kit b.y{border-radius:50%;background:var(--red)}
-.kit b.n::before,.kit b.n::after{content:"";position:absolute;left:50%;top:1px;width:2.4px;height:16px;border-radius:2px;background:#cbbfa9}
+.kit b.n::before,.kit b.n::after{content:"";position:absolute;left:50%;top:1px;width:2.2px;height:13px;border-radius:2px;background:#cdc1ab}
 .kit b.n::before{transform:translateX(-50%) rotate(45deg)}.kit b.n::after{transform:translateX(-50%) rotate(-45deg)}
-.kit-cta{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:20px}
-.kit-help{font-weight:800;color:var(--red-deep)}
-@media (max-width:820px){.kitw{grid-template-columns:1fr}.kit th,.kit td{padding:10px 3px;font-size:14px}.kit thead th{font-size:9.5px;letter-spacing:.04em}}
+.kit-help{font-weight:800;color:#ff8a7d;text-underline-offset:3px}
+@media (max-width:840px){.o-hero .hero{grid-template-columns:1fr}.kit{transform:none;box-shadow:8px 8px 0 var(--red);max-width:none}}
+@media (max-width:380px){.kit th,.kit td{font-size:12.5px;padding:8px 1px}}
 .o-go{order:2}.o-why,.o-main,.o-faq,.o-nights{display:none!important}
 .go{text-align:center;padding:clamp(40px,7vw,80px) 0 clamp(56px,8vw,96px)}
 .go h2{font-size:clamp(30px,4vw,46px);line-height:1;margin:0 auto 12px;max-width:14ch}.go h2 span{color:var(--red)}
@@ -431,24 +432,19 @@ html:not([data-live]) .o-next{display:none}
       <div>
         <p class="hero-meta"><span class="hm-red" id="proof">Invite only</span><span aria-hidden="true">·</span>Perugia<span aria-hidden="true">·</span>18+</p>
         <h1 style="margin-top:22px">Erasmus parties <em>in Perugia.</em></h1>
-        <p class="lede">Just arrived in Perugia? Meet students from here and from all over the world. Open bar, DJs, student price.</p>
+        <p class="lede">Just arrived? Three ways to go out in Perugia. Only one ticks every box.</p>
         <div class="ctas">
           <a class="btn" href="/#request" data-req>Request a place</a>
+          <a class="kit-help" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">New here? Ask us</a>
         </div>
       </div>
-      <img class="hero-art" src="/ill/hero-erasmus.svg" alt="People from all over the world meeting in Perugia" width="360" height="200" fetchpriority="high">
-    </div>
+      <div class="kit" role="group" aria-label="Three ways to go out in Perugia">
+        <div class="kit-t"><span>Starter kit</span><span>Perugia · 2026</span></div>
+        <table><thead><tr><th><span class="vh">What you get</span></th><th scope="col">Club</th><th scope="col">Centro</th><th scope="col" class="pp">Us</th></tr></thead><tbody><tr><th scope="row">Student prices</th><td><b class="n"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Open bar</th><td><b class="n"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Reachable on foot</th><td><b class="n"></b></td><td><b class="y"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Inside, not in the cold</th><td><b class="y"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Good music, every time</th><td><b class="n"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Open till late</th><td><b class="y"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Everything in English</th><td><b class="n"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr></tbody></table>
+      </div>
+</div>
   </div>
 
-<div class="wrap o-new"><section class="sec kitw" id="new" aria-labelledby="new-h">
-      <div><p class="hd-k2">New in Perugia?</p><h2 id="new-h">Your Erasmus <span>starter kit.</span></h2>
-      <p class="kit-sub">Three ways to go out in Perugia. Only one ticks every box. You're welcome.</p></div>
-      <div class="kit"><div class="kit-t"><span>Starter kit</span><span>Perugia · 2026</span></div>
-        <table><thead><tr><th></th><th scope="col">Club</th><th scope="col">Centro</th><th scope="col" class="pp">PerugiaParty</th></tr></thead><tbody><tr><th scope="row">Student prices</th><td><b class="n"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Open bar</th><td><b class="n"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Reachable from the centre</th><td><b class="n"></b></td><td><b class="y"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Inside, not in the cold</th><td><b class="y"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Good music, every time</th><td><b class="n"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Open till late</th><td><b class="y"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Everything in English</th><td><b class="n"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr></tbody></table>
-        <div class="kit-cta"><a class="btn" href="/#request" data-req>Request a place</a>
-        <a class="kit-help" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Still lost? Ask us</a></div>
-      </div>
-    </section></div>
   <section class="band-red o-next" id="next" aria-label="Next party">
     <div class="wrap sec next-sec">
       <div class="sec-head" id="next-head">
@@ -611,7 +607,7 @@ html:not([data-live]) .o-next{display:none}
     <div class="meta">
       <p>Independent nights · Perugia, Italia</p>
       <nav aria-label="Footer">
-        <a href="/it" hreflang="it">Italiano</a>
+        <a href="/italian" hreflang="it">Italiano</a>
         <a href="/erasmus">Erasmus</a>
         <a href="/privacy">Privacy</a>
         <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Contact</a>
