@@ -51,7 +51,7 @@ ER_FAQ = [
 def erasmus_post(s):
     # the hero keeps the receipt; a help link sits next to the button
     s = s.replace('<a class="btn" href="#request" data-req>Request a place</a>\n        </div>',
-                  '<a class="btn" href="#request" data-req>Request a place</a>\n          <a class="ask" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">New here? Ask us</a>\n        </div>', 1)
+                  '<a class="btn" href="#request" data-req>Request a place</a>\n          <a class="ask" href="#how">How it works</a>\n        </div>', 1)
     # three options, then how it works, then the questions
     s = s.replace("</style>", """.o-why{order:1}.o-main{order:2}.o-faq{order:3}.o-nights{display:none!important}
 #request{display:none!important}

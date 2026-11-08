@@ -398,8 +398,9 @@ html:not([data-live]) .o-next{display:none}
 .rc-l{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:9px}
 .rc-l li{display:grid;grid-template-columns:30px 1fr auto;align-items:baseline;gap:8px;font-size:14px;letter-spacing:.04em;text-transform:uppercase}
 .rc-l li span:first-child{color:#7a6e5d}.rc-l li span:last-child{color:var(--red);font-weight:500}
-.rc-t{display:flex;justify-content:space-between;align-items:baseline;border-top:2px dashed #d8ccb6;margin:16px 0 0;padding-top:14px;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
-.rc-t span:last-child{font-family:var(--f-display);font-size:22px;letter-spacing:0;text-transform:none;color:var(--red)}
+.rc-t{display:flex;justify-content:space-between;align-items:baseline;gap:14px;border-top:2px dashed #d8ccb6;margin:16px 0 0;padding-top:14px;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+.rc-t span:first-child{flex:none}
+.rc-t span:last-child{font-family:var(--f-display);font-size:clamp(15px,3.4vw,21px);line-height:1.05;text-align:right;letter-spacing:0;text-transform:none;color:var(--red)}
 .rc-bar{display:flex;gap:2px;height:42px;justify-content:center;margin:18px 0 8px}.rc-bar i{background:var(--ink);display:block}
 .rc-f{text-align:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7a6e5d;margin:0}
 @media (max-width:720px){.ticket.rcpt{padding:22px 20px 30px}.rc-l li{font-size:13px}}
@@ -429,7 +430,7 @@ html:not([data-live]) .o-next{display:none}
         <p class="lede">Just arrived? Three ways to go out in Perugia. Only one ticks every box.</p>
         <div class="ctas">
           <a class="btn" href="/#request" data-req>Request a place</a>
-          <a class="ask" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">New here? Ask us</a>
+          <a class="ask" href="#how">How it works</a>
         </div>
       </div>
       <a class="ticket rcpt" href="/#request" data-req aria-label="Request a place: what a night includes">
