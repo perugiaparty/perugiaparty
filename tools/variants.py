@@ -171,7 +171,6 @@ IT = [
      'Stanotte si balla. Domani non ricordiamo. <span>Poi diventa la notte più bella di sempre.</span>'),
     # live texts from the script
     ('ev.sold_out ? "Join the waitlist" : a.dataset.label', 'ev.sold_out ? "Entra in lista d’attesa" : a.dataset.label'),
-    ('mb.textContent = ev.sold_out ? "Join the waitlist" : "Request a place"', 'mb.textContent = ev.sold_out ? "Entra in lista d’attesa" : "Richiedi un posto"'),
     ('<span class="hm-red" id="proof">Invite only</span>', '<span class="hm-red" id="proof">Solo su invito</span>'),
     ('"Join the waitlist" : "Request a place"', '"Entra in lista d’attesa" : "Richiedi un posto"'),
     ('"Join the waitlist" : "Send request"', '"Entra in lista d’attesa" : "Invia richiesta"'),
