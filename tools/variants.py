@@ -90,9 +90,9 @@ build("/erasmus", "en", COMMON_HEAD("/erasmus", "Erasmus parties in Perugia · P
 # ---------- Italiano: the whole homepage in Italian, without the FAQ
 def italian_post(s):
     # the receipt, in Italian
-    for a, b in ((">Student night", ">Serata studenti"), (">Real DJs<", ">DJ veri<"),
-                 (">In the centre<", ">In centro<"), (">Till late<", ">Fino a tardi<"), (">New friends<", ">Gente nuova<"),
-                 (">Best night of the month<", ">La notte del mese<"), (">Total<", ">Totale<"), (">Student price<", ">Prezzo studenti<"),
+    for a, b in ((">Student night", ">Serata studenti"), (">REAL DJS<", ">DJ VERI<"),
+                 (">CENTRAL LOCATION<", ">IN CENTRO<"), (">ALL NIGHT<", ">TUTTA LA NOTTE<"),
+                 (">Total<", ">Totale<"), (">Student price<", ">Prezzo studenti<"),
                  (">YES<", ">SÌ<"), (">FREE<", ">GRATIS<"), (">INCL.<", ">INCL.<"),
                  ('aria-label="Request a place: what a night includes"', 'aria-label="Richiedi un posto: cosa include la serata"')):
         s = s.replace(a, b)

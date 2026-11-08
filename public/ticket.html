@@ -376,7 +376,8 @@ h1{font-size:clamp(40px,8vw,64px)}
 .rc-sub{text-align:center;margin:0 0 8px;font-size:11.5px;color:#666;letter-spacing:.12em}
 .rc-c{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;border:0;background:none;padding:11px 0;border-bottom:1px dotted #cfc8bb;color:#111;font:inherit;text-align:left;cursor:pointer}
 .rc-c span{font-size:11px;color:#666;letter-spacing:.12em}
-.rc-c b{font-weight:500;text-align:right;overflow-wrap:anywhere;text-transform:none;letter-spacing:.02em}
+.rc-c b{font-weight:500;text-align:right;text-transform:none;letter-spacing:0;font-size:clamp(11px,3.1vw,13.5px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc-c.wrap b{white-space:normal;overflow-wrap:anywhere}
 .rc-c i{font-style:normal;font-size:10px;letter-spacing:.1em;color:#7a7268;border:1px solid #d9d2c4;border-radius:7px;padding:4px 8px;white-space:nowrap}
 .rc-c i::after{content:"COPY"}
 .rc-c.got i{background:#12a150;border-color:#12a150;color:#fff}
@@ -384,12 +385,14 @@ h1{font-size:clamp(40px,8vw,64px)}
 .rc-c.plain{grid-template-columns:auto 1fr;cursor:default}
 .rc-c:active{background:#f3efe4}
 .rc-tot.got b{color:#12a150}
-.rc-dl{margin-top:14px;text-align:center;font-family:var(--f-body);text-transform:none;letter-spacing:0;font-size:13.5px;color:#444}
-.rc-dl.late{color:var(--red);font-weight:700}
-.rc-dl span{font-weight:800}
+.rc-dl{margin-top:16px;text-align:left;font-family:var(--f-body);text-transform:none;letter-spacing:0;color:var(--red);display:grid;gap:2px}
+.rc-dl .k{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#8a7e6c}
+.rc-dl b{font-family:var(--f-mono);font-size:19px;font-weight:500;color:var(--red);font-variant-numeric:tabular-nums}
+.rc-dl.late b{font-size:15px}
 #pay-all{width:100%;justify-content:center;margin-top:4px}
-.pay-info{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:6px;font-size:14px;color:var(--muted);line-height:1.45}
-.pay-info b{color:var(--ink)}.pay-info a{color:var(--ink);font-weight:700}
+.tipthx{display:grid;gap:4px;padding:18px 20px}
+.tipthx b{font-size:17px}
+.tipthx span{font-size:14px;color:var(--muted)}
 .rc-f{text-align:center;margin:0;line-height:1.8}
 /* when & where: the first thing a guest needs */
 .ww{background:var(--ink);color:var(--cream);border-radius:22px;padding:6px 22px 20px;margin:16px 0}
@@ -438,10 +441,11 @@ if (token) { const c = document.getElementById("nav-cta"); c.textContent = "My t
 function payLeftHTML(dl){
   const ms = dl - Date.now();
   const when = new Date(dl).toLocaleString("en-GB", { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" });
-  if (ms <= 0) return `Your time to pay is up.`;
-  const m = Math.floor(ms / 60000), dd = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mm = m % 60;
-  const txt = dd >= 2 ? `${dd} days` : dd === 1 ? `1 day ${h} h` : h ? `${h} h ${mm} min` : `${mm} min`;
-  return `Pay within <span>${txt}</span><br><small style="font-weight:500;opacity:.75">Before ${when}</small>`;
+  if (ms <= 0) return `<span class="k">Pay before</span><b>Your time to pay is up.</b>`;
+  const t = Math.floor(ms / 1000), dd = Math.floor(t / 86400), h = Math.floor(t / 3600) % 24, m = Math.floor(t / 60) % 60, sec = t % 60;
+  const p = n => String(n).padStart(2, "0");
+  const clock = (dd ? dd + "d " : "") + p(h) + ":" + p(m) + ":" + p(sec);
+  return `<span class="k">Pay before ${when}</span><b>${clock}</b>`;
 }
 function payRow(k, shown, value, key){
   if (!value) return `<div class="prow off"><span class="pk">${k}</span><span class="pv">${esc(shown)}</span></div>`;
@@ -776,6 +780,7 @@ function decorate(d){
     if (h) h.insertAdjacentHTML("afterend", prioHTML("Priority", d.status === "waitlist" ? "You came before, so you are first in line when a place opens up." : "You came before, so we look at your request before the new ones."));
   }
   if (d.next) P.insertAdjacentHTML("afterbegin", nextHTML(d) + inviteHTML(d)); // older ticket: the next party comes first
+  else if (d.status === "approved") { /* paying: nothing else on the screen */ }
   else if (d.ref) P.insertAdjacentHTML("beforeend", refHTML(d));
   else if (d.invite) P.insertAdjacentHTML("beforeend", inviteHTML(d));
   const again = $("again");
@@ -864,11 +869,13 @@ function receiptHTML(d, tierName, tip, country){
   return `<section class="rcpt" aria-label="Your receipt">
     <div class="rc-h"><b>PerugiaParty</b><span>${esc(d.event || "")}${d.date_label ? " · " + esc(d.date_label) : ""}</span></div>
     <div class="rc-d"></div>
-    ${line("1X", "OPEN BAR + DJS", "INCL.")}
+    ${line("1X", "OPEN BAR", "INCL.")}
+    ${line("1X", "MUSIC", "INCL.")}
+    ${line("1X", "ALL NIGHT", "INCL.")}
     ${line("1X", "TICKET · " + esc(String(tierName).toUpperCase()), euro(d.price))}
-    <div class="rc-l rc-tip"><span class="q">+</span><span class="i">SUPPORT US<button class="rc-i" type="button" id="tip-i" aria-expanded="false" aria-controls="tip-info" aria-label="What this goes to">i</button></span>
+    <div class="rc-l rc-tip"><span class="q" id="tip-q">${tip ? tip + "X" : "+"}</span><span class="i">SUPPORT US<button class="rc-i" type="button" id="tip-i" aria-expanded="false" aria-controls="tip-info" aria-label="What this goes to">i</button></span>
       <span class="v rc-step"><button type="button" data-tip="-1" aria-label="One euro less" ${tip ? "" : "disabled"}>−</button><b id="tip-v">${euro(tip)}</b><button type="button" data-tip="1" aria-label="One euro more">+</button></span></div>
-    <p class="rc-info" id="tip-info" hidden>It goes to the people who make the night: the bar, the DJs, the door, the clean-up at 05:00. They are all volunteers.</p>
+    <p class="rc-info" id="tip-info" hidden>It goes to the people who make the night: the bar, the DJs, the door. They are all volunteers.</p>
     <div class="rc-d"></div>
     <button class="rc-tot" type="button" id="tot-copy" data-copy="${String(total).replace(".", ",")}"><span>TOTAL</span><b id="tip-tot">${euro(total)}</b></button>
     <div class="rc-d"></div>
@@ -876,12 +883,12 @@ function receiptHTML(d, tierName, tip, country){
     ${copyLine("IBAN", d.iban ? d.iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim() : "—", d.iban ? d.iban.replace(/\s+/g, "") : "")}
     ${copyLine("NAME", d.beneficiary || "—", d.beneficiary || "")}
     ${country ? copyLine("BANK", country, country.replace(/ \([A-Z]{2}\)$/, "")) : ""}
-    ${copyLine("REFERENCE", d.reference, d.reference)}
+    ${copyLine("REFERENCE", d.reference, d.reference, true)}
     ${d.deadline ? `<div class="rc-dl${d.deadline < Date.now() ? " late" : ""}" id="pay-left" data-dl="${d.deadline}">${payLeftHTML(d.deadline)}</div>` : ""}
   </section>`;
 }
-function copyLine(k, shown, value){
-  return value ? `<button class="rc-c" type="button" data-copy="${esc(value)}"><span>${k}</span><b>${esc(shown)}</b><i aria-hidden="true"></i></button>` : `<div class="rc-c plain"><span>${k}</span><b>${esc(shown)}</b></div>`;
+function copyLine(k, shown, value, wrap){
+  return value ? `<button class="rc-c${wrap ? " wrap" : ""}" type="button" data-copy="${esc(value)}"><span>${k}</span><b>${esc(shown)}</b><i aria-hidden="true"></i></button>` : `<div class="rc-c plain"><span>${k}</span><b>${esc(shown)}</b></div>`;
 }
 document.addEventListener("click", e => {
   const b = e.target.closest("#tip-i"); if (!b) return;
@@ -896,7 +903,7 @@ document.addEventListener("click", e => {
   window.__tip = Math.max(0, Math.min(50, (window.__tip || 0) + Number(b.dataset.tip)));
   const tip = window.__tip, total = (Number(d.price) || 0) + tip;
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  set("tip-v", euro(tip)); set("tip-tot", euro(total));
+  set("tip-v", euro(tip)); set("tip-tot", euro(total)); set("tip-q", tip ? tip + "X" : "+");
   const tc = document.getElementById("tot-copy"); if (tc) tc.dataset.copy = String(total).replace(".", ",");
   const minus = document.querySelector('[data-tip="-1"]'); if (minus) minus.disabled = !tip;
   const all = document.getElementById("pay-all"); if (all) all.dataset.copy = all.dataset.copy.replace(/^Amount: .*$/m, "Amount: " + euro(total));
@@ -960,16 +967,10 @@ function render(d){
         ${stepsHTML(2, "on-red")}</div>
       ${receiptHTML(d, tierName, tip, bankCountry)}
       <button class="btn pay-all" id="pay-all" type="button" data-copy="${esc(allText)}">Copy all payment details</button>
-      <ul class="pay-info">
-        <li><b>Instant transfer, please.</b> Your payment has to be with us before the party, or the place goes back to the list.</li>
-        <li><b>After paying:</b> nothing to send. Your ticket and the place appear here${d.verified ? " and we DM you" : ""}.</li>
-        ${bankCountry && ibanCC !== "IT" ? `<li><b>Foreign account:</b> an instant SEPA transfer in euro works from any European bank.</li>` : ""}
-        <li><b>Lost this page?</b> perugiaparty.com/ticket with code <b>${esc(d.vcode || d.code)}</b>.</li>
-        <li><b>Questions?</b> DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</li>
-      </ul>`;
+`;
     celebrate({ vcode: "ok-" + (d.code || "") }, 45);
     clearInterval(window.__payTimer);
-    window.__payTimer = setInterval(() => { const el = document.getElementById("pay-left"); if (!el) return clearInterval(window.__payTimer); const dl = Number(el.dataset.dl); el.classList.toggle("late", dl < Date.now()); el.innerHTML = payLeftHTML(dl); }, 30000);
+    window.__payTimer = setInterval(() => { const el = document.getElementById("pay-left"); if (!el) return clearInterval(window.__payTimer); const dl = Number(el.dataset.dl); el.classList.toggle("late", dl < Date.now()); el.innerHTML = payLeftHTML(dl); }, 1000);
   } else if (d.status === "paid" || d.status === "in") {
     const inside = d.status === "in", over = partyOver(d);
     P.innerHTML = `${inside && over ? thanksHTML(d, first) : `<div class="hype ${inside ? "" : "paid"}">
@@ -981,6 +982,7 @@ function render(d){
         ${d.crew ? "" : stepsHTML(inside ? 5 : 4, inside ? "" : "on-red")}
       </div>
       ${inside ? `<div class="inbar" role="status"><div><b>Checked in</b><span>${d.in_at ? "Entered at " + new Date(d.in_at).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) + ". " : ""}This ticket has been used.</span></div></div>` : ""}`}
+      ${!inside && !over && Number(d.tip) > 0 ? `<div class="card tipthx"><b>Thank you for the ${euro(Number(d.tip))}.</b><span>You supported the crew, and the whole team thanks you.</span></div>` : ""}
       ${!over ? whenWhereHTML(d) : ""}
       ${inside && !over ? programmeHTML(d) : ""}
       <div class="cine${inside ? "" : " shine"}${d.crew ? " crew" : ""}">${d.crew ? `<span class="crewband">Crew pass</span>` : ""}
