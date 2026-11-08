@@ -10,8 +10,8 @@ def build(path, lang, pairs, hero_art, hero_alt, post=None):
         if a not in s: miss.append(a[:60])
         s = s.replace(a, b)
     # hero: own illustration instead of the example ticket
-    s = re.sub(r'<a class="ticket[^"]*".*?</a>', f'<img class="hero-art" src="/ill/{hero_art}.svg" alt="{hero_alt}" width="360" height="200" fetchpriority="high">', s, count=1, flags=re.S)
-    s = s.replace('<link rel="preload" href="/logo.png" as="image">', f'<link rel="preload" href="/ill/{hero_art}.svg" as="image">')
+    if hero_art:
+        s = re.sub(r'<a class="ticket[^"]*".*?</a>', f'<img class="hero-art" src="/ill/{hero_art}.svg" alt="{hero_alt}" width="360" height="200" fetchpriority="high">', s, count=1, flags=re.S)
     s = s.replace("</style>", ".hero-art{display:block;width:100%;height:auto;border-radius:24px;box-shadow:12px 12px 0 var(--red);transform:rotate(-2deg)}\n</style>", 1)
     if post: s = post(s)
     # structured data: this page + its own visible FAQ
@@ -61,18 +61,18 @@ ER_FAQ = [
     ("What do I bring?", "Your ticket QR on your phone and a photo ID (passport or ID card). You must be 18+."),
 ]
 def erasmus_post(s):
-    Y, N, M = '<b class="y"></b>', '<b class="n"></b>', '<b class="m">–</b>'
-    KIT = [("Student prices", N, M, Y), ("Open bar", N, N, Y), ("Walk there from the centre", N, Y, Y),
-           ("Inside, not in the cold", Y, N, Y), ("Good music, every time", M, N, Y), ("Open till late", Y, N, Y)]
+    Y, N = '<b class="y"></b>', '<b class="n"></b>'
+    KIT = [("Student prices", N, N, Y), ("Open bar", N, N, Y), ("Reachable from the centre", N, Y, Y),
+           ("Inside, not in the cold", Y, N, Y), ("Good music, every time", N, N, Y), ("Open till late", Y, N, Y),
+           ("Everything in English", N, N, Y)]
     rows = "".join(f'<tr><th scope="row">{k}</th><td>{c}</td><td>{z}</td><td class="pp">{p}</td></tr>' for k, c, z, p in KIT)
     guide = f"""<div class="wrap o-new"><section class="sec kitw" id="new" aria-labelledby="new-h">
       <div><p class="hd-k2">New in Perugia?</p><h2 id="new-h">Your Erasmus <span>starter kit.</span></h2>
       <p class="kit-sub">Three ways to go out in Perugia. Only one ticks every box. You're welcome.</p></div>
       <div class="kit"><div class="kit-t"><span>Starter kit</span><span>Perugia · 2026</span></div>
         <table><thead><tr><th></th><th scope="col">Club</th><th scope="col">Centro</th><th scope="col" class="pp">PerugiaParty</th></tr></thead><tbody>{rows}</tbody></table>
-        <p class="kit-legend"><b class="y"></b> yes <b class="m"></b> sometimes <b class="n"></b> no</p>
-        <p class="kit-plus"><b>Plus</b> everything in English · pay from any European bank · every guest checked on Instagram</p>
-        <a class="kit-help" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Still lost? Ask us on Instagram</a>
+        <div class="kit-cta"><a class="btn" href="#request" data-req>Request a place</a>
+        <a class="kit-help" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">Still lost? Ask us</a></div>
       </div>
     </section></div>
 """
@@ -89,18 +89,19 @@ def erasmus_post(s):
 .kit tbody th{text-align:left;font-weight:800}
 .kit thead th{font-family:var(--f-mono);font-weight:500;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7a6e5d}
 .kit thead th.pp{color:var(--red)}
-.kit td.pp{background:#fdf0ec}
-.kit b.y,.kit b.n,.kit b.m{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:middle}
-.kit b.y{background:var(--red)}.kit b.n{border:2px solid #d8ccb6}.kit b.m{background:#c9bca6;transform:scale(.6)}
-.kit-legend{display:flex;gap:8px;align-items:center;font-size:12px;color:#7a6e5d;margin:12px 0 0}.kit-legend b{width:11px!important;height:11px!important;margin-left:6px}
-.kit-plus{margin:16px 0 0;font-size:14px;color:#5f5547}.kit-plus b{color:var(--red);margin-right:4px}
-.kit-help{display:inline-block;margin-top:14px;font-weight:800;color:var(--red-deep)}
+.kit td.pp,.kit thead th.pp{background:#fbe4df}
+.kit b{display:inline-block;width:18px;height:18px;position:relative;vertical-align:middle}
+.kit b.y{border-radius:50%;background:var(--red)}
+.kit b.n::before,.kit b.n::after{content:"";position:absolute;left:50%;top:1px;width:2.4px;height:16px;border-radius:2px;background:#cbbfa9}
+.kit b.n::before{transform:translateX(-50%) rotate(45deg)}.kit b.n::after{transform:translateX(-50%) rotate(-45deg)}
+.kit-cta{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:20px}
+.kit-help{font-weight:800;color:var(--red-deep)}
 @media (max-width:820px){.kitw{grid-template-columns:1fr}.kit th,.kit td{padding:10px 3px;font-size:14px}.kit thead th{font-size:9.5px;letter-spacing:.04em}}
 </style>""", 1)
     cta = """<div class="wrap o-go"><section class="go" aria-labelledby="go-h">
       <h2 id="go-h">Ready for your <span>first night?</span></h2>
       <p>The next date and the request form are on the main page.</p>
-      <div class="go-b"><a class="btn" href="/#request">Request a place</a><a class="btn outline" href="/">Go to PerugiaParty</a></div>
+      <div class="go-b"><a class="btn" href="#request" data-req>Request a place</a><a class="btn outline" href="/">Go to PerugiaParty</a></div>
     </section></div>
 """
     s = s.replace('<div class="wrap o-why">', cta + '<div class="wrap o-why">', 1)
@@ -169,16 +170,32 @@ build("/erasmus", "en", COMMON_HEAD("/erasmus", "Erasmus parties in Perugia · P
 
 # Italian page: the comparison is the hook, so it comes right after the title
 def it_post(s):
-    s = re.sub(r'<img class="hero-art"[^>]*>', '', s, count=1)
     s = re.sub(r'\s*<div class="ctas">.*?</div>', '', s, count=1, flags=re.S)  # no button under the title
-    s = s.replace('<link rel="preload" href="/ill/hero-it.svg" as="image">', "")
+    # the receipt, in Italian
+    for a, b in (("Student night", "Serata studenti"), (">Open bar<", ">Open bar<"), (">Real DJs<", ">DJ veri<"),
+                 (">In the centre<", ">In centro<"), (">Till late<", ">Fino a tardi<"), (">New friends<", ">Gente nuova<"),
+                 (">Best night of the month<", ">La notte del mese<"), (">Total<", ">Totale<"), (">Student price<", ">Prezzo studenti<"),
+                 (">YES<", ">SÌ<"), (">FREE<", ">GRATIS<"),
+                 ("Grazie · see you on the dancefloor", "Grazie · ci vediamo in pista"),
+                 ('aria-label="Request a place: what a night includes"', 'aria-label="Richiedi un posto: cosa include la serata"')):
+        s = s.replace(a, b)
     cta = """<div class="wrap o-go"><section class="go" aria-labelledby="go-h">
       <h2 id="go-h">Pronto per la <span>prossima notte?</span></h2>
       <p>La prossima data e la richiesta sono sulla pagina principale.</p>
-      <div class="go-b"><a class="btn" href="/#request">Richiedi un posto</a><a class="btn outline" href="/">Vai a PerugiaParty</a></div>
+      <div class="go-b"><a class="btn" href="#request" data-req>Richiedi un posto</a><a class="btn outline" href="/">Vai a PerugiaParty</a></div>
     </section></div>
 """
     s = s.replace('<div class="wrap o-main">', cta + '<div class="wrap o-main">', 1)
+    FATTI = [("Open bar vero", "Bevi quanto vuoi. Non due drink e poi paghi."),
+             ("DJ veri", "Niente playlist a caso dal telefono."),
+             ("Lista privata", "Chiedi il posto, ti rispondiamo su Instagram."),
+             ("In centro", "Ci arrivi a piedi. Torni a casa a piedi.")]
+    fatti = "".join(f'<li><b>{h}</b><span>{x}</span></li>' for h, x in FATTI)
+    band = f'''<section class="band-ink o-fat"><div class="wrap"><div class="fat">
+      <h2>Non la <span>solita</span> festa universitaria.</h2>
+      <ul>{fatti}</ul></div></div></section>
+'''
+    s = s.replace('<div class="wrap o-go">', band + '<div class="wrap o-go">', 1)
     s = s.replace('href="#request"', 'href="/#request"').replace('a.href = "#request"', 'a.href = "/#request"')
     s = s.replace("</style>", """.o-go{order:3}.o-main,.o-faq,.o-nights{display:none!important}
 .go{text-align:center;padding:clamp(40px,7vw,80px) 0 clamp(56px,8vw,96px)}
@@ -186,7 +203,17 @@ def it_post(s):
 .go p{color:var(--muted);margin:0 auto 24px;max-width:40ch}
 .go-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 </style>""", 1)
-    s = s.replace("</style>", """.hero{grid-template-columns:1fr!important;padding-block:clamp(36px,6vw,72px) clamp(40px,6vw,72px)!important;gap:0!important}
+    s = s.replace('href="#request"', 'href="/#request"').replace('a.href = "#request"', 'a.href = "/#request"')
+    s = s.replace("</style>", """.o-fat{order:3}.o-go{order:4}
+.band-ink{background:var(--ink);color:var(--cream)}
+.fat{padding-block:clamp(40px,6vw,72px)}
+.fat h2{font-size:clamp(30px,4.4vw,52px);line-height:.98;margin:0 0 clamp(22px,3vw,34px);max-width:16ch}.fat h2 span{color:#ff4a3d}
+.fat ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#2a2420;border:1px solid #2a2420;border-radius:18px;overflow:hidden}
+.fat li{background:var(--ink);padding:20px}
+.fat li b{display:block;font-size:18px;font-weight:800;margin-bottom:6px}
+.fat li span{color:#b9ab98;font-size:15px;line-height:1.45}
+@media (max-width:820px){.fat ul{grid-template-columns:1fr 1fr}}@media (max-width:480px){.fat ul{grid-template-columns:1fr}}
+.hero{grid-template-columns:1fr!important;padding-block:clamp(36px,6vw,72px) clamp(40px,6vw,72px)!important;gap:0!important}
 .hero .lede{max-width:46ch}
 .o-why #why{padding-top:clamp(28px,4vw,44px)}
 .o-why .why-big{font-size:clamp(28px,4vw,48px);margin-bottom:clamp(18px,3vw,32px)}
@@ -281,5 +308,5 @@ IT = [
 build("/it", "it", COMMON_HEAD("/it", "Feste universitarie ed Erasmus a Perugia · PerugiaParty",
         "Feste private per studenti universitari ed Erasmus nel centro di Perugia. Open bar, DJ e gente nuova da conoscere, a prezzo studenti. 18+.",
         "Feste universitarie a Perugia · PerugiaParty", "Serata da club. Vibe da centro. Il meglio dei due mondi. Open bar, prezzi bassi. 18+.", "it_IT") + IT,
-      "hero-it", "Perugia di notte, con una festa accesa", it_post)
+      None, "", it_post)
 print("built /it and /erasmus")

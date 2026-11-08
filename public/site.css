@@ -101,12 +101,12 @@ label small{font-weight:400;color:var(--muted)}
 .oops .acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px}
 
 footer{background:var(--ink);color:var(--cream)}
-footer .wrap{padding-block:44px 40px;display:grid;grid-template-columns:auto 1fr;gap:18px 32px;align-items:center}
+footer .wrap{padding-block:44px 40px;display:grid;grid-template-columns:auto 1fr;gap:14px 32px;align-items:center}
 footer .foot-mark{height:34px;margin:0}
 footer .sign{grid-column:1/-1;grid-row:2;font-family:var(--f-body);font-size:14px;line-height:1.5;color:var(--muted-dark);max-width:none;margin:0}
 footer .sign span{color:var(--muted-dark)}
 footer .meta{display:contents}
-footer .meta > p{grid-column:1/-1;grid-row:3;font-size:12px;color:#6f665c;margin:0;padding-top:16px;border-top:1px solid #2a2420}
+footer .meta > p{grid-column:1/-1;grid-row:3;font-size:12px;color:#6f665c;margin:0}
 footer nav{grid-column:2;grid-row:1;justify-self:end;margin:0;gap:22px}
 footer nav a{font-size:14px;color:#cfc3ae}
 @media (max-width:640px){footer .wrap{grid-template-columns:1fr}footer nav{grid-column:1;grid-row:auto;justify-self:start;gap:16px}footer .sign{grid-row:auto}footer .meta > p{grid-row:auto}}
