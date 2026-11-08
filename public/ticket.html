@@ -372,7 +372,9 @@ h1{font-size:clamp(40px,8vw,64px)}
 .rc-c.plain{grid-template-columns:auto 1fr;cursor:default}
 .rc-c:active{background:#f3efe4}
 .rc-tot.got b{color:#12a150}
-.rc-dl{margin-top:12px;text-align:center;font-family:var(--f-body);text-transform:none;letter-spacing:0;font-size:13.5px;color:#444}
+.rc-dl{margin-top:14px;text-align:center;font-family:var(--f-body);text-transform:none;letter-spacing:0;font-size:13.5px;color:#444}
+.rc-dl.late{color:var(--red);font-weight:700}
+.rc-dl span{font-weight:800}
 #pay-all{width:100%;justify-content:center;margin-top:4px}
 .pay-info{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:6px;font-size:14px;color:var(--muted);line-height:1.45}
 .pay-info b{color:var(--ink)}.pay-info a{color:var(--ink);font-weight:700}
@@ -822,18 +824,18 @@ function receiptHTML(d, tierName, tip, country){
     <div class="rc-d"></div>
     ${line("1X", "OPEN BAR + DJS", "INCL.")}
     ${line("1X", "TICKET · " + esc(String(tierName).toUpperCase()), euro(d.price))}
-    <div class="rc-l rc-tip"><span class="q">+</span><span class="i">SUPPORT THE CREW<button class="rc-i" type="button" id="tip-i" aria-expanded="false" aria-controls="tip-info" aria-label="What this goes to">i</button></span>
+    <div class="rc-l rc-tip"><span class="q">+</span><span class="i">SUPPORT US<button class="rc-i" type="button" id="tip-i" aria-expanded="false" aria-controls="tip-info" aria-label="What this goes to">i</button></span>
       <span class="v rc-step"><button type="button" data-tip="-1" aria-label="One euro less" ${tip ? "" : "disabled"}>−</button><b id="tip-v">${euro(tip)}</b><button type="button" data-tip="1" aria-label="One euro more">+</button></span></div>
     <p class="rc-info" id="tip-info" hidden>It goes to the people who make the night: the bar, the DJs, the door, the clean-up at 05:00. They are all volunteers.</p>
     <div class="rc-d"></div>
     <button class="rc-tot" type="button" id="tot-copy" data-copy="${String(total).replace(".", ",")}"><span>TOTAL</span><b id="tip-tot">${euro(total)}</b></button>
     <div class="rc-d"></div>
-    <p class="rc-sub">Pay by bank transfer</p>
+    <p class="rc-sub">Pay by instant bank transfer</p>
     ${copyLine("IBAN", d.iban ? d.iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim() : "—", d.iban ? d.iban.replace(/\s+/g, "") : "")}
     ${copyLine("NAME", d.beneficiary || "—", d.beneficiary || "")}
     ${country ? copyLine("BANK", country, country.replace(/ \([A-Z]{2}\)$/, "")) : ""}
     ${copyLine("REFERENCE", d.reference, d.reference)}
-    ${d.deadline ? `<div class="rc-dl" id="pay-left" data-dl="${d.deadline}">${payLeftHTML(d.deadline)}</div>` : ""}
+    ${d.deadline ? `<div class="rc-dl${d.deadline < Date.now() ? " late" : ""}" id="pay-left" data-dl="${d.deadline}">${payLeftHTML(d.deadline)}</div>` : ""}
   </section>`;
 }
 function copyLine(k, shown, value){
@@ -881,7 +883,7 @@ function render(d){
         <h1>You're on the list, ${first}.</h1>
         ${wl ? `<span class="wl-tag">Waitlist</span>` : ""}
         <p class="lead">${!d.verified ? `One more step: send us your code on Instagram, then we look at your request for <b>${esc(d.event)}</b>.`
-          : wl ? `<b>${esc(d.event)}</b> is full. If a place opens up, this page shows your price.`
+          : wl ? `<b>${esc(d.event)}</b> is full. If a place opens up we DM you, and your price appears here.`
           : `We're checking your request for <b>${esc(d.event)}</b>. You'll see your price here.`}</p>
         ${stepsHTML(1)}
       </div>
@@ -917,15 +919,15 @@ function render(d){
       ${receiptHTML(d, tierName, tip, bankCountry)}
       <button class="btn pay-all" id="pay-all" type="button" data-copy="${esc(allText)}">Copy all payment details</button>
       <ul class="pay-info">
+        <li><b>Instant transfer, please.</b> Your payment has to be with us before the party, or the place goes back to the list.</li>
         <li><b>After paying:</b> nothing to send. Your ticket and the place appear here${d.verified ? " and we DM you" : ""}.</li>
-        <li><b>How long:</b> instant transfer right away, normal 1–2 working days.</li>
-        ${bankCountry && ibanCC !== "IT" ? `<li><b>Foreign account:</b> normal SEPA transfer in euro.</li>` : ""}
+        ${bankCountry && ibanCC !== "IT" ? `<li><b>Foreign account:</b> an instant SEPA transfer in euro works from any European bank.</li>` : ""}
         <li><b>Lost this page?</b> perugiaparty.com/ticket with code <b>${esc(d.vcode || d.code)}</b>.</li>
         <li><b>Questions?</b> DM <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">@perugiaparty</a>.</li>
       </ul>`;
     celebrate({ vcode: "ok-" + (d.code || "") }, 45);
     clearInterval(window.__payTimer);
-    window.__payTimer = setInterval(() => { const el = document.getElementById("pay-left"); if (!el) return clearInterval(window.__payTimer); el.innerHTML = payLeftHTML(Number(el.dataset.dl)); }, 30000);
+    window.__payTimer = setInterval(() => { const el = document.getElementById("pay-left"); if (!el) return clearInterval(window.__payTimer); const dl = Number(el.dataset.dl); el.classList.toggle("late", dl < Date.now()); el.innerHTML = payLeftHTML(dl); }, 30000);
   } else if (d.status === "paid" || d.status === "in") {
     const inside = d.status === "in", over = partyOver(d);
     P.innerHTML = `${inside && over ? thanksHTML(d, first) : `<div class="hype ${inside ? "" : "paid"}">
@@ -952,11 +954,11 @@ function render(d){
       </div>
       ${!inside && !over ? programmeHTML(d) : ""}
       ${over ? "" : `<div class="actions">
-        <button class="btn wide" type="button" id="pdf">${IN_APP ? "Save ticket" : "Save ticket (PDF)"}</button>
         ${d.starts_at ? `<button class="btn outline" type="button" id="cal">Calendar</button>` : ""}
         <button class="btn outline" type="button" id="share">Tell friends</button>
+        <button class="btn outline wide" type="button" id="pdf">${IN_APP ? "Save a copy" : "Save a copy (PDF)"}</button>
       </div>
-      <p class="note">Bring your photo ID. Save the ticket in case there's no signal.</p>`}`;
+      <p class="note">Your QR stays on this page: open the link at the door. Bring your photo ID.</p>`}`;
     if (!inside && !over) unlocked(d, first);
     try { drawQR(d.qr, $("qr")); } catch (e) { $("qr").parentElement.innerHTML = `<p style="color:#111;padding:20px;font-family:var(--f-mono)">${esc(d.code)}</p>`; }
     if ($("pdf")) $("pdf").addEventListener("click", e => downloadTicket(d, e.currentTarget));
