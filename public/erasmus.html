@@ -412,7 +412,6 @@ html:not([data-live]) .o-next{display:none}
   .side .mini{transform:none;filter:drop-shadow(8px 8px 0 var(--red));padding:22px 20px 28px}
 }
 .o-why{order:1}.o-main{order:2}.o-faq{order:3}.o-nights{display:none!important}
-#request{display:none!important}
 #how{border-top:1.5px solid var(--line)}
 #faq h2 span{color:var(--red)}
 .ask{font-weight:800;color:#ff8a7d;text-underline-offset:3px;align-self:center}
@@ -423,7 +422,7 @@ html:not([data-live]) .o-next{display:none}
   <div class="wrap">
     <a class="mark" href="#top"><img src="/brand/wordmark-2.png" alt="PerugiaParty" width="851" height="160"></a>
     <nav aria-label="Main">
-      <a class="btn" id="nav-cta" href="/#request" data-req>Request a place</a>
+      <a class="btn" id="nav-cta" href="#request" data-req>Request a place</a>
     </nav>
   </div>
 </header>
@@ -436,11 +435,11 @@ html:not([data-live]) .o-next{display:none}
         <h1 style="margin-top:22px">Erasmus parties <em>in Perugia.</em></h1>
         <p class="lede">Just arrived? Three ways to go out in Perugia. Only one ticks every box.</p>
         <div class="ctas">
-          <a class="btn" href="/#request" data-req>Request a place</a>
+          <a class="btn" href="#request" data-req>Request a place</a>
           <a class="ask" href="#how">How it works</a>
         </div>
       </div>
-      <a class="ticket rcpt" href="/#request" data-req aria-label="Request a place: what a night includes">
+      <a class="ticket rcpt" href="#request" data-req aria-label="Request a place: what a night includes">
         <p class="rc-h">PerugiaParty</p>
         <p class="rc-s" id="tk-sub">Student night · Perugia</p>
         <ul class="rc-l"><li><span>1x</span><span>Open bar</span><span>INCL.</span></li><li><span>1x</span><span>Real DJs</span><span>INCL.</span></li><li><span>1x</span><span>In the centre</span><span>YES</span></li><li><span>1x</span><span>Till late</span><span>YES</span></li><li><span>1x</span><span>New friends</span><span>FREE</span></li><li><span>1x</span><span>Best night of the month</span><span>YES</span></li></ul>
@@ -612,7 +611,7 @@ html:not([data-live]) .o-next{display:none}
   </div>
 </footer>
 
-<a class="mbar" id="mbar" href="/#request" hidden>Request a place</a>
+<a class="mbar" id="mbar" href="#request" hidden>Request a place</a>
 
 <div class="saveov" id="saveov" role="dialog" aria-modal="true" aria-labelledby="save-h" hidden>
   <div class="savebox">
@@ -662,7 +661,7 @@ function applyOpen(ev){
   document.querySelectorAll("[data-req]").forEach(a => {
     if (!a.dataset.label) a.dataset.label = a.textContent;
     if (closed) { a.href = "https://www.instagram.com/perugiaparty/"; a.target = "_blank"; a.rel = "noopener"; if (a.classList.contains("btn")) a.textContent = a.id === "nav-cta" ? "Instagram" : "Follow on Instagram"; }
-    else { a.href = "/#request"; a.removeAttribute("target"); if (a.classList.contains("btn")) a.textContent = ev.sold_out ? "Join the waitlist" : a.dataset.label; }
+    else { a.href = "#request"; a.removeAttribute("target"); if (a.classList.contains("btn")) a.textContent = ev.sold_out ? "Join the waitlist" : a.dataset.label; }
   });
 }
 function renderNext(ev){
@@ -676,7 +675,7 @@ function renderNext(ev){
   const ts = $("tk-sub"); if (ts && ev.name) ts.textContent = "Next: " + ev.name + (ev.date_label ? " · " + ev.date_label : "");
   const price = ev.price ? "From " + euro(ev.price.min) : null;
   const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]].filter(f => f[1]);
-  const cta = ev.requests_open ? `<a class="btn" href="/#request">${ev.sold_out ? "Join the waitlist" : "Request a place"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram</a>`;
+  const cta = ev.requests_open ? `<a class="btn" href="#request">${ev.sold_out ? "Join the waitlist" : "Request a place"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram</a>`;
   el.classList.toggle("has-poster", !!ev.poster);
   const art = ev.poster ? "" : `<img class="next-art" src="/ill/${ev.sold_out ? "waitlist" : "hero-party"}.svg" alt="" width="360" height="200">`;
   el.innerHTML = `<div class="next-main"><span class="status"><i></i>${statusLine(ev)}</span>

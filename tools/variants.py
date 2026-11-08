@@ -54,12 +54,10 @@ def erasmus_post(s):
                   '<a class="btn" href="#request" data-req>Request a place</a>\n          <a class="ask" href="#how">How it works</a>\n        </div>', 1)
     # three options, then how it works, then the questions
     s = s.replace("</style>", """.o-why{order:1}.o-main{order:2}.o-faq{order:3}.o-nights{display:none!important}
-#request{display:none!important}
 #how{border-top:1.5px solid var(--line)}
 #faq h2 span{color:var(--red)}
 .ask{font-weight:800;color:#ff8a7d;text-underline-offset:3px;align-self:center}
 </style>""", 1)
-    s = s.replace('href="#request"', 'href="/#request"').replace('a.href = "#request"', 'a.href = "/#request"')
     # the questions a newcomer actually has
     a = s.index('<div class="faq">', s.index('id="faq"')); b = s.index('<details id="rules">', a)
     s = s[:a] + '<div class="faq">\n' + "".join(f"        <details><summary>{q}</summary><p>{x}</p></details>\n" for q, x in ER_FAQ) + "        " + s[b:]
