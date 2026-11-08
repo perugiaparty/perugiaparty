@@ -195,18 +195,19 @@ h1{font-size:clamp(40px,8vw,64px)}
 .hype .count div{background:var(--ink-2);border-radius:14px;padding:10px 4px;min-width:0;text-align:center}
 .hype .count b{display:block;font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1;color:var(--cream);font-variant-numeric:tabular-nums}
 .hype .count span{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
-.cine{position:relative;background:#111;color:#f5f5f0;border-radius:10px;padding:40px 24px 36px;display:grid;gap:16px;justify-items:center;text-align:center;box-shadow:10px 10px 0 var(--red)}
+.cine{position:relative;background:#111;color:#f5f5f0;border-radius:10px;padding:34px 22px 30px;display:grid;gap:13px;justify-items:center;text-align:center;box-shadow:10px 10px 0 var(--red)}
 .cine .holes{position:absolute;left:14px;right:14px;height:12px;background:radial-gradient(circle,var(--cream) 4px,transparent 4.5px) 0 50%/20px 12px repeat-x}
 .cine .holes.t{top:10px}.cine .holes.b{bottom:10px}
-.cine .logo{width:240px;height:auto}
-.cine .ev{font-family:var(--f-display);font-size:32px;line-height:1.05;color:#f5f5f0}
-.cine .meta{color:#a9a9a2;font-size:15px}
+.cine .logo{width:170px;height:auto}
+.cine .ev{font-family:var(--f-display);font-size:26px;line-height:1.05;color:#f5f5f0}
+.cine .meta{color:#a9a9a2;font-size:14px}
 .cine .perf{position:relative;border-top:2px dashed #444;width:calc(100% + 48px);margin:4px -24px}
 .cine .perf::before,.cine .perf::after{content:"";position:absolute;top:-13px;width:24px;height:24px;border-radius:50%;background:var(--cream)}
 .cine .perf::before{left:-12px}.cine .perf::after{right:-12px}
-.cine .code{font-family:var(--f-mono);font-size:24px;letter-spacing:.1em;color:#f5f5f0}
-.cine .who{font-family:var(--f-mono);font-size:16px;color:#f5f5f0}
-.cine .qr{background:#f5f5f0}
+.cine .code{font-family:var(--f-mono);font-size:20px;letter-spacing:.06em;color:#f5f5f0}
+.cine .who{font-family:var(--f-mono);font-size:14px;color:#a9a9a2}
+.cine .qr{background:#f5f5f0;padding:14px;border-radius:12px;line-height:0}
+.cine .qr canvas{display:block;width:min(228px,58vw);height:auto;image-rendering:pixelated}
 .where{background:var(--red);color:var(--cream);border-radius:20px;padding:20px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
 .where p{font-size:20px;font-weight:700;margin-top:2px}
 .where .btn{background:var(--cream);border-color:var(--cream);color:var(--red)}
@@ -377,10 +378,11 @@ h1{font-size:clamp(40px,8vw,64px)}
 .pay-info b{color:var(--ink)}.pay-info a{color:var(--ink);font-weight:700}
 .rc-f{text-align:center;margin:0;line-height:1.8}
 /* when & where: the first thing a guest needs */
-.ww{background:var(--ink);color:var(--cream);border-radius:22px;padding:6px 20px 18px;margin:16px 0}
-.ww-r{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:14px 0;border-bottom:1px solid rgba(244,234,215,.14)}
+.ww{background:var(--ink);color:var(--cream);border-radius:22px;padding:6px 22px 20px;margin:16px 0}
+.ww-r:last-of-type{border-bottom:0;padding-bottom:4px}
+.ww-r{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:15px 0;border-bottom:1px solid rgba(244,234,215,.12)}
 .ww-r span{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#b9ab98;flex:none}
-.ww-r b{font-size:18px;font-weight:800;text-align:right;overflow-wrap:anywhere}
+.ww-r b{font-size:17px;font-weight:800;text-align:right;overflow-wrap:anywhere}
 .ww-r a{color:inherit;text-decoration:underline;text-underline-offset:3px}
 .ww-go{margin-top:14px;width:100%;justify-content:center}
 /* clean login: centred column, logo, no extra text */
@@ -475,19 +477,19 @@ async function ticketCanvas(d){
   x.fillStyle = "#f4ead7"; x.fillRect(0, 0, W, H);
   x.fillStyle = "#111"; x.beginPath(); x.roundRect ? x.roundRect(40, 40, W-80, H-80, 28) : x.rect(40, 40, W-80, H-80); x.fill();
   x.fillStyle = "#f4ead7"; for (let px = 90; px < W-60; px += 40) { x.beginPath(); x.arc(px, 70, 8, 0, 7); x.fill(); x.beginPath(); x.arc(px, H-70, 8, 0, 7); x.fill(); }
-  try { const logo = await loadImage("/brand/wordmark-4.png"); const lw = 720, lh = lw * logo.height / logo.width; x.drawImage(logo, (W-lw)/2, 290 - lh/2, lw, lh); } catch(e){}
+  try { const logo = await loadImage("/brand/wordmark-4.png"); const lw = 520, lh = lw * logo.height / logo.width; x.drawImage(logo, (W-lw)/2, 275 - lh/2, lw, lh); } catch(e){}
   x.textAlign = "center"; x.fillStyle = "#f5f5f0";
-  x.font = `68px "Bowlby One", Impact, sans-serif`; x.fillText(d.event || "PerugiaParty", W/2, 510);
+  x.font = `60px "Bowlby One", Impact, sans-serif`; x.fillText(d.event || "PerugiaParty", W/2, 480);
   x.fillStyle = "#a9a9a2"; x.font = `500 34px "Figtree", sans-serif`;
-  x.fillText([d.date_label, d.doors && "doors " + d.doors].filter(Boolean).join(" · "), W/2, 570);
-  x.strokeStyle = "#444"; x.setLineDash([14, 10]); x.lineWidth = 4; x.beginPath(); x.moveTo(40, 640); x.lineTo(W-40, 640); x.stroke(); x.setLineDash([]);
-  x.fillStyle = "#f4ead7"; x.beginPath(); x.arc(40, 640, 26, 0, 7); x.fill(); x.beginPath(); x.arc(W-40, 640, 26, 0, 7); x.fill();
+  x.fillText([d.date_label, d.doors && "doors " + d.doors].filter(Boolean).join(" · "), W/2, 540);
+  x.strokeStyle = "#444"; x.setLineDash([14, 10]); x.lineWidth = 4; x.beginPath(); x.moveTo(40, 615); x.lineTo(W-40, 615); x.stroke(); x.setLineDash([]);
+  x.fillStyle = "#f4ead7"; x.beginPath(); x.arc(40, 615, 26, 0, 7); x.fill(); x.beginPath(); x.arc(W-40, 615, 26, 0, 7); x.fill();
   const qc = document.createElement("canvas"); drawQR(d.qr, qc);
-  const box = 560; x.fillStyle = "#f5f5f0"; x.fillRect((W-box)/2 - 24, 700, box + 48, box + 48);
-  x.imageSmoothingEnabled = false; x.drawImage(qc, (W-box)/2, 724, box, box);
-  x.fillStyle = "#f5f5f0"; x.font = `500 60px "DM Mono", monospace`; x.fillText(d.code, W/2, 1420);
-  x.font = `500 40px "DM Mono", monospace`; x.fillText(d.name, W/2, 1490);
-  x.fillStyle = "#a9a9a2"; x.font = `500 26px "DM Mono", monospace`; x.fillText(d.crew ? "CREW PASS · PHOTO ID AT THE DOOR" : "PERSONAL TICKET · PHOTO ID AT THE DOOR · 18+", W/2, 1560);
+  const box = 540; x.fillStyle = "#f5f5f0"; x.fillRect((W-box)/2 - 26, 690, box + 52, box + 52);
+  x.imageSmoothingEnabled = false; x.drawImage(qc, (W-box)/2, 716, box, box);
+  x.fillStyle = "#f5f5f0"; x.font = `500 52px "DM Mono", monospace`; x.fillText(d.code, W/2, 1370);
+  x.fillStyle = "#a9a9a2"; x.font = `500 34px "DM Mono", monospace`; x.fillText(d.name, W/2, 1432);
+  x.font = `500 24px "DM Mono", monospace`; x.fillText(d.crew ? "CREW PASS · PHOTO ID AT THE DOOR" : "PHOTO ID AT THE DOOR · 18+", W/2, 1530);
   return c;
 }
 // Instagram, Facebook and TikTok's built-in browsers silently block file downloads
@@ -526,7 +528,7 @@ async function downloadTicket(d, btn){
   setTimeout(() => { btn.disabled = false; btn.textContent = label; }, 2000);
 }
 async function shareParty(d, btn){
-  const text = `I'm going to ${d.event}${d.date_label ? " on " + d.date_label : ""} 🎉 Request your place before the list closes:`;
+  const text = `I'm going to ${d.event}${d.date_label ? " on " + d.date_label : ""} Request your place before the list closes:`;
   const url = location.origin + "/";
   try { if (navigator.share) { await navigator.share({ title: "PerugiaParty", text, url }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
   const label = btn.textContent;

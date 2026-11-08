@@ -96,35 +96,12 @@ def italian_post(s):
                  (">YES<", ">SÌ<"), (">FREE<", ">GRATIS<"), (">INCL.<", ">INCL.<"),
                  ('aria-label="Request a place: what a night includes"', 'aria-label="Richiedi un posto: cosa include la serata"')):
         s = s.replace(a, b)
-    # the band: why this is not the usual student party
-    FATTI = [("Open bar vero", "Bevi quanto vuoi."), ("DJ veri", "Niente playlist dal telefono."),
-             ("Lista privata", "Chiedi il posto su Instagram."), ("In centro", "Ci arrivi a piedi.")]
-    fatti = "".join(f'<li><b>{h}</b><span>{x}</span></li>' for h, x in FATTI)
-    band = f'''  <section class="band-ink o-fat" aria-labelledby="fat-h"><div class="wrap"><div class="fat">
-      <div><p class="fat-k">Perugia · 18+</p><h2 id="fat-h">Non la <span>solita</span> festa universitaria.</h2>
-      <p class="fat-b"><a class="btn" href="#request" data-req>Richiedi un posto</a></p></div>
-      <ul>{fatti}</ul>
-    </div></div></section>
-'''
-    s = s.replace('  <div class="wrap o-main">', band + '  <div class="wrap o-main">', 1)
     # no FAQ on this page; the house rules live on the English homepage
     a = s.index('<div class="wrap o-faq">')
     b = s.index("</div>", s.index("</section>", a)) + 6
     s = s[:a] + s[b:]
     s = s.replace('href="#rules"', 'href="/#rules"').replace('a[href="/#rules"]', 'a[href="#rules"]')
-    s = s.replace("</style>", """.o-fat{order:3}.o-next{order:4}.o-main{order:5}.o-faq{order:6}.o-nights{order:7}
-.band-ink{background:var(--ink);color:var(--cream)}
-.fat{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(30px,5vw,68px);align-items:center;padding-block:clamp(52px,7vw,92px)}
-.fat-k{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#ff4a3d;margin:0 0 14px}
-.fat h2{font-size:clamp(30px,4.2vw,52px);line-height:.98;margin:0;max-width:13ch}.fat h2 span{color:#ff4a3d}
-.fat .fat-b{margin:26px 0 0}
-.fat ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.fat ul{gap:16px}
-.fat li{background:#1b1715;border:1px solid #2e2724;border-radius:18px;padding:26px 24px 28px}
-.fat li b{display:block;font-size:19px;font-weight:800;line-height:1.2}
-.fat li b::before{content:"";display:block;width:26px;height:3px;border-radius:2px;background:#ff4a3d;margin-bottom:16px}
-.fat li span{display:block;color:#b9ab98;font-size:15px;line-height:1.5;margin-top:8px}
-@media (max-width:820px){.fat{grid-template-columns:1fr;gap:28px}}
+    s = s.replace("</style>", """.o-next{order:3}.o-main{order:4}.o-faq{order:5}.o-nights{order:6}
 @media (max-width:420px){.fat ul{grid-template-columns:1fr}}
 </style>""", 1)
     return s
