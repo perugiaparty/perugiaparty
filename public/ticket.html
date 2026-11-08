@@ -82,15 +82,18 @@ h1{font-size:clamp(40px,8vw,64px)}
 /* one theme: pills take their colour from the card they sit on */
 .page > .state,.card .state{background:var(--ink);border-color:var(--ink);color:var(--cream)}
 .rq .state,.hype .state,.pay .state{background:var(--red);border-color:var(--red);color:var(--cream)}
-.hero-ok .state,.hype.paid .state,.thanks .state,.where .state{background:var(--cream);border-color:var(--cream);color:var(--red)}
+.hero-ok .state,.thanks .state,.where .state{background:var(--cream);border-color:var(--cream);color:var(--red)}
+.hype.paid .state{background:var(--red);border-color:var(--red);color:var(--cream)}
 .wl-tag{justify-self:start;background:var(--cream);color:var(--red);font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:4px 10px}
 /* paid */
-.hype.paid{background:var(--red)}
-.hype.paid h1{color:var(--cream);padding-right:70px}
-.hype.paid .lead{color:#f3d3cc}
-.hype.paid .lead b{color:var(--cream)}
-.hype.paid .count div{background:rgba(20,18,16,.22)}
-.hype.paid .count span{color:#f3d3cc}
+.hype.paid{background:none;padding:8px 2px 0;border-radius:0}
+.hype.paid h1{color:var(--ink);padding-right:70px}
+.hype.paid .lead{color:var(--muted)}
+.hype.paid .lead b{color:var(--ink)}
+.hype.paid .count div{background:var(--cream-2)}
+.hype.paid .count span{color:var(--muted)}
+.hype.paid .count b{color:var(--ink)}
+.hype.paid .rq-stamp{color:var(--red);border-color:var(--red)}
 .rq-stamp.paid-stamp{color:var(--cream);border-color:var(--cream);font-size:16px;animation-delay:.25s}
 .cine.shine{overflow:hidden}
 .cine.shine::after{content:"";position:absolute;inset:-40% -60%;background:linear-gradient(105deg,transparent 42%,rgba(255,255,255,.14) 50%,transparent 58%);transform:translateX(-60%);animation:shine 3.2s 1s ease-in-out infinite;pointer-events:none}
@@ -195,7 +198,7 @@ h1{font-size:clamp(40px,8vw,64px)}
 .hype .count div{background:var(--ink-2);border-radius:14px;padding:10px 4px;min-width:0;text-align:center}
 .hype .count b{display:block;font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1;color:var(--cream);font-variant-numeric:tabular-nums}
 .hype .count span{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
-.cine-w{filter:drop-shadow(11px 11px 0 var(--red))}
+.cine-w{filter:drop-shadow(0 14px 30px rgba(20,18,16,.10))}
 .cine{position:relative;background:var(--paper);color:var(--ink);font-family:var(--f-mono);padding:40px 26px 44px;display:grid;gap:12px;justify-items:center;text-align:center;
   -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/36px 51% repeat-x,conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/36px 51% repeat-x;
   mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/36px 51% repeat-x,conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/36px 51% repeat-x}
@@ -383,7 +386,7 @@ h1{font-size:clamp(40px,8vw,64px)}
 .rc-dl b{font-family:var(--f-mono);font-size:19px;font-weight:500;color:var(--red);font-variant-numeric:tabular-nums}
 .rc-dl.late b{font-size:15px}
 #pay-all{width:100%;justify-content:center;margin-top:4px}
-.tipthx{display:grid;gap:4px;padding:18px 20px}
+.tipthx{display:grid;gap:4px;padding:18px 20px;margin-bottom:4px;border-color:var(--red)}
 .tipthx b{font-size:17px}
 .tipthx span{font-size:14px;color:var(--muted)}
 .rc-f{text-align:center;margin:0;line-height:1.8}
@@ -985,16 +988,15 @@ function render(d){
     window.__payTimer = setInterval(() => { const el = document.getElementById("pay-left"); if (!el) return clearInterval(window.__payTimer); const dl = Number(el.dataset.dl); el.classList.toggle("late", dl < Date.now()); el.innerHTML = payLeftHTML(dl); }, 1000);
   } else if (d.status === "paid" || d.status === "in") {
     const inside = d.status === "in", over = partyOver(d);
-    P.innerHTML = `${inside && over ? thanksHTML(d, first) : `<div class="hype ${inside ? "" : "paid"}">
+    P.innerHTML = `${inside && over ? thanksHTML(d, first) : `${!inside && Number(d.tip) > 0 ? `<div class="card tipthx"><b>Thank you for the ${euro(Number(d.tip))} :)</b><span>You supported the crew, and the whole team thanks you.</span></div>` : ""}<div class="hype ${inside ? "" : "paid"}">
         ${inside ? "" : `<span class="rq-stamp paid-stamp" aria-hidden="true">${d.crew ? "Crew" : "Paid"}</span>`}
         ${inside ? `<span class="state">Checked in</span>` : ""}
         <h1>${inside ? `You made it, <em>${first}</em>.` : d.crew ? `You're crew, ${first}.` : `You're going, ${first}.`}</h1>
         <p class="lead">${inside ? "Enjoy the night." : d.crew ? `Thanks for making <b>${esc(d.event)}</b> happen.` : `See you at <b>${esc(d.event)}</b>.`}</p>
         <div class="count" id="tcount" ${inside ? 'style="display:none"' : ""} hidden></div>
-        ${d.crew ? "" : stepsHTML(inside ? 5 : 4, inside ? "" : "on-red")}
+        ${d.crew ? "" : stepsHTML(inside ? 5 : 4)}
       </div>
       ${inside ? `<div class="inbar" role="status"><div><b>Checked in</b><span>${d.in_at ? "Entered at " + new Date(d.in_at).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) + ". " : ""}This ticket has been used.</span></div></div>` : ""}`}
-      ${!inside && !over && Number(d.tip) > 0 ? `<div class="card tipthx"><b>Thank you for the ${euro(Number(d.tip))}.</b><span>You supported the crew, and the whole team thanks you.</span></div>` : ""}
       ${inside && !over ? programmeHTML(d) : ""}
       <div class="cine-w"><div class="cine${d.crew ? " crew" : ""}">${d.crew ? `<span class="crewband">Crew pass</span>` : ""}
         ${inside ? `<span class="instamp">CHECKED IN</span>` : ""}
