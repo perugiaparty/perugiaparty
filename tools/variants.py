@@ -49,61 +49,30 @@ ER_FAQ = [
     ("What do I bring?", "Your ticket QR on your phone and a photo ID (passport or ID card). You must be 18+."),
 ]
 def erasmus_post(s):
-    Y, N = '<b class="y"></b>', '<b class="n"></b>'
-    KIT = [("Student prices", N, N, Y), ("Open bar", N, N, Y), ("Reachable on foot", N, Y, Y),
-           ("Inside, not in the cold", Y, N, Y), ("Good music, every time", N, N, Y), ("Open till late", Y, N, Y),
-           ("Everything in English", N, N, Y)]
-    rows = "".join(f'<tr><th scope="row">{k}</th><td>{c}</td><td>{z}</td><td class="pp">{p}</td></tr>' for k, c, z, p in KIT)
-    kit = f'''<div class="kit" role="group" aria-label="Three ways to go out in Perugia">
-        <div class="kit-t"><span>Starter kit</span><span>Perugia · 2026</span></div>
-        <table><thead><tr><th><span class="vh">What you get</span></th><th scope="col">Club</th><th scope="col">Centro</th><th scope="col" class="pp">Us</th></tr></thead><tbody>{rows}</tbody></table>
-      </div>
-'''
-    # the kit replaces the receipt beside the title
-    s = re.sub(HERO_TICKET, kit, s, count=1, flags=re.S)
-    assert 'class="kit"' in s
+    # the hero keeps the receipt; a help link sits next to the button
     s = s.replace('<a class="btn" href="#request" data-req>Request a place</a>\n        </div>',
-                  '<a class="btn" href="#request" data-req>Request a place</a>\n          <a class="kit-help" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">New here? Ask us</a>\n        </div>', 1)
-    s = s.replace("</style>", """.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-.o-hero .hero{grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);gap:clamp(28px,4vw,56px)}
-.kit{background:#fbf7ef;color:var(--ink);border-radius:20px;padding:clamp(16px,1.8vw,22px) clamp(16px,2vw,24px) clamp(10px,1.4vw,14px);box-shadow:12px 12px 0 var(--red);transform:rotate(-1.2deg);width:100%;max-width:490px;justify-self:center}
-.kit-t{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7e6c;border-bottom:2px dashed #e6dbc7;padding-bottom:11px}
-.kit table{width:100%;border-collapse:collapse;margin-top:4px;table-layout:fixed}
-.kit th,.kit td{padding:9px 2px;border-bottom:1px solid #efe7d9;text-align:center;font-size:13.5px}
-.kit tbody tr:last-child th,.kit tbody tr:last-child td{border-bottom:0}
-.kit tbody th{text-align:left;font-weight:800;width:52%;line-height:1.25}
-.kit thead th + th{width:16%}
-.kit thead th{font-family:var(--f-mono);font-weight:500;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8a7e6c;padding-top:12px}
-.kit thead th.pp{color:var(--red)}
-.kit td.pp,.kit thead th.pp{background:#f7e3dd}
-.kit tbody tr:last-child td.pp{border-radius:0 0 8px 8px}
-.kit thead th.pp{border-radius:8px 8px 0 0}
-.kit b{display:inline-block;width:15px;height:15px;position:relative;vertical-align:middle}
-.kit b.y{border-radius:50%;background:var(--red)}
-.kit b.n::before,.kit b.n::after{content:"";position:absolute;left:50%;top:1px;width:2.2px;height:13px;border-radius:2px;background:#cdc1ab}
-.kit b.n::before{transform:translateX(-50%) rotate(45deg)}.kit b.n::after{transform:translateX(-50%) rotate(-45deg)}
-.kit-help{font-weight:800;color:#ff8a7d;text-underline-offset:3px}
-@media (max-width:840px){.o-hero .hero{grid-template-columns:1fr}.kit{transform:none;box-shadow:8px 8px 0 var(--red);max-width:none}}
-@media (max-width:380px){.kit th,.kit td{font-size:12.5px;padding:8px 1px}}
-</style>""", 1)
+                  '<a class="btn" href="#request" data-req>Request a place</a>\n          <a class="ask" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">New here? Ask us</a>\n        </div>', 1)
     cta = """<div class="wrap o-go"><section class="go" aria-labelledby="go-h">
       <h2 id="go-h">Ready for your <span>first night?</span></h2>
       <p>The next date and the request form are on the main page.</p>
       <div class="go-b"><a class="btn" href="#request" data-req>Request a place</a><a class="btn outline" href="/">Go to PerugiaParty</a></div>
     </section></div>
 """
-    s = s.replace('<div class="wrap o-why">', cta + '<div class="wrap o-why">', 1)
-    s = s.replace("</style>", """.o-go{order:2}.o-why,.o-main,.o-faq,.o-nights{display:none!important}
-.go{text-align:center;padding:clamp(40px,7vw,80px) 0 clamp(56px,8vw,96px)}
+    s = s.replace('  <div class="wrap o-nights">', cta + '  <div class="wrap o-nights">', 1)
+    assert 'o-go' in s
+    # three options, then how it works, then the way to the main page, then the questions
+    s = s.replace("</style>", """.o-why{order:1}.o-main{order:2}.o-go{order:3}.o-faq{order:4}.o-nights{display:none!important}
+#request{display:none!important}
+#how{border-top:1.5px solid var(--line)}
+#faq h2 span{color:var(--red)}
+.ask{font-weight:800;color:#ff8a7d;text-underline-offset:3px;align-self:center}
+.go{text-align:center;padding:clamp(36px,6vw,64px) 0 clamp(48px,7vw,84px)}
 .go h2{font-size:clamp(30px,4vw,46px);line-height:1;margin:0 auto 12px;max-width:14ch}.go h2 span{color:var(--red)}
 .go p{color:var(--muted);margin:0 auto 24px;max-width:40ch}
 .go-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 </style>""", 1)
     s = s.replace('href="#request"', 'href="/#request"').replace('a.href = "#request"', 'a.href = "/#request"')
-    # Erasmus page: no club / centro comparison, keep the mission as "Who we are"
-    a = s.index('<h2 id="why-h"'); b = s.index('<h3 class="why-q">', a)
-    s = s[:a] + s[b:]
-    s = s.replace('<h3 class="why-q">But <span>why?</span></h3>', '<h2 class="why-q" id="why-h">Who <span>we are.</span></h2>', 1)
+    # the questions a newcomer actually has
     a = s.index('<div class="faq">', s.index('id="faq"')); b = s.index('<details id="rules">', a)
     s = s[:a] + '<div class="faq">\n' + "".join(f"        <details><summary>{q}</summary><p>{x}</p></details>\n" for q, x in ER_FAQ) + "        " + s[b:]
     return s
@@ -122,6 +91,13 @@ build("/erasmus", "en", COMMON_HEAD("/erasmus", "Erasmus parties in Perugia · P
     ('<h3>Pay</h3><p>Bank transfer, tap to copy.</p>', '<h3>Pay</h3><p>Bank transfer in euro, any European bank.</p>'),
     ('<h3>Your QR</h3><p>Ticket and place unlock.</p>', '<h3>Your QR</h3><p>Your ticket and the address appear.</p>'),
     ('<h3>Party</h3><p>QR and photo ID at the door.</p>', '<h3>Party</h3><p>Show the QR and your passport or ID card.</p>'),
+    ('Club night. Centro vibes. <span>Best of both.</span>', 'Three ways to go out. <span>One makes sense.</span>'),
+    ('Expensive.<br>Light drinks.<br>Far away.', 'Out of town.<br>Taxi both ways.<br>Pricey drinks.'),
+    ('Student prices.<br>Open bar.<br>In the centre.<br>Till late.', 'Student price.<br>Open bar.<br>Walk there.<br>All in English.'),
+    ('In the cold.<br>No music.<br>Ends early.', 'Outside in the cold.<br>No music.<br>Bars shut 01:30.'),
+    ('<h3 class="why-q">But <span>why?</span></h3>', '<h3 class="why-q">Who <span>we are.</span></h3>'),
+    ('<h2 id="faq-h">Good to know.</h2>', '<h2 id="faq-h">New here? <span>Start with this.</span></h2>'),
+    ('<p>We check every request on Instagram.</p>', '<p>We check every request on Instagram.</p>'),
 ], erasmus_post)
 
 
@@ -138,35 +114,32 @@ def italian_post(s):
     # the band: why this is not the usual student party
     FATTI = [("Open bar vero", "Bevi quanto vuoi."), ("DJ veri", "Niente playlist dal telefono."),
              ("Lista privata", "Chiedi il posto su Instagram."), ("In centro", "Ci arrivi a piedi.")]
-    fatti = "".join(f'<li><em>0{i}</em><div><b>{h}</b><span>{x}</span></div></li>' for i, (h, x) in enumerate(FATTI, 1))
+    fatti = "".join(f'<li><i aria-hidden="true"></i><b>{h}</b><span>{x}</span></li>' for h, x in FATTI)
     band = f'''  <section class="band-ink o-fat" aria-labelledby="fat-h"><div class="wrap"><div class="fat">
-      <div><p class="fat-k">Perugia · 18+</p><h2 id="fat-h">Non la <span>solita</span> festa universitaria.</h2></div>
+      <div><p class="fat-k">Perugia · 18+</p><h2 id="fat-h">Non la <span>solita</span> festa universitaria.</h2>
+      <p class="fat-b"><a class="btn" href="#request" data-req>Richiedi un posto</a></p></div>
       <ul>{fatti}</ul>
     </div></div></section>
 '''
     s = s.replace('  <div class="wrap o-main">', band + '  <div class="wrap o-main">', 1)
-    # no FAQ: only the house rules stay, so the box on the request form still links to them
-    rules = re.search(r'<details id="rules">.*?</details>', s, re.S).group(0)
+    # no FAQ on this page; the house rules live on the English homepage
     a = s.index('<div class="wrap o-faq">')
     b = s.index("</div>", s.index("</section>", a)) + 6
-    s = s[:a] + f'''<div class="wrap o-faq rules-sec">
-    <section class="sec" aria-label="Regole della casa">
-      <div class="faq">{rules}</div>
-    </section>
-  </div>''' + s[b:]
+    s = s[:a] + s[b:]
+    s = s.replace('href="#rules"', 'href="/#rules"').replace('a[href="/#rules"]', 'a[href="#rules"]')
     s = s.replace("</style>", """.o-fat{order:3}.o-next{order:4}.o-main{order:5}.o-faq{order:6}.o-nights{order:7}
 .band-ink{background:var(--ink);color:var(--cream)}
-.fat{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(26px,5vw,72px);align-items:center;padding-block:clamp(48px,7vw,88px)}
+.fat{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(30px,5vw,68px);align-items:center;padding-block:clamp(52px,7vw,92px)}
 .fat-k{font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#ff4a3d;margin:0 0 14px}
 .fat h2{font-size:clamp(30px,4.2vw,52px);line-height:.98;margin:0;max-width:13ch}.fat h2 span{color:#ff4a3d}
-.fat ul{list-style:none;margin:0;padding:0}
-.fat li{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:baseline;padding:15px 0;border-top:1px solid #2d2724}
-.fat li:last-child{border-bottom:1px solid #2d2724}
-.fat li em{font-family:var(--f-mono);font-style:normal;font-size:12px;color:#6f665c}
-.fat li b{display:block;font-size:18px;font-weight:800}
-.fat li span{color:#b9ab98;font-size:15px}
-.rules-sec .sec{padding-block:0 clamp(48px,7vw,80px)}
-@media (max-width:820px){.fat{grid-template-columns:1fr;gap:26px}}
+.fat .fat-b{margin:26px 0 0}
+.fat ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fat li{background:#1c1816;border:1px solid #2d2724;border-radius:16px;padding:18px}
+.fat li i{display:block;width:9px;height:9px;border-radius:50%;background:#ff4a3d;margin-bottom:13px}
+.fat li b{display:block;font-size:17px;font-weight:800;margin-bottom:5px}
+.fat li span{color:#b9ab98;font-size:14.5px;line-height:1.45}
+@media (max-width:820px){.fat{grid-template-columns:1fr;gap:28px}}
+@media (max-width:420px){.fat ul{grid-template-columns:1fr}}
 </style>""", 1)
     return s
 
@@ -242,7 +215,13 @@ IT = [
     ('<span class="hm-red" id="proof">Invite only</span>', '<span class="hm-red" id="proof">Solo su invito</span>'),
     ('"Join the waitlist" : "Request a place"', '"Entra in lista d’attesa" : "Richiedi un posto"'),
     ('"Join the waitlist" : "Send request"', '"Entra in lista d’attesa" : "Invia richiesta"'),
-    ('<p>Request below. Once approved, pay to unlock your ticket.</p>', '<p>Richiedi qui sotto. Se approvato, paghi e sblocchi il biglietto.</p>'),
+    ('<p class="next-sub">Request below. Once approved, pay to unlock your ticket.</p>', '<p class="next-sub">Richiedi qui sotto. Se approvato, paghi e sblocchi il biglietto.</p>'),
+    ('<li>Open bar</li><li>Real DJs</li><li>In the centre</li><li>Till late</li>', '<li>Open bar</li><li>DJ veri</li><li>In centro</li><li>Fino a tardi</li>'),
+    ('<span class="nx-note">30 seconds to request. We reply on Instagram.</span>', '<span class="nx-note">30 secondi. Ti rispondiamo su Instagram.</span>'),
+    ('[["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]]', '[["Data", ev.date_label], ["Porte", ev.doors], ["Biglietti", price]]'),
+    ('"From " + euro(ev.price.min)', '"Da " + euro(ev.price.min)'),
+    ('[[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]]', '[[d,"giorni"],[p(h),"ore"],[p(m),"min"],[p(s),"sec"]]'),
+    ('<b style="font-size:22px">The party has started.</b>', '<b style="font-size:22px">La festa è iniziata.</b>'),
 ]
 build("/italian", "it", COMMON_HEAD("/italian", "Feste universitarie ed Erasmus a Perugia · PerugiaParty",
         "Feste private per studenti universitari ed Erasmus nel centro di Perugia. Open bar, DJ e gente nuova da conoscere, a prezzo studenti. 18+.",

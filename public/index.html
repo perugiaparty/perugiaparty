@@ -361,8 +361,25 @@ html:not([data-live]) .o-next{display:none}
 /* small lines in the regular bold font, darker grey */
 .vs-l,.pl.us .vs-l{font-family:var(--f-body)!important;font-weight:800;letter-spacing:-.01em;line-height:1.3}
 .pl{color:#544a3e}.jr p{color:#5f5547}
-/* bigger countdown */
-.count b{font-size:clamp(34px,5vw,52px)}.count div{min-width:92px;padding:14px 16px}
+/* next party: made to be clicked */
+.next{position:relative;overflow:hidden;isolation:isolate}
+.next::after{content:"";position:absolute;z-index:-1;right:-12%;bottom:-70%;width:72%;height:150%;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(232,57,43,.26),transparent 70%)}
+.next h3{font-size:clamp(32px,5.4vw,54px);letter-spacing:-.01em}
+.next .next-sub{color:var(--muted-dark);margin-top:10px}
+.nx-chips{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0;padding:0}
+.nx-chips li{font-size:13px;font-weight:800;color:var(--cream);background:#231e1b;border:1px solid #37302b;border-radius:999px;padding:6px 13px}
+.next dl{gap:28px;margin-top:22px}
+.next dd{font-size:19px}
+.count{gap:12px;margin-top:24px}
+.count div{min-width:96px;padding:15px 16px 12px;background:#1d1917;border:1px solid #332c28;border-radius:16px;position:relative;overflow:hidden}
+.count div::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,#ff4a3d,rgba(255,74,61,0))}
+.count div::after{content:"";position:absolute;left:0;right:0;top:54%;height:1px;background:rgba(255,255,255,.05)}
+.count b{font-size:clamp(34px,5vw,52px);letter-spacing:-.02em}
+.next-cta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:26px}
+.next-cta .btn{padding:15px 30px;font-size:16.5px;box-shadow:0 14px 34px -14px rgba(232,57,43,.95)}
+.nx-note{font-size:13.5px;color:var(--muted-dark)}
+@media (max-width:420px){.nx-chips li{font-size:12px;padding:5px 11px}.next-cta{gap:10px}.next-cta .btn{width:100%}.nx-note{font-size:12.5px}}
 /* dark top: the page opens like a night out */
 .o-hero{background:var(--ink);box-shadow:0 0 0 100vmax var(--ink);clip-path:inset(0 -100vmax);color:var(--cream);position:relative;isolation:isolate}
 .o-hero::before{content:"";position:absolute;inset:-40px -100vmax 0;z-index:-1;pointer-events:none;
@@ -666,10 +683,11 @@ function renderNext(ev){
   const art = ev.poster ? "" : `<img class="next-art" src="/ill/${ev.sold_out ? "waitlist" : "hero-party"}.svg" alt="" width="360" height="200">`;
   el.innerHTML = `<div class="next-main"><span class="status"><i></i>${statusLine(ev)}</span>
       <h3>${esc(ev.name || "Next PerugiaParty")}</h3>
-      <p>Request below. Once approved, pay to unlock your ticket.</p>
+      <p class="next-sub">Request below. Once approved, pay to unlock your ticket.</p>
+      <ul class="nx-chips"><li>Open bar</li><li>Real DJs</li><li>In the centre</li><li>Till late</li></ul>
       ${facts.length ? `<dl>${facts.map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>` : ""}
       <div class="count" id="count" ${ev.starts_at ? "" : "hidden"} aria-label="Countdown to the party"></div>
-      <div class="next-cta">${cta}</div></div>${art}
+      <div class="next-cta">${cta}<span class="nx-note">30 seconds to request. We reply on Instagram.</span></div></div>${art}
     ${ev.poster ? `<a class="poster" href="${ev.requests_open ? "#request" : "https://www.instagram.com/perugiaparty/"}" aria-label="${esc(ev.name || "Party")} poster"><img src="${esc(ev.poster)}" alt="${esc(ev.name || "Party")} poster" loading="lazy" decoding="async"></a>` : ""}`;
   if (ev.starts_at) { tick(); clearInterval(timer); timer = setInterval(tick, 1000); }
 }
