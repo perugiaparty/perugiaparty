@@ -104,7 +104,19 @@
 .why-k{font-family:var(--f-mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--red);margin:0 0 14px}
 .why-big{font-family:var(--f-display);font-weight:400;font-size:clamp(34px,5.4vw,64px);line-height:.98;letter-spacing:-.01em;margin:0 0 clamp(28px,4vw,56px);max-width:16ch}
 .why-big span{color:var(--red)}
-.vs{display:grid;grid-template-columns:1fr 1.1fr 1fr;align-items:stretch;gap:clamp(10px,2vw,20px);margin-top:8px}
+.vs{margin-top:8px}
+.cmp{width:100%;border-collapse:collapse;background:#fffaf0;border-radius:20px;overflow:hidden;box-shadow:0 0 0 1.5px var(--line)}
+.cmp th,.cmp td{padding:clamp(13px,1.8vw,18px) 6px;text-align:center;border-bottom:1px solid #efe7d9}
+.cmp tbody tr:last-child th,.cmp tbody tr:last-child td{border-bottom:0}
+.cmp tbody th{text-align:left;font-weight:800;font-size:clamp(15px,2vw,19px);padding-left:clamp(16px,2vw,26px);width:40%}
+.cmp thead th{font-family:var(--f-mono);font-weight:500;font-size:clamp(10px,1.3vw,12px);letter-spacing:.1em;text-transform:uppercase;color:#8a7e6c;padding-top:clamp(16px,2vw,22px)}
+.cmp thead th.pp{color:var(--red)}
+.cmp td.pp,.cmp thead th.pp{background:#fbe4df}
+.cmp b{display:inline-block;width:17px;height:17px;position:relative;vertical-align:middle}
+.cmp b.y{border-radius:50%;background:var(--red)}
+.cmp b.n::before,.cmp b.n::after{content:"";position:absolute;left:50%;top:1px;width:2.4px;height:15px;border-radius:2px;background:#cbbfa9}
+.cmp b.n::before{transform:translateX(-50%) rotate(45deg)}.cmp b.n::after{transform:translateX(-50%) rotate(-45deg)}
+@media (max-width:420px){.cmp tbody th{font-size:14px;padding-left:12px;width:44%}.cmp thead th{font-size:9px;letter-spacing:.03em}}
 .pl{margin:0;border-radius:20px;overflow:hidden;background:#e9dfcc;color:#6d6252;display:flex;align-items:center}
 .pl figcaption{padding:clamp(18px,2.2vw,26px);width:100%}
 .pl svg{display:block;width:100%;height:auto}
@@ -477,9 +489,10 @@ html:not([data-live]) .o-next{display:none}
     <section class="sec" id="why" aria-labelledby="why-h">
       <h2 id="why-h" class="why-big">Club night. Centro vibes. <span>Best of both.</span></h2>
       <div class="vs">
-        <figure class="pl"><figcaption><p class="vs-t">The club</p><p class="vs-l">Expensive.<br>Light drinks.<br>Far away.</p></figcaption></figure>
-        <figure class="pl us"><a class="pl-go" href="#request" data-req aria-label="Request a place"></a><figcaption><p class="vs-t">PerugiaParty</p><p class="vs-l">Student prices.<br>Open bar.<br>In the centre.<br>Till late.</p></figcaption></figure>
-        <figure class="pl"><figcaption><p class="vs-t">The centro</p><p class="vs-l">In the cold.<br>No music.<br>Ends early.</p></figcaption></figure>
+        <table class="cmp">
+          <thead><tr><td></td><th scope="col">The club</th><th scope="col">The centro</th><th scope="col" class="pp">PerugiaParty</th></tr></thead>
+          <tbody><tr><th scope="row">Student price</th><td><b class="n"></b></td><td><b class="y"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Open bar</th><td><b class="n"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">In the centre</th><td><b class="n"></b></td><td><b class="y"></b></td><td class="pp"><b class="y"></b></td></tr><tr><th scope="row">Till late</th><td><b class="y"></b></td><td><b class="n"></b></td><td class="pp"><b class="y"></b></td></tr></tbody>
+        </table>
       </div>
       <h3 class="why-q">But <span>why?</span></h3>
       <p class="mission">PerugiaParty is run by volunteers who want to make student life in Perugia a little more open and inclusive. Through music and a welcoming space, we bring people from Umbria and from all over the world together, Italian and Erasmus students alike, to share one night.</p>
