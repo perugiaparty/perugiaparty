@@ -116,8 +116,8 @@ h1{font-size:clamp(40px,8vw,64px)}
 .tsave img{width:100%;max-height:68vh;object-fit:contain;border-radius:12px;-webkit-touch-callout:default;user-select:auto}
 .tsave-n{color:var(--muted-dark);font-size:13px;margin:0;max-width:36ch}
 .tsave .btn{min-width:140px}
-.cine .crewband{position:absolute;top:26px;right:-44px;transform:rotate(35deg);background:var(--red);color:var(--cream);font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:6px 52px;z-index:2}
-.cine.crew{overflow:hidden;box-shadow:10px 10px 0 var(--ink),10px 10px 0 2px var(--red)}
+.cine .crewband{position:absolute;top:30px;right:-46px;transform:rotate(35deg);background:var(--red);color:var(--cream);z-index:3;font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:6px 52px;z-index:2}
+.cine.crew .brand{color:var(--red)}
 .rq.pending{border:3px solid #ff4a3d}
 .rq.pending .state{background:#ff4a3d;border-color:#ff4a3d;color:var(--ink)}
 .rq.pending .lead b{color:var(--cream)}
@@ -195,31 +195,24 @@ h1{font-size:clamp(40px,8vw,64px)}
 .hype .count div{background:var(--ink-2);border-radius:14px;padding:10px 4px;min-width:0;text-align:center}
 .hype .count b{display:block;font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1;color:var(--cream);font-variant-numeric:tabular-nums}
 .hype .count span{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
-.cine{position:relative;background:#111;color:#f5f5f0;border-radius:10px;padding:34px 22px 30px;display:grid;gap:13px;justify-items:center;text-align:center;box-shadow:10px 10px 0 var(--red)}
-.cine .holes{position:absolute;left:14px;right:14px;height:12px;background:radial-gradient(circle,var(--cream) 4px,transparent 4.5px) 0 50%/20px 12px repeat-x}
-.cine .holes.t{top:10px}.cine .holes.b{bottom:10px}
-.cine .logo{width:170px;height:auto}
-.cine .ev{font-family:var(--f-display);font-size:26px;line-height:1.05;color:#f5f5f0}
-.cine .meta{color:#a9a9a2;font-size:14px}
-.cine .perf{position:relative;border-top:2px dashed #444;width:calc(100% + 48px);margin:4px -24px}
-.cine .perf::before,.cine .perf::after{content:"";position:absolute;top:-13px;width:24px;height:24px;border-radius:50%;background:var(--cream)}
-.cine .perf::before{left:-12px}.cine .perf::after{right:-12px}
-.cine .code{font-family:var(--f-mono);font-size:20px;letter-spacing:.06em;color:#f5f5f0}
-.cine .who{font-family:var(--f-mono);font-size:14px;color:#a9a9a2}
-.cine .qr{background:#f5f5f0;padding:14px;border-radius:12px;line-height:0;border:0;cursor:pointer;display:block}
+.cine-w{filter:drop-shadow(11px 11px 0 var(--red))}
+.cine{position:relative;background:var(--paper);color:var(--ink);font-family:var(--f-mono);padding:40px 26px 44px;display:grid;gap:12px;justify-items:center;text-align:center;
+  -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/36px 51% repeat-x,conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/36px 51% repeat-x;
+  mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/36px 51% repeat-x,conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/36px 51% repeat-x}
+.cine .brand{font-family:var(--f-display);font-size:30px;line-height:1;margin:0}
+.cine .sub{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:#7a6e5d;margin:0 0 6px}
+.cine .qr{background:#fff;padding:14px;border-radius:12px;line-height:0;border:0;cursor:pointer;display:block;margin-top:10px}
 .cine .qr:active{transform:scale(.985)}
-.noscroll{overflow:hidden}
-.qrfs{position:fixed;inset:0;z-index:200;background:#fffaf0;display:grid;place-items:center;padding:24px;overscroll-behavior:contain}
-.qrfs-in{display:grid;justify-items:center;gap:12px;width:100%;max-width:560px}
-.qrfs img{width:min(84vw,460px);height:auto;display:block;border-radius:14px;image-rendering:pixelated;box-shadow:0 10px 40px rgba(20,18,16,.14)}
-.qrfs-c{font-family:var(--f-mono);font-size:22px;letter-spacing:.08em;color:var(--ink);margin:6px 0 0}
-.qrfs-n{font-family:var(--f-mono);font-size:14px;color:var(--muted);margin:0}
-.qrfs-b{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
-.qrfs-b .btn.outline{color:var(--ink);border-color:var(--ink)}
-.qrfs-h{font-size:13px;color:var(--muted);text-align:center;margin:2px 0 0}
-@media (max-height:700px){.qrfs img{width:min(70vw,360px)}}
-.cine .qr-hint{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:#a9a9a2;margin-top:-4px}
-.cine .qr canvas{display:block;width:min(228px,58vw);height:auto;image-rendering:pixelated}
+.cine .qr canvas{display:block;width:min(230px,58vw);height:auto;image-rendering:pixelated}
+.cine .qr-hint{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#9a8f7e;margin-top:-2px}
+.cine .code{font-size:22px;letter-spacing:.06em;margin:6px 0 0}
+.cine .who{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#7a6e5d;margin:0}
+.cine .tk-l{width:100%;margin:14px 0 0;padding-top:16px;border-top:2px dashed #d8ccb6;display:grid;gap:10px;text-align:left}
+.cine .tk-l > div{display:flex;justify-content:space-between;align-items:baseline;gap:14px}
+.cine .tk-l dt{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9a8f7e}
+.cine .tk-l dd{margin:0;font-size:13.5px;font-weight:500;text-align:right}
+.cine .tk-f{width:100%;margin:14px 0 0;padding-top:14px;border-top:2px dashed #d8ccb6;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#9a8f7e}
+.maps{justify-content:center;margin-top:18px}
 .where{background:var(--red);color:var(--cream);border-radius:20px;padding:20px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
 .where p{font-size:20px;font-weight:700;margin-top:2px}
 .where .btn{background:var(--cream);border-color:var(--cream);color:var(--red)}
@@ -227,7 +220,7 @@ h1{font-size:clamp(40px,8vw,64px)}
 .inbar .tick{flex:none;width:52px;height:52px;border-radius:50%;background:var(--red);color:var(--cream);display:grid;place-items:center;font-size:30px;font-weight:700;line-height:1}
 .inbar b{display:block;font-family:var(--f-display);font-weight:400;font-size:28px;line-height:1.05}
 .inbar span{font-size:15px;opacity:.9}
-.cine .instamp{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);border:5px solid #ff4a3d;color:#ff4a3d;background:rgba(17,17,17,.85);font-family:var(--f-mono);font-size:28px;font-weight:500;letter-spacing:.14em;padding:10px 18px;border-radius:12px;white-space:nowrap;z-index:2}
+.cine .instamp{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);border:5px solid var(--red);color:var(--red);background:rgba(255,250,240,.88);font-family:var(--f-mono);font-size:28px;font-weight:500;letter-spacing:.14em;padding:10px 18px;border-radius:12px;white-space:nowrap;z-index:2}
 
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .actions .btn{width:100%}
@@ -522,22 +515,37 @@ async function ticketCanvas(d){
   try { await document.fonts.ready; } catch(e){}
   const W = 1080, H = 1700, c = document.createElement("canvas"); c.width = W; c.height = H;
   const x = c.getContext("2d");
-  x.fillStyle = "#f4ead7"; x.fillRect(0, 0, W, H);
-  x.fillStyle = "#111"; x.beginPath(); x.roundRect ? x.roundRect(40, 40, W-80, H-80, 28) : x.rect(40, 40, W-80, H-80); x.fill();
-  x.fillStyle = "#f4ead7"; for (let px = 90; px < W-60; px += 40) { x.beginPath(); x.arc(px, 70, 8, 0, 7); x.fill(); x.beginPath(); x.arc(px, H-70, 8, 0, 7); x.fill(); }
-  try { const logo = await loadImage("/brand/wordmark-4.png"); const lw = 520, lh = lw * logo.height / logo.width; x.drawImage(logo, (W-lw)/2, 275 - lh/2, lw, lh); } catch(e){}
-  x.textAlign = "center"; x.fillStyle = "#f5f5f0";
-  x.font = `60px "Bowlby One", Impact, sans-serif`; x.fillText(d.event || "PerugiaParty", W/2, 480);
-  x.fillStyle = "#a9a9a2"; x.font = `500 34px "Figtree", sans-serif`;
-  x.fillText([d.date_label, d.doors && "doors " + d.doors].filter(Boolean).join(" · "), W/2, 540);
-  x.strokeStyle = "#444"; x.setLineDash([14, 10]); x.lineWidth = 4; x.beginPath(); x.moveTo(40, 615); x.lineTo(W-40, 615); x.stroke(); x.setLineDash([]);
-  x.fillStyle = "#f4ead7"; x.beginPath(); x.arc(40, 615, 26, 0, 7); x.fill(); x.beginPath(); x.arc(W-40, 615, 26, 0, 7); x.fill();
+  x.fillStyle = "#141210"; x.fillRect(0, 0, W, H);
+  x.fillStyle = "#fffaf0"; x.beginPath(); x.roundRect ? x.roundRect(40, 40, W-80, H-80, 18) : x.rect(40, 40, W-80, H-80); x.fill();
+  // torn edges, top and bottom
+  x.fillStyle = "#141210";
+  for (let px = 40; px < W-40; px += 36) {
+    x.beginPath(); x.moveTo(px, 40); x.lineTo(px+18, 62); x.lineTo(px+36, 40); x.closePath(); x.fill();
+    x.beginPath(); x.moveTo(px, H-40); x.lineTo(px+18, H-62); x.lineTo(px+36, H-40); x.closePath(); x.fill();
+  }
+  const dash = y => { x.strokeStyle = "#d8ccb6"; x.setLineDash([16, 12]); x.lineWidth = 4; x.beginPath(); x.moveTo(110, y); x.lineTo(W-110, y); x.stroke(); x.setLineDash([]); };
+  x.textAlign = "center"; x.fillStyle = "#141210";
+  x.font = `70px "Bowlby One", Impact, sans-serif`; x.fillText("PerugiaParty", W/2, 250);
+  x.fillStyle = "#7a6e5d"; x.font = `500 30px "DM Mono", monospace`;
+  x.fillText([d.event, d.date_label].filter(Boolean).join(" · ").toUpperCase(), W/2, 310);
+  dash(370);
   const qc = document.createElement("canvas"); drawQR(d.qr, qc);
-  const box = 540; x.fillStyle = "#f5f5f0"; x.fillRect((W-box)/2 - 26, 690, box + 52, box + 52);
-  x.imageSmoothingEnabled = false; x.drawImage(qc, (W-box)/2, 716, box, box);
-  x.fillStyle = "#f5f5f0"; x.font = `500 52px "DM Mono", monospace`; x.fillText(d.code, W/2, 1370);
-  x.fillStyle = "#a9a9a2"; x.font = `500 34px "DM Mono", monospace`; x.fillText(d.name, W/2, 1432);
-  x.font = `500 24px "DM Mono", monospace`; x.fillText(d.crew ? "CREW PASS · PHOTO ID AT THE DOOR" : "PHOTO ID AT THE DOOR · 18+", W/2, 1530);
+  const box = 520; x.fillStyle = "#ffffff"; x.fillRect((W-box)/2 - 26, 430, box + 52, box + 52);
+  x.imageSmoothingEnabled = false; x.drawImage(qc, (W-box)/2, 456, box, box);
+  x.fillStyle = "#141210"; x.font = `500 54px "DM Mono", monospace`; x.fillText(d.code, W/2, 1080);
+  x.fillStyle = "#7a6e5d"; x.font = `500 30px "DM Mono", monospace`; x.fillText(String(d.name || "").toUpperCase(), W/2, 1135);
+  dash(1195);
+  const rows = [["DATE", (typeof fullDay === "function" && fullDay(d)) || d.date_label || ""], ["DOORS", d.doors || ""], ["PLACE", d.location || ""]].filter(r => r[1]);
+  let y = 1255;
+  rows.forEach(([k, v]) => {
+    x.textAlign = "left"; x.fillStyle = "#9a8f7e"; x.font = `500 26px "DM Mono", monospace`; x.fillText(k, 110, y);
+    x.textAlign = "right"; x.fillStyle = "#141210"; x.font = `500 32px "DM Mono", monospace`;
+    let t = String(v); while (x.measureText(t).width > W - 420 && t.length > 4) t = t.slice(0, -2);
+    x.fillText(t + (t === String(v) ? "" : "…"), W-110, y); y += 62;
+  });
+  dash(y + 6);
+  x.textAlign = "center"; x.fillStyle = "#9a8f7e"; x.font = `500 26px "DM Mono", monospace`;
+  x.fillText(d.crew ? "CREW PASS · PHOTO ID AT THE DOOR" : "PHOTO ID AT THE DOOR · 18+", W/2, y + 70);
   return c;
 }
 // Instagram, Facebook and TikTok's built-in browsers silently block file downloads
@@ -849,6 +857,10 @@ function unlocked(d, first){
   celebrate({ vcode: "paid-" + (d.code || "") }, 120);
 }
 // date, time and place in one clear block at the top of the ticket
+function fullDay(d){
+  const st = d.starts_at ? new Date(d.starts_at) : null;
+  return st && !isNaN(st) ? st.toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Rome" }) : "";
+}
 function whenWhereHTML(d){
   const st = d.starts_at ? new Date(d.starts_at) : null, ok = st && !isNaN(st);
   const date = ok ? st.toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Rome" }) : (d.date_label || "");
@@ -983,20 +995,23 @@ function render(d){
       </div>
       ${inside ? `<div class="inbar" role="status"><div><b>Checked in</b><span>${d.in_at ? "Entered at " + new Date(d.in_at).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) + ". " : ""}This ticket has been used.</span></div></div>` : ""}`}
       ${!inside && !over && Number(d.tip) > 0 ? `<div class="card tipthx"><b>Thank you for the ${euro(Number(d.tip))}.</b><span>You supported the crew, and the whole team thanks you.</span></div>` : ""}
-      ${!over ? whenWhereHTML(d) : ""}
       ${inside && !over ? programmeHTML(d) : ""}
-      <div class="cine${inside ? "" : " shine"}${d.crew ? " crew" : ""}">${d.crew ? `<span class="crewband">Crew pass</span>` : ""}
-        <span class="holes t" aria-hidden="true"></span><span class="holes b" aria-hidden="true"></span>
+      <div class="cine-w"><div class="cine${d.crew ? " crew" : ""}">${d.crew ? `<span class="crewband">Crew pass</span>` : ""}
         ${inside ? `<span class="instamp">CHECKED IN</span>` : ""}
-        <img class="logo" src="/brand/wordmark-4.png" alt="PerugiaParty" width="851" height="160" decoding="async">
-        <div><p class="ev">${esc(d.event)}</p><p class="meta">${esc([d.date_label, d.doors && "doors " + d.doors].filter(Boolean).join(" · "))}</p></div>
-        <div class="perf" aria-hidden="true"></div>
+        <p class="brand">PerugiaParty</p>
+        <p class="sub">${esc([d.event, d.date_label].filter(Boolean).join(" · "))}</p>
         <button class="qr" type="button" id="qr-open" aria-label="Open your QR full screen"><canvas id="qr" aria-label="Your entry QR code"></canvas></button>
         <span class="qr-hint">Tap the code to open it big</span>
         <p class="code">${esc(d.code)}</p>
         <p class="who">${esc(d.name)}</p>
-        <p class="meta">Show this QR and your photo ID at the door</p>
-      </div>
+        <dl class="tk-l">
+          ${d.date_label ? `<div><dt>Date</dt><dd>${esc(fullDay(d) || d.date_label)}</dd></div>` : ""}
+          ${d.doors ? `<div><dt>Doors</dt><dd>${esc(d.doors)}</dd></div>` : ""}
+          ${d.location ? `<div><dt>Place</dt><dd>${esc(d.location)}</dd></div>` : ""}
+        </dl>
+        <p class="tk-f">${d.crew ? "Crew pass · photo ID at the door" : "Photo ID at the door · 18+"}</p>
+      </div></div>
+      ${d.location && !over ? `<a class="btn wide maps" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener">Open in Maps</a>` : ""}
       ${!inside && !over ? programmeHTML(d) : ""}
       ${over ? "" : `<div class="actions">
         ${d.starts_at ? `<button class="btn outline" type="button" id="cal">Calendar</button>` : ""}
