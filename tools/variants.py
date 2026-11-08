@@ -52,24 +52,12 @@ def erasmus_post(s):
     # the hero keeps the receipt; a help link sits next to the button
     s = s.replace('<a class="btn" href="#request" data-req>Request a place</a>\n        </div>',
                   '<a class="btn" href="#request" data-req>Request a place</a>\n          <a class="ask" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">New here? Ask us</a>\n        </div>', 1)
-    cta = """<div class="wrap o-go"><section class="go" aria-labelledby="go-h">
-      <h2 id="go-h">Ready for your <span>first night?</span></h2>
-      <p>The next date and the request form are on the main page.</p>
-      <div class="go-b"><a class="btn" href="#request" data-req>Request a place</a><a class="btn outline" href="/">Go to PerugiaParty</a></div>
-    </section></div>
-"""
-    s = s.replace('  <div class="wrap o-nights">', cta + '  <div class="wrap o-nights">', 1)
-    assert 'o-go' in s
-    # three options, then how it works, then the way to the main page, then the questions
-    s = s.replace("</style>", """.o-why{order:1}.o-main{order:2}.o-go{order:3}.o-faq{order:4}.o-nights{display:none!important}
+    # three options, then how it works, then the questions
+    s = s.replace("</style>", """.o-why{order:1}.o-main{order:2}.o-faq{order:3}.o-nights{display:none!important}
 #request{display:none!important}
 #how{border-top:1.5px solid var(--line)}
 #faq h2 span{color:var(--red)}
 .ask{font-weight:800;color:#ff8a7d;text-underline-offset:3px;align-self:center}
-.go{text-align:center;padding:clamp(36px,6vw,64px) 0 clamp(48px,7vw,84px)}
-.go h2{font-size:clamp(30px,4vw,46px);line-height:1;margin:0 auto 12px;max-width:14ch}.go h2 span{color:var(--red)}
-.go p{color:var(--muted);margin:0 auto 24px;max-width:40ch}
-.go-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 </style>""", 1)
     s = s.replace('href="#request"', 'href="/#request"').replace('a.href = "#request"', 'a.href = "/#request"')
     # the questions a newcomer actually has
