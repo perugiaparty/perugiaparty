@@ -216,7 +216,6 @@ IT = [
     ('"Join the waitlist" : "Request a place"', '"Entra in lista d’attesa" : "Richiedi un posto"'),
     ('"Join the waitlist" : "Send request"', '"Entra in lista d’attesa" : "Invia richiesta"'),
     ('<p class="next-sub">Request below. Once approved, pay to unlock your ticket.</p>', '<p class="next-sub">Richiedi qui sotto. Se approvato, paghi e sblocchi il biglietto.</p>'),
-    ('<li>Open bar</li><li>Real DJs</li><li>In the centre</li><li>Till late</li>', '<li>Open bar</li><li>DJ veri</li><li>In centro</li><li>Fino a tardi</li>'),
     ('<span class="nx-note">30 seconds to request. We reply on Instagram.</span>', '<span class="nx-note">30 secondi. Ti rispondiamo su Instagram.</span>'),
     ('[["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]]', '[["Data", ev.date_label], ["Porte", ev.doors], ["Biglietti", price]]'),
     ('"From " + euro(ev.price.min)', '"Da " + euro(ev.price.min)'),
