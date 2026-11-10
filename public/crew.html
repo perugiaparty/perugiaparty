@@ -522,11 +522,32 @@ function notesView() {
 }
 
 function moreView() {
-  const tabs = [["spend", "Money"], ["notes", "Notes"], ["info", "Info"], ["risk", "Plan B"], ["dec", "Decisions"], ["retro", "Retro"]];
-  if (!tabs.some(([k]) => k === sub)) sub = "spend";
-  const v = sub === "spend" ? spendView() : sub === "info" ? infoView() : sub === "risk" ? riskView() : sub === "dec" ? decView() : sub === "retro" ? retroView() : notesView();
+  const tabs = [["night", "Nights"], ["spend", "Money"], ["notes", "Notes"], ["info", "Info"], ["risk", "Plan B"], ["dec", "Decisions"], ["retro", "Retro"]];
+  if (!tabs.some(([k]) => k === sub)) sub = "night";
+  const v = sub === "night" ? nightView() : sub === "spend" ? spendView() : sub === "info" ? infoView() : sub === "risk" ? riskView() : sub === "dec" ? decView() : sub === "retro" ? retroView() : notesView();
   return `<h2>More</h2>
   <div class="chips" style="margin-top:8px;margin-bottom:14px">${tabs.map(([k, l]) => `<button class="chip ${sub === k ? "on" : ""}" data-sub="${k}">${l}</button>`).join("")}</div>${v}`;
+}
+function nightView() {
+  const ns = (S.plans || []);
+  if (!ns.length) return `<h3 style="margin-top:0">Nights</h3><div class="card"><div class="empty">Nothing planned yet</div></div>`;
+  return ns.map((n) => {
+    const jobs = n.jobs || [], done = jobs.filter((j) => Number(j.done) === 1).length;
+    const when = [n.date_label, n.doors ? "doors " + n.doors : ""].filter(Boolean).join(" · ");
+    const rows = jobs.length ? jobs.map((j) => {
+      const d = Number(j.done) === 1;
+      const sub = d ? "done" + (j.done_by ? " by " + first(j.done_by) : "") : (j.who ? j.who : "nobody yet");
+      return `<div class="risk" style="display:flex;gap:10px;align-items:center">
+        <button class="dot ${d ? "ok" : j.who ? "who" : ""}" data-pjob="${j.id}" data-v="${d ? 0 : 1}" aria-label="${d ? "Not done after all" : "Mark done"}">${d ? CHECK : (j.who ? esc(ini(j.who)) : "")}</button>
+        <div style="flex:1;min-width:0"><b style="${d ? "text-decoration:line-through;opacity:.55" : ""}">${esc(j.title)}</b><span>${esc(sub)}${j.note ? " · " + esc(j.note) : ""}</span></div></div>`;
+    }).join("") : `<div class="empty">No jobs yet</div>`;
+    return `<h3 style="margin-top:0">${esc(n.name)}</h3>
+      <div class="card" style="margin-bottom:16px">
+        <div class="risk" style="display:flex;gap:10px"><div style="flex:1"><b>${esc(when || "Date to come")}</b><span>${esc(n.venue || "Place to come")}${n.venue_note ? " · " + esc(n.venue_note) : ""}</span></div></div>
+        <div class="risk" style="display:flex;gap:10px"><div style="flex:1"><b>${n.capacity ? "Room for " + n.capacity + " people" : "Size to come"}</b><span>${jobs.length ? done + " of " + jobs.length + " jobs done" : "no jobs yet"}</span></div></div>
+        ${rows}
+      </div>`;
+  }).join("");
 }
 function infoView() {
   const info = S.event.info;
@@ -630,6 +651,7 @@ document.addEventListener("click", (e) => {
   const d = t.dataset;
   if (d.tab) { if (noteDirty) saveNote(); tab = d.tab; openId = null; adding = null; draw(); window.scrollTo(0, 0); return; }
   if (d.push) { enablePush(); return; }
+  if (d.pjob) return act("plan_job_done", { id: Number(d.pjob), v: d.v === "1" }, d.v === "1" ? "Done" : "Put back");
   if (d.blk) { return act("need_blocker", { id: Number(d.blk), v: d.v === "1" }, d.v === "1" ? "Marked as blocker" : "Not a blocker"); }
   if (d.here) return act("here", { v: d.here === "1" }, d.here === "1" ? "Checked in" : "Check-in undone");
   if (d.delrisk) { if (confirmTwice(t)) act("risk_del", { id: d.delrisk }, "Removed"); return; }

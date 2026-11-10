@@ -114,7 +114,7 @@ function palette(raw) {
 
 async function state(env, ev, me) {
   const tag = ev.tag;
-  const [crew, spends, needs, st, news, note, shifts, risks, decisions, retro] = await Promise.all([
+  const [crew, spends, needs, st, news, note, shifts, risks, decisions, retro, plans, pjobs] = await Promise.all([
     env.DB.prepare("SELECT c.id, c.name, c.lead, p.role, p.going, p.arrive, p.here_at FROM crew c JOIN crew_party p ON p.crew_id = c.id WHERE p.event = ? ORDER BY c.lead DESC, c.name").bind(tag).all(),
     env.DB.prepare("SELECT id, item, amount, cat, shop, repaid, repaid_at, created_at FROM crew_spend WHERE event = ? AND crew_id = ? ORDER BY created_at DESC").bind(tag, me.id).all(),
     env.DB.prepare("SELECT id, COALESCE(kind,'buy') AS kind, phase, due, doff, COALESCE(blocker,0) AS blocker, item, qty, cat, shop, owner, done, done_by, done_at, created_at, created_by FROM crew_need WHERE event = ? ORDER BY done, created_at").bind(tag).all(),
@@ -127,6 +127,8 @@ async function state(env, ev, me) {
     env.DB.prepare("SELECT id, risk, plan FROM crew_risk WHERE event = ? ORDER BY id").bind(tag).all(),
     env.DB.prepare("SELECT id, body, author, created_at FROM crew_decision WHERE event = ? ORDER BY created_at DESC").bind(tag).all(),
     env.DB.prepare("SELECT good, bad, change, updated_at FROM crew_retro WHERE crew_id = ? AND event = ?").bind(me.id, tag).first(),
+    env.DB.prepare("SELECT id, name, date_label, starts_at, doors, venue, venue_note, capacity, status FROM plan WHERE shared = 1 AND status <> 'archived' ORDER BY COALESCE(starts_at, '9999'), id").all(),
+    env.DB.prepare("SELECT j.id, j.plan_id, j.title, j.who, j.note, j.done, j.done_at, j.done_by FROM plan_job j JOIN plan p ON p.id = j.plan_id WHERE p.shared = 1 AND p.status <> 'archived' ORDER BY j.sort, j.id").all(),
   ]);
   const a = st || {};
   const out = {
@@ -142,6 +144,7 @@ async function state(env, ev, me) {
     decisions: decisions.results || [],
     retro: retro || { good: "", bad: "", change: "", updated_at: null },
     note: note ? { body: note.body || "", at: note.updated_at } : { body: "", at: null },
+    plans: (plans.results || []).map((p) => ({ ...p, jobs: (pjobs.results || []).filter((j) => j.plan_id === p.id) })),
     attendance: { requested: a.requested || 0, approved: a.approved || 0, paid: a.paid || 0, inside: a.inside || 0, crew_tickets: a.crew_tickets || 0 },
   };
   return out;
@@ -255,6 +258,13 @@ export async function apiCrew(req, env, action, { getEvent, json }) {
       } else {
         await env.DB.prepare("UPDATE crew_need SET done = 0, done_by = NULL, done_at = NULL WHERE id = ?").bind(id).run();
       }
+      return ok();
+    }
+    case "plan_job_done": {
+      const j = await env.DB.prepare("SELECT j.id FROM plan_job j JOIN plan p ON p.id = j.plan_id WHERE j.id = ? AND p.shared = 1").bind(id).first();
+      if (!j) return ok();
+      if (body.v) await env.DB.prepare("UPDATE plan_job SET done = 1, done_at = ?, done_by = ? WHERE id = ?").bind(now, clean(me.name, 60), id).run();
+      else await env.DB.prepare("UPDATE plan_job SET done = 0, done_at = NULL, done_by = NULL WHERE id = ?").bind(id).run();
       return ok();
     }
     case "need_del": {
