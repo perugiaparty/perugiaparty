@@ -12,8 +12,8 @@ body{background:#2a2a2a;font-family:"Figtree",system-ui,sans-serif;color:var(--i
 .lbl{font-size:7pt;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
 
 /* hero */
-.hero{background:var(--red);color:var(--cream);padding:9mm 14mm 8mm;border-radius:0 0 7mm 7mm}
-.hero h1{font-size:36pt}
+.hero{background:var(--red);color:var(--cream);padding:8mm 14mm 7mm;border-radius:0 0 7mm 7mm}
+.hero h1{font-size:32pt}
 .hero h2{font-size:17pt;color:var(--yellow);margin-top:2mm}
 .stats{display:grid;grid-template-columns:1fr 1fr 1fr;margin-top:5mm;border-top:.5mm solid rgba(247,239,226,.35);
        border-bottom:.5mm solid rgba(247,239,226,.35)}
@@ -25,41 +25,34 @@ body{background:#2a2a2a;font-family:"Figtree",system-ui,sans-serif;color:var(--i
 .hero p em{font-style:normal;color:var(--yellow);font-weight:800}
 
 /* body */
-.bd{padding:6mm 14mm 0;display:flex;flex-direction:column;flex:1}
+.bd{padding:5mm 14mm 0;display:flex;flex-direction:column;flex:1}
 .sec{display:grid;grid-template-columns:1fr;gap:0}
 .hd{margin-bottom:3mm}
 .hd .n{font-size:7.5pt;font-weight:800;letter-spacing:.2em;color:var(--red2)}
-.hd h3{font-family:"Anton",sans-serif;font-weight:400;font-size:17pt;text-transform:uppercase;margin-top:1mm}
+.hd h3{font-family:"Anton",sans-serif;font-weight:400;font-size:16pt;text-transform:uppercase;margin-top:1mm}
 
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:3mm;margin-bottom:4mm}
-.card{border-radius:3mm;padding:3.4mm 4.5mm}
-.card.dark{background:var(--ink);color:var(--cream)}
-.card.ylw{background:var(--yellow);color:var(--ink)}
-.card .lbl{opacity:.75}
-.card b{display:block;font-family:"Anton",sans-serif;font-weight:400;font-size:15pt;text-transform:uppercase;margin:.8mm 0 1.2mm}
-.card p{font-size:8.5pt;line-height:1.35}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:3mm}
+.pc{border:.4mm solid rgba(23,18,15,.25);border-radius:3mm;padding:3mm 3.4mm;display:flex;flex-direction:column}
+.pc .lbl{color:var(--red2)}
+.pc b{display:block;font-family:"Anton",sans-serif;font-weight:400;font-size:14pt;text-transform:uppercase;margin:1.2mm 0 1.3mm}
+.pc p{font-size:8.3pt;line-height:1.3}
 
-.rw{display:grid;grid-template-columns:34mm 1fr;gap:5mm;align-items:baseline;padding:1.6mm 0;border-bottom:.3mm solid rgba(23,18,15,.18)}
-.rw .lbl{color:var(--red2)}
-.rw p{font-size:9.5pt;line-height:1.35}
-.rw p b{font-weight:800}
-
-.fmt{display:grid;grid-template-columns:20mm 1fr 1fr 1fr;gap:0 4mm;margin-top:1mm}
-.fmt .h{font-family:"Anton",sans-serif;font-size:14pt;text-transform:uppercase;color:var(--red2);padding-bottom:1.5mm;
+.fmt{display:grid;grid-template-columns:18mm 1fr 1fr 1fr;gap:0 4mm;margin-top:1mm}
+.fmt .h{font-family:"Anton",sans-serif;font-size:13pt;text-transform:uppercase;color:var(--red2);padding-bottom:1.5mm;
         border-bottom:.8mm solid var(--ink)}
 .fmt .h.k{border-bottom:.8mm solid var(--ink)}
-.fmt .k{font-size:7.5pt;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);padding:1.5mm 0;
+.fmt .k{font-size:7.5pt;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);padding:1.3mm 0;
         border-bottom:.3mm solid rgba(23,18,15,.18)}
-.fmt .v{font-size:9pt;line-height:1.3;padding:1.5mm 0;border-bottom:.3mm solid rgba(23,18,15,.18)}
+.fmt .v{font-size:8.8pt;line-height:1.3;padding:1.3mm 0;border-bottom:.3mm solid rgba(23,18,15,.18)}
 
 /* footer */
-.ft{background:var(--ink);color:var(--cream);margin-top:auto;padding:6mm 14mm 6mm}
-.ft .slg{font-family:"Anton",sans-serif;font-size:12.5pt;text-transform:uppercase;line-height:1.1}
+.ft{background:var(--ink);color:var(--cream);margin-top:auto;padding:5mm 14mm 5mm}
+.ft .slg{font-family:"Anton",sans-serif;font-size:12pt;text-transform:uppercase;line-height:1.1}
 .ft .slg i{font-style:normal;color:var(--yellow)}
-.ft .cr{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm 5mm;margin-top:4mm;padding-top:3.5mm;
+.ft .cr{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5mm 5mm;margin-top:3.5mm;padding-top:3mm;
         border-top:.4mm solid rgba(247,239,226,.3)}
 .ft .cr div .lbl{color:var(--yellow);opacity:.9}
-.ft .cr div b{display:block;font-family:"Anton",sans-serif;font-weight:400;font-size:11pt;text-transform:uppercase;margin-top:1mm}
+.ft .cr div b{display:block;font-family:"Anton",sans-serif;font-weight:400;font-size:10.5pt;text-transform:uppercase;margin-top:1mm}
 </style></head><body>
 <div class="pg">
 
@@ -69,28 +62,28 @@ body{background:#2a2a2a;font-family:"Figtree",system-ui,sans-serif;color:var(--i
     <div class="stats">
       <div><b>11 Nov</b><span>Questo aggiornamento</span></div>
       <div><b>1 Anno</b><span>Di PerugiaParty</span></div>
-      <div><b>3 Format</b><span>Classic · Ape · Dinner</span></div>
+      <div><b>3 Format</b><span>Classic, Aperitivo, Dinner</span></div>
     </div>
-    <p><em>Dove siamo:</em> dopo un'anno di perugiaparty, una brutta esperienza nel primo locale, guardiamo quali sono i nostri prossimi passi.</p>
+    <p><em>Dove siamo:</em> dopo un'anno di perugiaparty, una brutta esperienza nel primo locale, guardiamo quali sono i nostri prossimi passi</p>
   </div>
 
   <div class="bd">
     <div class="sec">
       <div class="hd"><p class="n">01</p><h3>Chi fa' cosa</h3></div>
-      <div class="cards">
-        <div class="card dark"><p class="lbl">CEO · Exec. producer</p><b>Mattheo</b><p>Money side, general communication (w/ third parties), website and tickets, end authority.</p></div>
-        <div class="card ylw"><p class="lbl">Manager</p><b>Miltiad</b><p>Floor host during the night. First contact during the night.</p></div>
+      <div class="grid">
+        <div class="pc"><p class="lbl">Exec. producer</p><b>Mattheo</b><p>Money side, general communication (w/ third parties), website and tickets, end authority</p></div>
+        <div class="pc"><p class="lbl">Manager</p><b>Miltiad</b><p>Floor host during the night, first contact during the night</p></div>
+        <div class="pc"><p class="lbl">Bar manager</p><b>Big J</b><p>Bar e baristas: drinks, shots, snacks</p></div>
+        <div class="pc"><p class="lbl">Creatives</p><b>Sara e Cori</b><p>Media (photo/video), general vibe: decoration, theme, activities for each event</p></div>
+        <div class="pc"><p class="lbl">Guest relations</p><b>Irene</b><p>External check</p></div>
+        <div class="pc"><p class="lbl">Third parties</p><b>Design, DJs,<br>baristas, doorman</b><p>Various</p></div>
       </div>
-      <div class="rw"><p class="lbl">Big J</p><p><b>Bar manager</b> · bar e baristas (drinks, shots, snacks)</p></div>
-      <div class="rw"><p class="lbl">Sara e Cori</p><p><b>Creatives</b> · media (photo/video), general vibe (decoration/theme/activities)</p></div>
-      <div class="rw"><p class="lbl">Irene</p><p><b>Guest relations</b> · external check</p></div>
-      <div class="rw"><p class="lbl">Third parties</p><p><b>Design, DJs, baristas, doorman</b> · various</p></div>
     </div>
 
-    <div class="sec" style="margin-top:5mm">
+    <div class="sec" style="margin-top:4mm">
       <div class="hd"><p class="n">02</p><h3>I tre format</h3></div>
       <div class="fmt">
-        <div class="h k">&nbsp;</div><div class="h">Classic</div><div class="h">Ape</div><div class="h">Dinner</div>
+        <div class="h k">&nbsp;</div><div class="h">Classic</div><div class="h">Aperitivo</div><div class="h">Dinner</div>
         <div class="k">Where</div><div class="v">La Goliardia</div><div class="v">Modu</div><div class="v">Circolo Ponte d'Oddi</div>
         <div class="k">Time</div><div class="v">22:00 - 04:00/05:00</div><div class="v">Inizio 17:00/18:00</div><div class="v">Sera</div>
         <div class="k">People</div><div class="v">100 minimum</div><div class="v">Walk-in, informal</div><div class="v">50 and up</div>
@@ -105,10 +98,12 @@ body{background:#2a2a2a;font-family:"Figtree",system-ui,sans-serif;color:var(--i
   <div class="ft">
     <p class="slg">Tonight we party.<br>Tomorrow we forget.<br><i>Later, it's the best night you've ever had.</i></p>
     <div class="cr">
-      <div><p class="lbl">CEO</p><b>Mattheo</b></div>
+      <div><p class="lbl">Exec. producer</p><b>Mattheo</b></div>
       <div><p class="lbl">Manager</p><b>Miltiad</b></div>
       <div><p class="lbl">Bar</p><b>Big J</b></div>
       <div><p class="lbl">Creatives</p><b>Sara e Cori</b></div>
+      <div><p class="lbl">Guest relations</p><b>Irene</b></div>
+      <div><p class="lbl">Third parties</p><b>Design, DJs, Bar, Door</b></div>
     </div>
   </div>
 
