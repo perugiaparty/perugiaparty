@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>PerugiaParty — venues &amp; formats</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+@page{size:A4;margin:0}
+:root{--paper:#efe3c8;--ink:#1a1714;--red:#c0180f;--mut:#6d6252;--line:rgba(26,23,20,.5)}
+*{box-sizing:border-box;margin:0}
+body{background:#222;font-family:"DM Mono",monospace;color:var(--ink)}
+.pg{width:210mm;height:297mm;background:var(--paper);padding:17mm 16mm 14mm;display:flex;flex-direction:column;
+    page-break-after:always;position:relative;overflow:hidden}
+.pg:last-child{page-break-after:auto}
+.sp{flex:1}
+.kick{font-size:9.5pt;letter-spacing:.14em;text-transform:uppercase;padding-bottom:4mm}
+.rule{height:2.4mm;background:var(--ink)}
+.rule.t{height:1.1mm;margin-top:1.4mm}
+.rule.h{height:.4mm;background:var(--line)}
+h1{font-family:"Bowlby One",sans-serif;font-weight:400;color:var(--red);text-transform:uppercase;line-height:.88;
+   font-size:40pt;margin:6mm 0 0}
+h2{font-family:"Bowlby One",sans-serif;font-weight:400;color:var(--red);text-transform:uppercase;
+   font-size:17pt;line-height:1;margin:8mm 0 3mm}
+h2:first-of-type{margin-top:6mm}
+h3{font-family:"Bowlby One",sans-serif;font-weight:400;font-size:13pt;text-transform:uppercase;line-height:1.05}
+p{font-size:10.5pt;line-height:1.5}
+.mut{color:var(--mut)}
+.row{display:flex;justify-content:space-between;gap:6mm;font-size:10.5pt;letter-spacing:.03em;
+     text-transform:uppercase;padding:2.6mm 0;border-bottom:.4mm solid var(--line)}
+.row b{font-weight:500}
+.foot{display:flex;justify-content:center;gap:5mm;font-size:9pt;letter-spacing:.14em;text-transform:uppercase;padding-top:3mm}
+.foot i{font-style:normal;color:var(--red)}
+.bar{background:var(--red);color:var(--paper);font-family:"Bowlby One",sans-serif;font-size:15pt;
+     text-transform:uppercase;text-align:center;padding:3.4mm 4mm}
+
+/* roles */
+.role{display:grid;grid-template-columns:52mm 1fr;gap:5mm;padding:3.4mm 0;border-bottom:.4mm solid var(--line);align-items:baseline}
+.role .rn em{display:block;font-style:normal;font-size:9pt;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-top:1.2mm}
+.role p{font-size:10pt;line-height:1.45}
+
+/* format cards */
+.fmt{border-top:1.2mm solid var(--ink);padding-top:3mm;margin-top:6mm}
+.fmt .hd{display:flex;justify-content:space-between;align-items:baseline;gap:5mm}
+.fmt .hd span{font-size:9.5pt;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.fmt .gr{display:grid;grid-template-columns:30mm 1fr;gap:1.6mm 5mm;margin-top:3mm;font-size:10pt}
+.fmt .gr b{font-weight:500;color:var(--red);letter-spacing:.08em;text-transform:uppercase;font-size:9pt}
+
+/* venue card */
+.vn{border:.6mm solid var(--ink);padding:5mm 5mm 4mm;margin-top:5mm}
+.vn .hd{display:flex;justify-content:space-between;align-items:baseline;border-bottom:.6mm solid var(--ink);padding-bottom:2.4mm}
+.vn .hd em{font-style:normal;font-size:9.5pt;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.vn .gr{display:grid;grid-template-columns:1fr 1fr;gap:0 7mm;margin-top:2mm}
+.vn .f{display:flex;justify-content:space-between;gap:3mm;font-size:9.5pt;letter-spacing:.04em;text-transform:uppercase;
+       padding:2.2mm 0;border-bottom:.3mm solid var(--line)}
+.vn .f span{color:var(--mut)}
+.vn .f b{font-weight:500;min-width:26mm;border-bottom:.3mm dotted var(--line);text-align:right}
+.vn .note{font-size:9.5pt;color:var(--mut);margin-top:2.5mm;letter-spacing:.04em;text-transform:uppercase}
+.vn .note u{text-decoration:none;border-bottom:.3mm dotted var(--line);display:inline-block;min-width:60mm}
+
+/* table */
+table{width:100%;border-collapse:collapse;margin-top:4mm;font-size:9.5pt}
+th,td{border-bottom:.4mm solid var(--line);padding:3mm 2mm;text-align:left;letter-spacing:.04em;text-transform:uppercase}
+th{font-size:8.5pt;color:var(--red);border-bottom:.8mm solid var(--ink)}
+td.b{border-bottom:.4mm solid var(--line)}
+.chk{list-style:none;padding:0;margin-top:3mm}
+.chk li{font-size:10.5pt;letter-spacing:.04em;text-transform:uppercase;padding:2.8mm 0;border-bottom:.4mm solid var(--line);
+        display:flex;gap:4mm}
+.chk li i{font-style:normal;color:var(--red);font-family:"Bowlby One",sans-serif;font-size:9pt}
+</style></head><body>
+
+<!-- COVER -->
+<div class="pg">
+  <p class="kick">PerugiaParty · internal</p><div class="rule"></div><div class="rule t"></div>
+  <h1>Venues<br>&amp; Formats</h1>
+  <p style="font-size:12pt;margin-top:6mm;max-width:120mm" class="mut">Where we looked, what each place gives us, and the three kinds of night we want to run.</p>
+  <div class="sp"></div>
+  <div class="rule h"></div>
+  <div class="row"><span>Written for</span><b>The crew</b></div>
+  <div class="row"><span>Date</span><b>November 2026</b></div>
+  <div class="row"><span>Next night</span><b>Sinterklaas · Sat 5 Dec</b></div>
+  <div class="sp"></div>
+  <div class="bar">One year of PerugiaParty</div>
+  <div class="rule" style="margin-top:5mm"></div>
+  <p class="foot"><span>Centre</span><i>|</i><span>Open bar</span><i>|</i><span>All night</span></p>
+</div>
+
+<!-- WHERE WE STAND -->
+<div class="pg">
+  <p class="kick">01 · Where we stand</p><div class="rule"></div><div class="rule t"></div>
+  <h2>What we are</h2>
+  <p>Affordable nights in the centre of Perugia, good music, an open bar, and a room where people from Umbria and from everywhere else actually meet. Not a nightclub, not a private house party any more.</p>
+  <h2>What is fixed</h2>
+  <div class="rule h"></div>
+  <div class="row"><span>Rhythm</span><b>About once a month</b></div>
+  <div class="row"><span>Size</span><b>80+ guests, demand is higher</b></div>
+  <div class="row"><span>Bar</span><b>Open bar, always</b></div>
+  <div class="row"><span>Theme</span><b>Every edition has one</b></div>
+  <div class="row"><span>Age</span><b>18+, photo ID</b></div>
+  <div class="row"><span>Crew</span><b>9 people, free entry, small fee from Dec</b></div>
+  <h2>What has to change</h2>
+  <p>No permanent location so far, and the last edition was not fully in order on the legal side. From now on: the venue carries the licence, everything agreed in writing before the night, and the numbers settled the week after.</p>
+  <div class="sp"></div>
+  <div class="rule"></div>
+  <p class="foot"><span>Centre</span><i>|</i><span>Open bar</span><i>|</i><span>All night</span></p>
+</div>
+
+<!-- ROLES -->
+<div class="pg">
+  <p class="kick">02 · Who does what</p><div class="rule"></div><div class="rule t"></div>
+  <h2>The crew</h2>
+  <div class="rule h"></div>
+  <div class="role"><div class="rn"><h3>Matt</h3><em>Exec. producer</em></div><p>Venues, money, contracts, the website and the ticket flow. Decides the theme and the calendar.</p></div>
+  <div class="role"><div class="rn"><h3>Miltiad</h3><em>Floor host · PR</em></div><p>Runs the room on the night and is the first contact for the crew, so Matt is not disturbed. Brings people in.</p></div>
+  <div class="role"><div class="rn"><h3>Sara</h3><em>Art direction</em></div><p>Owns the look of each edition: theme, decoration, how the room should feel when the doors open.</p></div>
+  <div class="role"><div class="rn"><h3>Hidde</h3><em>Visual design</em></div><p>Posters, stories, menu and everything printed. Keeps the house style the same every month.</p></div>
+  <div class="role"><div class="rn"><h3>Jona</h3><em>Music director</em></div><p>The set and the second DJ, sound and gear. Says what a venue needs to be able to handle.</p></div>
+  <div class="role"><div class="rn"><h3>Irene</h3><em>Guest relations</em></div><p>Requests, the list, the door. Knows who is coming and who is waiting.</p></div>
+  <div class="role"><div class="rn"><h3>Andrea</h3><em>Media &amp; content</em></div><p>Photo and video on the night, the recap after, the series between parties.</p></div>
+  <h2>Still to fill</h2>
+  <div class="rule h"></div>
+  <div class="row"><span>Door · ticket check</span><b></b></div>
+  <div class="row"><span>Bar · two people</span><b></b></div>
+  <div class="row"><span>Legal · licence and SIAE</span><b></b></div>
+  <div class="sp"></div>
+  <div class="bar">Nine people, free entry, a fee from December</div>
+  <div class="rule" style="margin-top:5mm"></div>
+  <p class="foot"><span>Centre</span><i>|</i><span>Open bar</span><i>|</i><span>All night</span></p>
+</div>
+
+<!-- FORMATS -->
+<div class="pg">
+  <p class="kick">03 · The three formats</p><div class="rule"></div><div class="rule t"></div>
+
+  <div class="fmt">
+    <div class="hd"><h3>Classic PerugiaParty</h3><span>Late · 22:00 to close</span></div>
+    <div class="gr">
+      <b>The night</b><span>Theme, open bar, two DJs, dancing from the first hour.</span>
+      <b>Who comes</b><span>Students and Erasmus, 80 to 150.</span>
+      <b>We need</b><span>Room to dance, a real bar, sound, late closing, neighbours who can take it.</span>
+      <b>Ticket</b><span>Early bird / normal / late, open bar included.</span>
+    </div>
+  </div>
+
+  <div class="fmt">
+    <div class="hd"><h3>Cena with live music</h3><span>Early · 20:00 to 00:00</span></div>
+    <div class="gr">
+      <b>The night</b><span>Seated dinner, one live act or acoustic set, drinks after. Cultural, calmer, still ours.</span>
+      <b>Who comes</b><span>Mixed ages, locals as well as students, 40 to 80 seated.</span>
+      <b>We need</b><span>A kitchen, tables, a corner for the band, a venue that is proud of its food.</span>
+      <b>Ticket</b><span>One price, dinner and the act included, drinks separate or capped.</span>
+    </div>
+  </div>
+
+  <div class="fmt">
+    <div class="hd"><h3>Aperitivo</h3><span>Early · 18:30 to 22:00</span></div>
+    <div class="gr">
+      <b>The night</b><span>Drink, buffet, DJ set on low volume. The easy way in for people who do not know us.</span>
+      <b>Who comes</b><span>Walk-ins and first-timers, 50 to 100, high turnover.</span>
+      <b>We need</b><span>Outdoor or a street-facing room, fast bar, simple food.</span>
+      <b>Ticket</b><span>Low fixed price, drink plus buffet, no theme needed.</span>
+    </div>
+  </div>
+
+  <div class="sp"></div>
+  <div class="bar">One venue rarely does all three</div>
+  <div class="rule" style="margin-top:5mm"></div>
+  <p class="foot"><span>Centre</span><i>|</i><span>Open bar</span><i>|</i><span>All night</span></p>
+</div>
+
+<!-- CHECKLIST -->
+<div class="pg">
+  <p class="kick">04 · What we ask of a venue</p><div class="rule"></div><div class="rule t"></div>
+  <h2>Non negotiable</h2>
+  <ul class="chk">
+    <li><i>01</i>Licence and public liability in the venue's name</li>
+    <li><i>02</i>Capacity on paper, not by eye</li>
+    <li><i>03</i>Closing time in writing</li>
+    <li><i>04</i>Open bar possible, price agreed per guest</li>
+    <li><i>05</i>SIAE and music handled, and by whom</li>
+    <li><i>06</i>Our own DJs and our own decoration allowed</li>
+  </ul>
+  <h2>Makes it good</h2>
+  <ul class="chk">
+    <li><i>07</i>Walking distance from the centre</li>
+    <li><i>08</i>A real dance floor, not a corridor</li>
+    <li><i>09</i>Own sound, or room for ours</li>
+    <li><i>10</i>Kitchen, if we want the dinner format</li>
+    <li><i>11</i>Outdoor space for the aperitivo</li>
+    <li><i>12</i>Staff who have done a busy night before</li>
+  </ul>
+  <div class="sp"></div>
+  <div class="rule"></div>
+  <p class="foot"><span>Centre</span><i>|</i><span>Open bar</span><i>|</i><span>All night</span></p>
+</div>
+
+<!-- VENUE PAGES -->
+<div class="pg">
+  <p class="kick">05 · The places we visited</p><div class="rule"></div><div class="rule t"></div>
+  <p class="mut" style="font-size:9.5pt;letter-spacing:.06em;text-transform:uppercase;margin-top:4mm">One card per place. Fill in what we saw, decide the format it fits.</p>
+  <div class="vn">
+    <div class="hd"><h3>Venue 1</h3><em>Area</em></div>
+    <div class="gr">
+      <div class="f"><span>Capacity</span><b></b></div><div class="f"><span>Cost model</span><b></b></div>
+      <div class="f"><span>Bar</span><b></b></div><div class="f"><span>Kitchen</span><b></b></div>
+      <div class="f"><span>Sound</span><b></b></div><div class="f"><span>Closing</span><b></b></div>
+      <div class="f"><span>Outdoor</span><b></b></div><div class="f"><span>Licence</span><b></b></div>
+    </div>
+    <p class="note">Fits · <u></u></p>
+    <p class="note">Notes · <u></u></p>
+  </div>
+  <div class="vn">
+    <div class="hd"><h3>Venue 2</h3><em>Area</em></div>
+    <div class="gr">
+      <div class="f"><span>Capacity</span><b></b></div><div class="f"><span>Cost model</span><b></b></div>
+      <div class="f"><span>Bar</span><b></b></div><div class="f"><span>Kitchen</span><b></b></div>
+      <div class="f"><span>Sound</span><b></b></div><div class="f"><span>Closing</span><b></b></div>
+      <div class="f"><span>Outdoor</span><b></b></div><div class="f"><span>Licence</span><b></b></div>
+    </div>
+    <p class="note">Fits · <u></u></p>
+    <p class="note">Notes · <u></u></p>
+  </div>
+  <div class="vn">
+    <div class="hd"><h3>Venue 3</h3><em>Area</em></div>
+    <div class="gr">
+      <div class="f"><span>Capacity</span><b></b></div><div class="f"><span>Cost model</span><b></b></div>
+      <div class="f"><span>Bar</span><b></b></div><div class="f"><span>Kitchen</span><b></b></div>
+      <div class="f"><span>Sound</span><b></b></div><div class="f"><span>Closing</span><b></b></div>
+      <div class="f"><span>Outdoor</span><b></b></div><div class="f"><span>Licence</span><b></b></div>
+    </div>
+    <p class="note">Fits · <u></u></p>
+    <p class="note">Notes · <u></u></p>
+  </div>
+  <div class="sp"></div>
+  <div class="rule"></div>
+  <p class="foot"><span>Centre</span><i>|</i><span>Open bar</span><i>|</i><span>All night</span></p>
+</div>
+
+<div class="pg">
+  <p class="kick">05 · The places we visited</p><div class="rule"></div><div class="rule t"></div>
+  <div class="vn" style="margin-top:6mm">
+    <div class="hd"><h3>Venue 4</h3><em>Area</em></div>
+    <div class="gr">
+      <div class="f"><span>Capacity</span><b></b></div><div class="f"><span>Cost model</span><b></b></div>
+      <div class="f"><span>Bar</span><b></b></div><div class="f"><span>Kitchen</span><b></b></div>
+      <div class="f"><span>Sound</span><b></b></div><div class="f"><span>Closing</span><b></b></div>
+      <div class="f"><span>Outdoor</span><b></b></div><div class="f"><span>Licence</span><b></b></div>
+    </div>
+    <p class="note">Fits · <u></u></p>
+    <p class="note">Notes · <u></u></p>
+  </div>
+  <div class="vn">
+    <div class="hd"><h3>Venue 5</h3><em>Area</em></div>
+    <div class="gr">
+      <div class="f"><span>Capacity</span><b></b></div><div class="f"><span>Cost model</span><b></b></div>
+      <div class="f"><span>Bar</span><b></b></div><div class="f"><span>Kitchen</span><b></b></div>
+      <div class="f"><span>Sound</span><b></b></div><div class="f"><span>Closing</span><b></b></div>
+      <div class="f"><span>Outdoor</span><b></b></div><div class="f"><span>Licence</span><b></b></div>
+    </div>
+    <p class="note">Fits · <u></u></p>
+    <p class="note">Notes · <u></u></p>
+  </div>
+  <div class="vn">
+    <div class="hd"><h3>Venue 6</h3><em>Area</em></div>
+    <div class="gr">
+      <div class="f"><span>Capacity</span><b></b></div><div class="f"><span>Cost model</span><b></b></div>
+      <div class="f"><span>Bar</span><b></b></div><div class="f"><span>Kitchen</span><b></b></div>
+      <div class="f"><span>Sound</span><b></b></div><div class="f"><span>Closing</span><b></b></div>
+      <div class="f"><span>Outdoor</span><b></b></div><div class="f"><span>Licence</span><b></b></div>
+    </div>
+    <p class="note">Fits · <u></u></p>
+    <p class="note">Notes · <u></u></p>
+  </div>
+  <div class="sp"></div>
+  <div class="rule"></div>
+  <p class="foot"><span>Centre</span><i>|</i><span>Open bar</span><i>|</i><span>All night</span></p>
+</div>
+
+<!-- SIDE BY SIDE -->
+<div class="pg">
+  <p class="kick">06 · Side by side</p><div class="rule"></div><div class="rule t"></div>
+  <table>
+    <tr><th>Venue</th><th>Cap.</th><th>Cost</th><th>Late</th><th>Kitchen</th><th>Best for</th></tr>
+    <tr><td>1</td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>2</td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>3</td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>4</td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>5</td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>6</td><td></td><td></td><td></td><td></td><td></td></tr>
+  </table>
+  <h2>What we decide together</h2>
+  <div class="rule h"></div>
+  <div class="row"><span>Home for the classic night</span><b></b></div>
+  <div class="row"><span>Place for the cena</span><b></b></div>
+  <div class="row"><span>Place for the aperitivo</span><b></b></div>
+  <div class="row"><span>Who negotiates</span><b></b></div>
+  <div class="row"><span>Signed before</span><b></b></div>
+  <div class="sp"></div>
+  <div class="bar">Decide once, book the next three</div>
+  <div class="rule" style="margin-top:5mm"></div>
+  <p class="foot"><span>Centre</span><i>|</i><span>Open bar</span><i>|</i><span>All night</span></p>
+</div>
+
+</body></html>
