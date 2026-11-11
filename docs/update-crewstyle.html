@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><title>Update PerugiaParty</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+@page{size:A4;margin:0}
+@font-face{font-family:'Anton';src:url(/fonts/anton-400.woff2) format('woff2');font-weight:400;font-display:block}
+:root{--red:#9e0b0b;--red2:#c0180f;--cream:#f7efe2;--ink:#17120f;--yellow:#ffd23f;--mut:#7d7265}
+*{box-sizing:border-box;margin:0}
+body{background:#2a2a2a;font-family:"Figtree",system-ui,sans-serif;color:var(--ink)}
+.pg{width:210mm;height:297mm;background:var(--cream);display:flex;flex-direction:column;overflow:hidden}
+.d{font-family:"Anton",sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.005em;line-height:.92}
+.lbl{font-size:7pt;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+
+/* hero */
+.hero{background:var(--red);color:var(--cream);padding:9mm 14mm 8mm;border-radius:0 0 7mm 7mm}
+.hero h1{font-size:36pt}
+.hero h2{font-size:17pt;color:var(--yellow);margin-top:2mm}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;margin-top:5mm;border-top:.5mm solid rgba(247,239,226,.35);
+       border-bottom:.5mm solid rgba(247,239,226,.35)}
+.stats div{padding:3mm 0 3mm 5mm;border-left:.5mm solid rgba(247,239,226,.35)}
+.stats div:first-child{border-left:0;padding-left:0}
+.stats b{display:block;font-family:"Anton",sans-serif;font-weight:400;font-size:15pt;text-transform:uppercase}
+.stats span{font-size:8.5pt;opacity:.85}
+.hero p{font-size:10pt;line-height:1.4;margin-top:3.5mm;max-width:150mm}
+.hero p em{font-style:normal;color:var(--yellow);font-weight:800}
+
+/* body */
+.bd{padding:6mm 14mm 0;display:flex;flex-direction:column;flex:1}
+.sec{display:grid;grid-template-columns:1fr;gap:0}
+.hd{margin-bottom:3mm}
+.hd .n{font-size:7.5pt;font-weight:800;letter-spacing:.2em;color:var(--red2)}
+.hd h3{font-family:"Anton",sans-serif;font-weight:400;font-size:17pt;text-transform:uppercase;margin-top:1mm}
+
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:3mm;margin-bottom:4mm}
+.card{border-radius:3mm;padding:3.4mm 4.5mm}
+.card.dark{background:var(--ink);color:var(--cream)}
+.card.ylw{background:var(--yellow);color:var(--ink)}
+.card .lbl{opacity:.75}
+.card b{display:block;font-family:"Anton",sans-serif;font-weight:400;font-size:15pt;text-transform:uppercase;margin:.8mm 0 1.2mm}
+.card p{font-size:8.5pt;line-height:1.35}
+
+.rw{display:grid;grid-template-columns:34mm 1fr;gap:5mm;align-items:baseline;padding:1.6mm 0;border-bottom:.3mm solid rgba(23,18,15,.18)}
+.rw .lbl{color:var(--red2)}
+.rw p{font-size:9.5pt;line-height:1.35}
+.rw p b{font-weight:800}
+
+.fmt{display:grid;grid-template-columns:20mm 1fr 1fr 1fr;gap:0 4mm;margin-top:1mm}
+.fmt .h{font-family:"Anton",sans-serif;font-size:14pt;text-transform:uppercase;color:var(--red2);padding-bottom:1.5mm;
+        border-bottom:.8mm solid var(--ink)}
+.fmt .h.k{border-bottom:.8mm solid var(--ink)}
+.fmt .k{font-size:7.5pt;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);padding:1.5mm 0;
+        border-bottom:.3mm solid rgba(23,18,15,.18)}
+.fmt .v{font-size:9pt;line-height:1.3;padding:1.5mm 0;border-bottom:.3mm solid rgba(23,18,15,.18)}
+
+/* footer */
+.ft{background:var(--ink);color:var(--cream);margin-top:auto;padding:6mm 14mm 6mm}
+.ft .slg{font-family:"Anton",sans-serif;font-size:12.5pt;text-transform:uppercase;line-height:1.1}
+.ft .slg i{font-style:normal;color:var(--yellow)}
+.ft .cr{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm 5mm;margin-top:4mm;padding-top:3.5mm;
+        border-top:.4mm solid rgba(247,239,226,.3)}
+.ft .cr div .lbl{color:var(--yellow);opacity:.9}
+.ft .cr div b{display:block;font-family:"Anton",sans-serif;font-weight:400;font-size:11pt;text-transform:uppercase;margin-top:1mm}
+</style></head><body>
+<div class="pg">
+
+  <div class="hero">
+    <h1 class="d">Update</h1>
+    <h2 class="d">PerugiaParty</h2>
+    <div class="stats">
+      <div><b>11 Nov</b><span>Questo aggiornamento</span></div>
+      <div><b>1 Anno</b><span>Di PerugiaParty</span></div>
+      <div><b>3 Format</b><span>Classic · Ape · Dinner</span></div>
+    </div>
+    <p><em>Dove siamo:</em> dopo un'anno di perugiaparty, una brutta esperienza nel primo locale, guardiamo quali sono i nostri prossimi passi.</p>
+  </div>
+
+  <div class="bd">
+    <div class="sec">
+      <div class="hd"><p class="n">01</p><h3>Chi fa' cosa</h3></div>
+      <div class="cards">
+        <div class="card dark"><p class="lbl">CEO · Exec. producer</p><b>Mattheo</b><p>Money side, general communication (w/ third parties), website and tickets, end authority.</p></div>
+        <div class="card ylw"><p class="lbl">Manager</p><b>Miltiad</b><p>Floor host during the night. First contact during the night.</p></div>
+      </div>
+      <div class="rw"><p class="lbl">Big J</p><p><b>Bar manager</b> · bar e baristas (drinks, shots, snacks)</p></div>
+      <div class="rw"><p class="lbl">Sara e Cori</p><p><b>Creatives</b> · media (photo/video), general vibe (decoration/theme/activities)</p></div>
+      <div class="rw"><p class="lbl">Irene</p><p><b>Guest relations</b> · external check</p></div>
+      <div class="rw"><p class="lbl">Third parties</p><p><b>Design, DJs, baristas, doorman</b> · various</p></div>
+    </div>
+
+    <div class="sec" style="margin-top:5mm">
+      <div class="hd"><p class="n">02</p><h3>I tre format</h3></div>
+      <div class="fmt">
+        <div class="h k">&nbsp;</div><div class="h">Classic</div><div class="h">Ape</div><div class="h">Dinner</div>
+        <div class="k">Where</div><div class="v">La Goliardia</div><div class="v">Modu</div><div class="v">Circolo Ponte d'Oddi</div>
+        <div class="k">Time</div><div class="v">22:00 - 04:00/05:00</div><div class="v">Inizio 17:00/18:00</div><div class="v">Sera</div>
+        <div class="k">People</div><div class="v">100 minimum</div><div class="v">Walk-in, informal</div><div class="v">50 and up</div>
+        <div class="k">Drinks</div><div class="v">Open bar</div><div class="v">Various, partner bar</div><div class="v">Basics</div>
+        <div class="k">Food</div><div class="v">Snacks</div><div class="v">Snacks</div><div class="v">Full dinner</div>
+        <div class="k">Music</div><div class="v">DJ, dance floor</div><div class="v">Chill</div><div class="v">Live act (various)</div>
+        <div class="k">Needs</div><div class="v">Central, real bar, dance floor, late closing</div><div class="v">Centre, seated, our activities and accents</div><div class="v">Space</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ft">
+    <p class="slg">Tonight we party.<br>Tomorrow we forget.<br><i>Later, it's the best night you've ever had.</i></p>
+    <div class="cr">
+      <div><p class="lbl">CEO</p><b>Mattheo</b></div>
+      <div><p class="lbl">Manager</p><b>Miltiad</b></div>
+      <div><p class="lbl">Bar</p><b>Big J</b></div>
+      <div><p class="lbl">Creatives</p><b>Sara e Cori</b></div>
+    </div>
+  </div>
+
+</div>
+</body></html>
