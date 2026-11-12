@@ -440,7 +440,6 @@ async function verifyTurnstile(ev, token, req) {
 }
 
 // where the request was sent from: Cloudflare's approximate city and country for the connection
-const geo = (req) => ({ country: (req.cf && req.cf.country) || null, city: (req.cf && req.cf.city) || null });
 async function apiRequest(req, env) {
   let body;
   try { body = await req.json(); } catch { return json({ error: "Send the form again." }, 400); }
@@ -478,9 +477,8 @@ async function apiRequest(req, env) {
   const status = (await soldOut(env, ev)) ? "waitlist" : "requested";
   const token = newToken(), vcode = newVcode(ev.tag);
   if (withIg === ig) withIg = null;
-  const where = geo(req);
-  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, invited_by, is_returning, vcode, verified, with_ig, signup_country, signup_city) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)")
-    .bind(token, ev.tag, name, ig, phone, note, status, Date.now(), inviter, returning ? 1 : 0, vcode, withIg, where.country, where.city).run();
+  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, invited_by, is_returning, vcode, verified, with_ig) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)")
+    .bind(token, ev.tag, name, ig, phone, note, status, Date.now(), inviter, returning ? 1 : 0, vcode, withIg).run();
   await upsertPerson(env, ig, name, phone);
   return json({ ok: true, token, vcode, ig, waitlist: status === "waitlist" });
 }
@@ -508,9 +506,8 @@ async function apiRerequest(req, env) {
   const token = newToken();
   // the old personal link proves it's them when that ticket was used at the door or confirmed by DM
   if (proven) await dropUnconfirmed(env, ev.tag, ig, null);
-  const where = geo(req);
-  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, is_returning, vcode, verified, verified_at, signup_country, signup_city) VALUES (?, ?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?)")
-    .bind(token, ev.tag, g.name, ig, g.phone || "", status, Date.now(), returning ? 1 : 0, newVcode(ev.tag), proven ? 1 : 0, proven ? Date.now() : null, where.country, where.city).run();
+  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, is_returning, vcode, verified, verified_at) VALUES (?, ?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?)")
+    .bind(token, ev.tag, g.name, ig, g.phone || "", status, Date.now(), returning ? 1 : 0, newVcode(ev.tag), proven ? 1 : 0, proven ? Date.now() : null).run();
   if (proven) await env.DB.prepare("UPDATE people SET verified = 1 WHERE ig = ?").bind(ig).run();
   await upsertPerson(env, ig, g.name, g.phone);
   return json({ ok: true, token, waitlist: status === "waitlist" });
@@ -810,7 +807,7 @@ async function sitemap(env) {
   const alt = `<xhtml:link rel="alternate" hreflang="en" href="https://perugiaparty.com/"/><xhtml:link rel="alternate" hreflang="it" href="https://perugiaparty.com/italian"/>`;
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-${[u("/", today, "1.0", alt), u("/italian", today, "0.8", alt), u("/erasmus", today, "0.8"), u("/privacy", "2026-10-13", "0.2")].join("\n")}
+${[u("/", today, "1.0", alt), u("/italian", today, "0.8", alt), u("/erasmus", today, "0.8"), u("/privacy", "2026-10-13", "0.2"), u("/terms", today, "0.2"), u("/termini", today, "0.2")].join("\n")}
 </urlset>`;
   return new Response(body, { headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" } });
 }
@@ -971,7 +968,7 @@ const SECURITY = {
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
   "Cross-Origin-Opener-Policy": "same-origin",
   "Permissions-Policy": "camera=(self), microphone=(), geolocation=(), payment=(), usb=()",
-  "Content-Security-Policy": "default-src 'self'; worker-src 'self'; manifest-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests",
+  "Content-Security-Policy": "default-src 'self'; worker-src 'self'; manifest-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self'; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests",
 };
 function secure(res) {
   if (!res || res.status === 101) return res;
