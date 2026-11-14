@@ -54,7 +54,6 @@ header .btn{white-space:nowrap}
 header .btn{padding:8px 16px}
 
 .sec{padding-block:80px}
-.sec + .sec{border-top:1.5px solid var(--line)}
 .sec-head{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;margin-bottom:40px}
 .sec-head p{max-width:46ch;color:var(--muted)}
 .sec-head p a{color:var(--red-deep);font-weight:700}

@@ -87,7 +87,7 @@
 .reqbox input,.reqbox textarea{background:#1d1815;border:1.5px solid rgba(244,234,215,.2);color:var(--cream);border-radius:14px;padding:14px 16px}
 .reqbox input::placeholder,.reqbox textarea::placeholder{color:#6f675e}
 .reqbox input:focus,.reqbox textarea:focus{border-color:var(--red-glow);box-shadow:0 0 0 3px rgba(255,74,61,.18);outline:none}
-.reqbox .check{color:var(--cream);font-family:var(--f-body);font-size:15px;letter-spacing:0;text-transform:none;border-top:1px solid rgba(244,234,215,.12);padding-top:16px;margin-top:2px}
+.reqbox .check{color:var(--cream);font-family:var(--f-body);font-size:15px;letter-spacing:0;text-transform:none;padding-top:8px;margin-top:2px}
 .reqbox .check input{accent-color:var(--red-glow)}
 .reqbox .send-row .btn{padding:15px 34px;font-size:17px;min-width:220px}
 .reqbox .err{color:#ff8a7f}
@@ -106,6 +106,8 @@
 @media (max-width:640px){.reqbox{padding:22px 18px;border-radius:20px}}
 .req-next{margin-bottom:0;color:var(--cream);padding:0;background:transparent;border-radius:0}
 .reqbox .req-next h3{margin:0;font-size:clamp(34px,5.6vw,58px)}
+.nx-when{font-family:var(--f-mono);font-size:clamp(14px,2vw,17px);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--cream);margin-top:12px}
 .nightfacts{display:grid;gap:14px}
 .nf-l{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8f8579}
 .nf-l b{color:var(--cream);font-weight:500}
@@ -305,7 +307,7 @@ textarea{resize:vertical;min-height:88px}
 .req-note.invite{background:var(--red);border-left-color:var(--ink)}
 .req-note.invite span{color:#f3d3cc}
 /* house rules: full-width dark band */
-.rules-band{background:var(--ink);color:var(--cream);border-bottom:1px solid var(--ink-2)}
+.rules-band{background:var(--ink);color:var(--cream)}
 .rules-band .sec{padding-block:72px}
 .rules-card{background:transparent;padding:0}
 .rules-card .sec-head{margin-bottom:32px}
@@ -413,11 +415,22 @@ body.locked{overflow:hidden}
 .hero-meta .hm-red{color:var(--red-deep);font-weight:500}
 
 /* no party taking requests: the form and everything pointing to it disappears */
-html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
+html[data-closed] .ctas .btn.outline{display:none}
+html[data-closed] .reqbox form,html[data-closed] .reqbox .side,html[data-closed] .reqbox .nightfacts{display:none}
+html[data-closed] .reqbox{grid-template-columns:1fr}
+/* no party announced yet: the block turns into the red "in the works" card */
+html:not([data-live]) .reqbox{background:var(--red)}
+html:not([data-live]) .reqbox::after{display:none}
+html:not([data-live]) .reqbox .status{color:#ffd9d4}
+html:not([data-live]) .reqbox .status i{background:#ffd9d4}
+html:not([data-live]) .reqbox .next p{color:#f6ded9}
+html:not([data-live]) .reqbox .btn{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+html:not([data-live]) .reqbox .next{grid-template-columns:1fr auto;gap:30px;align-items:center}
+@media (max-width:720px){html:not([data-live]) .reqbox .next{grid-template-columns:1fr}}
 /* page order: a published party jumps right under the top */
 main#top{display:flex;flex-direction:column}main#top>*{width:100%;box-sizing:border-box}
 .o-hero{order:0}.o-new{order:1}.o-main{order:2}.o-why{order:3}.o-nights{order:4}.o-faq{order:5}
-html:not([data-live]) #next-card{display:none}
+
 /* past nights: small strip */
 #nights{padding-block:28px 40px}#nights .sec-head h2{font-size:clamp(22px,3vw,30px)}#nights .sec-head{margin-bottom:14px}
 #nights .nights{flex-wrap:wrap;overflow:visible;gap:8px}
@@ -750,8 +763,10 @@ function renderNext(ev){
   const cta = ev.requests_open ? "" : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram</a>`;
   el.classList.toggle("has-poster", !!ev.poster);
   const art = "";
+  const when = [ev.date_label, ev.doors ? "Doors " + ev.doors : ""].filter(Boolean).join(" · ");
   el.innerHTML = `<div class="next-main">
       <h3>${esc(ev.name || "Next PerugiaParty")}</h3>
+      ${when ? `<p class="nx-when">${esc(when)}</p>` : ""}
       ${cta ? `<div class="next-cta">${cta}</div>` : ""}</div>${art}
     ${ev.poster ? `<a class="poster" href="${ev.requests_open ? "#request" : "https://www.instagram.com/perugiaparty/"}" aria-label="${esc(ev.name || "Party")} poster"><img src="${esc(ev.poster)}" alt="${esc(ev.name || "Party")} poster" loading="lazy" decoding="async"></a>` : ""}`;
   const nf = $("night-facts");
@@ -848,7 +863,7 @@ function previewEvent(){
   if (EVENT && EVENT.published && EVENT.name) $("pv-ev").textContent = "Guest request · " + EVENT.name;
   const t = $("pv-total"); if (!t || !EVENT) return;
   // the price that applies right now; it goes up as places at this price run out
-  if (EVENT.price_now != null) t.textContent = euro(EVENT.price_now);
+  if (EVENT.price_now != null) t.textContent = "From " + euro(EVENT.price_now);
   else if (EVENT.price && EVENT.price.min != null) t.textContent = "From " + euro(EVENT.price.min);
 }
 (function(){ try { const m = JSON.parse(localStorage.getItem("pp_me") || "null"); if (m) { $("f-name").value = m.name || ""; $("f-ig").value = m.ig || ""; $("f-phone").value = m.phone || ""; } } catch(e){} })();
