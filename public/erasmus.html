@@ -71,8 +71,18 @@
 .reqbox .req{display:contents}
 .reqbox .req-next{grid-column:1;grid-row:1}
 .reqbox form{grid-column:1;grid-row:2}
-.reqbox .side{grid-column:2;grid-row:1 / span 2;align-self:center}
-.reqbox label,.reqbox .check{color:var(--cream)}
+.reqbox .nightfacts{grid-column:1;grid-row:3;border-top:1px solid rgba(244,234,215,.14);padding-top:22px}
+.reqbox .side{grid-column:2;grid-row:1 / span 3;align-self:center}
+.reqbox form{display:grid;gap:18px}
+.reqbox label{color:#b9ab98;font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:400}
+.reqbox label small{color:#7f776d;text-transform:none;letter-spacing:0;font-family:var(--f-body)}
+.reqbox input,.reqbox textarea{background:#1d1815;border:1.5px solid rgba(244,234,215,.2);color:var(--cream);border-radius:14px;padding:14px 16px}
+.reqbox input::placeholder,.reqbox textarea::placeholder{color:#6f675e}
+.reqbox input:focus,.reqbox textarea:focus{border-color:var(--red-glow);box-shadow:0 0 0 3px rgba(255,74,61,.18);outline:none}
+.reqbox .check{color:var(--cream);font-family:var(--f-body);font-size:15px;letter-spacing:0;text-transform:none;border-top:1px solid rgba(244,234,215,.14);padding-top:18px}
+.reqbox .check input{accent-color:var(--red-glow)}
+.reqbox .send-row .btn{padding:15px 34px;font-size:17px;min-width:220px}
+.reqbox .err{color:#ff8a7f}
 .reqbox .check a{color:var(--cream)}
 .reqbox .privacy{color:#9a8f7e}
 .reqbox .privacy a{color:#b9ab98}
@@ -82,18 +92,19 @@
 .reqbox .side .linkbox{background:#241e1a}
 @media (max-width:860px){
   .reqbox{grid-template-columns:1fr;row-gap:26px}
-  .reqbox .req-next,.reqbox form,.reqbox .side{grid-column:1;grid-row:auto}
+  .reqbox .req-next,.reqbox form,.reqbox .nightfacts,.reqbox .side{grid-column:1;grid-row:auto}
+  .reqbox .side{order:2}.reqbox .nightfacts{order:3}
 }
 @media (max-width:640px){.reqbox{padding:22px 18px;border-radius:20px}}
-.req-next{margin-bottom:28px;color:var(--cream);padding:0;background:transparent;border-radius:0}
-.req-next .next-main{display:grid;grid-template-columns:1fr auto;grid-template-areas:"t c" "d c";
-  align-items:center;column-gap:34px;row-gap:10px;width:100%}
-.req-next .next-main h3{grid-area:t}
-.req-next .next-main dl{grid-area:d;margin:0}
-.req-next .next-main .count{grid-area:c;margin-top:0}
-@media (max-width:720px){.req-next .next-main{grid-template-columns:1fr;grid-template-areas:"t" "d" "c";row-gap:18px}}
+.req-next{margin-bottom:4px;color:var(--cream);padding:0;background:transparent;border-radius:0}
+.nightfacts{display:flex;align-items:center;gap:clamp(20px,4vw,44px);flex-wrap:wrap}
+.nightfacts dl{display:flex;gap:30px;flex-wrap:wrap;margin:0}
+.nightfacts dt{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8f8579}
+.nightfacts dd{margin:4px 0 0;font-weight:700;font-size:19px;color:var(--cream)}
+.nightfacts .count{margin-top:0}
+.req-next .next-main{display:block;width:100%}
 .req-next h3{color:var(--cream)}
-@media (max-width:640px){.req-next{padding:26px 22px;margin-bottom:22px}}
+@media (max-width:640px){.req-next{padding:0;margin-bottom:18px}}
 .next-sec{padding-block:48px}
 .next .kicker{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-dark);margin-bottom:10px}
 .next .next-main{min-width:0;display:flex;flex-direction:column;align-items:flex-start}
@@ -329,7 +340,7 @@ html,body{overflow-x:clip}
   .hero{padding-block:24px 40px;gap:36px;min-height:80svh;align-content:center}
   .hero .lede{font-size:18px}
   .hero .ctas{margin-top:26px}
-  .hero .ctas .btn{width:100%;text-align:center;padding-block:18px;font-size:18px}
+  .hero .ctas .btn{width:auto;min-width:240px;text-align:center;padding:15px 30px;font-size:17px}
   .next .next-art-l,.next .next-art{display:none}
   .ticket{max-width:calc(100% - 14px);box-shadow:8px 8px 0 var(--red);padding:22px 22px 20px}
   .ticket .logo{width:120px;height:auto}
@@ -340,7 +351,7 @@ html,body{overflow-x:clip}
   .sec-head{margin-bottom:28px}
   .next{padding:22px}
   .next dl{gap:20px}
-  .next .btn{width:100%}
+  .next .btn{width:auto;min-width:220px}
   .steps{gap:22px}
   .steps li{display:grid;grid-template-columns:44px 1fr;column-gap:14px;align-items:start}
   .steps li::before{width:44px;height:44px;font-size:20px;grid-row:span 2}
@@ -429,7 +440,7 @@ html:not([data-live]) #next-card{display:none}
 .count b{font-size:clamp(34px,5vw,52px);letter-spacing:-.02em}
 .next-cta{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:30px}
 .next-cta .btn{padding:15px 30px;font-size:16.5px;box-shadow:0 14px 34px -14px rgba(232,57,43,.95)}
-@media (max-width:420px){.next-cta{gap:10px}.next-cta .btn{width:100%}}
+@media (max-width:420px){.next-cta{gap:10px}}
 /* dark top: the page opens like a night out */
 .o-hero{background:var(--ink);box-shadow:0 0 0 100vmax var(--ink);clip-path:inset(0 -100vmax);color:var(--cream);position:relative;isolation:isolate}
 .o-hero::before{content:"";position:absolute;inset:-40px -100vmax 0;z-index:-1;pointer-events:none;
@@ -464,7 +475,8 @@ html:not([data-live]) #next-card{display:none}
   .o-hero .hero{padding-block:34px 44px;gap:0}
   .hero h1{font-size:clamp(40px,11.5vw,56px)}
   .hero .lede{font-size:17px;margin-top:18px}
-  .hero .ctas{margin-top:24px}.hero .ctas .btn{width:100%}
+  .hero .ctas{margin-top:24px}
+  .hero .ctas .btn{width:auto;min-width:240px;padding:15px 30px;font-size:17px}
   .side{position:static;gap:20px}
   .side .mini{transform:none;filter:drop-shadow(8px 8px 0 var(--red));padding:22px 20px 28px}
 }
@@ -569,6 +581,7 @@ html:not([data-live]) #next-card{display:none}
           <div class="send-row"><button class="btn" type="submit" id="f-send">Send request</button></div>
           <p class="privacy">Your details are only used for the guest list. <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p>
         </form>
+        <div class="nightfacts" id="night-facts" hidden></div>
         <aside class="side" id="side" aria-live="polite">
           <div class="mini" aria-label="Live preview of your request">
             <span class="stamp" id="pv-stamp">DRAFT</span>
@@ -734,10 +747,14 @@ function renderNext(ev){
   const art = "";
   el.innerHTML = `<div class="next-main">
       <h3>${esc(ev.name || "Next PerugiaParty")}</h3>
-      ${facts.length ? `<dl>${facts.map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>` : ""}
-      <div class="count" id="count" ${ev.starts_at ? "" : "hidden"} aria-label="Countdown to the party"></div>
       <div class="next-cta">${cta}</div></div>${art}
     ${ev.poster ? `<a class="poster" href="${ev.requests_open ? "#request" : "https://www.instagram.com/perugiaparty/"}" aria-label="${esc(ev.name || "Party")} poster"><img src="${esc(ev.poster)}" alt="${esc(ev.name || "Party")} poster" loading="lazy" decoding="async"></a>` : ""}`;
+  const nf = $("night-facts");
+  if (nf) {
+    nf.innerHTML = `${facts.length ? `<dl>${facts.map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>` : ""}
+      <div class="count" id="count" ${ev.starts_at ? "" : "hidden"} aria-label="Countdown to the party"></div>`;
+    nf.hidden = !(facts.length || ev.starts_at);
+  }
   if (ev.starts_at) { tick(); clearInterval(timer); timer = setInterval(tick, 1000); }
 }
 function tick(){
