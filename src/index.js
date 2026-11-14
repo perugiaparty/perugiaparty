@@ -57,12 +57,29 @@ async function heldPlaces(env, tag) {
   const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND status IN ('approved','paid','in') AND COALESCE(ticket,'') <> 'crew'").bind(tag).first();
   return r?.n || 0;
 }
-// Tier that applies right now by date (same rule as the admin Approve button).
-function dateTier(ev) {
-  const now = Date.now(), eu = ev.early_until ? Date.parse(ev.early_until) : NaN, nu = ev.normal_until ? Date.parse(ev.normal_until) : NaN;
-  if (Number.isFinite(eu) && now < eu) return "early";
-  if (Number.isFinite(nu) && now >= nu) return "late";
-  return "normal";
+// How many places each round has already taken (approved, paid or at the door).
+async function tierUsed(env, tag) {
+  const rows = (await env.DB.prepare(
+    "SELECT ticket, COUNT(*) AS n FROM guests WHERE event = ? AND status IN ('approved','paid','in') GROUP BY ticket"
+  ).bind(tag).all()).results || [];
+  return Object.fromEntries(rows.map((r) => [r.ticket, Number(r.n) || 0]));
+}
+// The round that applies right now: the first one with a price whose own limit is not
+// full yet. A round without a limit never ends, so it is the last one that can apply.
+// Prices go up by how many people are in, never by the clock.
+function tierFromCounts(ev, used) {
+  const order = ["early", "normal", "late"];
+  const priced = order.filter((t) => ev["price_" + t] != null && ev["price_" + t] !== "");
+  if (!priced.length) return "normal";
+  for (const t of priced) {
+    const cap = Number(ev["cap_" + t]);
+    if (!(cap > 0)) return t;                       // no limit: this round stays open
+    if ((used[t] || 0) < cap) return t;             // still room at this price
+  }
+  return priced[priced.length - 1];                 // every round full: the last price stands
+}
+async function tierNow(env, ev) {
+  return tierFromCounts(ev, await tierUsed(env, ev.tag));
 }
 // Places left in the current ticket round. When a round has its own limit and is full,
 // the next round counts. Without round limits, falls back to the overall guest limit.
@@ -71,9 +88,8 @@ async function spotsLeft(env, ev) {
   const hasCaps = order.some((t) => Number(ev["cap_" + t]) > 0);
   const total = Number(ev.capacity) > 0 ? Math.max(0, Number(ev.capacity) - (await heldPlaces(env, ev.tag)) - Math.max(0, Number(ev.offline_going) || 0)) : null;
   if (!hasCaps) return total;
-  const rows = (await env.DB.prepare("SELECT ticket, COUNT(*) AS n FROM guests WHERE event = ? AND status IN ('approved','paid','in') GROUP BY ticket").bind(ev.tag).all()).results || [];
-  const used = Object.fromEntries(rows.map((r) => [r.ticket, r.n]));
-  for (const t of order.slice(order.indexOf(dateTier(ev)))) {
+  const used = await tierUsed(env, ev.tag);
+  for (const t of order.slice(order.indexOf(tierFromCounts(ev, used)))) {
     if (ev["price_" + t] == null || ev["price_" + t] === "") continue;
     const cap = Number(ev["cap_" + t]);
     if (!(cap > 0)) return total; // this round has no limit
@@ -337,8 +353,10 @@ async function igHandleDm(env, ev, igsid, text) {
       return;
     }
     await markVerified(env, g, igsid);
+    const back = Number(g.is_returning) === 1 || (await isReturner(env, normIg(g.ig), ev && ev.tag));
     await igSend(env, ev, igsid, [
-      `Confirmed, ${first}! Your request is verified.`,
+      back ? `Welcome back to @perugiaparty, ${first}! Your request is received.`
+           : `Welcome to @perugiaparty, ${first}! Your request is received.`,
       ``,
       `Link: ${shortUrl(await shortFor(env, g), g.token)}`,
     ].join("\n"));
@@ -412,6 +430,8 @@ async function apiEvent(env) {
     date_label: ev.date_label,
     doors: ev.doors,
     price: priceRange(ev),
+    // what the next person to be approved pays right now (rounds move on numbers, not dates)
+    price_now: Number(ev["price_" + (await tierNow(env, ev))]) || null,
     requests_open: !!ev.requests_open,
     sold_out: await soldOut(env, ev),
     pair_free: Number(ev.pair_free) || 0,
@@ -933,7 +953,7 @@ async function igReminders(env) {
     if (!(c.meta && c.meta.changes)) continue;
     const ms = Number(g.deadline) - Date.now();
     const mins = Math.max(1, Math.floor(ms / 6e4)), left = mins >= 60 ? `${Math.floor(mins / 60)}h` : `${mins} min`;
-    const up = Number(ev.price_late) > Number(g.price) && ["early", "normal"].includes(g.ticket) && Number.isFinite(Date.parse(ev.normal_until));
+    const up = Number(ev.price_late) > Number(g.price) && ["early", "normal"].includes(g.ticket);
     const text = isPartyDay(ev) ? `Payment not received yet. ${payNowText(ev, g)}` : ms > 0
       ? `Payment not received yet. You still have ${left} to pay ${euro(g.price)}.\n${up ? `After the deadline the price goes up to ${euro(ev.price_late)}.` : "After the deadline your spot will be released."}`
       : `Payment not received yet. The deadline to pay ${euro(g.price)} has passed.\nPay now to keep your spot, otherwise it will be released.`;
@@ -946,7 +966,7 @@ async function igReminders(env) {
 // when their deadline has passed. They get a reminder with the new amount and a new deadline (never after the party starts).
 async function repriceLate(env) {
   const ev = await getEvent(env);
-  if (!ev || !ev.tag || dateTier(ev) !== "late" || !(Number(ev.price_late) > 0)) return;
+  if (!ev || !ev.tag || (await tierNow(env, ev)) !== "late" || !(Number(ev.price_late) > 0)) return;
   const now = Date.now(), start = Date.parse(ev.starts_at);
   let dl = now + (Number(ev.hours_late) || 24) * 36e5;
   if (Number.isFinite(start) && start > now) dl = Math.min(dl, start);

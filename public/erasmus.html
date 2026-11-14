@@ -824,7 +824,10 @@ $("f-ig").addEventListener("blur", () => {
 function previewEvent(){
   if (!$("pv-ev")) return;
   if (EVENT && EVENT.published && EVENT.name) $("pv-ev").textContent = "Guest request · " + EVENT.name;
-  const t = $("pv-total"); if (t && EVENT && EVENT.price && EVENT.price.min != null) t.textContent = "From " + euro(EVENT.price.min);
+  const t = $("pv-total"); if (!t || !EVENT) return;
+  // the price that applies right now; it goes up as places at this price run out
+  if (EVENT.price_now != null) t.textContent = euro(EVENT.price_now);
+  else if (EVENT.price && EVENT.price.min != null) t.textContent = "From " + euro(EVENT.price.min);
 }
 (function(){ try { const m = JSON.parse(localStorage.getItem("pp_me") || "null"); if (m) { $("f-name").value = m.name || ""; $("f-ig").value = m.ig || ""; $("f-phone").value = m.phone || ""; } } catch(e){} })();
 preview();
