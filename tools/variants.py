@@ -97,7 +97,7 @@ def italian_post(s):
     b = s.index("</div>", s.index("</section>", a)) + 6
     s = s[:a] + s[b:]
     s = s.replace('href="#rules"', 'href="/#rules"').replace('a[href="/#rules"]', 'a[href="#rules"]')
-    s = s.replace("</style>", """.o-main{order:2}.o-why{order:3}.o-nights{order:4}.o-faq{order:5}
+    s = s.replace("</style>", """.o-why{order:2}.o-main{order:3}.o-nights{order:4}.o-faq{order:5}
 @media (max-width:420px){.fat ul{grid-template-columns:1fr}}
 </style>""", 1)
     return s
@@ -119,6 +119,20 @@ IT = [
     ('<th scope="row">In the centre</th>', '<th scope="row">In centro</th>'),
     ('<th scope="row">Till late</th>', '<th scope="row">Fino a tardi</th>'),
     ('But <span>why?</span>', 'Ma <span>perché?</span>'),
+    ('"Doors " + ev.doors', '"Porte " + ev.doors'),
+    ('<span class="stamp" id="pv-stamp">DRAFT</span>', '<span class="stamp" id="pv-stamp">BOZZA</span>'),
+    ('<p class="rc-s" id="pv-ev">Guest request</p>', '<p class="rc-s" id="pv-ev">Richiesta ospite</p>'),
+    ('<p class="pv-name" id="pv-name">Your name</p>', '<p class="pv-name" id="pv-name">Il tuo nome</p>'),
+    ('<p class="pv-ig" id="pv-ig">@yourinstagram</p>', '<p class="pv-ig" id="pv-ig">@iltuoprofilo</p>'),
+    ('<li id="pv-age"><span></span> 18+ with photo ID</li>', '<li id="pv-age"><span></span> 18+ con documento</li>'),
+    ('<li id="pv-rules"><span></span> House rules read</li>', '<li id="pv-rules"><span></span> Regole lette</li>'),
+    ('<span id="pv-total">Student price</span>', '<span id="pv-total">Prezzo studenti</span>'),
+    ('<p class="tiny" id="pv-tiny">Your code arrives after approval</p>', '<p class="tiny" id="pv-tiny">Il codice arriva dopo l\'approvazione</p>'),
+    ('n.textContent = name || "Your name"', 'n.textContent = name || "Il tuo nome"'),
+    ('i.textContent = "@" + (ig || "yourinstagram")', 'i.textContent = "@" + (ig || "iltuoprofilo")'),
+    ('$("pv-ev").textContent = "Guest request · " + EVENT.name', '$("pv-ev").textContent = "Richiesta ospite · " + EVENT.name'),
+    ('t.textContent = "From " + euro(EVENT.price_now)', 't.textContent = "Da " + euro(EVENT.price_now)'),
+    ('t.textContent = "From " + euro(EVENT.price.min)', 't.textContent = "Da " + euro(EVENT.price.min)'),
     ('<p class="vs-t">The club</p><p class="vs-l">Pricier.<br>Drinks extra.<br>Out of town.</p>', '<p class="vs-t">Il club</p><p class="vs-l">Più caro.<br>Drink a parte.<br>Fuori città.</p>'),
     ('<p class="vs-t">PerugiaParty</p><p class="vs-l">Student prices.<br>Open bar.<br>In the centre.<br>Till late.</p>', '<p class="vs-t">PerugiaParty</p><p class="vs-l">Prezzi studenti.<br>Open bar.<br>In centro.<br>Fino a tardi.</p>'),
     ('<p class="vs-t">The centro</p><p class="vs-l">In the cold.<br>No music.<br>Ends early.</p>', '<p class="vs-t">Il centro</p><p class="vs-l">Al freddo.<br>Niente musica.<br>Finisce presto.</p>'),

@@ -79,8 +79,7 @@
 .reqbox .req{display:contents}
 .reqbox .req-next{grid-column:1;grid-row:1}
 .reqbox form{grid-column:1;grid-row:2}
-.reqbox .nightfacts{grid-column:1;grid-row:3;padding-top:4px}
-.reqbox .side{grid-column:2;grid-row:1 / span 3;align-self:center}
+.reqbox .side{grid-column:2;grid-row:1 / span 2;align-self:center}
 .reqbox form{display:grid;gap:16px;margin-top:4px}
 .reqbox label{color:#b9ab98;font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:400}
 .reqbox label small{color:#7f776d;text-transform:none;letter-spacing:0;font-family:var(--f-body)}
@@ -100,20 +99,13 @@
 .reqbox .side .linkbox{background:#241e1a}
 @media (max-width:860px){
   .reqbox{grid-template-columns:1fr;row-gap:26px}
-  .reqbox .req-next,.reqbox form,.reqbox .nightfacts,.reqbox .side{grid-column:1;grid-row:auto}
-  .reqbox .side{order:2}.reqbox .nightfacts{order:3}
+  .reqbox .req-next,.reqbox form,.reqbox .side{grid-column:1;grid-row:auto}
 }
 @media (max-width:640px){.reqbox{padding:22px 18px;border-radius:20px}}
 .req-next{margin-bottom:0;color:var(--cream);padding:0;background:transparent;border-radius:0}
 .reqbox .req-next h3{margin:0;font-size:clamp(34px,5.6vw,58px)}
 .nx-when{font-family:var(--f-mono);font-size:clamp(14px,2vw,17px);letter-spacing:.1em;text-transform:uppercase;
   color:var(--cream);margin-top:12px}
-.nightfacts{display:grid;gap:14px}
-.nf-l{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8f8579}
-.nf-l b{color:var(--cream);font-weight:500}
-.nightfacts .count{margin-top:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.nightfacts .count div{min-width:0;background:rgba(244,234,215,.05);border:0;padding:14px 8px 11px}
-.nightfacts .count b{font-size:clamp(28px,6vw,40px)}
 .req-next .next-main{display:block;width:100%}
 .req-next h3{color:var(--cream)}
 @media (max-width:640px){.reqbox .req-next{padding:0;margin-bottom:0}}
@@ -416,7 +408,7 @@ body.locked{overflow:hidden}
 
 /* no party taking requests: the form and everything pointing to it disappears */
 html[data-closed] .ctas .btn.outline{display:none}
-html[data-closed] .reqbox form,html[data-closed] .reqbox .side,html[data-closed] .reqbox .nightfacts{display:none}
+html[data-closed] .reqbox form,html[data-closed] .reqbox .side{display:none}
 html[data-closed] .reqbox{grid-template-columns:1fr}
 /* no party announced yet: the block turns into the red "in the works" card */
 html:not([data-live]) .reqbox{background:var(--red)}
@@ -429,7 +421,7 @@ html:not([data-live]) .reqbox .next{grid-template-columns:1fr auto;gap:30px;alig
 @media (max-width:720px){html:not([data-live]) .reqbox .next{grid-template-columns:1fr}}
 /* page order: a published party jumps right under the top */
 main#top{display:flex;flex-direction:column}main#top>*{width:100%;box-sizing:border-box}
-.o-hero{order:0}.o-new{order:1}.o-main{order:2}.o-why{order:3}.o-nights{order:4}.o-faq{order:5}
+.o-hero{order:0}.o-new{order:1}.o-why{order:2}.o-main{order:3}.o-nights{order:4}.o-faq{order:5}
 
 /* past nights: small strip */
 #nights{padding-block:28px 40px}#nights .sec-head h2{font-size:clamp(22px,3vw,30px)}#nights .sec-head{margin-bottom:14px}
@@ -503,7 +495,7 @@ main#top{display:flex;flex-direction:column}main#top>*{width:100%;box-sizing:bor
   .side{position:static;gap:20px}
   .side .mini{transform:none;filter:drop-shadow(8px 8px 0 var(--red));padding:22px 20px 28px}
 }
-.o-main{order:2}.o-why{order:3}.o-nights{order:4}.o-faq{order:5}
+.o-why{order:2}.o-main{order:3}.o-nights{order:4}.o-faq{order:5}
 @media (max-width:420px){.fat ul{grid-template-columns:1fr}}
 </style>
 </head>
@@ -601,26 +593,25 @@ main#top{display:flex;flex-direction:column}main#top>*{width:100%;box-sizing:bor
           <div class="send-row"><button class="btn" type="submit" id="f-send">Invia richiesta</button></div>
           <p class="privacy">I tuoi dati servono solo per la lista ospiti. <a href="/privacy">Privacy</a> · <a href="/termini">Termini</a></p>
         </form>
-        <div class="nightfacts" id="night-facts" hidden></div>
         <aside class="side" id="side" aria-live="polite">
           <div class="mini" aria-label="Live preview of your request">
-            <span class="stamp" id="pv-stamp">DRAFT</span>
+            <span class="stamp" id="pv-stamp">BOZZA</span>
             <p class="rc-h">PerugiaParty</p>
-            <p class="rc-s" id="pv-ev">Guest request</p>
+            <p class="rc-s" id="pv-ev">Richiesta ospite</p>
             <div class="grp">
-              <p class="pv-name" id="pv-name">Your name</p>
-              <p class="pv-ig" id="pv-ig">@yourinstagram</p>
+              <p class="pv-name" id="pv-name">Il tuo nome</p>
+              <p class="pv-ig" id="pv-ig">@iltuoprofilo</p>
               <p class="pv-hi dim" id="pv-hi" hidden></p>
             </div>
             <ul class="pv-checks">
-              <li id="pv-age"><span></span> 18+ with photo ID</li>
-              <li id="pv-rules"><span></span> House rules read</li>
+              <li id="pv-age"><span></span> 18+ con documento</li>
+              <li id="pv-rules"><span></span> Regole lette</li>
             </ul>
             <ul class="rc-l pv-items"><li><span>1x</span><span>OPEN BAR</span><span>INCL.</span></li><li><span>1x</span><span>DJ VERI</span><span>INCL.</span></li><li><span>1x</span><span>IN CENTRO</span><span>SÌ</span></li><li><span>1x</span><span>TUTTA LA NOTTE</span><span>SÌ</span></li></ul>
             <p class="rc-t pv-tot"><span>Totale</span><span id="pv-total">Prezzo studenti</span></p>
             <div class="grp">
               <p class="pv-code" id="pv-code">PP-XXX-XXXX</p>
-              <p class="tiny" id="pv-tiny">Your code arrives after approval</p>
+              <p class="tiny" id="pv-tiny">Il codice arriva dopo l'approvazione</p>
             </div>
           </div>
           <div id="side-info"></div>
@@ -748,23 +739,16 @@ function renderNext(ev){
   // phones: one tap to the form while requests are open
   // the example ticket carries the real party
   const ts = $("tk-sub"); if (ts && ev.name) ts.textContent = "Next: " + ev.name + (ev.date_label ? " · " + ev.date_label : "");
-  const facts = [["Date", ev.date_label]].filter(f => f[1]);
   const cta = ev.requests_open ? "" : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Seguici su Instagram</a>`;
   el.classList.toggle("has-poster", !!ev.poster);
   const art = "";
-  const when = [ev.date_label, ev.doors ? "Doors " + ev.doors : ""].filter(Boolean).join(" · ");
+  const when = [ev.date_label, ev.doors ? "Porte " + ev.doors : ""].filter(Boolean).join(" · ");
   el.innerHTML = `<div class="next-main">
       <h3>${esc(ev.name || "Next PerugiaParty")}</h3>
       ${when ? `<p class="nx-when">${esc(when)}</p>` : ""}
       ${cta ? `<div class="next-cta">${cta}</div>` : ""}</div>${art}
     ${ev.poster ? `<a class="poster" href="${ev.requests_open ? "#request" : "https://www.instagram.com/perugiaparty/"}" aria-label="${esc(ev.name || "Party")} poster"><img src="${esc(ev.poster)}" alt="${esc(ev.name || "Party")} poster" loading="lazy" decoding="async"></a>` : ""}`;
-  const nf = $("night-facts");
-  if (nf) {
-    nf.innerHTML = `<p class="nf-l">${ev.date_label ? `Counting down to <b>${esc(ev.date_label)}</b>` : "Counting down"}</p>
-      <div class="count" id="count" ${ev.starts_at ? "" : "hidden"} aria-label="Countdown to the party"></div>`;
-    nf.hidden = !(facts.length || ev.starts_at);
-  }
-  if (ev.starts_at) { tick(); clearInterval(timer); timer = setInterval(tick, 1000); }
+  if (ev.starts_at && $("count")) { tick(); clearInterval(timer); timer = setInterval(tick, 1000); }
 }
 function tick(){
   const c = $("count"); if (!c || !EVENT) return;
@@ -833,8 +817,8 @@ function preview(e){
   if (!$("pv-name")) return;
   if (e && e.target) { const map = { "f-name":"pv-name", "f-ig":"pv-ig", "f-intro":"pv-hi", "f-age":"pv-age", "f-rules":"pv-rules" }; const t = $(map[e.target.id]); if (t) bump(t); }
   const name = $("f-name").value.trim(), ig = $("f-ig").value.trim().replace(/^@+/, ""), hi = $("f-intro").value.trim();
-  const n = $("pv-name"); n.textContent = name || "Your name"; n.classList.toggle("dim", !name);
-  const i = $("pv-ig"); i.textContent = "@" + (ig || "yourinstagram"); i.classList.toggle("dim", !ig);
+  const n = $("pv-name"); n.textContent = name || "Il tuo nome"; n.classList.toggle("dim", !name);
+  const i = $("pv-ig"); i.textContent = "@" + (ig || "iltuoprofilo"); i.classList.toggle("dim", !ig);
   const h = $("pv-hi"); h.textContent = hi ? "“" + hi.slice(0, 120) + (hi.length > 120 ? "…" : "") + "”" : ""; h.hidden = !hi;
   for (const [id, box] of [["pv-age","f-age"],["pv-rules","f-rules"]]) { const li = $(id), on = $(box).checked; li.classList.toggle("on", on); li.querySelector("span").textContent = on ? "" : ""; }
 }
@@ -849,11 +833,11 @@ $("f-ig").addEventListener("blur", () => {
 ["f-name","f-ig","f-intro","f-age","f-rules"].forEach(id => { $(id).addEventListener("input", preview); $(id).addEventListener("change", preview); });
 function previewEvent(){
   if (!$("pv-ev")) return;
-  if (EVENT && EVENT.published && EVENT.name) $("pv-ev").textContent = "Guest request · " + EVENT.name;
+  if (EVENT && EVENT.published && EVENT.name) $("pv-ev").textContent = "Richiesta ospite · " + EVENT.name;
   const t = $("pv-total"); if (!t || !EVENT) return;
   // the price that applies right now; it goes up as places at this price run out
-  if (EVENT.price_now != null) t.textContent = "From " + euro(EVENT.price_now);
-  else if (EVENT.price && EVENT.price.min != null) t.textContent = "From " + euro(EVENT.price.min);
+  if (EVENT.price_now != null) t.textContent = "Da " + euro(EVENT.price_now);
+  else if (EVENT.price && EVENT.price.min != null) t.textContent = "Da " + euro(EVENT.price.min);
 }
 (function(){ try { const m = JSON.parse(localStorage.getItem("pp_me") || "null"); if (m) { $("f-name").value = m.name || ""; $("f-ig").value = m.ig || ""; $("f-phone").value = m.phone || ""; } } catch(e){} })();
 preview();
