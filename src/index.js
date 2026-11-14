@@ -170,9 +170,11 @@ const shortUrl = (code, token) => code ? `https://perugiaparty.com/t/${code}` : 
 async function shortRedirect(url, env) {
   const c = url.pathname.slice(3).toLowerCase().replace(/\/$/, "");
   if (!SHORT_RE.test(c)) return null;
-  const g = await env.DB.prepare("SELECT token FROM guests WHERE short = ?").bind(c).first();
+  const g = await env.DB.prepare("SELECT token, lang FROM guests WHERE short = ?").bind(c).first();
   if (!g) return null;
-  return new Response(null, { status: 302, headers: { location: `/ticket.html?t=${g.token}`, "cache-control": "no-store" } });
+  // Italian guests land straight on the Italian page, so they never see an English flash
+  const page = g.lang === "it" ? "/biglietto.html" : "/ticket.html";
+  return new Response(null, { status: 302, headers: { location: `${page}?t=${g.token}`, "cache-control": "no-store" } });
 }
 function inviteLimit(ev) { const n = Number(ev.invites_per_guest ?? 1); return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 1; }
 async function invitesUsed(env, ev, ig) {
@@ -355,8 +357,11 @@ async function igHandleDm(env, ev, igsid, text) {
     await markVerified(env, g, igsid);
     const back = Number(g.is_returning) === 1 || (await isReturner(env, normIg(g.ig), ev && ev.tag));
     await igSend(env, ev, igsid, [
-      back ? `Welcome back to @perugiaparty, ${first}! Your request is received.`
-           : `Welcome to @perugiaparty, ${first}! Your request is received.`,
+      isIt(g)
+        ? (back ? `Bentornato su @perugiaparty, ${first}! La tua richiesta è arrivata.`
+                : `Benvenuto su @perugiaparty, ${first}! La tua richiesta è arrivata.`)
+        : (back ? `Welcome back to @perugiaparty, ${first}! Your request is received.`
+                : `Welcome to @perugiaparty, ${first}! Your request is received.`),
       ``,
       `Link: ${shortUrl(await shortFor(env, g), g.token)}`,
     ].join("\n"));
@@ -460,45 +465,65 @@ async function verifyTurnstile(ev, token, req) {
 }
 
 // where the request was sent from: Cloudflare's approximate city and country for the connection
+// Request-form answers in the language of the page they used
+const IT_MSG = {
+  "Send the form again.": "Invia di nuovo il modulo.",
+  "Requests aren't open right now. Follow @perugiaparty on Instagram for the next date.":
+    "Le richieste non sono aperte adesso. Segui @perugiaparty su Instagram per la prossima data.",
+  "Please complete the human check above the button and try again.":
+    "Completa la verifica sopra il pulsante e riprova.",
+  "Add your full name.": "Aggiungi nome e cognome.",
+  "Add your Instagram handle, like @yourname.": "Aggiungi il tuo profilo Instagram, tipo @iltuonome.",
+  "Confirm you're 18+ and accept the house rules.": "Conferma di avere 18+ anni e accetta le regole della casa.",
+  "This Instagram already has a confirmed request for this party. Log in with your code on your ticket page, or DM us.":
+    "Questo Instagram ha già una richiesta confermata per questa serata. Entra con il tuo codice sulla pagina del biglietto, o scrivici.",
+  "This invite link has already been used or isn't valid anymore.":
+    "Questo link di invito è già stato usato o non è più valido.",
+  "Right now only guests who came before, and the friends they invite, can request a place. Requests open for everyone soon.":
+    "Per ora possono richiedere un posto solo chi è già venuto e gli amici che invitano. Le richieste aprono per tutti a breve.",
+};
+const say = (msg, lang) => (lang === "it" && IT_MSG[msg]) || msg;
+
 async function apiRequest(req, env) {
   let body;
   try { body = await req.json(); } catch { return json({ error: "Send the form again." }, 400); }
+  const lang = String((body && body.lang) || "").slice(0, 2).toLowerCase() === "it" ? "it" : "en";
   if (body.website) return json({ ok: true, token: newToken() }); // honeypot: pretend success
   const ev = await getEvent(env);
   if (!ev || !ev.published || !ev.requests_open || !ev.tag) {
-    return json({ error: "Requests aren't open right now. Follow @perugiaparty on Instagram for the next date." }, 409);
+    return json({ error: say("Requests aren't open right now. Follow @perugiaparty on Instagram for the next date.", lang) }, 409);
   }
-  if (!(await verifyTurnstile(ev, body.turnstile, req))) return json({ error: "Please complete the human check above the button and try again." }, 400);
+  if (!(await verifyTurnstile(ev, body.turnstile, req))) return json({ error: say("Please complete the human check above the button and try again.", lang) }, 400);
   const name = clean(body.name, 80);
   let ig = clean(body.ig, 40).replace(/^@+/, "");
   const phone = clean(body.phone, 30);
   const note = clean(body.intro, 500);
   let withIg = clean(body.with, 40).replace(/^@+/, "").toLowerCase();
   withIg = /^[a-z0-9._]{1,30}$/.test(withIg) ? "@" + withIg : null;
-  if (name.length < 2) return json({ error: "Add your full name." }, 400);
-  if (!/^[A-Za-z0-9._]{1,30}$/.test(ig)) return json({ error: "Add your Instagram handle, like @yourname." }, 400);
-  if (body.age !== true || body.rules !== true) return json({ error: "Confirm you're 18+ and accept the house rules." }, 400);
+  if (name.length < 2) return json({ error: say("Add your full name.", lang) }, 400);
+  if (!/^[A-Za-z0-9._]{1,30}$/.test(ig)) return json({ error: say("Add your Instagram handle, like @yourname.", lang) }, 400);
+  if (body.age !== true || body.rules !== true) return json({ error: say("Confirm you're 18+ and accept the house rules.", lang) }, 400);
   ig = "@" + ig.toLowerCase();
   if (await isBlocked(env, ig)) { await sleep(400); return json({ error: BLOCKED_MSG }, 403); }
   // an unconfirmed request doesn't lock the handle: whoever proves the account by DM keeps it
   const dup = await env.DB.prepare("SELECT 1 FROM guests WHERE event = ? AND lower(ig) = ? AND verified = 1 AND status IN ('requested','waitlist','approved','paid','in')")
     .bind(ev.tag, ig).first();
-  if (dup) return json({ error: "This Instagram already has a confirmed request for this party. Log in with your code on your ticket page, or DM us." }, 409);
+  if (dup) return json({ error: say("This Instagram already has a confirmed request for this party. Log in with your code on your ticket page, or DM us.", lang) }, 409);
   const returning = await isReturner(env, ig, ev.tag);
   let inviter = null;
   if (body.invite) {
     const inv = await resolveInvite(env, ev, String(body.invite));
     if (inv && inv.left > 0 && inv.ig !== ig) inviter = inv.ig;
-    else if (returnersOnly(ev) && !returning) return json({ error: "This invite link has already been used or isn't valid anymore." }, 409);
+    else if (returnersOnly(ev) && !returning) return json({ error: say("This invite link has already been used or isn't valid anymore.", lang) }, 409);
   }
   if (returnersOnly(ev) && !returning && !inviter) {
-    return json({ error: "Right now only guests who came before, and the friends they invite, can request a place. Requests open for everyone soon." }, 409);
+    return json({ error: say("Right now only guests who came before, and the friends they invite, can request a place. Requests open for everyone soon.", lang) }, 409);
   }
   const status = (await soldOut(env, ev)) ? "waitlist" : "requested";
   const token = newToken(), vcode = newVcode(ev.tag);
   if (withIg === ig) withIg = null;
-  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, invited_by, is_returning, vcode, verified, with_ig) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)")
-    .bind(token, ev.tag, name, ig, phone, note, status, Date.now(), inviter, returning ? 1 : 0, vcode, withIg).run();
+  await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, invited_by, is_returning, vcode, verified, with_ig, lang) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)")
+    .bind(token, ev.tag, name, ig, phone, note, status, Date.now(), inviter, returning ? 1 : 0, vcode, withIg, lang).run();
   await upsertPerson(env, ig, name, phone);
   return json({ ok: true, token, vcode, ig, waitlist: status === "waitlist" });
 }
@@ -549,7 +574,7 @@ async function apiTicket(url, env) {
   const ev = (await getEvent(env)) || {};
   const sameEvent = ev.tag === g.event;
   if (!g.vcode) { g.vcode = newVcode(g.event); await env.DB.prepare("UPDATE guests SET vcode = ? WHERE token = ? AND vcode IS NULL").bind(g.vcode, g.token).run(); }
-  const out = { status: g.status, name: g.name, event: sameEvent ? ev.name : g.event, ig: g.ig, vcode: g.vcode, link: shortUrl(await shortFor(env, g), g.token), verified: Number(g.verified) === 1, mismatch: !!g.ig_mismatch, ig_auto: !!(ev.ig_token && ev.ig_app_secret) };
+  const out = { lang: g.lang === "it" ? "it" : "en", status: g.status, name: g.name, event: sameEvent ? ev.name : g.event, ig: g.ig, vcode: g.vcode, link: shortUrl(await shortFor(env, g), g.token), verified: Number(g.verified) === 1, mismatch: !!g.ig_mismatch, ig_auto: !!(ev.ig_token && ev.ig_app_secret) };
   if (g.status === "approved") {
     Object.assign(out, {
       code: g.code, price: g.price, ticket: g.ticket, tip: Number(g.tip) || 0,
@@ -907,7 +932,11 @@ const euro = (n) => "€" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", "
 // true on the day of the party (Rome time): then unpaid guests have to pay straight away
 const romeDay = (t) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(t));
 const isPartyDay = (ev) => { const st = Date.parse(ev.starts_at); return Number.isFinite(st) && romeDay(st) === romeDay(Date.now()); };
-const payNowText = (ev, g) => `Today is the party, so please pay ${euro(g.price)} right now with a bonifico istantaneo.\n\nThen send the screenshot of the bonifico here in this chat.`;
+// Every automatic message follows the language the guest signed up in.
+const isIt = (g) => g && g.lang === "it";
+const payNowText = (ev, g) => isIt(g)
+  ? `Oggi è la serata, quindi paga ${euro(g.price)} subito con un bonifico istantaneo.\n\nPoi manda qui in chat lo screenshot del bonifico.`
+  : `Today is the party, so please pay ${euro(g.price)} right now with a bonifico istantaneo.\n\nThen send the screenshot of the bonifico here in this chat.`;
 async function igStatusDms(env) {
   const ev = await getEvent(env);
   if (!ev || !ev.ig_token) return;
@@ -919,11 +948,15 @@ async function igStatusDms(env) {
   for (const g of rows) {
     const first = String(g.name || "").split(" ")[0];
     const free = g.status === "paid" && Number(g.price) === 0 && g.ig_sent !== "paid";
-    const text = {
+    const text = (isIt(g) ? {
+      approved: isPartyDay(ev) ? `Sei dentro, ${first}! ${payNowText(ev, g)}` : `Sei dentro, ${first}! Paga ${euro(g.price)} per bloccare il tuo posto.`,
+      released: g.event === ev.tag ? `Il tuo posto è stato riassegnato, il pagamento non è arrivato entro la scadenza.\nRichiedi di nuovo per tornare in lista d'attesa.` : null,
+      paid: g.ticket === "crew" ? `Sei nella crew, ${first}.` : free ? `Sei dentro, ${first}. Ingresso gratis.` : `Pagamento ricevuto. Ci sei, ${first}!`,
+    } : {
       approved: isPartyDay(ev) ? `You're in, ${first}! ${payNowText(ev, g)}` : `You're in, ${first}! Pay ${euro(g.price)} to lock in your place.`,
       released: g.event === ev.tag ? `Your spot has been reassigned, payment was not received before the deadline.\nSign up again to get back on the waitlist.` : null,
       paid: g.ticket === "crew" ? `You're on the crew, ${first}.` : free ? `You're in, ${first}. Free entry.` : `Payment received. You're going, ${first}!`,
-    }[g.status] || null;
+    })[g.status] || null;
     // claim it first so two runs at once never send twice
     const c = await env.DB.prepare("UPDATE guests SET ig_sent = ? WHERE token = ? AND (ig_sent IS NULL OR ig_sent <> ?)").bind(g.status, g.token, g.status).run();
     if (text && c.meta && c.meta.changes) {
@@ -934,7 +967,9 @@ async function igStatusDms(env) {
       const n = Number(ev.pair_free) || 0;
       const pairs = n > 0 ? ((await env.DB.prepare("SELECT COUNT(*) AS n FROM guests WHERE event = ? AND (invited_by IS NOT NULL OR with_ig IS NOT NULL) AND status NOT IN ('declined','removed','released')").bind(ev.tag).first()) || {}).n || 0 : 0;
       if (g.status === "approved" && n > 0 && pairs < n && g.event === ev.tag && (await isReturner(env, normIg(g.ig), ev.tag))) {
-        await igSend(env, ev, g.igsid, `Bring a new friend: the ${ordinal(n)} pair gets in free. They add ${normIg(g.ig)} as their friend.`);
+        await igSend(env, ev, g.igsid, isIt(g)
+          ? `Porta un amico nuovo: la ${n}ª coppia entra gratis. Lui aggiunge ${normIg(g.ig)} come amico.`
+          : `Bring a new friend: the ${ordinal(n)} pair gets in free. They add ${normIg(g.ig)} as their friend.`);
       }
     }
   }
@@ -954,9 +989,13 @@ async function igReminders(env) {
     const ms = Number(g.deadline) - Date.now();
     const mins = Math.max(1, Math.floor(ms / 6e4)), left = mins >= 60 ? `${Math.floor(mins / 60)}h` : `${mins} min`;
     const up = Number(ev.price_late) > Number(g.price) && ["early", "normal"].includes(g.ticket);
-    const text = isPartyDay(ev) ? `Payment not received yet. ${payNowText(ev, g)}` : ms > 0
-      ? `Payment not received yet. You still have ${left} to pay ${euro(g.price)}.\n${up ? `After the deadline the price goes up to ${euro(ev.price_late)}.` : "After the deadline your spot will be released."}`
-      : `Payment not received yet. The deadline to pay ${euro(g.price)} has passed.\nPay now to keep your spot, otherwise it will be released.`;
+    const text = isIt(g)
+      ? (isPartyDay(ev) ? `Pagamento non ancora ricevuto. ${payNowText(ev, g)}` : ms > 0
+        ? `Pagamento non ancora ricevuto. Hai ancora ${left} per pagare ${euro(g.price)}.\n${up ? `Dopo la scadenza il prezzo sale a ${euro(ev.price_late)}.` : "Dopo la scadenza il posto viene liberato."}`
+        : `Pagamento non ancora ricevuto. La scadenza per pagare ${euro(g.price)} è passata.\nPaga ora per tenere il posto, altrimenti viene liberato.`)
+      : (isPartyDay(ev) ? `Payment not received yet. ${payNowText(ev, g)}` : ms > 0
+        ? `Payment not received yet. You still have ${left} to pay ${euro(g.price)}.\n${up ? `After the deadline the price goes up to ${euro(ev.price_late)}.` : "After the deadline your spot will be released."}`
+        : `Payment not received yet. The deadline to pay ${euro(g.price)} has passed.\nPay now to keep your spot, otherwise it will be released.`);
     const sent = await igSend(env, ev, g.igsid, text);
     if (!sent) await env.DB.prepare("UPDATE guests SET ig_fail = 1 WHERE token = ?").bind(g.token).run();
   }

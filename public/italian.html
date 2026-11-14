@@ -717,7 +717,7 @@ function renderAppBox(){
   const add = $("app-add");
   if (add) add.addEventListener("click", async () => { const e = installEvt; installEvt = null; e.prompt(); try { await e.userChoice; } catch(x){} renderAppBox(); });
 }
-(function(){ const t = savedToken(); if (t) showMyTicket("/ticket.html?t=" + encodeURIComponent(t)); })();
+(function(){ const t = savedToken(); if (t) showMyTicket("/biglietto.html?t=" + encodeURIComponent(t)); })();
 
 /* next party + countdown */
 let timer = null;
@@ -876,6 +876,8 @@ $("req-form").addEventListener("submit", async e => {
     intro: $("f-intro").value.trim(), website: $("f-website").value,
     turnstile: (window.turnstile && tsWidget !== null) ? turnstile.getResponse(tsWidget) : "",
     age: $("f-age").checked, rules: $("f-rules").checked,
+    // the page they signed up on decides the language of their ticket and our messages
+    lang: (document.documentElement.lang || "en").slice(0, 2),
     invite: INVITE || undefined,
   };
   const missing = [], bad = [];
@@ -901,7 +903,7 @@ $("req-form").addEventListener("submit", async e => {
     }
     rememberToken(data.token);
     try { localStorage.setItem("pp_me", JSON.stringify({ name: body.name, ig: body.ig, phone: body.phone })); } catch(e){}
-    const link = location.origin + "/ticket.html?t=" + data.token;
+    const link = location.origin + "/biglietto.html?t=" + data.token;
     const handle = data.ig || ("@" + body.ig.replace(/^@+/, "").toLowerCase());
     $("my-link").textContent = data.vcode || ""; $("my-ig").textContent = handle;
     $("dm-link").href = dmUrl(data.vcode);
@@ -910,7 +912,7 @@ $("req-form").addEventListener("submit", async e => {
     const st = $("pv-stamp"); if (st) { st.textContent = "DM CODE"; st.classList.add("sent"); document.querySelector(".side .mini").classList.add("done"); $("pv-tiny").textContent = "DM your code to @perugiaparty"; }
         $("req-form").reset();
     // straight to their own page: big "Not sent yet" + the code + the Instagram button
-    location.href = "/ticket.html?t=" + encodeURIComponent(data.token);
+    location.href = "/biglietto.html?t=" + encodeURIComponent(data.token);
   } catch (x) {
     err.textContent = "Couldn't reach us. Check your connection and try again.";
     if (window.ppNotify) ppNotify("Offline · not sent", "error", { action: { label: "Retry", onClick: () => $("req-form").requestSubmit() } });

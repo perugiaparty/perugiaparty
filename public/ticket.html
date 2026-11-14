@@ -438,6 +438,7 @@ h1{font-size:clamp(40px,8vw,64px)}
 
 <script src="/vendor/qrcode.js"></script>
 <script>
+const LANG = "en";
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const euro = n => n == null ? "—" : "€" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", ",") : Number(n));
@@ -939,7 +940,15 @@ document.addEventListener("click", e => {
   clearTimeout(tipTimer);
   tipTimer = setTimeout(() => { const t = token; if (t) fetch("/api/ticket/tip", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ t, tip }) }).catch(() => {}); }, 600);
 });
+// Italian guests get the whole flow in Italian: same link, the page follows their language
+function langSwap(d){
+  const want = d && d.lang === "it" ? "it" : "en";
+  if (want === LANG) return false;
+  location.replace((want === "it" ? "/biglietto.html" : "/ticket.html") + location.search + location.hash);
+  return true;
+}
 function render(d){
+  if (langSwap(d)) return;
   const P = $("page"), first = esc(String(d.name || "").split(" ")[0]);
   if (d.status === "requested" || d.status === "waitlist") {
     // same page for both: the waitlist is only a tag, the steps don't change

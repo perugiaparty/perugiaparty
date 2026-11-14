@@ -889,6 +889,8 @@ $("req-form").addEventListener("submit", async e => {
     intro: $("f-intro").value.trim(), website: $("f-website").value,
     turnstile: (window.turnstile && tsWidget !== null) ? turnstile.getResponse(tsWidget) : "",
     age: $("f-age").checked, rules: $("f-rules").checked,
+    // the page they signed up on decides the language of their ticket and our messages
+    lang: (document.documentElement.lang || "en").slice(0, 2),
     invite: INVITE || undefined,
   };
   const missing = [], bad = [];

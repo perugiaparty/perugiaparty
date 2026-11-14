@@ -1,0 +1,1101 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Il mio biglietto · PerugiaParty</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#141210">
+<link rel="icon" type="image/png" sizes="48x48" href="/favicon-v2.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" id="mf" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PerugiaParty">
+<link rel="preload" href="/fonts/figtree-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/bowlby-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/fonts/fonts.css?v=1">
+<link rel="stylesheet" href="/site.css?v=20261108b">
+<script src="/notify.js?v=20261013g" defer></script>
+<style>
+main{padding-block:44px 80px}
+.page{max-width:620px;margin-inline:auto;display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+.page > *{min-width:0}
+.page h1,.page h2{overflow-wrap:normal}
+.state{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;border-radius:999px;padding:5px 12px;background:var(--cream-2);border:1.5px solid var(--ink)}
+.state.ok{background:var(--red);border-color:var(--red);color:var(--cream)}
+h1{font-size:clamp(40px,8vw,64px)}
+.lead{font-size:18px;color:var(--muted);max-width:46ch}
+.card{background:var(--paper);border:1.5px solid var(--line);border-radius:20px;padding:22px;display:grid;gap:14px}
+.savep{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 20px}
+.savep b{display:block;font-size:16px;line-height:1.3}
+.savep span{font-size:13.5px;color:var(--muted)}
+.row{display:grid;grid-template-columns:130px 1fr auto;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:12px}
+.row:last-child{border-bottom:0;padding-bottom:0}
+.row dt{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.row dd{margin:0;font-weight:700;overflow-wrap:anywhere;min-width:0}
+.row dd.mono{font-family:var(--f-mono);font-weight:500;letter-spacing:.04em}
+.copy{font:inherit;font-size:13px;font-weight:700;border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;cursor:pointer}
+.copy:hover{border-color:var(--ink)}
+@media (max-width:520px){.row{grid-template-columns:1fr auto}.row dt{grid-column:1/-1}}
+.deadline{background:var(--ink);color:var(--cream);border-radius:16px;padding:16px 18px;font-weight:700}
+.deadline span{color:#ff8a7f}
+.ticket{background:var(--ink);color:var(--cream);border-radius:24px;padding:26px;display:grid;gap:18px;justify-items:center;text-align:center;box-shadow:12px 12px 0 var(--red)}
+.ticket .logo{width:170px}
+.ticket .ev{font-family:var(--f-display);font-size:30px;line-height:1.05}
+.ticket .meta{color:var(--muted-dark);font-size:15px}
+.qr{background:var(--cream);padding:14px;border-radius:16px;width:min(260px,70vw)}
+.qr canvas{width:100%;height:auto;display:block;image-rendering:pixelated}
+.ticket .code{font-family:var(--f-mono);font-size:26px;letter-spacing:.1em}
+.ticket .who{font-weight:700;font-size:18px}
+.loc{background:var(--red);color:var(--cream);border-radius:20px;padding:20px 22px;display:grid;gap:6px}
+.loc p{font-size:20px;font-weight:700}
+.loc a{color:var(--cream)}
+.note{font-size:14px;color:var(--muted)}
+.empty{text-align:center;padding:40px 10px;display:grid;gap:14px;justify-items:center}
+/* accepted landing */
+.hero-ok{background:var(--red);color:var(--cream);border-radius:24px;padding:28px;display:grid;gap:10px}
+.hero-ok h1{color:var(--cream)}
+.hero-ok .state{justify-self:start}
+.hero-ok .lead{color:#f3d3cc}
+.amount{background:var(--ink);color:var(--cream);border-radius:22px;padding:24px;display:grid;gap:6px}
+.amount .big{font-family:var(--f-display);font-size:clamp(48px,11vw,72px);line-height:1;color:var(--cream)}
+.amount .why{color:var(--muted-dark);font-size:15px;max-width:46ch}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.tier{border:1.5px solid #3a3330;border-radius:14px;padding:10px 12px;color:var(--muted-dark);font-size:14px}
+.tier b{display:block;font-family:var(--f-display);font-weight:400;font-size:22px;color:var(--muted-dark)}
+.tier.me{border-color:var(--cream);background:var(--ink-2);color:var(--cream)}
+.tier.me b{color:var(--cream)}
+.tier .tn,.tier .tu{display:block}
+.tier .tu{font-size:12px;opacity:.8}
+.tier .you{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#ff8a7f}
+.howto{list-style:none;margin:0;padding:0;counter-reset:h;display:grid;gap:16px}
+.howto li{counter-increment:h;display:grid;grid-template-columns:40px 1fr;gap:14px;align-items:start}
+.howto li::before{content:counter(h);display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--red);color:var(--cream);font-family:var(--f-display);font-size:18px}
+.howto h3{font-size:20px;margin-bottom:4px}
+.howto p{color:var(--muted);font-size:15px}
+.ref{font-family:var(--f-mono);font-size:18px;background:var(--ink);color:var(--cream);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;overflow-wrap:anywhere}
+.ref .copy{color:var(--cream);border-color:#4a423b}
+.copyall{justify-self:start}
+.state{justify-self:start}
+/* one theme: pills take their colour from the card they sit on */
+.page > .state,.card .state{background:var(--ink);border-color:var(--ink);color:var(--cream)}
+.rq .state,.hype .state,.pay .state{background:var(--red);border-color:var(--red);color:var(--cream)}
+.hero-ok .state,.thanks .state,.where .state{background:var(--cream);border-color:var(--cream);color:var(--red)}
+.hype.paid .state{background:var(--red);border-color:var(--red);color:var(--cream)}
+.wl-tag{justify-self:start;background:var(--cream);color:var(--red);font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:4px 10px}
+/* paid */
+.hype.paid{background:none;padding:8px 2px 0;border-radius:0}
+.hype.paid h1{color:var(--ink);padding-right:70px}
+.hype.paid .lead{color:var(--muted)}
+.hype.paid .lead b{color:var(--ink)}
+.hype.paid .count div{background:var(--cream-2)}
+.hype.paid .count span{color:var(--muted)}
+.hype.paid .count b{color:var(--ink)}
+.hype.paid .rq-stamp{color:var(--red);border-color:var(--red)}
+.rq-stamp.paid-stamp{color:var(--cream);border-color:var(--cream);font-size:16px;animation-delay:.25s}
+.cine.shine{overflow:hidden}
+.cine.shine::after{content:"";position:absolute;inset:-40% -60%;background:linear-gradient(105deg,transparent 42%,rgba(255,255,255,.14) 50%,transparent 58%);transform:translateX(-60%);animation:shine 3.2s 1s ease-in-out infinite;pointer-events:none}
+@keyframes shine{0%{transform:translateX(-60%)}55%,100%{transform:translateX(60%)}}
+.page .where{background:var(--ink)}
+.page .where .eyebrow.unl{color:#ff8a7f}
+.page .where .btn{background:var(--red);border-color:var(--red);color:var(--cream)}
+.page .actions{grid-template-columns:1fr 1fr}
+.actions .btn.wide{grid-column:1/-1}
+.unlock{position:fixed;inset:0;z-index:998;background:var(--red);color:var(--cream);display:grid;place-items:center;text-align:center;padding:24px;cursor:pointer;animation:unIn .35s ease-out both}
+.unlock.out{animation:unOut .45s ease-in forwards}
+.unlock-in{display:grid;gap:14px;justify-items:center}
+.unlock-k{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;background:var(--cream);color:var(--red);border-radius:999px;padding:5px 12px;animation:pop .4s .15s both}
+.unlock-h{font-family:var(--f-display);font-size:clamp(64px,20vw,120px);line-height:.9;margin:0;animation:bigIn .6s .25s cubic-bezier(.2,1.5,.4,1) both}
+.unlock-t{font-size:14px;color:#f3d3cc;animation:unIn .4s 1s both}
+@keyframes unIn{from{opacity:0}to{opacity:1}}
+@keyframes unOut{to{opacity:0;transform:translateY(-30px)}}
+@keyframes bigIn{from{opacity:0;transform:scale(.4) rotate(-6deg)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.unlock,.unlock *,.cine.shine::after{animation:none!important}}
+.tsave{position:fixed;inset:0;z-index:997;background:var(--ink);display:grid;place-items:center;padding:16px;overflow:auto}
+.tsave-in{display:grid;gap:12px;justify-items:center;max-width:420px;width:100%;text-align:center}
+.tsave-h{color:var(--cream);font-weight:700;font-size:17px;margin:0}
+.tsave img{width:100%;max-height:68vh;object-fit:contain;border-radius:12px;-webkit-touch-callout:default;user-select:auto}
+.tsave-n{color:var(--muted-dark);font-size:13px;margin:0;max-width:36ch}
+.tsave .btn{min-width:140px}
+.cine .crewband{position:absolute;top:30px;right:-46px;transform:rotate(35deg);background:var(--red);color:var(--cream);z-index:3;font-family:var(--f-mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:6px 52px;z-index:2}
+.cine.crew .brand{color:var(--red)}
+.rq.pending{border:3px solid #ff4a3d}
+.rq.pending .state{background:#ff4a3d;border-color:#ff4a3d;color:var(--ink)}
+.rq.pending .lead b{color:var(--cream)}
+.rq.pending .vcode{margin-top:4px}
+.rq.pending .pend-go{width:100%;font-size:18px;padding:16px 22px}
+.rq.pending .pend-n{font-size:14px;color:var(--muted-dark);margin:0}
+.rq.pending .pend-n b{color:var(--cream)}
+.rq.pending .warn{background:var(--red);color:var(--cream);border-radius:12px;padding:10px 12px;font-size:14px;margin:0}
+/* how to pay */
+.pay{position:relative;background:var(--ink);color:var(--cream);border-radius:24px;padding:22px 18px 18px;display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+.pay .eyebrow{color:var(--muted-dark)}
+.pay h2{color:var(--cream);font-size:clamp(48px,13vw,68px);line-height:.95}
+.tier-tag{position:absolute;top:18px;right:18px;background:var(--red);color:var(--cream);font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;border-radius:999px;padding:5px 10px;white-space:nowrap}
+.pay-hint{color:var(--muted-dark);font-size:14px;margin:0 0 4px}
+.prow-list{display:grid;gap:6px}
+.prow{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"k p" "v p";column-gap:12px;row-gap:1px;align-items:center;background:var(--ink-2);border:1.5px solid transparent;border-radius:14px;padding:10px 12px 10px 14px;width:100%;-webkit-tap-highlight-color:transparent;transition:transform .12s,border-color .2s,background .2s}
+.prow:active{transform:scale(.98)}
+.prow:focus-visible{outline:3px solid #ff4a3d;outline-offset:2px}
+.prow .pk{grid-area:k;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
+.prow .pv{grid-area:v;font-family:var(--f-mono);font-size:16px;font-weight:500;color:var(--cream);overflow-wrap:anywhere;line-height:1.3}
+.prow .pill{grid-area:p;font-size:12px;font-weight:700;border:1.5px solid #4a423b;border-radius:999px;padding:5px 11px;color:var(--cream);white-space:nowrap}
+.prow.key .pk{color:#ff8a7f}
+.prow.got{border-color:var(--red);background:#2a1513}
+.prow.got .pill{border-color:var(--red);background:var(--red);color:var(--cream)}
+.prow.off{cursor:default;opacity:.6}
+.pay-all{width:100%;margin-top:4px}
+.pay-faq{background:var(--paper);border:1.5px solid var(--line);border-radius:20px;padding:18px}
+.pay-faq h3{font-size:20px;margin-bottom:6px}
+.pay-faq dl{margin:0;display:grid}
+.pay-faq dl div{padding:10px 0;border-top:1px solid var(--line)}
+.pay-faq dl div:first-child{border-top:0}
+.pay-faq dt{font-weight:700;font-size:15px}
+.pay-faq dd{margin:2px 0 0;color:var(--muted);font-size:14.5px;line-height:1.5}
+.pay-faq b{font-family:var(--f-mono);color:var(--ink)}
+@media (max-width:380px){.prow .pv{font-size:14.5px}}
+/* request received */
+.rq{position:relative;overflow:hidden;background:var(--ink);color:var(--cream);border-radius:24px;padding:28px 24px;display:grid;gap:12px;grid-template-columns:minmax(0,1fr);animation:rqIn .5s cubic-bezier(.2,.9,.3,1.2) both}
+.rq h1{color:var(--cream);font-size:clamp(36px,9vw,58px)}
+.rq .lead{color:var(--muted-dark)}
+.rq .state{background:var(--red);border-color:var(--red);color:var(--cream)}
+.wl-tag{justify-self:start;background:var(--red);color:var(--cream);font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;border-radius:8px;padding:6px 10px}
+.rq-stamp{position:absolute;top:22px;right:18px;font-family:var(--f-display);font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#ff4a3d;border:3px solid #ff4a3d;border-radius:10px;padding:4px 12px;transform:rotate(12deg);animation:stamp .45s .35s cubic-bezier(.2,1.6,.4,1) both}
+.rq-steps{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;position:relative}
+.rq-steps li{display:grid;justify-items:center;gap:6px;font-family:var(--f-mono);font-size:10px;letter-spacing:.02em;text-transform:uppercase;color:var(--muted-dark);position:relative;min-width:0;text-align:center}
+.rq-steps li::before{content:"";position:absolute;top:8px;left:-50%;width:100%;height:2px;background:#3a3330;z-index:0}
+.rq-steps li:first-child::before{display:none}
+.rq-steps li.done::before,.rq-steps li.now::before{background:var(--red)}
+.rq-steps i{width:18px;height:18px;border-radius:50%;border:2px solid #4a423b;background:var(--ink);position:relative;z-index:1}
+.rq-steps li.done i{background:var(--red);border-color:var(--red);animation:pop .4s both}
+.rq-steps li.done:nth-child(2) i{animation-delay:.15s}
+.rq-steps li.now i{border-color:#ff4a3d;animation:pulse 1.6s infinite}
+.rq-steps li.done,.rq-steps li.now{color:var(--cream)}
+.hype.paid .rq-steps li{color:#9a8f7e}
+.hype.paid .rq-steps li.done,.hype.paid .rq-steps li.now{color:var(--ink)}
+.hype.paid .rq-steps i{background:var(--cream);border-color:#cfc3ae}
+.hype.paid .rq-steps li.done i{background:var(--red);border-color:var(--red)}
+.hype.paid .rq-steps li.now i{background:var(--cream);border-color:var(--red)}
+.hype.paid .rq-steps li::before{background:#ddd2bd}
+.hype.paid .rq-steps li.done::before,.hype.paid .rq-steps li.now::before{background:var(--red)}
+.rq-steps.on-red li{color:#f3d3cc}
+.rq-steps.on-red li.done,.rq-steps.on-red li.now{color:var(--cream)}
+.rq-steps.on-red li::before{background:rgba(244,234,215,.3)}
+.rq-steps.on-red li.done::before,.rq-steps.on-red li.now::before{background:var(--cream)}
+.rq-steps.on-red i{background:var(--red);border-color:rgba(244,234,215,.45)}
+.rq-steps.on-red li.done i{background:var(--cream);border-color:var(--cream)}
+.rq-steps.on-red li.now i{border-color:var(--cream);animation:pulseC 1.6s infinite}
+@keyframes pulseC{0%{box-shadow:0 0 0 0 rgba(244,234,215,.7)}70%{box-shadow:0 0 0 10px rgba(244,234,215,0)}100%{box-shadow:0 0 0 0 rgba(244,234,215,0)}}
+@keyframes rqIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes stamp{from{opacity:0;transform:rotate(12deg) scale(2.2)}to{opacity:1;transform:rotate(12deg) scale(1)}}
+@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,74,61,.6)}70%{box-shadow:0 0 0 10px rgba(255,74,61,0)}100%{box-shadow:0 0 0 0 rgba(255,74,61,0)}}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden}
+.confetti i{position:absolute;top:-14px;width:9px;height:14px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translate(var(--dx),110vh) rotate(var(--r))}}
+@media (prefers-reduced-motion: reduce){.rq,.rq-stamp,.rq-steps i{animation:none!important}}
+/* you're in */
+.hype{background:var(--ink);color:var(--cream);border-radius:24px;padding:28px 24px;display:grid;gap:12px;position:relative;overflow:hidden}
+.hype h1{color:var(--cream);font-size:clamp(38px,9vw,60px)}
+.hype h1 em{font-style:normal;color:#ff4a3d}
+.hype .lead{color:var(--muted-dark)}
+.hype .count{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+.hype .count div{background:var(--ink-2);border-radius:14px;padding:10px 4px;min-width:0;text-align:center}
+.hype .count b{display:block;font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1;color:var(--cream);font-variant-numeric:tabular-nums}
+.hype .count span{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-dark)}
+.cine-w{filter:drop-shadow(0 14px 30px rgba(20,18,16,.10))}
+.cine{position:relative;background:var(--paper);color:var(--ink);font-family:var(--f-mono);padding:40px 26px 44px;display:grid;gap:12px;justify-items:center;text-align:center;
+  -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/36px 51% repeat-x,conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/36px 51% repeat-x;
+  mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/36px 51% repeat-x,conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/36px 51% repeat-x}
+.cine .brand{font-family:var(--f-display);font-size:30px;line-height:1;margin:0}
+.cine .sub{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:#7a6e5d;margin:0 0 6px}
+.cine .qr{background:#fff;padding:14px;border-radius:12px;line-height:0;border:0;cursor:pointer;display:block;margin-top:10px}
+.cine .qr:active{transform:scale(.985)}
+.cine .qr canvas{display:block;width:min(230px,58vw);height:auto;image-rendering:pixelated}
+.cine .qr-hint{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#9a8f7e;margin-top:-2px}
+.cine .code{font-size:22px;letter-spacing:.06em;margin:6px 0 0}
+.cine .who{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:#7a6e5d;margin:0}
+.cine .tk-l{width:100%;margin:14px 0 0;padding-top:16px;border-top:2px dashed #d8ccb6;display:grid;gap:10px;text-align:left}
+.cine .tk-l > div{display:flex;justify-content:space-between;align-items:baseline;gap:14px}
+.cine .tk-l dt{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9a8f7e}
+.cine .tk-l dd{margin:0;font-size:13.5px;font-weight:500;text-align:right}
+.cine .tk-f{width:100%;margin:14px 0 0;padding-top:14px;border-top:2px dashed #d8ccb6;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#9a8f7e}
+.maps{justify-content:center;margin-top:18px}
+.where{background:var(--red);color:var(--cream);border-radius:20px;padding:20px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.where p{font-size:20px;font-weight:700;margin-top:2px}
+.where .btn{background:var(--cream);border-color:var(--cream);color:var(--red)}
+.inbar{background:var(--ink);color:var(--cream);border:2px solid var(--red);border-radius:20px;padding:20px 22px;display:flex;align-items:center;gap:14px}
+.inbar .tick{flex:none;width:52px;height:52px;border-radius:50%;background:var(--red);color:var(--cream);display:grid;place-items:center;font-size:30px;font-weight:700;line-height:1}
+.inbar b{display:block;font-family:var(--f-display);font-weight:400;font-size:28px;line-height:1.05}
+.inbar span{font-size:15px;opacity:.9}
+.cine .instamp{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);border:5px solid var(--red);color:var(--red);background:rgba(255,250,240,.88);font-family:var(--f-mono);font-size:28px;font-weight:500;letter-spacing:.14em;padding:10px 18px;border-radius:12px;white-space:nowrap;z-index:2}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions .btn{width:100%}
+.actions .btn.outline{color:var(--ink);border-color:var(--ink)}
+@media (max-width:420px){.actions{grid-template-columns:1fr}}
+/* payment fields */
+.fbox{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--cream);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px}
+.fbox .k{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.fbox .v{display:block;font-family:var(--f-mono);font-size:17px;font-weight:500;letter-spacing:.03em;color:var(--ink);overflow-wrap:anywhere;margin-top:2px}
+.fbox > div{min-width:0}
+.fbox.dark{background:var(--ink);border-color:var(--ink)}
+.fbox.dark .k{color:var(--muted-dark)}
+.fbox.dark .v{color:var(--cream)}
+.fbox.dark .copy{color:var(--cream);border-color:#4a423b}
+.fbox .copy{flex:none}
+.howto{gap:22px}
+.howto li > div{min-width:0}
+.howto h3{margin-top:8px}
+@media (max-width:520px){
+  .card{padding:18px}
+  .howto li{grid-template-columns:30px 1fr;gap:10px}
+  .howto li::before{width:30px;height:30px;font-size:14px}
+  .howto h3{margin-top:3px;font-size:18px}
+  .fbox{padding:10px 12px}
+  .fbox .v{font-size:15px;letter-spacing:.01em}
+}
+/* programme */
+.prog{background:var(--ink);color:var(--cream);border-radius:22px;padding:22px 22px 14px}
+.prog-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+.prog-head h2{font-size:26px;color:var(--cream)}
+.prog-head .live{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#ff4a3d;display:inline-flex;align-items:center;gap:7px}
+.prog-head .live::before{content:"";width:8px;height:8px;border-radius:50%;background:#ff4a3d;animation:pp-pulse 1.4s ease-in-out infinite}
+@keyframes pp-pulse{50%{opacity:.25}}
+.prog ol{list-style:none;margin:0;padding:0}
+.prog li{display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:center;padding:12px 0;border-top:1px solid #2e2925}
+.prog li:first-child{border-top:0}
+.prog .tm{font-family:var(--f-mono);font-size:15px;color:var(--muted-dark);font-variant-numeric:tabular-nums}
+.prog .tt{font-weight:700;font-size:17px;line-height:1.3}
+.prog li.past{opacity:.4}
+.prog li.now{background:var(--red);border-radius:12px;padding:12px;margin-inline:-12px;border-top-color:transparent}
+.prog li.now + li{border-top-color:transparent}
+.prog li.now .tm{color:#f3d3cc}
+.prog .tag{display:inline-block;margin-left:8px;font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;background:var(--cream);color:var(--red);padding:3px 8px;border-radius:999px;vertical-align:2px}
+/* after the party */
+.thanks{background:var(--red);color:var(--cream);border-radius:24px;padding:28px 24px;display:grid;gap:12px}
+.thanks h1{color:var(--cream);font-size:clamp(38px,9vw,58px)}
+.thanks p{color:#f3d3cc;max-width:44ch}
+.thanks .btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.thanks .btn{width:100%;background:var(--cream);border-color:var(--cream);color:var(--red)}
+.thanks .btn.ghost{background:transparent;color:var(--cream);border-color:rgba(244,234,215,.55)}
+@media (max-width:420px){.thanks .btns{grid-template-columns:1fr}}
+/* next party (one tap for returning guests) */
+.nextc{background:var(--ink);color:var(--cream);border-radius:24px;padding:26px 24px;display:grid;gap:10px;justify-items:start}
+.nextc .kick{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-dark)}
+.nextc h2{font-size:clamp(30px,8vw,52px);color:var(--cream);justify-self:stretch}
+.nextc .date{color:var(--muted-dark);font-size:17px;margin-top:-4px}
+.nextc .badge{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:#ff4a3d;color:var(--ink);padding:5px 10px;border-radius:999px}
+.nextc .btn{margin-top:6px}
+.nextc .sub{font-size:14px;color:var(--muted-dark)}
+.nextc .sub a{color:var(--cream)}
+.nextc .err{color:#ff8a7f;font-size:14px;font-weight:700}
+/* invite a friend */
+.invite{background:var(--cream-2);border:2px dashed var(--ink);border-radius:22px;padding:22px;display:grid;gap:12px}
+.invite .left{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--red-deep)}
+.invite h2{font-size:30px}
+.invite p{color:var(--muted);font-size:15px}
+.invite .lnk{font-family:var(--f-mono);font-size:14px;background:var(--paper);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;overflow-wrap:anywhere}
+.invite .row2{display:flex;gap:8px;flex-wrap:wrap}
+.invite .dots{display:flex;gap:6px}.invite .dots i{flex:1;max-width:56px;height:8px;border-radius:99px;background:var(--paper);border:1.5px solid var(--ink)}.invite .dots i.on{background:var(--red)}
+.invite .btn.outline{color:var(--ink);border-color:var(--ink)}
+/* returning guests: one warm line, nothing else */
+.prio{position:relative;overflow:hidden;isolation:isolate;background:#17120e;color:var(--cream);
+  border-radius:20px;padding:24px 26px;border:1px solid rgba(255,210,63,.35)}
+.prio::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(120% 120% at 0 0,rgba(255,210,63,.16),transparent 58%)}
+.prio b{display:block;font-family:var(--f-display);font-weight:400;font-size:clamp(22px,5.4vw,28px);
+  line-height:1.08;letter-spacing:-.01em;color:#ffd23f}
+.prio p{margin:8px 0 0;font-size:15.5px;line-height:1.45;color:#cdbfa9}
+/* confirm it's you (Instagram DM) */
+.verify{background:var(--ink);color:var(--cream);border-radius:22px;padding:24px 22px;display:grid;gap:12px;border:2px solid #ff4a3d}
+.verify .kick{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#ff4a3d}
+.verify h2{font-size:clamp(28px,6.5vw,38px);color:var(--cream)}
+.verify p{color:var(--muted-dark);font-size:15px}
+.verify p b{color:var(--cream)}
+.vcode{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--cream);color:var(--ink);border-radius:14px;padding:12px 14px}
+.vcode span{font-family:var(--f-mono);font-size:clamp(24px,7vw,32px);font-weight:500;letter-spacing:.08em}
+.vcode .copy{border-color:var(--ink)}
+.verify .warn{background:var(--red);color:var(--cream);border-radius:12px;padding:10px 12px;font-size:14px}
+.verified{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#dcefdc;color:#1f7a3d;border-radius:14px;padding:10px 14px;font-size:14px;font-weight:700}
+.verified code{font-family:var(--f-mono);font-weight:500;color:var(--ink);background:#fff;border-radius:8px;padding:2px 8px}
+/* log in with Instagram + code */
+.login{max-width:440px;display:grid;gap:14px}
+.login label{display:grid;gap:6px}
+.login .err{color:var(--red-deep);font-size:14px;font-weight:700;min-height:1.2em}
+/* every card is a one-column grid that never grows wider than the screen */
+.hero-ok,.amount,.hype,.cine,.thanks,.nextc,.invite,.verify,.card,.prog{grid-template-columns:minmax(0,1fr)}
+/* small phones */
+.vcode span{white-space:nowrap;min-width:0;font-size:clamp(20px,6.4vw,32px)}
+.badge,.state{white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.fbox .v{overflow-wrap:break-word}
+@media (max-width:400px){
+  .tiers{grid-template-columns:1fr;gap:6px}
+  .tier{display:grid;grid-template-columns:64px 1fr auto;grid-template-areas:"p n y" "p u y";align-items:center;column-gap:10px;padding:8px 12px}
+  .tier b{grid-area:p;font-size:22px}
+  .tier .tn{grid-area:n}
+  .tier .tu{grid-area:u}
+  .tier .you{display:none}
+  .tier{grid-template-columns:64px 1fr}
+  .fbox .v{font-size:14px;letter-spacing:0}
+  .prog-head h2{font-size:22px}
+  .cine .instamp{font-size:20px;padding:8px 12px;border-width:4px}
+  .verify,.nextc,.thanks,.invite,.hype,.hero-ok{padding-inline:18px}
+}
+/* app + notifications */
+.appc{display:flex;gap:14px;align-items:center;background:var(--paper);border:1.5px solid var(--line);border-radius:18px;padding:14px 16px}
+.appc .ic{flex:none;width:44px;height:44px;border-radius:12px;background:var(--ink) url(/icon-192.png) center/cover}
+.appc .tx{flex:1;min-width:0;display:grid;gap:2px}
+.appc .tx b{font-size:15px}
+.appc .tx span{font-size:13px;color:var(--muted)}
+.appc .btn{flex:none;padding:9px 16px;font-size:14px}
+.appc.on{background:var(--cream-2);border-color:var(--ink)}
+.appc.on .tx b{color:var(--red)}
+.appc .steps{font-size:13px;color:var(--ink-2);margin:4px 0 0;padding-left:18px}
+@media (max-width:420px){.appc{flex-wrap:wrap}.appc .btn{width:100%}}
+
+/* receipt (scontrino) with the optional crew tip */
+.rcpt{--zz:10px;background:#fff;color:#111;margin:16px 0;padding:30px 22px 26px;font-family:var(--f-mono);font-size:13.5px;letter-spacing:.04em;text-transform:uppercase;position:relative;
+  -webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/calc(var(--zz)*2) 51% repeat-x,conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/calc(var(--zz)*2) 51% repeat-x;
+  mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) bottom/calc(var(--zz)*2) 51% repeat-x,conic-gradient(from 135deg at top,#0000,#000 1deg 89deg,#0000 90deg) top/calc(var(--zz)*2) 51% repeat-x}
+.rc-h{text-align:center;display:grid;gap:4px;margin-bottom:6px}
+.rc-h b{font-family:var(--f-display);font-weight:400;font-size:32px;letter-spacing:-.01em;text-transform:none;line-height:1}
+.rc-d{border-top:1.5px dashed #111;margin:12px 0}
+.rc-l{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;padding:4px 0}
+.rc-l .v{text-align:right;white-space:nowrap}
+.rc-l small{display:block;font-size:10.5px;color:#666;letter-spacing:.1em}
+.rc-tip{margin-top:2px}
+.rc-i{width:18px;height:18px;margin-left:8px;border-radius:50%;border:1.5px solid #b9b2a4;background:none;color:#7a7268;font:500 11px/1 var(--f-mono);cursor:pointer;padding:0;vertical-align:1px}
+.rc-i[aria-expanded="true"]{background:#111;border-color:#111;color:#fff}
+.rc-info{text-transform:none;letter-spacing:0;font-family:var(--f-body);font-size:13px;color:#555;line-height:1.5;margin:10px 0 0;padding:12px 14px;background:#f6f2e8;border-radius:12px}
+.rc-step{display:inline-flex;align-items:center;gap:8px}
+.rc-step button{width:34px;height:34px;border-radius:50%;border:2px solid #111;background:#fff;color:#111;font:700 18px/1 var(--f-body);display:grid;place-items:center;cursor:pointer;padding:0}
+.rc-step button[data-tip="1"]{background:#111;color:#fff}
+.rc-step button:disabled{opacity:.25;cursor:default}
+.rc-step b{min-width:48px;text-align:center;font-weight:500}
+.rc-l .i{display:flex;align-items:center}
+.rc-why{text-transform:none;letter-spacing:0;font-family:var(--f-body);font-size:13px;color:#555;margin:8px 0 0;line-height:1.45}
+.rc-tot{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--f-display);font-size:30px;letter-spacing:0;text-transform:uppercase}
+.rc-tot b{font-weight:400}
+.rc-tot{width:100%;border:0;background:none;padding:0;color:inherit;cursor:pointer;text-align:left}
+.rc-sub{text-align:center;margin:0 0 8px;font-size:11.5px;color:#666;letter-spacing:.12em}
+.rc-c{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;border:0;background:none;padding:11px 0;border-bottom:1px dotted #cfc8bb;color:#111;font:inherit;text-align:left;cursor:pointer}
+.rc-c span{font-size:11px;color:#666;letter-spacing:.12em}
+.rc-c b{font-weight:500;text-align:right;text-transform:none;letter-spacing:0;font-size:clamp(11px,3.1vw,13.5px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc-c.wrap b{white-space:normal;overflow-wrap:anywhere}
+.rc-c i{font-style:normal;font-size:10px;letter-spacing:.1em;color:#7a7268;border:1px solid #d9d2c4;border-radius:7px;padding:4px 8px;white-space:nowrap}
+.rc-c i::after{content:"COPIA"}
+.rc-c.got i{background:#12a150;border-color:#12a150;color:#fff}
+.rc-c.got i::after{content:"COPIATO"}
+.rc-c.plain{grid-template-columns:auto 1fr;cursor:default}
+.rc-c:active{background:#f3efe4}
+.rc-tot.got b{color:#12a150}
+.rc-dl{margin-top:16px;text-align:left;font-family:var(--f-body);text-transform:none;letter-spacing:0;color:var(--red);display:grid;gap:2px}
+.rc-dl .k{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#8a7e6c}
+.rc-dl b{font-family:var(--f-mono);font-size:19px;font-weight:500;color:var(--red);font-variant-numeric:tabular-nums}
+.rc-dl.late b{font-size:15px}
+#pay-all{width:100%;justify-content:center;margin-top:4px}
+.tipthx{display:grid;gap:4px;padding:18px 20px;margin-bottom:4px;border-color:var(--red)}
+.tipthx b{font-size:17px}
+.tipthx span{font-size:14px;color:var(--muted)}
+.rc-f{text-align:center;margin:0;line-height:1.8}
+/* when & where: the first thing a guest needs */
+.ww{background:var(--ink);color:var(--cream);border-radius:22px;padding:6px 22px 20px;margin:16px 0}
+.ww-r:last-of-type{border-bottom:0;padding-bottom:4px}
+.ww-r{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:15px 0;border-bottom:1px solid rgba(244,234,215,.12)}
+.ww-r span{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#b9ab98;flex:none}
+.ww-r b{font-size:17px;font-weight:800;text-align:right;overflow-wrap:anywhere}
+.ww-r a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+.ww-go{margin-top:14px;width:100%;justify-content:center}
+/* clean login: centred column, logo, no extra text */
+.auth{max-width:340px;margin:0 auto;text-align:center;padding:6vh 0 4vh}
+.auth-tile{background:var(--ink);border-radius:20px;padding:22px 20px;margin:0 auto 18px}
+.auth-logo{width:240px;max-width:100%;height:auto;display:block;margin:0 auto}
+.auth h1{font-family:var(--f-body);font-weight:800;font-size:26px;letter-spacing:-.01em;margin:0 0 18px}
+.auth .login{display:grid;gap:10px}
+.auth .login input{width:100%;box-sizing:border-box}
+.auth .login .btn{width:100%;justify-content:center}
+.auth .err:empty{display:none}
+.auth-note{margin-top:18px;font-size:14px;color:var(--muted);line-height:1.8}
+.auth-note a{color:var(--ink);font-weight:700}
+.tkfoot{max-width:560px;margin:26px auto 0;text-align:center;font-size:13px;line-height:1.5;color:#6b5f52}
+.tkfoot a{color:inherit}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="/"><img src="/brand/wordmark-4.png" alt="PerugiaParty" width="851" height="160"></a>
+    <nav aria-label="Main"><a class="btn" id="nav-cta" href="/#request">Richiedi un posto</a></nav>
+  </div>
+</header>
+<main class="wrap">
+  <div class="page" id="page"><p class="note">Carico il tuo biglietto…</p></div>
+  <p class="tkfoot">I biglietti sono personali, non cedibili e non rimborsabili. Se annulliamo noi, ti contattiamo e ti restituiamo i soldi. <a href="/termini">Termini</a> · <a href="/privacy">Privacy</a></p>
+</main>
+
+<script src="/vendor/qrcode.js"></script>
+<script>
+const LANG = "it";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const euro = n => n == null ? "—" : "€" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", ",") : Number(n));
+const when = t => new Date(t).toLocaleString("en-GB", { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" });
+
+const params = new URLSearchParams(location.search);
+let token = params.get("t");
+try { if (token) localStorage.setItem("pp_token", token); else token = localStorage.getItem("pp_token"); } catch(e){}
+if (token) { const c = document.getElementById("nav-cta"); c.textContent = "Il mio biglietto"; c.href = "/biglietto.html?t=" + encodeURIComponent(token); }
+
+function payLeftHTML(dl){
+  const ms = dl - Date.now();
+  const when = new Date(dl).toLocaleString("it-IT", { weekday:"short", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" });
+  if (ms <= 0) return `<span class="k">Paga entro</span><b>Il tempo per pagare è scaduto.</b>`;
+  const t = Math.floor(ms / 1000), dd = Math.floor(t / 86400), h = Math.floor(t / 3600) % 24, m = Math.floor(t / 60) % 60, sec = t % 60;
+  const p = n => String(n).padStart(2, "0");
+  const clock = (dd ? dd + "d " : "") + p(h) + ":" + p(m) + ":" + p(sec);
+  return `<span class="k">Paga entro ${when}</span><b>${clock}</b>`;
+}
+function payRow(k, shown, value, key){
+  if (!value) return `<div class="prow off"><span class="pk">${k}</span><span class="pv">${esc(shown)}</span></div>`;
+  return `<button class="prow${key ? " key" : ""}" type="button" data-copy="${esc(value)}"><span class="pk">${k}</span><span class="pv">${esc(shown)}</span><span class="pill">Copy</span></button>`;
+}
+function copyBtn(value){ return `<button class="copy" type="button" data-copy="${esc(value)}">Copy</button>`; }
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-copy]"); if (!b) return;
+  const v = b.dataset.copy;
+  const pill = b.querySelector(".pill");
+  if (pill) { const done = () => { b.classList.add("got"); pill.textContent = "Copied"; note && note("Copied", "ok"); setTimeout(() => pill.textContent = "Copy", 1800); };
+    try { navigator.clipboard.writeText(v).then(done, () => note("Tieni premuto per copiare", "warn")); } catch(x){ note("Tieni premuto per copiare", "warn"); } return; }
+  if (b.classList.contains("rc-c") || b.classList.contains("rc-tot")) { // receipt lines: keep the layout, flash and toast
+    const ok = () => { b.classList.add("got"); note && note("Copied", "ok"); setTimeout(() => b.classList.remove("got"), 1200); };
+    try { navigator.clipboard.writeText(v).then(ok, () => note("Tieni premuto per copiare", "warn")); } catch(x){ note("Tieni premuto per copiare", "warn"); } return; }
+  const label = b.textContent; const done = () => { b.textContent = "Copied"; setTimeout(() => b.textContent = label, 1500); };
+  const fail = () => { b.textContent = "Tieni premuto per copiare"; note("Tieni premuto per copiare", "warn"); };
+  try { navigator.clipboard.writeText(v).then(done, fail); } catch(x){ fail(); }
+});
+
+function oops(title, text, retry){
+  $("page").innerHTML = `<div class="oops"><p class="big" aria-hidden="true">:(</p><h1>${title}</h1><p>${text}</p>
+    <div class="acts">${retry ? `<button class="btn" type="button" id="retry">Riprova</button>` : ""}<a class="btn outline" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">DM us</a></div></div>`;
+  if (retry) $("retry").addEventListener("click", retry);
+}
+const note = (m, t, o) => window.ppNotify && ppNotify(m, t, o);
+function empty(title, text){
+  $("page").innerHTML = `<div class="empty"><h1 style="font-size:40px">${title}</h1><p class="lead">${text}</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><a class="btn" href="/#request">Richiedi un posto</a><a class="btn outline" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">DM us</a></div></div>`;
+}
+
+function drawQR(text, canvas){
+  const qr = qrcode(0, "M"); qr.addData(text); qr.make();
+  const n = qr.getModuleCount(), cell = 10, q = 2;
+  canvas.width = canvas.height = (n + q*2) * cell;
+  const x = canvas.getContext("2d");
+  x.fillStyle = "#f7f8ef"; x.fillRect(0, 0, canvas.width, canvas.height);
+  x.fillStyle = "#141210";
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (qr.isDark(r, c)) x.fillRect((c+q)*cell, (r+q)*cell, cell, cell);
+}
+
+
+/* the QR, full screen: biggest possible, savable, screen kept awake */
+function qrBigCanvas(text, scale){
+  const base = document.createElement("canvas"); drawQR(text, base);
+  const c = document.createElement("canvas"); c.width = base.width * scale; c.height = base.height * scale;
+  const x = c.getContext("2d"); x.imageSmoothingEnabled = false; x.drawImage(base, 0, 0, c.width, c.height);
+  return c;
+}
+async function openQR(d){
+  let lock = null;
+  try { if (navigator.wakeLock) lock = await navigator.wakeLock.request("screen"); } catch (e) {}
+  const url = qrBigCanvas(d.qr, 3).toDataURL("image/png");
+  const o = document.createElement("div"); o.className = "qrfs"; o.setAttribute("role", "dialog"); o.setAttribute("aria-label", "Il tuo QR d'ingresso");
+  o.innerHTML = `<div class="qrfs-in">
+      <img src="${url}" alt="Entry QR ${esc(d.code)}" draggable="false">
+      <p class="qrfs-c">${esc(d.code)}</p>
+      <p class="qrfs-n">${esc(d.name)}</p>
+      <div class="qrfs-b"><button class="btn" type="button" data-save>Salva immagine</button><button class="btn outline" type="button" data-close>Done</button></div>
+      <p class="qrfs-h">Tieni premuto sul codice per salvarlo, o fai uno screenshot.</p>
+    </div>`;
+  const close = () => { document.body.classList.remove("noscroll"); o.remove(); document.removeEventListener("keydown", esckey); try { lock && lock.release(); } catch (e) {} };
+  const esckey = e => { if (e.key === "Escape") close(); };
+  o.addEventListener("click", e => { if (e.target === o || e.target.closest("[data-close]")) close(); });
+  o.querySelector("[data-save]").addEventListener("click", e => {
+    const a = document.createElement("a"); a.href = url; a.download = `PerugiaParty-${d.code}.png`;
+    document.body.appendChild(a); a.click(); a.remove(); e.currentTarget.textContent = "Saved";
+  });
+  document.addEventListener("keydown", esckey);
+  document.body.classList.add("noscroll"); document.body.appendChild(o);
+}
+function loadImage(src){ return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
+async function ticketCanvas(d){
+  try { await document.fonts.ready; } catch(e){}
+  const W = 1080, H = 1700, c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d");
+  x.fillStyle = "#141210"; x.fillRect(0, 0, W, H);
+  x.fillStyle = "#fffaf0"; x.beginPath(); x.roundRect ? x.roundRect(40, 40, W-80, H-80, 18) : x.rect(40, 40, W-80, H-80); x.fill();
+  // torn edges, top and bottom
+  x.fillStyle = "#141210";
+  for (let px = 40; px < W-40; px += 36) {
+    x.beginPath(); x.moveTo(px, 40); x.lineTo(px+18, 62); x.lineTo(px+36, 40); x.closePath(); x.fill();
+    x.beginPath(); x.moveTo(px, H-40); x.lineTo(px+18, H-62); x.lineTo(px+36, H-40); x.closePath(); x.fill();
+  }
+  const dash = y => { x.strokeStyle = "#d8ccb6"; x.setLineDash([16, 12]); x.lineWidth = 4; x.beginPath(); x.moveTo(110, y); x.lineTo(W-110, y); x.stroke(); x.setLineDash([]); };
+  x.textAlign = "center"; x.fillStyle = "#141210";
+  x.font = `70px "Bowlby One", Impact, sans-serif`; x.fillText("PerugiaParty", W/2, 250);
+  x.fillStyle = "#7a6e5d"; x.font = `500 30px "DM Mono", monospace`;
+  x.fillText([d.event, d.date_label].filter(Boolean).join(" · ").toUpperCase(), W/2, 310);
+  dash(370);
+  const qc = document.createElement("canvas"); drawQR(d.qr, qc);
+  const box = 520; x.fillStyle = "#ffffff"; x.fillRect((W-box)/2 - 26, 430, box + 52, box + 52);
+  x.imageSmoothingEnabled = false; x.drawImage(qc, (W-box)/2, 456, box, box);
+  x.fillStyle = "#141210"; x.font = `500 54px "DM Mono", monospace`; x.fillText(d.code, W/2, 1080);
+  x.fillStyle = "#7a6e5d"; x.font = `500 30px "DM Mono", monospace`; x.fillText(String(d.name || "").toUpperCase(), W/2, 1135);
+  dash(1195);
+  const rows = [["DATE", (typeof fullDay === "function" && fullDay(d)) || d.date_label || ""], ["DOORS", d.doors || ""], ["PLACE", d.location || ""]].filter(r => r[1]);
+  let y = 1255;
+  rows.forEach(([k, v]) => {
+    x.textAlign = "left"; x.fillStyle = "#9a8f7e"; x.font = `500 26px "DM Mono", monospace`; x.fillText(k, 110, y);
+    x.textAlign = "right"; x.fillStyle = "#141210"; x.font = `500 32px "DM Mono", monospace`;
+    let t = String(v); while (x.measureText(t).width > W - 420 && t.length > 4) t = t.slice(0, -2);
+    x.fillText(t + (t === String(v) ? "" : "…"), W-110, y); y += 62;
+  });
+  dash(y + 6);
+  x.textAlign = "center"; x.fillStyle = "#9a8f7e"; x.font = `500 26px "DM Mono", monospace`;
+  x.fillText(d.crew ? "PASS CREW · DOCUMENTO ALL'INGRESSO" : "DOCUMENTO ALL'INGRESSO · 18+", W/2, y + 70);
+  return c;
+}
+// Instagram, Facebook and TikTok's built-in browsers silently block file downloads
+const IN_APP = /Instagram|FBAN|FBAV|FB_IAB|TikTok|musical_ly|Line\//i.test(navigator.userAgent);
+function showTicketImage(src, d){
+  const o = document.createElement("div"); o.className = "tsave"; o.setAttribute("role", "dialog"); o.setAttribute("aria-label", "Salva il biglietto");
+  o.innerHTML = `<div class="tsave-in"><p class="tsave-h">Tieni premuto sul biglietto, poi tocca <b>Salva immagine</b>.</p>
+    <img src="${src}" alt="Il tuo biglietto PerugiaParty ${esc(d.code)}">
+    <p class="tsave-n">${IN_APP ? "Vuoi il PDF? Apri questa pagina in Safari o Chrome (menu, poi Apri nel browser)." : "Salvato nelle foto, funziona anche senza rete all'ingresso."}</p>
+    <button class="btn" type="button">Done</button></div>`;
+  o.querySelector("button").addEventListener("click", () => o.remove());
+  o.addEventListener("click", e => { if (e.target === o) o.remove(); });
+  document.body.appendChild(o);
+}
+async function downloadTicket(d, btn){
+  const label = btn.textContent; btn.disabled = true; btn.textContent = "Preparo il tuo biglietto…";
+  const name = `PerugiaParty-${d.code}`;
+  let img = null;
+  try {
+    const c = await ticketCanvas(d);
+    img = c.toDataURL("image/jpeg", 0.92);
+    if (IN_APP) { showTicketImage(img, d); }
+    else {
+      if (!window.jspdf) await new Promise(res => { const sc = document.createElement("script"); sc.src = "/vendor/jspdf.umd.min.js"; sc.onload = res; sc.onerror = res; document.head.appendChild(sc); });
+      const { jsPDF } = window.jspdf || {};
+      if (!jsPDF) throw new Error("no pdf");
+      const pdf = new jsPDF({ unit: "mm", format: [108, 170], orientation: "portrait", compress: true });
+      pdf.setProperties({ title: `${d.event} · ${d.code}`, subject: "PerugiaParty ticket" });
+      pdf.addImage(img, "JPEG", 0, 0, 108, 170);
+      pdf.save(name + ".pdf");
+      btn.textContent = "Saved";
+    }
+  } catch (e) {
+    if (img) showTicketImage(img, d); else note("Fai uno screenshot del QR", "error");
+  }
+  setTimeout(() => { btn.disabled = false; btn.textContent = label; }, 2000);
+}
+async function shareParty(d, btn){
+  const text = `I'm going to ${d.event}${d.date_label ? " on " + d.date_label : ""} Request your place before the list closes:`;
+  const url = location.origin + "/";
+  try { if (navigator.share) { await navigator.share({ title: "PerugiaParty", text, url }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+  const label = btn.textContent;
+  try { await navigator.clipboard.writeText(text + " " + url); btn.textContent = "Invito copiato"; } catch (e) { btn.textContent = "Condividi perugiaparty.com"; }
+  setTimeout(() => btn.textContent = label, 2500);
+}
+function addToCalendar(d){
+  const start = new Date(d.starts_at), end = new Date(start.getTime() + 5 * 36e5);
+  const f = t => t.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const esc2 = v => String(v || "").replace(/([,;\\])/g, "\\$1");
+  const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//PerugiaParty//EN","BEGIN:VEVENT",
+    "UID:" + d.code + "@perugiaparty.com","DTSTAMP:" + f(new Date()),"DTSTART:" + f(start),"DTEND:" + f(end),
+    "SUMMARY:" + esc2(d.event + " · PerugiaParty"),"LOCATION:" + esc2(d.location),
+    "DESCRIPTION:" + esc2("Il tuo biglietto: " + (d.link || location.href) + " · Porta un documento."),"END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" })); a.download = "PerugiaParty.ics";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+let countTimer = null;
+function startCount(iso){
+  const el = $("tcount"); if (!el || !iso) return;
+  const t = new Date(iso).getTime(); if (!Number.isFinite(t)) return;
+  const tick = () => {
+    const ms = t - Date.now();
+    if (ms <= 0) { el.hidden = ms < -12 * 36e5; el.innerHTML = `<div style="min-width:auto"><b style="font-size:22px">È ora di festa.</b></div>`; clearInterval(countTimer); return; }
+    const p = n => String(n).padStart(2, "0");
+    el.innerHTML = [[Math.floor(ms/864e5),"days"],[p(Math.floor(ms/36e5)%24),"hours"],[p(Math.floor(ms/6e4)%60),"min"],[p(Math.floor(ms/1e3)%60),"sec"]].map(([v,l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
+    el.hidden = false;
+  };
+  clearInterval(countTimer); tick(); countTimer = setInterval(tick, 1000);
+}
+
+const DM = "https://ig.me/m/perugiaparty";
+function romeMinutes(iso){
+  const p = new Intl.DateTimeFormat("en-GB", { timeZone:"Europe/Rome", hour:"2-digit", minute:"2-digit", hourCycle:"h23" }).formatToParts(new Date(iso));
+  return Number(p.find(x => x.type === "hour").value) * 60 + Number(p.find(x => x.type === "minute").value);
+}
+// programme times are local clock times; anything well before the start belongs to the next morning
+function progItems(d){
+  const list = d.program || [], s = new Date(d.starts_at).getTime();
+  if (!list.length) return [];
+  const sm = Number.isFinite(s) ? romeMinutes(d.starts_at) : null;
+  return list.map(it => {
+    const m = /^(\d\d):(\d\d)$/.exec(it.time || ""); let at = null;
+    if (m && sm != null) { let delta = Number(m[1]) * 60 + Number(m[2]) - sm; if (delta < -360) delta += 1440; at = s + delta * 6e4; }
+    return { ...it, at };
+  });
+}
+function programmeHTML(d){
+  const items = progItems(d); if (!items.length) return "";
+  const timed = items.filter(i => i.at != null), now = Date.now();
+  const live = timed.length && now >= timed[0].at - 36e5 && now <= timed[timed.length - 1].at + 3 * 36e5;
+  let cur = -1; if (live) items.forEach((it, i) => { if (it.at != null && it.at <= now) cur = i; });
+  return `<section class="prog" id="prog" aria-label="Programme"><div class="prog-head"><h2>${live ? "Tonight" : "Il programma"}</h2>${live ? `<span class="live">Live</span>` : ""}</div>
+    <ol>${items.map((it, i) => `<li class="${i === cur ? "now" : (cur > i ? "past" : "")}"><span class="tm">${esc(it.time || "·")}</span><span class="tt">${esc(it.title)}${i === cur ? `<span class="tag">Ora</span>` : ""}</span></li>`).join("")}</ol></section>`;
+}
+function partyOver(d){ const s = new Date(d.starts_at).getTime(); return Number.isFinite(s) && Date.now() > s + 8 * 36e5; }
+function thanksHTML(d, first){
+  return `<div class="thanks"><span class="state">È finita</span>
+    <h1>Thanks for coming, ${first}.</h1>
+    <p>Hai foto o video della serata? Mandaceli, i migliori finiscono sulla nostra pagina. E raccontaci com'è andata: leggiamo ogni messaggio.</p>
+    <div class="btns"><a class="btn" href="${DM}" target="_blank" rel="noopener">Manda le tue foto</a><a class="btn ghost" href="${DM}" target="_blank" rel="noopener">Raccontaci com'è andata</a></div></div>`;
+}
+function nextHTML(d){
+  const n = d.next; if (!n) return "";
+  let action;
+  if (n.token) action = `<a class="btn" href="/biglietto.html?t=${encodeURIComponent(n.token)}">Apri la mia richiesta</a><p class="sub">Hai già una richiesta per questa serata.</p>`;
+  else if (n.open) action = `<button class="btn" type="button" id="again">${n.early ? "Usa il mio accesso anticipato" : "Richiedi il mio posto"}</button><p class="sub">${n.early ? "L'accesso anticipato è solo per chi è già venuto. " : d.returner ? "Chi è già venuto ha la precedenza. " : ""}Un tocco. Usiamo lo stesso nome e Instagram dell'ultima volta.</p><p class="err" id="again-err" role="alert"></p>`;
+  else action = `<p class="sub">Le richieste non sono ancora aperte. Segui <a href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">@perugiaparty</a> così non te la perdi.</p>`;
+  return `<section class="nextc"><span class="kick">Prossima festa</span>${d.returner && !n.token ? `<span class="badge">Ospite con precedenza</span>` : ""}
+    <h2>${esc(n.event)}</h2>${n.date_label ? `<p class="date">${esc(n.date_label)}</p>` : ""}${action}</section>`;
+}
+function inviteHTML(d){
+  const v = d.invite; if (!v) return "";
+  const event = d.next ? d.next.event : d.event;
+  if (v.left <= 0) return `<section class="invite"><span class="left">Invito usato</span><h2>Il tuo amico ci sta.</h2><p>Il tuo invito per ${esc(event)} è stato usato. Controlleremo la sua richiesta come tutte le altre.</p></section>`;
+  return `<section class="invite"><span class="left">${v.left} of ${v.limit} invite${v.limit > 1 ? "s" : ""} left</span>
+    <h2>Porta un amico.</h2>
+    <p>Sei già venuto, quindi puoi invitare ${v.limit > 1 ? "amici" : "un amico"} a ${esc(event)}. Manda loro questo link. Devono comunque passare dalla nostra approvazione, e vedremo che sono con te.</p>
+    <div class="lnk">${esc(v.url)}</div>
+    <div class="row2"><button class="btn ink" type="button" id="inv-share" data-url="${esc(v.url)}" data-ev="${esc(event)}">Manda l'invito</button><button class="btn outline" type="button" data-copy="${esc(v.url)}">Copia link</button></div></section>`;
+}
+function refHTML(d){
+  const r = d.ref; if (!r) return "";
+  const money = r.refund ? `€${Number(r.refund).toLocaleString("it-IT")}` : "your ticket money";
+  const dots = Array.from({ length: r.need }, (_, i) => `<i class="${i < r.done ? "on" : ""}"></i>`).join("");
+  const share = `<div class="lnk">${esc(r.url)}</div>
+    <div class="row2"><button class="btn ink" type="button" id="inv-share" data-url="${esc(r.url)}" data-ev="${esc(d.event)}">Manda agli amici</button><button class="btn outline" type="button" data-copy="${esc(r.url)}">Copia link</button></div>`;
+  if (r.earned) return `<section class="invite"><span class="left">${r.need} of ${r.need} new friends</span><div class="dots">${dots}</div><h2>Il biglietto te lo offriamo noi.</h2><p>${r.need} friends who'd never been to PerugiaParty paid for their place. You get ${money} back after the party. You can still send your link to more friends.</p>${share}</section>`;
+  if (r.full) return `<section class="invite"><span class="left">Biglietti gratis esauriti</span><h2>Porta comunque i tuoi amici.</h2><p>Tutti i biglietti gratis di questa serata sono stati presi. I tuoi amici possono comunque richiedere un posto con il tuo link.</p>${share}</section>`;
+  return `<section class="invite"><span class="left">${r.done} of ${r.need} new friends</span><div class="dots">${dots}</div>
+    <h2>Bring ${r.need} new friends, get your ticket back.</h2>
+    <p>Send your link to friends who've never been to PerugiaParty. When ${r.need} of them have paid, you get ${money} back after the party.</p>${share}</section>`;
+}
+function verifyHTML(d){
+  const handle = esc(d.ig || "your Instagram");
+  if (d.verified) return "";
+  return `<section class="verify" id="verify"><span class="kick">Ultimo passo</span>
+    <h2>Mandaci il tuo codice su Instagram.</h2>
+    <p>Manda questo codice a <b>@perugiaparty</b> from <b>${handle}</b>. It proves the account is yours${d.returner ? " and unlocks your priority as a returning guest" : ""}. ${d.ig_auto ? "Ricevi una risposta automatica entro un minuto." : "Confermiamo appena lo vediamo."}</p>
+    <div class="vcode"><span>${esc(d.vcode)}</span>${copyBtn(d.vcode)}</div>
+    ${d.mismatch ? `<p class="warn">Abbiamo ricevuto questo codice da un altro account Instagram. Mandalo da <b>${handle}</b>, the account in your request.</p>` : ""}
+    <a class="btn" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(d.vcode || "")}" target="_blank" rel="noopener" style="justify-self:start" onclick="try{navigator.clipboard.writeText(${esc(JSON.stringify(d.vcode || ""))})}catch(e){}">Manda il codice su Instagram</a>
+    <p style="font-size:13px">Tieni il codice: con quello entri su perugiaparty.com/biglietto da qualsiasi telefono.</p></section>`;
+}
+function loginView(msg){
+  $("page").innerHTML = `<div class="auth">
+    <div class="auth-tile"><img class="auth-logo" src="/brand/wordmark-4.png" alt="PerugiaParty"></div>
+    <h1>Il mio biglietto</h1>
+    <form class="login" id="login" novalidate>
+      <input id="l-ig" placeholder="@instagram" aria-label="Instagram" autocapitalize="off" autocomplete="username" maxlength="40">
+      <input id="l-code" placeholder="Codice (H26-XXXXXX)" aria-label="Codice personale" autocapitalize="characters" autocomplete="one-time-code" maxlength="20" style="font-family:var(--f-mono);letter-spacing:.06em">
+      <p class="err" id="l-err" role="alert">${esc(msg || "")}</p>
+      <button class="btn" type="submit" id="l-go">Entra</button>
+    </form>
+    <p class="auth-note">Non hai ancora una richiesta? <a href="/#request">Richiedi un posto</a><br>Perso il codice? <a href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener">DM us</a></p></div>`;
+  try { const m = JSON.parse(localStorage.getItem("pp_me") || "null"); if (m && m.ig) $("l-ig").value = m.ig; } catch(e){}
+  $("login").addEventListener("submit", async e => {
+    e.preventDefault();
+    const ig = $("l-ig").value.trim(), code = $("l-code").value.trim(), err = $("l-err"), go = $("l-go");
+    if (!ig) { err.textContent = "Aggiungi il tuo Instagram."; window.ppFieldError && ppFieldError($("l-ig")); $("l-ig").focus(); return; }
+    if (code.replace(/[^a-z0-9]/gi, "").length < 7) { err.textContent = "Aggiungi il codice completo, tipo H26-K7M4QX."; window.ppFieldError && ppFieldError($("l-code")); $("l-code").focus(); return; }
+    go.disabled = true; go.textContent = "Checking…";
+    try {
+      const r = await fetch("/api/login", { method:"POST", headers:{ "content-type":"application/json" }, body: JSON.stringify({ ig, code }) });
+      const x = await r.json().catch(() => ({}));
+      if (!r.ok || !x.token) throw new Error(x.error || "Non ha funzionato. Riprova.");
+      try { localStorage.setItem("pp_token", x.token); } catch(e){}
+      location.href = "/biglietto.html?t=" + encodeURIComponent(x.token);
+    } catch (e) {
+      const m = e.message === "Failed to fetch" ? "Nessuna connessione. Controlla internet e riprova." : e.message;
+      err.textContent = m; go.disabled = false; go.textContent = "Log in";
+      if (/match/i.test(m) && window.ppFieldError) { ppFieldError($("l-ig")); ppFieldError($("l-code")); }
+      note(/connection/i.test(m) ? "Nessuna connessione" : "Instagram o codice sbagliato", "error");
+    }
+  });
+}
+/* ---------- app: install + push notifications ---------- */
+const APP = {
+  standalone: matchMedia("(display-mode: standalone)").matches || navigator.standalone === true,
+  ios: /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1),
+  push: "serviceWorker" in navigator && "PushManager" in window && "Notification" in window,
+  installEvt: null,
+};
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
+addEventListener("beforeinstallprompt", e => { e.preventDefault(); APP.installEvt = e; if (LAST) renderApp(LAST); });
+if (token) $("mf").href = "/manifest.webmanifest?t=" + encodeURIComponent(token);
+const b64ToBytes = s => { s = s.replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; return Uint8Array.from(atob(s), c => c.charCodeAt(0)); };
+async function pushSubscribe(test){
+  const reg = await navigator.serviceWorker.ready;
+  const { key } = await fetch("/api/push/key").then(r => r.json());
+  if (!key) throw new Error("Le notifiche non sono ancora disponibili.");
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(key) });
+  const r = await fetch("/api/push/subscribe", { method:"POST", headers:{ "content-type":"application/json" }, body: JSON.stringify({ t: token, sub: sub.toJSON(), test: !!test }) });
+  if (!r.ok) throw new Error("Non siamo riusciti ad attivare le notifiche.");
+  try { localStorage.setItem("pp_push", token); } catch(e){}
+}
+function pushIsOn(){ try { return APP.push && Notification.permission === "granted" && localStorage.getItem("pp_push") === token; } catch(e){ return false; } }
+function appHTML(d){
+  // only once they've paid, and not on iPhone (installing there takes too many steps)
+  if (!["paid","in"].includes(d.status) || partyOver(d) || APP.ios) return "";
+  if (pushIsOn()) return "";
+  if (!APP.push && !APP.installEvt) return "";
+  if (APP.push && Notification.permission === "denied" && !APP.installEvt) return "";
+  const label = APP.installEvt && !APP.standalone ? "Aggiungi alla schermata Home" : "Attiva le notifiche";
+  return `<div class="appc" id="appc"><span class="ic" aria-hidden="true"></span><div class="tx"><b>Tieni il biglietto a portata di tocco</b><span>Funziona anche senza rete, con una notifica per il programma.</span></div>
+    <button class="btn ink" type="button" id="app-go">${label}</button></div>`;
+}
+function renderApp(d){
+  const old = $("appc"), html = appHTML(d);
+  if (old) old.outerHTML = html || ""; else if (html) { const P = $("page"), first = P.querySelector(".verify, .verified, .rq, .hero-ok, .hype, h1"); (first || P.firstElementChild || P).insertAdjacentHTML("afterend", html); }
+  const go = $("app-go");
+  if (go) go.addEventListener("click", async () => {
+    go.disabled = true;
+    try {
+      // one button: install the app if the phone offers it, then switch on notifications
+      if (APP.installEvt && !APP.standalone) { const e = APP.installEvt; APP.installEvt = null; e.prompt(); try { await e.userChoice; } catch(x){} }
+      if (APP.push && Notification.permission !== "denied") {
+        const perm = await Notification.requestPermission();
+        if (perm === "granted") { await pushSubscribe(true); note("È tutto pronto", "ok"); }
+      }
+    } catch (e) { note("Notifiche bloccate", "error"); }
+    renderApp(d);
+  });
+}
+// a new ticket on a phone that already allowed notifications: move them over quietly
+function keepPushOnThisTicket(){
+  try { if (APP.push && Notification.permission === "granted" && localStorage.getItem("pp_push") && localStorage.getItem("pp_push") !== token) pushSubscribe(false).then(() => LAST && renderApp(LAST)).catch(() => {}); } catch(e){}
+}
+
+function prioHTML(lead, text){ return `<div class="prio" role="note"><b>${lead}</b><p>${text}</p></div>`; }
+function decorate(d){
+  const P = $("page");
+  const pre = d.status === "requested" || d.status === "waitlist" || d.status === "approved";
+  if (!d.next && pre && d.vcode && !P.querySelector(".rq.pending")) {
+    const h = P.querySelector(".rq") || P.querySelector(".hero-ok") || P.querySelector("h1");
+    if (h) h.insertAdjacentHTML("afterend", verifyHTML(d));
+  }
+  if (d.priority && !d.next && (d.status === "requested" || d.status === "waitlist")) {
+    const h = P.querySelector(".rq") || P.querySelector("h1");
+    if (h) h.insertAdjacentHTML("afterend", prioHTML("Bentornato, " + esc(String(d.name || "").split(" ")[0] || "friend") + ".", d.status === "waitlist" ? "Sei il primo appena si libera un posto." : "Guardiamo la tua richiesta prima delle nuove."));
+  }
+  if (d.next) P.insertAdjacentHTML("afterbegin", nextHTML(d) + inviteHTML(d)); // older ticket: the next party comes first
+  else if (d.status === "approved") { /* paying: nothing else on the screen */ }
+  else if (d.ref) P.insertAdjacentHTML("beforeend", refHTML(d));
+  else if (d.invite) P.insertAdjacentHTML("beforeend", inviteHTML(d));
+  const again = $("again");
+  if (again) again.addEventListener("click", async () => {
+    again.disabled = true; again.textContent = "Sending…";
+    try {
+      const r = await fetch("/api/rerequest", { method:"POST", headers:{ "content-type":"application/json" }, body: JSON.stringify({ t: token }) });
+      const x = await r.json().catch(() => ({}));
+      if (!r.ok || !x.token) throw new Error(x.error || "Invio non riuscito. Riprova.");
+      try { localStorage.setItem("pp_token", x.token); } catch(e){}
+      location.href = "/biglietto.html?t=" + encodeURIComponent(x.token);
+    } catch (e) { const m = e.message === "Failed to fetch" ? "Nessuna connessione. Controlla internet e riprova." : e.message; $("again-err").textContent = m; note(/connection/i.test(m) ? "Nessuna connessione · non inviato" : "Richiesta non inviata · vedi sotto", "error"); again.disabled = false; again.textContent = "Riprova"; }
+  });
+  const sh = $("inv-share");
+  if (sh) sh.addEventListener("click", async () => {
+    const label = sh.dataset.label || (sh.dataset.label = sh.textContent);
+    const url = sh.dataset.url, text = `Come to ${sh.dataset.ev} with me. Request your place with my link:`;
+    try { if (navigator.share) { await navigator.share({ title: "PerugiaParty", text, url }); return; } } catch (e) { if (e && e.name === "AbortError") return; }
+    try { await navigator.clipboard.writeText(text + " " + url); sh.textContent = "Invito copiato"; } catch (e) { sh.textContent = "Copia il link qui sopra"; }
+    setTimeout(() => sh.textContent = label, 2500);
+  });
+}
+// long party names: shrink a heading until its longest word fits, never break inside a word
+function fitHeadings(){
+  document.querySelectorAll(".page h1, .page h2").forEach(h => {
+    h.style.fontSize = "";
+    let size = parseFloat(getComputedStyle(h).fontSize), guard = 0;
+    while (h.scrollWidth > h.clientWidth + 1 && size > 18 && guard++ < 30) { size *= 0.94; h.style.fontSize = size + "px"; }
+  });
+}
+addEventListener("resize", () => { clearTimeout(fitHeadings.t); fitHeadings.t = setTimeout(fitHeadings, 120); });
+let LAST = null;
+setInterval(() => { const el = $("prog"); if (el && LAST) el.outerHTML = programmeHTML(LAST) || ""; }, 60000);
+
+// a short confetti burst the first time someone sees their request
+function celebrate(d, count){
+  const key = "pp_cheer_" + (d.vcode || ""); try { if (localStorage.getItem(key)) return; localStorage.setItem(key, "1"); } catch(e){}
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const box = document.createElement("div"); box.className = "confetti"; box.setAttribute("aria-hidden", "true");
+  const cols = ["#b90000", "#ff4a3d", "#141210", "#f4ead7", "#8f0000"];
+  for (let i = 0; i < (count || 70); i++) {
+    const c = document.createElement("i");
+    c.style.left = (Math.random() * 100) + "%"; c.style.background = cols[i % cols.length];
+    c.style.setProperty("--dx", (Math.random() * 160 - 80) + "px"); c.style.setProperty("--r", (Math.random() * 720 - 360) + "deg");
+    c.style.animationDelay = (Math.random() * .35) + "s"; c.style.animationDuration = (1.6 + Math.random() * 1.2) + "s";
+    if (i % 3 === 0) c.style.borderRadius = "50%";
+    box.appendChild(c);
+  }
+  document.body.appendChild(box); setTimeout(() => box.remove(), 4200);
+  try { navigator.vibrate && navigator.vibrate([30, 40, 30]); } catch(e){}
+}
+// progress bar shown on every step: Request, Review, Pay, Ticket Party
+function stepsHTML(stage, cls){
+  const names = ["Richiesta", "Verifica", "Paga", "Biglietto", "Festa"];
+  return `<ol class="rq-steps ${cls || ""}" aria-label="A che punto sei">${names.map((n, i) => `<li class="${i < stage ? "done" : i === stage ? "now" : ""}"${i === stage ? ' aria-current="step"' : ""}><i></i><span>${n}</span></li>`).join("")}</ol>`;
+}
+// the moment the payment lands: full-screen "Ci sei" then the ticket
+function unlocked(d, first){
+  const key = "pp_paid_" + (d.code || ""); try { if (localStorage.getItem(key)) return; localStorage.setItem(key, "1"); } catch(e){ return; }
+  const o = document.createElement("div"); o.className = "unlock"; o.setAttribute("role", "status");
+  o.innerHTML = d.crew ? `<div class="unlock-in"><span class="unlock-k">Pass crew</span><p class="unlock-h">Sei<br>crew.</p><span class="unlock-t">Tocca per vedere il pass</span></div>`
+    : `<div class="unlock-in"><span class="unlock-k">Pagamento ricevuto</span><p class="unlock-h">Ci<br>sei.</p><span class="unlock-t">Tocca per vedere il biglietto</span></div>`;
+  const close = () => { o.classList.add("out"); setTimeout(() => o.remove(), 450); };
+  o.addEventListener("click", close); setTimeout(close, 3200);
+  document.body.appendChild(o);
+  celebrate({ vcode: "paid-" + (d.code || "") }, 120);
+}
+// date, time and place in one clear block at the top of the ticket
+function fullDay(d){
+  const st = d.starts_at ? new Date(d.starts_at) : null;
+  return st && !isNaN(st) ? st.toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Rome" }) : "";
+}
+function whenWhereHTML(d){
+  const st = d.starts_at ? new Date(d.starts_at) : null, ok = st && !isNaN(st);
+  const date = ok ? st.toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", timeZone:"Europe/Rome" }) : (d.date_label || "");
+  const time = d.doors || (ok ? st.toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) : "");
+  const maps = d.location ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(d.location) : "";
+  if (!date && !time && !d.location) return "";
+  return `<section class="ww" aria-label="Quando e dove">
+    ${date ? `<div class="ww-r"><span>Date</span><b>${esc(date)}</b></div>` : ""}
+    ${time ? `<div class="ww-r"><span>Time</span><b>${esc(time)}</b></div>` : ""}
+    ${d.location ? `<div class="ww-r"><span>Place</span><b><a href="${maps}" target="_blank" rel="noopener">${esc(d.location)}</a></b></div>
+      <a class="btn ww-go" href="${maps}" target="_blank" rel="noopener">Apri in Maps</a>` : ""}
+  </section>`;
+}
+// ---- the receipt: what you get, what you pay, and an optional tip for the crew ----
+function receiptHTML(d, tierName, tip, country){
+  const total = (Number(d.price) || 0) + tip;
+  const line = (q, item, v) => `<div class="rc-l"><span class="q">${q}</span><span class="i">${item}</span><span class="v">${v}</span></div>`;
+  return `<section class="rcpt" aria-label="Il tuo scontrino">
+    <div class="rc-h"><b>PerugiaParty</b><span>${esc(d.event || "")}${d.date_label ? " · " + esc(d.date_label) : ""}</span></div>
+    <div class="rc-d"></div>
+    ${line("1X", "OPEN BAR", "INCL.")}
+    ${line("1X", "MUSICA", "INCL.")}
+    ${line("1X", "TUTTA LA NOTTE", "INCL.")}
+    ${line("1X", "BIGLIETTO · " + esc(String(tierName).toUpperCase()), euro(d.price))}
+    <div class="rc-l rc-tip"><span class="q" id="tip-q">${tip ? tip + "X" : "+"}</span><span class="i">SOSTIENICI<button class="rc-i" type="button" id="tip-i" aria-expanded="false" aria-controls="tip-info" aria-label="Dove vanno i soldi">i</button></span>
+      <span class="v rc-step"><button type="button" data-tip="-1" aria-label="Un euro in meno" ${tip ? "" : "disabled"}>−</button><b id="tip-v">${euro(tip)}</b><button type="button" data-tip="1" aria-label="Un euro in più">+</button></span></div>
+    <p class="rc-info" id="tip-info" hidden>It goes to the people who make the night: the bar, the DJs, the door. They are all volunteers.</p>
+    <div class="rc-d"></div>
+    <button class="rc-tot" type="button" id="tot-copy" data-copy="${String(total).replace(".", ",")}"><span>TOTALE</span><b id="tip-tot">${euro(total)}</b></button>
+    <div class="rc-d"></div>
+    <p class="rc-sub">Paga con bonifico istantaneo</p>
+    ${copyLine("IBAN", d.iban ? d.iban.replace(/\s+/g, "").replace(/(.{4})/g, "$1 ").trim() : "—", d.iban ? d.iban.replace(/\s+/g, "") : "")}
+    ${copyLine("NOME", d.beneficiary || "—", d.beneficiary || "")}
+    ${country ? copyLine("BANCA", country, country.replace(/ \([A-Z]{2}\)$/, "")) : ""}
+    ${copyLine("CAUSALE", d.reference, d.reference, true)}
+    ${d.deadline ? `<div class="rc-dl${d.deadline < Date.now() ? " late" : ""}" id="pay-left" data-dl="${d.deadline}">${payLeftHTML(d.deadline)}</div>` : ""}
+  </section>`;
+}
+function copyLine(k, shown, value, wrap){
+  return value ? `<button class="rc-c${wrap ? " wrap" : ""}" type="button" data-copy="${esc(value)}"><span>${k}</span><b>${esc(shown)}</b><i aria-hidden="true"></i></button>` : `<div class="rc-c plain"><span>${k}</span><b>${esc(shown)}</b></div>`;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("#tip-i"); if (!b) return;
+  const panel = document.getElementById("tip-info"); if (!panel) return;
+  const open = panel.hasAttribute("hidden");
+  panel.toggleAttribute("hidden", !open); b.setAttribute("aria-expanded", String(open));
+});
+let tipTimer = null;
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-tip]"); if (!b || !window.__payD) return;
+  const d = window.__payD;
+  window.__tip = Math.max(0, Math.min(50, (window.__tip || 0) + Number(b.dataset.tip)));
+  const tip = window.__tip, total = (Number(d.price) || 0) + tip;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set("tip-v", euro(tip)); set("tip-tot", euro(total)); set("tip-q", tip ? tip + "X" : "+");
+  const tc = document.getElementById("tot-copy"); if (tc) tc.dataset.copy = String(total).replace(".", ",");
+  const minus = document.querySelector('[data-tip="-1"]'); if (minus) minus.disabled = !tip;
+  const all = document.getElementById("pay-all"); if (all) all.dataset.copy = all.dataset.copy.replace(/^Amount: .*$/m, "Amount: " + euro(total));
+  clearTimeout(tipTimer);
+  tipTimer = setTimeout(() => { const t = token; if (t) fetch("/api/ticket/tip", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ t, tip }) }).catch(() => {}); }, 600);
+});
+// Italian guests get the whole flow in Italian: same link, the page follows their language
+function langSwap(d){
+  const want = d && d.lang === "it" ? "it" : "en";
+  if (want === LANG) return false;
+  location.replace((want === "it" ? "/biglietto.html" : "/ticket.html") + location.search + location.hash);
+  return true;
+}
+function render(d){
+  if (langSwap(d)) return;
+  const P = $("page"), first = esc(String(d.name || "").split(" ")[0]);
+  if (d.status === "requested" || d.status === "waitlist") {
+    // same page for both: the waitlist is only a tag, the steps don't change
+    const wl = d.status === "waitlist";
+    if (!d.verified) {
+      // not finished: nothing reaches us until the code arrives on Instagram, so no celebration yet
+      P.innerHTML = `<div class="rq pending"><span class="state">Non ancora inviata</span>
+          <h1>One step left, ${first}.</h1>
+          <p class="lead">Mandaci questo codice su Instagram. Fino ad allora la richiesta non vale.</p>
+          <div class="vcode"><span>${esc(d.vcode)}</span>${copyBtn(d.vcode)}</div>
+          ${d.mismatch ? `<p class="warn">Abbiamo ricevuto questo codice da un altro account. Mandalo da <b>${esc(d.ig || "your Instagram")}</b>.</p>` : ""}
+          <a class="btn pend-go" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(d.vcode || "")}" target="_blank" rel="noopener" onclick="try{navigator.clipboard.writeText(${esc(JSON.stringify(d.vcode || ""))})}catch(e){}">Manda il codice su Instagram</a>
+          <p class="pend-n">From <b>${esc(d.ig || "your Instagram")}</b>. This page updates by itself.</p>
+          ${stepsHTML(0)}
+        </div>`;
+    } else {
+    P.innerHTML = `<div class="rq"><span class="rq-stamp" aria-hidden="true">Received</span>
+        <span class="state">Richiesta inviata</span>
+        <h1>Sei in lista, ${first}.</h1>
+        ${wl ? `<span class="wl-tag">Lista d’attesa</span>` : ""}
+        <p class="lead">${!d.verified ? `One more step: send us your code on Instagram, then we look at your request for <b>${esc(d.event)}</b>.`
+          : wl ? `<b>${esc(d.event)}</b> is full. If a place opens up we DM you, and your price appears here.`
+          : `We're checking your request for <b>${esc(d.event)}</b>. You'll see your price here.`}</p>
+        ${stepsHTML(1)}
+      </div>
+      ${d.verified ? `<div class="card savep"><div><b>Salva questa pagina</b><span>Il link è anche nei tuoi messaggi.</span></div>${copyBtn(d.link || location.href)}</div>` : ""}`;
+    celebrate(d);
+    }
+  } else if (d.status === "approved") {
+    const left = d.deadline ? d.deadline - Date.now() : null;
+    const overdue = left != null && left < 0;
+    const names = { early: "Early bird", normal: "Normale", late: "Late", special: "Prezzo speciale" };
+    const tierName = names[d.ticket] || "Biglietto";
+    const day = iso => iso ? new Date(iso).toLocaleDateString("it-IT", { weekday:"short", day:"numeric", month:"short", timeZone:"Europe/Rome" }) : null;
+    const eu = d.tiers && day(d.tiers.early_until), nu = d.tiers && day(d.tiers.normal_until);
+    const why = {
+      early: "Sei stato approvato presto, quindi hai il prezzo più basso.",
+      normal: "Sei stato approvato al prezzo normale.",
+      late: "Sei stato approvato vicino alla serata, quindi vale il prezzo late.",
+      special: "Questo è un prezzo speciale, solo per te.",
+    }[d.ticket] || "Questo è il prezzo del tuo posto.";
+    const tiers = d.tiers ? ["early","normal","late"].filter(t => d.tiers[t] != null && d.tiers[t] !== "") : [];
+    // bank country from the IBAN's first two letters (many banks ask for it on foreign transfers)
+    const ibanCC = (d.iban || "").replace(/\s+/g, "").slice(0, 2).toUpperCase();
+    const CC = {IT:"Italia",LT:"Lituania",DE:"Germania",NL:"Paesi Bassi",BE:"Belgio",FR:"Francia",ES:"Spagna",IE:"Irlanda",GB:"Regno Unito",AT:"Austria",LU:"Lussemburgo",PT:"Portogallo",EE:"Estonia",LV:"Lettonia",FI:"Finlandia",MT:"Malta",SM:"San Marino",CH:"Svizzera",PL:"Polonia"};
+    const bankCountry = /^[A-Z]{2}$/.test(ibanCC) ? (CC[ibanCC] ? `${CC[ibanCC]} (${ibanCC})` : ibanCC) : "";
+    const tip = Math.max(0, Math.min(50, Math.round(Number(window.__tip != null ? window.__tip : d.tip) || 0)));
+    window.__tip = tip; window.__payD = d;
+    const total = (Number(d.price) || 0) + tip;
+    const allText = `Importo: ${euro(total)}\nIBAN: ${d.iban || ""}\nBeneficiario: ${d.beneficiary || ""}${bankCountry ? `\nPaese banca: ${bankCountry}` : ""}\nCausale: ${d.reference}`;
+    P.innerHTML = `<div class="hero-ok"><span class="state">Accettato</span>
+        <h1>Ci sei, ${first}.</h1>
+        <p class="lead"><b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " · " + esc(d.date_label) : ""}. Paga qui sotto per bloccare il posto.</p>
+        ${stepsHTML(2, "on-red")}</div>
+      ${receiptHTML(d, tierName, tip, bankCountry)}
+      <button class="btn pay-all" id="pay-all" type="button" data-copy="${esc(allText)}">Copia tutti i dati</button>
+`;
+    celebrate({ vcode: "ok-" + (d.code || "") }, 45);
+    clearInterval(window.__payTimer);
+    window.__payTimer = setInterval(() => { const el = document.getElementById("pay-left"); if (!el) return clearInterval(window.__payTimer); const dl = Number(el.dataset.dl); el.classList.toggle("late", dl < Date.now()); el.innerHTML = payLeftHTML(dl); }, 1000);
+  } else if (d.status === "paid" || d.status === "in") {
+    const inside = d.status === "in", over = partyOver(d);
+    P.innerHTML = `${inside && over ? thanksHTML(d, first) : `${!inside && Number(d.tip) > 0 ? `<div class="card tipthx"><b>Thank you for the ${euro(Number(d.tip))} :)</b><span>Hai sostenuto la crew, e tutto il team ti ringrazia.</span></div>` : ""}<div class="hype ${inside ? "" : "paid"}">
+        ${inside ? "" : `<span class="rq-stamp paid-stamp" aria-hidden="true">${d.crew ? "Crew" : "Paid"}</span>`}
+        ${inside ? `<span class="state">Entrato</span>` : ""}
+        <h1>${inside ? `Ce l'hai fatta, <em>${first}</em>.` : d.crew ? `Sei crew, ${first}.` : `Ci sei, ${first}.`}</h1>
+        <p class="lead">${inside ? "Buona serata." : d.crew ? `Thanks for making <b>${esc(d.event)}</b> happen.` : `See you at <b>${esc(d.event)}</b>.`}</p>
+        <div class="count" id="tcount" ${inside ? 'style="display:none"' : ""} hidden></div>
+        ${d.crew ? "" : stepsHTML(inside ? 5 : 4)}
+      </div>
+      ${inside ? `<div class="inbar" role="status"><div><b>Entrato</b><span>${d.in_at ? "Entrato alle " + new Date(d.in_at).toLocaleTimeString("it-IT", { hour:"2-digit", minute:"2-digit", timeZone:"Europe/Rome" }) + ". " : ""}This ticket has been used.</span></div></div>` : ""}`}
+      ${inside && !over ? programmeHTML(d) : ""}
+      <div class="cine-w"><div class="cine${d.crew ? " crew" : ""}">${d.crew ? `<span class="crewband">Pass crew</span>` : ""}
+        ${inside ? `<span class="instamp">ENTRATO</span>` : ""}
+        <p class="brand">PerugiaParty</p>
+        <p class="sub">${esc([d.event, d.date_label].filter(Boolean).join(" · "))}</p>
+        <button class="qr" type="button" id="qr-open" aria-label="Apri il QR a schermo intero"><canvas id="qr" aria-label="Il tuo codice QR d'ingresso"></canvas></button>
+        <span class="qr-hint">Tocca il codice per ingrandirlo</span>
+        <p class="code">${esc(d.code)}</p>
+        <p class="who">${esc(d.name)}</p>
+        <dl class="tk-l">
+          ${d.date_label ? `<div><dt>Date</dt><dd>${esc(fullDay(d) || d.date_label)}</dd></div>` : ""}
+          ${d.doors ? `<div><dt>Doors</dt><dd>${esc(d.doors)}</dd></div>` : ""}
+          ${d.location ? `<div><dt>Place</dt><dd>${esc(d.location)}</dd></div>` : ""}
+        </dl>
+        <p class="tk-f">${d.crew ? "Pass crew · documento all'ingresso" : "Documento all'ingresso · 18+"}</p>
+      </div></div>
+      ${d.location && !over ? `<a class="btn wide maps" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.location)}" target="_blank" rel="noopener">Apri in Maps</a>` : ""}
+      ${!inside && !over ? programmeHTML(d) : ""}
+      ${over ? "" : `<div class="actions">
+        ${d.starts_at ? `<button class="btn outline" type="button" id="cal">Calendario</button>` : ""}
+        <button class="btn outline" type="button" id="share">Dillo agli amici</button>
+        <button class="btn outline wide" type="button" id="pdf">${IN_APP ? "Salva una copia" : "Salva una copia (PDF)"}</button>
+      </div>
+      <p class="note">Il QR resta su questa pagina: apri il link all'ingresso. Porta un documento.</p>`}`;
+    if (!inside && !over) unlocked(d, first);
+    try { drawQR(d.qr, $("qr")); } catch (e) { $("qr").parentElement.innerHTML = `<p style="color:#111;padding:20px;font-family:var(--f-mono)">${esc(d.code)}</p>`; }
+    if ($("pdf")) $("pdf").addEventListener("click", e => downloadTicket(d, e.currentTarget));
+    if ($("share")) $("share").addEventListener("click", e => shareParty(d, e.currentTarget));
+    if ($("cal")) $("cal").addEventListener("click", () => addToCalendar(d));
+    if ($("qr-open")) $("qr-open").addEventListener("click", () => openQR(d));
+    startCount(d.starts_at);
+  } else if (d.status === "declined") {
+    empty("Non questa volta.", "Non siamo riusciti a darti un posto per questa edizione. Segui Instagram per la prossima.");
+  } else if (d.status === "removed") {
+    empty("Il tuo posto è stato annullato.", "La tua richiesta o il tuo biglietto per questa serata è stato annullato. Scrivici su Instagram se hai domande.");
+  } else if (d.status === "released") {
+    empty("Il tuo posto è stato liberato.", "Il tuo posto è tornato in lista. Scrivici su Instagram se pensi sia un errore.");
+  } else {
+    empty("Qualcosa non va.", "Non riusciamo a leggere questo biglietto. Scrivici su Instagram e lo sistemiamo.");
+  }
+  LAST = d;
+  decorate(d);
+  renderApp(d);
+  fitHeadings();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeadings);
+}
+
+if (!token) {
+  loginView();
+} else {
+  // live updates: check every 20 s while the page is open, and when the guest comes back to it
+  let last = null, busy = false, prevVerified = null;
+  const STATUS_TEXT = { waitlist: ["Sei in lista d'attesa", "warn"], approved: ["Sei dentro", "ok"], paid: ["Pagamento ricevuto", "ok"], in: ["Sei entrato", "ok"], declined: ["La tua richiesta è stata aggiornata", "warn"], released: ["La tua richiesta è stata aggiornata", "warn"], removed: ["La tua richiesta è stata aggiornata", "warn"] };
+  async function check(first){
+    if (busy) return; busy = true;
+    try {
+      const r = await fetch("/api/ticket?t=" + encodeURIComponent(token), { cache: "no-store" });
+      const d = await r.json();
+      if (!r.ok) { if (first) { try { localStorage.removeItem("pp_token"); } catch(e){} loginView("Non troviamo questo link. Entra con il tuo Instagram e il codice."); } return; }
+      const sig = JSON.stringify(d);
+      if (sig === last) return;
+      const prev = last ? JSON.parse(last).status : null;
+      last = sig;
+      render(d);
+      if (prev && prev === d.status && d.verified && prevVerified === false) note("Instagram confermato", "ok");
+      prevVerified = !!d.verified;
+      if (prev && prev !== d.status) { const [m, t] = STATUS_TEXT[d.status] || ["La pagina si è aggiornata", "ok"]; note(m, t); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    } catch (e) {
+      if (first) oops("Non riesco a caricare il biglietto.", navigator.onLine === false ? "Sei offline. Collegati a internet e riprova." : "Non riusciamo a raggiungere il server. Controlla la connessione e riprova.", () => { $("page").innerHTML = `<p class="note">Carico il tuo biglietto…</p>`; check(true); });
+    } finally { busy = false; }
+  }
+  check(true);
+  keepPushOnThisTicket();
+  setInterval(() => { if (document.visibilityState === "visible") check(false); }, 20000);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") check(false); });
+}
+</script>
+</body>
+</html>

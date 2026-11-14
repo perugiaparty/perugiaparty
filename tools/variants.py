@@ -119,6 +119,9 @@ IT = [
     ('<th scope="row">In the centre</th>', '<th scope="row">In centro</th>'),
     ('<th scope="row">Till late</th>', '<th scope="row">Fino a tardi</th>'),
     ('But <span>why?</span>', 'Ma <span>perché?</span>'),
+    ('showMyTicket("/ticket.html?t=" + encodeURIComponent(t))', 'showMyTicket("/biglietto.html?t=" + encodeURIComponent(t))'),
+    ('const link = location.origin + "/ticket.html?t=" + data.token;', 'const link = location.origin + "/biglietto.html?t=" + data.token;'),
+    ('location.href = "/ticket.html?t=" + encodeURIComponent(data.token);', 'location.href = "/biglietto.html?t=" + encodeURIComponent(data.token);'),
     ('"Doors " + ev.doors', '"Porte " + ev.doors'),
     ('<span class="stamp" id="pv-stamp">DRAFT</span>', '<span class="stamp" id="pv-stamp">BOZZA</span>'),
     ('<p class="rc-s" id="pv-ev">Guest request</p>', '<p class="rc-s" id="pv-ev">Richiesta ospite</p>'),
@@ -187,4 +190,6 @@ build("/italian", "it", COMMON_HEAD("/italian", "Feste universitarie ed Erasmus 
         "Feste private per studenti universitari ed Erasmus nel centro di Perugia. Open bar, DJ e gente nuova da conoscere, a prezzo studenti. 18+.",
         "Feste universitarie a Perugia · PerugiaParty", "Serata da club. Vibe da centro. Il meglio dei due mondi. Open bar, prezzi bassi. 18+.", "it_IT") + IT,
       italian_post)
+import ticket_it
+ticket_it.build()
 print("built /italian and /erasmus")
