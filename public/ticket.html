@@ -302,9 +302,19 @@ h1{font-size:clamp(40px,8vw,64px)}
 .invite .dots{display:flex;gap:6px}.invite .dots i{flex:1;max-width:56px;height:8px;border-radius:99px;background:var(--paper);border:1.5px solid var(--ink)}.invite .dots i.on{background:var(--red)}
 .invite .btn.outline{color:var(--ink);border-color:var(--ink)}
 /* priority for returning guests */
-.prio{background:var(--ink);color:var(--cream);border-radius:18px;padding:18px 20px;border-left:4px solid #ff4a3d}
-.prio .k{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#ff4a3d;margin-bottom:7px}
-.prio p{margin:0;font-size:15.5px;line-height:1.45;color:var(--cream)}
+.prio{position:relative;overflow:hidden;isolation:isolate;background:linear-gradient(135deg,#1e1813,#141210 58%);
+  color:var(--cream);border-radius:20px;padding:22px 24px;border:1.5px solid rgba(255,210,63,.42);
+  box-shadow:0 10px 30px rgba(20,18,16,.18)}
+.prio::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(130% 100% at 100% 0,rgba(255,210,63,.18),transparent 62%)}
+.prio::after{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;
+  background:linear-gradient(#ffd23f,#e0a500)}
+.prio .k{display:flex;align-items:center;gap:9px;font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;
+  text-transform:uppercase;color:#ffd23f;margin-bottom:10px}
+.prio .k i{width:7px;height:7px;border-radius:50%;background:#ffd23f;box-shadow:0 0 0 4px rgba(255,210,63,.16)}
+.prio b{display:block;font-family:var(--f-display);font-weight:400;font-size:clamp(21px,5vw,26px);line-height:1.05;
+  letter-spacing:-.01em;color:var(--cream)}
+.prio p{margin:7px 0 0;font-size:15px;line-height:1.45;color:#c9bca9;max-width:46ch}
 /* confirm it's you (Instagram DM) */
 .verify{background:var(--ink);color:var(--cream);border-radius:22px;padding:24px 22px;display:grid;gap:12px;border:2px solid #ff4a3d}
 .verify .kick{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#ff4a3d}
@@ -788,7 +798,7 @@ function keepPushOnThisTicket(){
   try { if (APP.push && Notification.permission === "granted" && localStorage.getItem("pp_push") && localStorage.getItem("pp_push") !== token) pushSubscribe(false).then(() => LAST && renderApp(LAST)).catch(() => {}); } catch(e){}
 }
 
-function prioHTML(kick, text){ return `<div class="prio" role="note"><span class="k">${kick}</span><p>${text}</p></div>`; }
+function prioHTML(kick, lead, text){ return `<div class="prio" role="note"><span class="k"><i></i>${kick}</span><b>${lead}</b><p>${text}</p></div>`; }
 function decorate(d){
   const P = $("page");
   const pre = d.status === "requested" || d.status === "waitlist" || d.status === "approved";
@@ -798,7 +808,7 @@ function decorate(d){
   }
   if (d.priority && !d.next && (d.status === "requested" || d.status === "waitlist")) {
     const h = P.querySelector(".rq") || P.querySelector("h1");
-    if (h) h.insertAdjacentHTML("afterend", prioHTML("Priority", d.status === "waitlist" ? "You came before, so you are first in line when a place opens up." : "You came before, so we look at your request before the new ones."));
+    if (h) h.insertAdjacentHTML("afterend", prioHTML("Priority", "You're a regular.", d.status === "waitlist" ? "First in line the moment a place opens up." : "Your request is looked at before the new ones."));
   }
   if (d.next) P.insertAdjacentHTML("afterbegin", nextHTML(d) + inviteHTML(d)); // older ticket: the next party comes first
   else if (d.status === "approved") { /* paying: nothing else on the screen */ }
