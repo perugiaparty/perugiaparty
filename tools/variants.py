@@ -80,7 +80,6 @@ build("/erasmus", "en", COMMON_HEAD("/erasmus", "Erasmus parties in Perugia · P
     ('Club night. Centro vibes. <span>Best of both.</span>', 'Three ways to go out. <span>One makes sense.</span>'),
     ('<h3 class="why-q">But <span>why?</span></h3>', '<h3 class="why-q">Who <span>we are.</span></h3>'),
     ('<h2 id="faq-h">Good to know.</h2>', '<h2 id="faq-h">New here? <span>Start with this.</span></h2>'),
-    ('<p>We check every request on Instagram.</p>', '<p>We check every request on Instagram.</p>'),
 ], erasmus_post)
 
 
@@ -133,8 +132,6 @@ IT = [
     ('<h3>Pay</h3><p>Bank transfer, tap to copy.</p>', '<h3>Paga</h3><p>Bonifico, tocca per copiare.</p>'),
     ('<h3>Your QR</h3><p>Ticket and place unlock.</p>', '<h3>Il tuo QR</h3><p>Biglietto e luogo si sbloccano.</p>'),
     ('<h3>Party</h3><p>QR and photo ID at the door.</p>', '<h3>Festa</h3><p>QR e documento alla porta.</p>'),
-    ('<h2 id="req-h">Request a place.</h2>', '<h2 id="req-h">Richiedi un posto.</h2>'),
-    ('<p>We check every request on Instagram.</p>', '<p>Controlliamo ogni richiesta su Instagram.</p>'),
     ('<label for="f-name">Full name</label>', '<label for="f-name">Nome e cognome</label>'),
     ('placeholder="As on your ID"', 'placeholder="Come sul documento"'),
     ('placeholder="@yourhandle"', 'placeholder="@iltuoprofilo"'),
@@ -169,9 +166,6 @@ IT = [
     ('ev.sold_out ? "Join the waitlist" : a.dataset.label', 'ev.sold_out ? "Entra in lista d’attesa" : a.dataset.label'),
     ('<span class="hm-red" id="proof">Invite only</span>', '<span class="hm-red" id="proof">Solo su invito</span>'),
     ('"Join the waitlist" : "Send request"', '"Entra in lista d’attesa" : "Invia richiesta"'),
-    ('<p class="next-sub">Request below. Once approved, pay to unlock your ticket.</p>', '<p class="next-sub">Richiedi qui sotto. Se approvato, paghi e sblocchi il biglietto.</p>'),
-    ('[["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]]', '[["Data", ev.date_label], ["Porte", ev.doors], ["Biglietti", price]]'),
-    ('"From " + euro(ev.price.min)', '"Da " + euro(ev.price.min)'),
     ('[[d,"days"],[p(h),"hours"],[p(m),"min"],[p(s),"sec"]]', '[[d,"giorni"],[p(h),"ore"],[p(m),"min"],[p(s),"sec"]]'),
     ('<b style="font-size:22px">The party has started.</b>', '<b style="font-size:22px">La festa è iniziata.</b>'),
 ]

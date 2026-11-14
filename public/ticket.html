@@ -301,20 +301,14 @@ h1{font-size:clamp(40px,8vw,64px)}
 .invite .row2{display:flex;gap:8px;flex-wrap:wrap}
 .invite .dots{display:flex;gap:6px}.invite .dots i{flex:1;max-width:56px;height:8px;border-radius:99px;background:var(--paper);border:1.5px solid var(--ink)}.invite .dots i.on{background:var(--red)}
 .invite .btn.outline{color:var(--ink);border-color:var(--ink)}
-/* priority for returning guests */
-.prio{position:relative;overflow:hidden;isolation:isolate;background:linear-gradient(135deg,#1e1813,#141210 58%);
-  color:var(--cream);border-radius:20px;padding:22px 24px;border:1.5px solid rgba(255,210,63,.42);
-  box-shadow:0 10px 30px rgba(20,18,16,.18)}
+/* returning guests: one warm line, nothing else */
+.prio{position:relative;overflow:hidden;isolation:isolate;background:#17120e;color:var(--cream);
+  border-radius:20px;padding:24px 26px;border:1px solid rgba(255,210,63,.35)}
 .prio::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
-  background:radial-gradient(130% 100% at 100% 0,rgba(255,210,63,.18),transparent 62%)}
-.prio::after{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;
-  background:linear-gradient(#ffd23f,#e0a500)}
-.prio .k{display:flex;align-items:center;gap:9px;font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;
-  text-transform:uppercase;color:#ffd23f;margin-bottom:10px}
-.prio .k i{width:7px;height:7px;border-radius:50%;background:#ffd23f;box-shadow:0 0 0 4px rgba(255,210,63,.16)}
-.prio b{display:block;font-family:var(--f-display);font-weight:400;font-size:clamp(21px,5vw,26px);line-height:1.05;
-  letter-spacing:-.01em;color:var(--cream)}
-.prio p{margin:7px 0 0;font-size:15px;line-height:1.45;color:#c9bca9;max-width:46ch}
+  background:radial-gradient(120% 120% at 0 0,rgba(255,210,63,.16),transparent 58%)}
+.prio b{display:block;font-family:var(--f-display);font-weight:400;font-size:clamp(22px,5.4vw,28px);
+  line-height:1.08;letter-spacing:-.01em;color:#ffd23f}
+.prio p{margin:8px 0 0;font-size:15.5px;line-height:1.45;color:#cdbfa9}
 /* confirm it's you (Instagram DM) */
 .verify{background:var(--ink);color:var(--cream);border-radius:22px;padding:24px 22px;display:grid;gap:12px;border:2px solid #ff4a3d}
 .verify .kick{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#ff4a3d}
@@ -798,7 +792,7 @@ function keepPushOnThisTicket(){
   try { if (APP.push && Notification.permission === "granted" && localStorage.getItem("pp_push") && localStorage.getItem("pp_push") !== token) pushSubscribe(false).then(() => LAST && renderApp(LAST)).catch(() => {}); } catch(e){}
 }
 
-function prioHTML(kick, lead, text){ return `<div class="prio" role="note"><span class="k"><i></i>${kick}</span><b>${lead}</b><p>${text}</p></div>`; }
+function prioHTML(lead, text){ return `<div class="prio" role="note"><b>${lead}</b><p>${text}</p></div>`; }
 function decorate(d){
   const P = $("page");
   const pre = d.status === "requested" || d.status === "waitlist" || d.status === "approved";
@@ -808,7 +802,7 @@ function decorate(d){
   }
   if (d.priority && !d.next && (d.status === "requested" || d.status === "waitlist")) {
     const h = P.querySelector(".rq") || P.querySelector("h1");
-    if (h) h.insertAdjacentHTML("afterend", prioHTML("Priority", "You're a regular.", d.status === "waitlist" ? "First in line the moment a place opens up." : "Your request is looked at before the new ones."));
+    if (h) h.insertAdjacentHTML("afterend", prioHTML("Welcome back, " + esc(String(d.name || "").split(" ")[0] || "friend") + ".", d.status === "waitlist" ? "You go first the moment a place opens up." : "We look at your request before the new ones."));
   }
   if (d.next) P.insertAdjacentHTML("afterbegin", nextHTML(d) + inviteHTML(d)); // older ticket: the next party comes first
   else if (d.status === "approved") { /* paying: nothing else on the screen */ }

@@ -68,8 +68,33 @@
 /* next party (red band) */
 .band-red{background:var(--red);color:var(--cream)}
 .band-red .sec-head p{color:#f3d3cc}
-.next{display:grid;grid-template-columns:1fr auto;gap:36px;align-items:center;background:var(--ink);border-radius:24px;padding:42px 44px}
-.req-next{margin-bottom:30px;color:var(--cream)}
+.next{display:grid;grid-template-columns:1fr;gap:36px;align-items:center;background:var(--ink);border-radius:24px;padding:42px 44px}
+.reqbox{background:var(--ink);color:var(--cream);border-radius:26px;padding:clamp(26px,3.4vw,44px)}
+.reqbox{display:grid;grid-template-columns:1.05fr .95fr;column-gap:44px;row-gap:30px;align-items:start}
+.reqbox .req{display:contents}
+.reqbox .req-next{grid-column:1;grid-row:1}
+.reqbox form{grid-column:1;grid-row:2}
+.reqbox .side{grid-column:2;grid-row:1 / span 2;align-self:center}
+.reqbox label,.reqbox .check{color:var(--cream)}
+.reqbox .check a{color:var(--cream)}
+.reqbox .privacy{color:#9a8f7e}
+.reqbox .privacy a{color:#b9ab98}
+.reqbox .side{position:static}
+.reqbox .side .btn.outline{color:var(--cream);border-color:rgba(244,234,215,.45)}
+.reqbox .side #side-info li,.reqbox .side #side-done p{color:#b9ab98}
+.reqbox .side .linkbox{background:#241e1a}
+@media (max-width:860px){
+  .reqbox{grid-template-columns:1fr;row-gap:26px}
+  .reqbox .req-next,.reqbox form,.reqbox .side{grid-column:1;grid-row:auto}
+}
+@media (max-width:640px){.reqbox{padding:22px 18px;border-radius:20px}}
+.req-next{margin-bottom:28px;color:var(--cream);padding:0;background:transparent;border-radius:0}
+.req-next .next-main{display:grid;grid-template-columns:1fr auto;grid-template-areas:"t c" "d c";
+  align-items:center;column-gap:34px;row-gap:10px;width:100%}
+.req-next .next-main h3{grid-area:t}
+.req-next .next-main dl{grid-area:d;margin:0}
+.req-next .next-main .count{grid-area:c;margin-top:0}
+@media (max-width:720px){.req-next .next-main{grid-template-columns:1fr;grid-template-areas:"t" "d" "c";row-gap:18px}}
 .req-next h3{color:var(--cream)}
 @media (max-width:640px){.req-next{padding:26px 22px;margin-bottom:22px}}
 .next-sec{padding-block:48px}
@@ -161,7 +186,7 @@
 @media (max-width:480px){.steps{grid-template-columns:1fr}}
 
 /* request */
-.req{display:grid;grid-template-columns:minmax(0,640px);gap:30px;align-items:start}
+.req{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:start}
 @media (max-width:840px){.req{grid-template-columns:1fr}}
 form{display:grid;gap:16px}
 .field{display:grid;gap:6px;min-width:0}
@@ -172,7 +197,7 @@ textarea{resize:vertical;min-height:88px}
 .check input{width:20px;height:20px;margin-top:3px;accent-color:var(--red);flex:none}
 .err{color:var(--red-deep);font-size:14px;font-weight:700}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-.side{display:grid;gap:26px}
+.side{display:grid;gap:26px;position:sticky;top:84px}
 .side h3{font-size:24px}
 .side #side-info,.side #side-done{padding-inline:6px}
 .side #side-info li,.side #side-done p{color:var(--muted);font-size:15px}
@@ -326,7 +351,7 @@ html,body{overflow-x:clip}
   .req{gap:24px}
   .req .side{position:static}
   /* phones: the form comes first; the live preview ticket and the duplicate steps are for bigger screens */
-  #side-info{display:none}
+  .side .mini,#side-info{display:none}
   .hide-phone{display:none!important}
   .hero{gap:56px}
   .hero .ticket{margin-top:8px}
@@ -502,11 +527,8 @@ html:not([data-live]) #next-card{display:none}
 
   <div class="wrap o-main">
 
-    <section class="sec" id="request" aria-labelledby="req-h">
-      <div class="sec-head">
-        <h2 id="req-h">Request a place.</h2>
-        <p>We check every request on Instagram.</p>
-      </div>
+    <section class="sec" id="request" aria-label="Request a place">
+      <div class="reqbox">
       <div class="next req-next" id="next-card">
         <div><span class="status"><i></i>Announcing soon</span>
           <h3>The next edition is in the works.</h3>
@@ -546,6 +568,26 @@ html:not([data-live]) #next-card{display:none}
           <p class="privacy">Your details are only used for the guest list. <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p>
         </form>
         <aside class="side" id="side" aria-live="polite">
+          <div class="mini" aria-label="Live preview of your request">
+            <span class="stamp" id="pv-stamp">DRAFT</span>
+            <p class="rc-h">PerugiaParty</p>
+            <p class="rc-s" id="pv-ev">Guest request</p>
+            <div class="grp">
+              <p class="pv-name" id="pv-name">Your name</p>
+              <p class="pv-ig" id="pv-ig">@yourinstagram</p>
+              <p class="pv-hi dim" id="pv-hi" hidden></p>
+            </div>
+            <ul class="pv-checks">
+              <li id="pv-age"><span></span> 18+ with photo ID</li>
+              <li id="pv-rules"><span></span> House rules read</li>
+            </ul>
+            <ul class="rc-l pv-items"><li><span>1x</span><span>OPEN BAR</span><span>INCL.</span></li><li><span>1x</span><span>REAL DJS</span><span>INCL.</span></li><li><span>1x</span><span>CENTRAL LOCATION</span><span>YES</span></li><li><span>1x</span><span>ALL NIGHT</span><span>YES</span></li></ul>
+            <p class="rc-t pv-tot"><span>Total</span><span id="pv-total">Student price</span></p>
+            <div class="grp">
+              <p class="pv-code" id="pv-code">PP-XXX-XXXX</p>
+              <p class="tiny" id="pv-tiny">Your code arrives after approval</p>
+            </div>
+          </div>
           <div id="side-info"></div>
           <div id="side-done" hidden>
             <img src="/ill/sent.svg" alt="" width="360" height="200" style="display:block;width:100%;height:auto;border-radius:14px;margin-bottom:14px">
@@ -557,6 +599,7 @@ html:not([data-live]) #next-card{display:none}
             <div class="appbox" id="appbox" hidden></div>
           </div>
         </aside>
+      </div>
       </div>
     </section>
     <section class="sec" id="how" aria-labelledby="how-h">
@@ -683,14 +726,12 @@ function renderNext(ev){
   // phones: one tap to the form while requests are open
   // the example ticket carries the real party
   const ts = $("tk-sub"); if (ts && ev.name) ts.textContent = "Next: " + ev.name + (ev.date_label ? " · " + ev.date_label : "");
-  const price = ev.price ? "From " + euro(ev.price.min) : null;
-  const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]].filter(f => f[1]);
+  const facts = [["Date", ev.date_label]].filter(f => f[1]);
   const cta = ev.requests_open ? "" : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram</a>`;
   el.classList.toggle("has-poster", !!ev.poster);
-  const art = ev.poster ? "" : `<a class="next-art-l" href="#request" data-req aria-label="Request a place"><img class="next-art" src="/ill/${ev.sold_out ? "waitlist" : "hero-party"}.svg" alt="" width="360" height="200"></a>`;
-  el.innerHTML = `<div class="next-main"><span class="status"><i></i>${statusLine(ev)}</span>
+  const art = "";
+  el.innerHTML = `<div class="next-main">
       <h3>${esc(ev.name || "Next PerugiaParty")}</h3>
-      <p class="next-sub">Request below. Once approved, pay to unlock your ticket.</p>
       ${facts.length ? `<dl>${facts.map(f => `<div><dt>${f[0]}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>` : ""}
       <div class="count" id="count" ${ev.starts_at ? "" : "hidden"} aria-label="Countdown to the party"></div>
       <div class="next-cta">${cta}</div></div>${art}
@@ -851,6 +892,7 @@ $("req-form").addEventListener("submit", async e => {
     $("dm-link").href = dmUrl(data.vcode);
     showMyTicket(link);
     $("side-info").hidden = true; $("side-done").hidden = false;
+    const st = $("pv-stamp"); if (st) { st.textContent = "DM CODE"; st.classList.add("sent"); document.querySelector(".side .mini").classList.add("done"); $("pv-tiny").textContent = "DM your code to @perugiaparty"; }
         $("req-form").reset();
     // straight to their own page: big "Not sent yet" + the code + the Instagram button
     location.href = "/ticket.html?t=" + encodeURIComponent(data.token);
