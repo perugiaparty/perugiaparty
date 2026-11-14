@@ -522,9 +522,9 @@ function notesView() {
 }
 
 function moreView() {
-  const tabs = [["night", "Nights"], ["spend", "Money"], ["notes", "Notes"], ["info", "Info"], ["risk", "Plan B"], ["dec", "Decisions"], ["retro", "Retro"]];
+  const tabs = [["night", "Nights"], ...(S.bilancio ? [["bil", "Bilancio"]] : []), ["spend", "Money"], ["notes", "Notes"], ["info", "Info"], ["risk", "Plan B"], ["dec", "Decisions"], ["retro", "Retro"]];
   if (!tabs.some(([k]) => k === sub)) sub = "night";
-  const v = sub === "night" ? nightView() : sub === "spend" ? spendView() : sub === "info" ? infoView() : sub === "risk" ? riskView() : sub === "dec" ? decView() : sub === "retro" ? retroView() : notesView();
+  const v = sub === "night" ? nightView() : sub === "bil" ? bilView() : sub === "spend" ? spendView() : sub === "info" ? infoView() : sub === "risk" ? riskView() : sub === "dec" ? decView() : sub === "retro" ? retroView() :notesView();
   return `<h2>More</h2>
   <div class="chips" style="margin-top:8px;margin-bottom:14px">${tabs.map(([k, l]) => `<button class="chip ${sub === k ? "on" : ""}" data-sub="${k}">${l}</button>`).join("")}</div>${v}`;
 }
@@ -577,6 +577,20 @@ function retroView() {
   </form>`;
 }
 const CAT_ICON = { Drinks: "🍸", Food: "🍿", Deco: "🎈", Venue: "🏠", Music: "🎧", Promo: "📣", Other: "🧾" };
+function bilView() {
+  const B = S.bilancio;
+  if (!B) return `<h3 style="margin-top:0">Bilancio</h3><div class="card"><div class="empty">No bilancio for this night yet</div></div>`;
+  const left = B.begroot - B.reeel, spentTot = B.spent.reduce((a, x) => a + x.a, 0);
+  const row = (name, note, amount) => `<div class="risk" style="display:flex;gap:10px;align-items:baseline">
+    <div style="flex:1;min-width:0"><b>${esc(name)}</b>${note ? `<span>${esc(note)}</span>` : ""}</div><b>${eur(amount)}</b></div>`;
+  return `<h3 style="margin-top:0">Bilancio · ${esc(B.night)}</h3>
+  <div class="tk-bal zero"><small>Begroot</small><b>${eur(B.begroot)}</b>
+    <span>${B.reeel ? `${eur(B.reeel)} reëel · ${eur(left)} te gaan` : "nothing paid yet"}</span></div>
+  <p class="lead" style="margin:12px 0 4px">${B.groups.length} groups · only leads see this</p>
+  ${B.groups.map((g) => `<details><summary>${esc(g.grp ? g.cat + " · " + g.grp : g.cat)} · ${eur(g.b)}${g.r ? " · reëel " + eur(g.r) : ""} ▾</summary>
+    <div class="card list">${g.lines.map((l) => row(l.n, [l.q ? l.q + "×" : "", l.r ? "begroot " + eur(l.b) : ""].filter(Boolean).join(" · "), l.r || l.b)).join("")}</div></details>`).join("")}
+  ${spentTot ? `<h3>What the crew paid</h3><div class="card list">${B.spent.map((s) => row(s.cat, "", s.a)).join("")}${row("Together", "", spentTot)}</div>` : ""}`;
+}
 function spendView() {
   const mine = S.spends, open = mine.filter((x) => !Number(x.repaid)), owed = open.reduce((a, x) => a + Number(x.amount || 0), 0);
   const paidTot = mine.filter((x) => Number(x.repaid)).reduce((a, x) => a + Number(x.amount || 0), 0);

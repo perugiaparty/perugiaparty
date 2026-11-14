@@ -112,6 +112,34 @@ function palette(raw) {
   } catch { return null; }
 }
 
+/* the night's own bilancio, as it stands in the planner. Leads only. */
+async function bilancio(env, ev) {
+  const rows = (await env.DB.prepare("SELECT id, name, money FROM plan WHERE shared = 1 AND status <> 'archived' ORDER BY COALESCE(starts_at, '9999'), id").all()).results || [];
+  if (!rows.length) return null;
+  const want = (ev.name || "").trim().toLowerCase();
+  const p = rows.find((r) => (r.name || "").trim().toLowerCase() === want) || rows[0];
+  let lines = [];
+  try { const m = JSON.parse(p.money || "null"); if (m && m.bil && Array.isArray(m.bil.lines)) lines = m.bil.lines; } catch { lines = []; }
+  if (!lines.length) return null;
+  const groups = [];
+  for (const l of lines.slice(0, 400)) {
+    const cat = clean(l.cat, 30) || "Other", grp = clean(l.grp, 40), key = cat + "|" + grp;
+    let g = groups.find((x) => x.key === key);
+    if (!g) { g = { key, cat, grp, b: 0, r: 0, lines: [] }; groups.push(g); }
+    const b = Number(l.b) || 0, r = Number(l.r) || 0;
+    g.b += b; g.r += r;
+    g.lines.push({ n: clean(l.n, 40), q: Number(l.q) || 0, b, r });
+  }
+  const spend = (await env.DB.prepare("SELECT cat, SUM(amount) AS a FROM crew_spend WHERE event = ? GROUP BY cat").bind(ev.tag).all()).results || [];
+  return {
+    night: clean(p.name, 60),
+    groups,
+    begroot: groups.reduce((a, g) => a + g.b, 0),
+    reeel: groups.reduce((a, g) => a + g.r, 0),
+    spent: spend.map((s) => ({ cat: clean(s.cat, 30) || "Other", a: Number(s.a) || 0 })).filter((s) => s.a > 0),
+  };
+}
+
 async function state(env, ev, me) {
   const tag = ev.tag;
   const [crew, spends, needs, st, news, note, shifts, risks, decisions, retro, plans, pjobs] = await Promise.all([
@@ -147,6 +175,7 @@ async function state(env, ev, me) {
     plans: (plans.results || []).map((p) => ({ ...p, jobs: (pjobs.results || []).filter((j) => j.plan_id === p.id) })),
     attendance: { requested: a.requested || 0, approved: a.approved || 0, paid: a.paid || 0, inside: a.inside || 0, crew_tickets: a.crew_tickets || 0 },
   };
+  if (Number(me.lead) === 1) out.bilancio = await bilancio(env, ev);
   return out;
 }
 
