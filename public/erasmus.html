@@ -297,8 +297,12 @@ details p{color:var(--muted);margin-top:10px;max-width:62ch}
 html,body{overflow-x:clip}
 @media (max-width:640px){
   .next-sec{padding-block:32px}
-  .hero{padding-block:32px 52px;gap:36px}
+  /* the hero owns the first screen: nothing else competes with the button */
+  .hero{padding-block:24px 40px;gap:36px;min-height:80svh;align-content:center}
   .hero .lede{font-size:18px}
+  .hero .ctas{margin-top:26px}
+  .hero .ctas .btn{width:100%;text-align:center;padding-block:18px;font-size:18px}
+  .next .next-art-l,.next .next-art{display:none}
   .ticket{max-width:calc(100% - 14px);box-shadow:8px 8px 0 var(--red);padding:22px 22px 20px}
   .ticket .logo{width:120px;height:auto}
   .ticket .name{font-size:30px}

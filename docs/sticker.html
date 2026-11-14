@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>PerugiaParty stickers</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+@page{size:A4;margin:0}
+:root{--red:#b90000;--cream:#f4ead7;--ink:#141210}
+*{box-sizing:border-box;margin:0}
+body{background:#333;font-family:"Figtree",sans-serif}
+.pg{width:210mm;height:297mm;background:#fff;padding:12mm;position:relative;overflow:hidden;page-break-after:always}
+.pg:last-child{page-break-after:auto}
+.hint{position:absolute;left:12mm;bottom:7mm;font-family:"DM Mono",monospace;font-size:7pt;color:#9a9a9a;letter-spacing:.1em;text-transform:uppercase}
+
+/* shared sticker looks */
+.badge{background:var(--cream);border:1.6mm solid var(--red);border-radius:4mm;display:flex;align-items:center;
+       justify-content:center;padding:4mm 5mm}
+.badge img{width:100%;height:auto;display:block}
+.round{background:var(--red);border-radius:50%;display:flex;flex-direction:column;align-items:center;
+       justify-content:center;color:var(--cream);text-align:center;line-height:.9}
+.round b{font-family:"Bowlby One",sans-serif;font-weight:400;text-transform:uppercase;display:block}
+.round .sm{font-family:"DM Mono",monospace;text-transform:uppercase;letter-spacing:.16em;opacity:.85}
+.strip{background:var(--ink);border-radius:2.5mm;display:flex;align-items:center;justify-content:center;padding:2.5mm 4mm}
+.strip img{width:100%;height:auto;display:block}
+
+/* sheet grid */
+.sheet{display:flex;flex-direction:column;gap:9mm;align-items:center}
+.row{display:flex;gap:9mm;align-items:center;justify-content:center}
+.cut{outline:.2mm dashed #cfcfcf;outline-offset:2.5mm}
+
+.b-lg{width:88mm}
+.b-sm{width:58mm;border-width:1.2mm;border-radius:3mm;padding:3mm 4mm}
+.r-lg{width:52mm;height:52mm}
+.r-sm{width:34mm;height:34mm}
+.s-lg{width:70mm}
+
+.r-lg b{font-size:15pt;letter-spacing:.01em}
+.r-lg .sm{font-size:6.5pt;margin-top:2.5mm}
+.r-sm b{font-size:10pt}
+.r-sm .sm{font-size:5pt;margin-top:1.6mm}
+
+/* press page */
+.press{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14mm}
+.bleedwrap{position:relative}
+.bleed{position:absolute;inset:-3mm;outline:.2mm solid #e2a0a0}
+.cutline{position:absolute;inset:0;outline:.2mm dashed #a0c0e2}
+.key{font-family:"DM Mono",monospace;font-size:7.5pt;color:#8a8a8a;letter-spacing:.08em;text-transform:uppercase;text-align:center;line-height:1.8}
+</style></head><body>
+
+<!-- SHEET: print on A4 sticker paper and cut along the dashed guides -->
+<div class="pg">
+  <div class="sheet">
+    <div class="row">
+      <div class="badge b-lg cut"><img src="/brand/wordmark-6.png" alt=""></div>
+    </div>
+    <div class="row">
+      <div class="badge b-sm cut"><img src="/brand/wordmark-6.png" alt=""></div>
+      <div class="badge b-sm cut"><img src="/brand/wordmark-6.png" alt=""></div>
+    </div>
+    <div class="row">
+      <div class="round r-lg cut"><b>Perugia<br>Party</b><span class="sm">Perugia</span></div>
+      <div class="round r-lg cut"><b>Perugia<br>Party</b><span class="sm">Perugia</span></div>
+      <div class="round r-sm cut"><b>PP</b><span class="sm">Perugia</span></div>
+      <div class="round r-sm cut"><b>PP</b><span class="sm">Perugia</span></div>
+    </div>
+    <div class="row">
+      <div class="strip s-lg cut"><img src="/brand/wordmark-4.png" alt=""></div>
+    </div>
+    <div class="row">
+      <div class="badge b-sm cut"><img src="/brand/wordmark-6.png" alt=""></div>
+      <div class="round r-sm cut"><b>PP</b><span class="sm">Perugia</span></div>
+      <div class="round r-sm cut"><b>PP</b><span class="sm">Perugia</span></div>
+    </div>
+  </div>
+  <p class="hint">Sheet 1 — print at 100%, cut along the dashed guides</p>
+</div>
+
+<!-- PRESS: one sticker per shape, with bleed and cut line, for a print shop -->
+<div class="pg">
+  <div class="press">
+    <div class="bleedwrap">
+      <div class="badge" style="width:90mm"><img src="/brand/wordmark-6.png" alt=""></div>
+      <div class="bleed"></div><div class="cutline"></div>
+    </div>
+    <div class="bleedwrap">
+      <div class="round" style="width:55mm;height:55mm"><b style="font-size:16pt">Perugia<br>Party</b><span class="sm" style="font-size:7pt;margin-top:3mm">Perugia</span></div>
+      <div class="bleed" style="border-radius:50%;outline-offset:0"></div><div class="cutline" style="border-radius:50%"></div>
+    </div>
+    <p class="key">Red outline = bleed, 3 mm<br>Blue dashed = cut line<br>Red #b90000 · Cream #f4ead7 · Black #141210</p>
+  </div>
+  <p class="hint">Sheet 2 — artwork for a print shop, die cut</p>
+</div>
+
+</body></html>
