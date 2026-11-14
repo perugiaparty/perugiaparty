@@ -69,6 +69,9 @@
 .band-red{background:var(--red);color:var(--cream)}
 .band-red .sec-head p{color:#f3d3cc}
 .next{display:grid;grid-template-columns:1fr auto;gap:36px;align-items:center;background:var(--ink);border-radius:24px;padding:42px 44px}
+.req-next{margin-bottom:30px;color:var(--cream)}
+.req-next h3{color:var(--cream)}
+@media (max-width:640px){.req-next{padding:26px 22px;margin-bottom:22px}}
 .next-sec{padding-block:48px}
 .next .kicker{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-dark);margin-bottom:10px}
 .next .next-main{min-width:0;display:flex;flex-direction:column;align-items:flex-start}
@@ -158,7 +161,7 @@
 @media (max-width:480px){.steps{grid-template-columns:1fr}}
 
 /* request */
-.req{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:start}
+.req{display:grid;grid-template-columns:minmax(0,640px);gap:30px;align-items:start}
 @media (max-width:840px){.req{grid-template-columns:1fr}}
 form{display:grid;gap:16px}
 .field{display:grid;gap:6px;min-width:0}
@@ -169,7 +172,7 @@ textarea{resize:vertical;min-height:88px}
 .check input{width:20px;height:20px;margin-top:3px;accent-color:var(--red);flex:none}
 .err{color:var(--red-deep);font-size:14px;font-weight:700}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-.side{display:grid;gap:26px;position:sticky;top:84px}
+.side{display:grid;gap:26px}
 .side h3{font-size:24px}
 .side #side-info,.side #side-done{padding-inline:6px}
 .side #side-info li,.side #side-done p{color:var(--muted);font-size:15px}
@@ -323,7 +326,7 @@ html,body{overflow-x:clip}
   .req{gap:24px}
   .req .side{position:static}
   /* phones: the form comes first; the live preview ticket and the duplicate steps are for bigger screens */
-  .side .mini,#side-info{display:none}
+  #side-info{display:none}
   .hide-phone{display:none!important}
   .hero{gap:56px}
   .hero .ticket{margin-top:8px}
@@ -370,9 +373,8 @@ body.locked{overflow:hidden}
 html[data-closed] #request,html[data-closed] .ctas .btn.outline{display:none}
 /* page order: a published party jumps right under the top */
 main#top{display:flex;flex-direction:column}main#top>*{width:100%;box-sizing:border-box}
-.o-hero{order:0}.o-new{order:1}.o-why{order:2}.o-next{order:3}.o-main{order:4}.o-faq{order:5}.o-nights{order:6}
-html[data-live] .o-next{order:0}
-html:not([data-live]) .o-next{display:none}
+.o-hero{order:0}.o-new{order:1}.o-main{order:2}.o-why{order:3}.o-nights{order:4}.o-faq{order:5}
+html:not([data-live]) #next-card{display:none}
 /* past nights: small strip */
 #nights{padding-block:28px 40px}#nights .sec-head h2{font-size:clamp(22px,3vw,30px)}#nights .sec-head{margin-bottom:14px}
 #nights .nights{flex-wrap:wrap;overflow:visible;gap:8px}
@@ -477,21 +479,6 @@ html:not([data-live]) .o-next{display:none}
     </div>
   </div>
 
-  <section class="band-red o-next" id="next" aria-label="Next party">
-    <div class="wrap sec next-sec">
-      <div class="sec-head" id="next-head">
-        <h2>Next party.</h2>
-        <p>New list every edition.</p>
-      </div>
-      <div class="next" id="next-card">
-        <div><span class="status"><i></i>Announcing soon</span>
-          <h3>The next edition is in the works.</h3>
-          <p>Date and theme drop on Instagram first.</p>
-        <a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener" style="margin-top:22px">Follow on Instagram</a></div>
-        <img class="next-art" src="/ill/soon.svg" alt="" width="360" height="220">
-      </div>
-    </div>
-  </section>
 
   <div class="wrap o-why">
     <section class="sec" id="why" aria-labelledby="why-h">
@@ -514,19 +501,20 @@ html:not([data-live]) .o-next{display:none}
   </div>
 
   <div class="wrap o-main">
-    <section class="sec" id="how" aria-labelledby="how-h">
-      <div class="sec-head">
-        <h2 id="how-h">How it works.</h2>
-        <p>Six steps to the door.</p>
-      </div>
-      <ol class="jr"><li><img src="/ill/step-request.svg" alt="" width="240" height="170" loading="lazy"><h3>Request</h3><p>Fill in 30 seconds.</p></li><li><img src="/ill/step-dm.svg" alt="" width="240" height="170" loading="lazy"><h3>DM the code</h3><p>Send it on Instagram.</p></li><li><img src="/ill/step-approved.svg" alt="" width="240" height="170" loading="lazy"><h3>Approved</h3><p>We check every request.</p></li><li><img src="/ill/step-pay.svg" alt="" width="240" height="170" loading="lazy"><h3>Pay</h3><p>Bank transfer, tap to copy.</p></li><li><img src="/ill/step-qr.svg" alt="" width="240" height="170" loading="lazy"><h3>Your QR</h3><p>Ticket and place unlock.</p></li><li class="us"><img src="/ill/step-party.svg" alt="" width="240" height="170" loading="lazy"><h3>Party</h3><p>QR and photo ID at the door.</p></li></ol>
-    </section>
 
     <section class="sec" id="request" aria-labelledby="req-h">
       <div class="sec-head">
         <h2 id="req-h">Request a place.</h2>
         <p>We check every request on Instagram.</p>
       </div>
+      <div class="next req-next" id="next-card">
+        <div><span class="status"><i></i>Announcing soon</span>
+          <h3>The next edition is in the works.</h3>
+          <p>Date and theme drop on Instagram first.</p>
+        <a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener" style="margin-top:22px">Follow on Instagram</a></div>
+        <img class="next-art" src="/ill/soon.svg" alt="" width="360" height="220">
+      </div>
+
       <div class="req">
         <form id="req-form" novalidate>
           <div class="req-note" id="req-note" hidden></div>
@@ -558,26 +546,6 @@ html:not([data-live]) .o-next{display:none}
           <p class="privacy">Your details are only used for the guest list. <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p>
         </form>
         <aside class="side" id="side" aria-live="polite">
-          <div class="mini" aria-label="Live preview of your request">
-            <span class="stamp" id="pv-stamp">DRAFT</span>
-            <p class="rc-h">PerugiaParty</p>
-            <p class="rc-s" id="pv-ev">Guest request</p>
-            <div class="grp">
-              <p class="pv-name" id="pv-name">Your name</p>
-              <p class="pv-ig" id="pv-ig">@yourinstagram</p>
-              <p class="pv-hi dim" id="pv-hi" hidden></p>
-            </div>
-            <ul class="pv-checks">
-              <li id="pv-age"><span></span> 18+ with photo ID</li>
-              <li id="pv-rules"><span></span> House rules read</li>
-            </ul>
-            <ul class="rc-l pv-items"><li><span>1x</span><span>OPEN BAR</span><span>INCL.</span></li><li><span>1x</span><span>REAL DJS</span><span>INCL.</span></li><li><span>1x</span><span>CENTRAL LOCATION</span><span>YES</span></li><li><span>1x</span><span>ALL NIGHT</span><span>YES</span></li></ul>
-            <p class="rc-t pv-tot"><span>Total</span><span id="pv-total">Student price</span></p>
-            <div class="grp">
-              <p class="pv-code" id="pv-code">PP-XXX-XXXX</p>
-              <p class="tiny" id="pv-tiny">Your code arrives after approval</p>
-            </div>
-          </div>
           <div id="side-info"></div>
           <div id="side-done" hidden>
             <img src="/ill/sent.svg" alt="" width="360" height="200" style="display:block;width:100%;height:auto;border-radius:14px;margin-bottom:14px">
@@ -590,6 +558,13 @@ html:not([data-live]) .o-next{display:none}
           </div>
         </aside>
       </div>
+    </section>
+    <section class="sec" id="how" aria-labelledby="how-h">
+      <div class="sec-head">
+        <h2 id="how-h">How it works.</h2>
+        <p>Six steps to the door.</p>
+      </div>
+      <ol class="jr"><li><img src="/ill/step-request.svg" alt="" width="240" height="170" loading="lazy"><h3>Request</h3><p>Fill in 30 seconds.</p></li><li><img src="/ill/step-dm.svg" alt="" width="240" height="170" loading="lazy"><h3>DM the code</h3><p>Send it on Instagram.</p></li><li><img src="/ill/step-approved.svg" alt="" width="240" height="170" loading="lazy"><h3>Approved</h3><p>We check every request.</p></li><li><img src="/ill/step-pay.svg" alt="" width="240" height="170" loading="lazy"><h3>Pay</h3><p>Bank transfer, tap to copy.</p></li><li><img src="/ill/step-qr.svg" alt="" width="240" height="170" loading="lazy"><h3>Your QR</h3><p>Ticket and place unlock.</p></li><li class="us"><img src="/ill/step-party.svg" alt="" width="240" height="170" loading="lazy"><h3>Party</h3><p>QR and photo ID at the door.</p></li></ol>
     </section>
 
   </div>
@@ -710,7 +685,7 @@ function renderNext(ev){
   const ts = $("tk-sub"); if (ts && ev.name) ts.textContent = "Next: " + ev.name + (ev.date_label ? " · " + ev.date_label : "");
   const price = ev.price ? "From " + euro(ev.price.min) : null;
   const facts = [["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]].filter(f => f[1]);
-  const cta = ev.requests_open ? `<a class="btn" href="#request">${ev.sold_out ? "Join the waitlist" : "Request a place"}</a>` : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram</a>`;
+  const cta = ev.requests_open ? "" : `<a class="btn" href="https://www.instagram.com/perugiaparty/" target="_blank" rel="noopener">Follow on Instagram</a>`;
   el.classList.toggle("has-poster", !!ev.poster);
   const art = ev.poster ? "" : `<a class="next-art-l" href="#request" data-req aria-label="Request a place"><img class="next-art" src="/ill/${ev.sold_out ? "waitlist" : "hero-party"}.svg" alt="" width="360" height="200"></a>`;
   el.innerHTML = `<div class="next-main"><span class="status"><i></i>${statusLine(ev)}</span>
@@ -786,6 +761,7 @@ function setupForm(ev){
 /* live preview: the request fills in like a ticket being made */
 function bump(el){ el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
 function preview(e){
+  if (!$("pv-name")) return;
   if (e && e.target) { const map = { "f-name":"pv-name", "f-ig":"pv-ig", "f-intro":"pv-hi", "f-age":"pv-age", "f-rules":"pv-rules" }; const t = $(map[e.target.id]); if (t) bump(t); }
   const name = $("f-name").value.trim(), ig = $("f-ig").value.trim().replace(/^@+/, ""), hi = $("f-intro").value.trim();
   const n = $("pv-name"); n.textContent = name || "Your name"; n.classList.toggle("dim", !name);
@@ -803,6 +779,7 @@ $("f-ig").addEventListener("blur", () => {
 });
 ["f-name","f-ig","f-intro","f-age","f-rules"].forEach(id => { $(id).addEventListener("input", preview); $(id).addEventListener("change", preview); });
 function previewEvent(){
+  if (!$("pv-ev")) return;
   if (EVENT && EVENT.published && EVENT.name) $("pv-ev").textContent = "Guest request · " + EVENT.name;
   const t = $("pv-total"); if (t && EVENT && EVENT.price && EVENT.price.min != null) t.textContent = "From " + euro(EVENT.price.min);
 }
@@ -874,9 +851,7 @@ $("req-form").addEventListener("submit", async e => {
     $("dm-link").href = dmUrl(data.vcode);
     showMyTicket(link);
     $("side-info").hidden = true; $("side-done").hidden = false;
-    const st = $("pv-stamp"); st.textContent = "DM CODE"; st.classList.add("sent"); document.querySelector(".side .mini").classList.add("done");
-    $("pv-tiny").textContent = "DM your code to @perugiaparty";
-    $("req-form").reset();
+        $("req-form").reset();
     // straight to their own page: big "Not sent yet" + the code + the Instagram button
     location.href = "/ticket.html?t=" + encodeURIComponent(data.token);
   } catch (x) {

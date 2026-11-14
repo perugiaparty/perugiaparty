@@ -98,7 +98,7 @@ def italian_post(s):
     b = s.index("</div>", s.index("</section>", a)) + 6
     s = s[:a] + s[b:]
     s = s.replace('href="#rules"', 'href="/#rules"').replace('a[href="/#rules"]', 'a[href="#rules"]')
-    s = s.replace("</style>", """.o-next{order:3}.o-main{order:4}.o-faq{order:5}.o-nights{order:6}
+    s = s.replace("</style>", """.o-main{order:2}.o-why{order:3}.o-nights{order:4}.o-faq{order:5}
 @media (max-width:420px){.fat ul{grid-template-columns:1fr}}
 </style>""", 1)
     return s
@@ -108,8 +108,6 @@ IT = [
     ('Request a place</a>', 'Richiedi un posto</a>'),
     ('Student parties <em>in Perugia.</em>', 'Feste universitarie <em>a Perugia.</em>'),
     ('Your people. Your night. Open bar, DJs and new people to meet, at a student price.', 'La tua gente. La tua notte. Open bar, DJ e gente nuova da conoscere, a prezzo studenti.'),
-    ('<h2>Next party.</h2>', '<h2>Prossima festa.</h2>'),
-    ('<p>New list every edition.</p>', '<p>Lista nuova a ogni edizione.</p>'),
     ('Announcing soon', 'In arrivo'),
     ('<h3>The next edition is in the works.</h3>', '<h3>La prossima edizione è in preparazione.</h3>'),
     ('<p>Date and theme drop on Instagram first.</p>', '<p>Data e tema escono prima su Instagram.</p>'),
@@ -148,11 +146,6 @@ IT = [
     ('Your details are only used for the guest list.', 'I tuoi dati servono solo per la lista ospiti.'),
     ('<a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>', '<a href="/privacy">Privacy</a> · <a href="/termini">Termini</a>'),
     ('<a href="/terms">Terms</a>\n', '<a href="/termini">Termini</a>\n'),
-    ('<p class="rc-s" id="pv-ev">Guest request</p>', '<p class="rc-s" id="pv-ev">Richiesta ospite</p>'),
-    ('<p class="pv-name" id="pv-name">Your name</p>', '<p class="pv-name" id="pv-name">Il tuo nome</p>'),
-    ('<span></span> 18+ with photo ID', '<span></span> 18+ con documento'),
-    ('<span></span> House rules read', '<span></span> Regole lette'),
-    ('<p class="tiny" id="pv-tiny">Your code arrives after approval</p>', '<p class="tiny" id="pv-tiny">Il codice arriva dopo l’approvazione</p>'),
     ('<h3>Not sent yet: DM us this code.</h3>', '<h3>Non ancora inviata: mandaci questo codice.</h3>'),
     ('id="copy-link">Copy code</button>', 'id="copy-link">Copia codice</button>'),
     ('Send code on Instagram', 'Manda il codice su Instagram'),
@@ -175,7 +168,6 @@ IT = [
     # live texts from the script
     ('ev.sold_out ? "Join the waitlist" : a.dataset.label', 'ev.sold_out ? "Entra in lista d’attesa" : a.dataset.label'),
     ('<span class="hm-red" id="proof">Invite only</span>', '<span class="hm-red" id="proof">Solo su invito</span>'),
-    ('"Join the waitlist" : "Request a place"', '"Entra in lista d’attesa" : "Richiedi un posto"'),
     ('"Join the waitlist" : "Send request"', '"Entra in lista d’attesa" : "Invia richiesta"'),
     ('<p class="next-sub">Request below. Once approved, pay to unlock your ticket.</p>', '<p class="next-sub">Richiedi qui sotto. Se approvato, paghi e sblocchi il biglietto.</p>'),
     ('[["Date", ev.date_label], ["Doors", ev.doors], ["Tickets", price]]', '[["Data", ev.date_label], ["Porte", ev.doors], ["Biglietti", price]]'),
