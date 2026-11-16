@@ -7,12 +7,18 @@ import os, re, sys
 ROOT = os.path.join(os.path.dirname(__file__), "..", "public")
 
 PAIRS = [
+    ('It pays for the ticket system and the website we built ourselves, and for the night: the door, the bar, the people working it. No ticketing platform takes a cut here.',
+     'Paga il sistema dei biglietti e il sito che abbiamo fatto noi, e la serata: la porta, il bar, le persone che ci lavorano. Qui nessuna piattaforma di biglietti prende una percentuale.'),
+    ('" This is the lowest fee of the night, because booking early is what lets us plan the bar."',
+     '" \u00c8 il costo pi\u00f9 basso della serata, perch\u00e9 prenotare presto \u00e8 quello che ci permette di organizzare il bar."'),
+    ('" It is the highest now, because a place this close to the night is the most work to arrange."',
+     '" Adesso \u00e8 il pi\u00f9 alto, perch\u00e9 un posto cos\u00ec vicino alla serata \u00e8 quello che costa pi\u00f9 lavoro."'),
+
     ('"EARLY SERVICE FEE"', '"COSTI DI SERVIZIO EARLY"'),
     ('"LAST MINUTE SERVICE FEE"', '"COSTI DI SERVIZIO LAST MINUTE"'),
     ('"SERVICE FEE"', '"COSTI DI SERVIZIO"'),
 
     ("What the service fee is for", "A cosa servono i costi di servizio"),
-    ("Ticketing, the website and running the night itself.", "Il sistema dei biglietti, il sito e l'organizzazione della serata."),
 
     # ---------- head ----------
     ('<html lang="en">', '<html lang="it">'),

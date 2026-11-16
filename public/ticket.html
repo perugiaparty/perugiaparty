@@ -894,6 +894,13 @@ function whenWhereHTML(d){
 }
 // ---- the receipt: what you get, what you pay ----
 const FEE_LABEL = { early: "EARLY SERVICE FEE", normal: "SERVICE FEE", late: "LAST MINUTE SERVICE FEE" };
+/* why there is a fee at all, said plainly, with the reason this round costs what it costs */
+const FEE_WHY = "It pays for the ticket system and the website we built ourselves, and for the night: the door, the bar, the people working it. No ticketing platform takes a cut here.";
+const FEE_INFO = {
+  early: FEE_WHY + " This is the lowest fee of the night, because booking early is what lets us plan the bar.",
+  normal: FEE_WHY,
+  late: FEE_WHY + " It is the highest now, because a place this close to the night is the most work to arrange.",
+};
 function receiptHTML(d, tierName, fee, country){
   const total = (Number(d.price) || 0) + fee;
   const line = (q, item, v) => `<div class="rc-l"><span class="q">${q}</span><span class="i">${item}</span><span class="v">${v}</span></div>`;
@@ -905,7 +912,7 @@ function receiptHTML(d, tierName, fee, country){
     ${line("1X", "ALL NIGHT", "INCL.")}
     ${line("1X", "TICKET · " + esc(String(tierName).toUpperCase()), euro(d.price))}
     ${fee > 0 ? `<div class="rc-l"><span class="q">1X</span><span class="i">${FEE_LABEL[d.ticket] || FEE_LABEL.normal}<button class="rc-i" type="button" id="fee-i" aria-expanded="false" aria-controls="fee-info" aria-label="What the service fee is for">i</button></span><span class="v">${euro(fee)}</span></div>
-    <p class="rc-info" id="fee-info" hidden>Ticketing, the website and running the night itself.</p>` : ""}
+    <p class="rc-info" id="fee-info" hidden>${FEE_INFO[d.ticket] || FEE_INFO.normal}</p>` : ""}
     <div class="rc-d"></div>
     <button class="rc-tot" type="button" id="tot-copy" data-copy="${String(total).replace(".", ",")}"><span>TOTAL</span><b id="rc-tot-v">${euro(total)}</b></button>
     <div class="rc-d"></div>
