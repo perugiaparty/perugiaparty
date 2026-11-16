@@ -21,8 +21,21 @@ function newToken() {
 
 const clean = (v, max) => String(v ?? "").replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, max);
 
+/* the booking fee per round. It rides on top of the ticket: guests.price stays the ticket alone,
+   so the venue receipt and the rounds keep working, and every amount we ask for adds the fee. */
+const feeOf = (ev, tier) => (ev && Number(ev["fee_" + tier])) || 0;
+const tierTotal = (ev, tier) => {
+  const p = Number(ev["price_" + tier]);
+  return Number.isFinite(p) && p > 0 ? p + feeOf(ev, tier) : null;
+};
+/* what this guest has to transfer: ticket plus the fee of their round, nothing on a free place */
+const payable = (ev, g) => {
+  const p = Number(g.price) || 0;
+  return p > 0 ? p + feeOf(ev, g.ticket) : p;
+};
+
 function priceRange(ev) {
-  const p = [ev.price_early, ev.price_normal, ev.price_late].map(Number).filter((n) => Number.isFinite(n) && n > 0);
+  const p = ["early", "normal", "late"].map((t) => tierTotal(ev, t)).filter((n) => Number.isFinite(n) && n > 0);
   if (!p.length) return null;
   return { min: Math.min(...p), max: Math.max(...p) };
 }
@@ -436,7 +449,8 @@ async function apiEvent(env) {
     doors: ev.doors,
     price: priceRange(ev),
     // what the next person to be approved pays right now (rounds move on numbers, not dates)
-    price_now: Number(ev["price_" + (await tierNow(env, ev))]) || null,
+    price_now: tierTotal(ev, await tierNow(env, ev)),
+    fee_now: feeOf(ev, await tierNow(env, ev)),
     requests_open: !!ev.requests_open,
     sold_out: await soldOut(env, ev),
     pair_free: Number(ev.pair_free) || 0,
@@ -577,7 +591,7 @@ async function apiTicket(url, env) {
   const out = { lang: g.lang === "it" ? "it" : "en", status: g.status, name: g.name, event: sameEvent ? ev.name : g.event, ig: g.ig, vcode: g.vcode, link: shortUrl(await shortFor(env, g), g.token), verified: Number(g.verified) === 1, mismatch: !!g.ig_mismatch, ig_auto: !!(ev.ig_token && ev.ig_app_secret) };
   if (g.status === "approved") {
     Object.assign(out, {
-      code: g.code, price: g.price, ticket: g.ticket, tip: Number(g.tip) || 0,
+      code: g.code, price: g.price, ticket: g.ticket, fee: sameEvent && Number(g.price) > 0 ? feeOf(ev, g.ticket) : 0,
       iban: sameEvent ? ev.iban : null, beneficiary: sameEvent ? ev.beneficiary : null,
       reference: `${g.name} ${g.code}`,
       approved_at: g.approved_at,
@@ -935,8 +949,8 @@ const isPartyDay = (ev) => { const st = Date.parse(ev.starts_at); return Number.
 // Every automatic message follows the language the guest signed up in.
 const isIt = (g) => g && g.lang === "it";
 const payNowText = (ev, g) => isIt(g)
-  ? `Oggi è la serata, quindi paga ${euro(g.price)} subito con un bonifico istantaneo.\n\nPoi manda qui in chat lo screenshot del bonifico.`
-  : `Today is the party, so please pay ${euro(g.price)} right now with a bonifico istantaneo.\n\nThen send the screenshot of the bonifico here in this chat.`;
+  ? `Oggi è la serata, quindi paga ${euro(payable(ev, g))} subito con un bonifico istantaneo.\n\nPoi manda qui in chat lo screenshot del bonifico.`
+  : `Today is the party, so please pay ${euro(payable(ev, g))} right now with a bonifico istantaneo.\n\nThen send the screenshot of the bonifico here in this chat.`;
 async function igStatusDms(env) {
   const ev = await getEvent(env);
   if (!ev || !ev.ig_token) return;
@@ -949,11 +963,11 @@ async function igStatusDms(env) {
     const first = String(g.name || "").split(" ")[0];
     const free = g.status === "paid" && Number(g.price) === 0 && g.ig_sent !== "paid";
     const text = (isIt(g) ? {
-      approved: isPartyDay(ev) ? `Sei dentro, ${first}! ${payNowText(ev, g)}` : `Sei dentro, ${first}! Paga ${euro(g.price)} per bloccare il tuo posto.`,
+      approved: isPartyDay(ev) ? `Sei dentro, ${first}! ${payNowText(ev, g)}` : `Sei dentro, ${first}! Paga ${euro(payable(ev, g))} per bloccare il tuo posto.`,
       released: g.event === ev.tag ? `Il tuo posto è stato riassegnato, il pagamento non è arrivato entro la scadenza.\nRichiedi di nuovo per tornare in lista d'attesa.` : null,
       paid: g.ticket === "crew" ? `Sei nella crew, ${first}.` : free ? `Sei dentro, ${first}. Ingresso gratis.` : `Pagamento ricevuto. Ci sei, ${first}!`,
     } : {
-      approved: isPartyDay(ev) ? `You're in, ${first}! ${payNowText(ev, g)}` : `You're in, ${first}! Pay ${euro(g.price)} to lock in your place.`,
+      approved: isPartyDay(ev) ? `You're in, ${first}! ${payNowText(ev, g)}` : `You're in, ${first}! Pay ${euro(payable(ev, g))} to lock in your place.`,
       released: g.event === ev.tag ? `Your spot has been reassigned, payment was not received before the deadline.\nSign up again to get back on the waitlist.` : null,
       paid: g.ticket === "crew" ? `You're on the crew, ${first}.` : free ? `You're in, ${first}. Free entry.` : `Payment received. You're going, ${first}!`,
     })[g.status] || null;
@@ -991,11 +1005,11 @@ async function igReminders(env) {
     const up = Number(ev.price_late) > Number(g.price) && ["early", "normal"].includes(g.ticket);
     const text = isIt(g)
       ? (isPartyDay(ev) ? `Pagamento non ancora ricevuto. ${payNowText(ev, g)}` : ms > 0
-        ? `Pagamento non ancora ricevuto. Hai ancora ${left} per pagare ${euro(g.price)}.\n${up ? `Dopo la scadenza il prezzo sale a ${euro(ev.price_late)}.` : "Dopo la scadenza il posto viene liberato."}`
-        : `Pagamento non ancora ricevuto. La scadenza per pagare ${euro(g.price)} è passata.\nPaga ora per tenere il posto, altrimenti viene liberato.`)
+        ? `Pagamento non ancora ricevuto. Hai ancora ${left} per pagare ${euro(payable(ev, g))}.\n${up ? `Dopo la scadenza il prezzo sale a ${euro(tierTotal(ev, "late"))}.` : "Dopo la scadenza il posto viene liberato."}`
+        : `Pagamento non ancora ricevuto. La scadenza per pagare ${euro(payable(ev, g))} è passata.\nPaga ora per tenere il posto, altrimenti viene liberato.`)
       : (isPartyDay(ev) ? `Payment not received yet. ${payNowText(ev, g)}` : ms > 0
-        ? `Payment not received yet. You still have ${left} to pay ${euro(g.price)}.\n${up ? `After the deadline the price goes up to ${euro(ev.price_late)}.` : "After the deadline your spot will be released."}`
-        : `Payment not received yet. The deadline to pay ${euro(g.price)} has passed.\nPay now to keep your spot, otherwise it will be released.`);
+        ? `Payment not received yet. You still have ${left} to pay ${euro(payable(ev, g))}.\n${up ? `After the deadline the price goes up to ${euro(tierTotal(ev, "late"))}.` : "After the deadline your spot will be released."}`
+        : `Payment not received yet. The deadline to pay ${euro(payable(ev, g))} has passed.\nPay now to keep your spot, otherwise it will be released.`);
     const sent = await igSend(env, ev, g.igsid, text);
     if (!sent) await env.DB.prepare("UPDATE guests SET ig_fail = 1 WHERE token = ?").bind(g.token).run();
   }

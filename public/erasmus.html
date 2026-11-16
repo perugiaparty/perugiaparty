@@ -851,6 +851,14 @@ function previewEvent(){
   // the price that applies right now; it goes up as places at this price run out
   if (EVENT.price_now != null) t.textContent = "From " + euro(EVENT.price_now);
   else if (EVENT.price && EVENT.price.min != null) t.textContent = "From " + euro(EVENT.price.min);
+  // the service fee is part of what you pay, so it stands on the receipt before you ask for a place
+  const items = document.querySelector(".pv-items");
+  if (items && EVENT.fee_now > 0 && !$("pv-fee")) {
+    const li = document.createElement("li");
+    li.id = "pv-fee";
+    li.innerHTML = `<span>1x</span><span>SERVICE FEE</span><span>${euro(EVENT.fee_now)}</span>`;
+    items.appendChild(li);
+  }
 }
 (function(){ try { const m = JSON.parse(localStorage.getItem("pp_me") || "null"); if (m) { $("f-name").value = m.name || ""; $("f-ig").value = m.ig || ""; $("f-phone").value = m.phone || ""; } } catch(e){} })();
 preview();

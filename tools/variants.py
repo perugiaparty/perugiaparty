@@ -89,6 +89,7 @@ def italian_post(s):
     for a, b in ((">Student night", ">Serata studenti"), (">REAL DJS<", ">DJ VERI<"),
                  (">CENTRAL LOCATION<", ">IN CENTRO<"), (">ALL NIGHT<", ">TUTTA LA NOTTE<"),
                  (">Total<", ">Totale<"), (">Student price<", ">Prezzo studenti<"),
+                 ("<span>SERVICE FEE</span>", "<span>COSTI DI SERVIZIO</span>"),
                  (">YES<", ">SÌ<"), (">FREE<", ">GRATIS<"), (">INCL.<", ">INCL.<"),
                  ('aria-label="Request a place: what a night includes"', 'aria-label="Richiedi un posto: cosa include la serata"')):
         s = s.replace(a, b)

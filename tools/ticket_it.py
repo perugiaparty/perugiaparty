@@ -7,6 +7,10 @@ import os, re, sys
 ROOT = os.path.join(os.path.dirname(__file__), "..", "public")
 
 PAIRS = [
+    ("SERVICE FEE<button", "COSTI DI SERVIZIO<button"),
+    ("What the service fee is for", "A cosa servono i costi di servizio"),
+    ("Ticketing, the website and running the night itself.", "Il sistema dei biglietti, il sito e l'organizzazione della serata."),
+
     # ---------- head ----------
     ('<html lang="en">', '<html lang="it">'),
     ('<title>My ticket · PerugiaParty</title>', '<title>Il mio biglietto · PerugiaParty</title>'),
@@ -63,7 +67,6 @@ PAIRS = [
     ('<span class="k">Pay before ${when}</span>', '<span class="k">Paga entro ${when}</span>'),
     ('Your time to pay is up.', 'Il tempo per pagare è scaduto.'),
     ('Copy all payment details', 'Copia tutti i dati'),
-    ('What this goes to', 'Dove vanno i soldi'),
     ('This is the price for your place.', 'Questo è il prezzo del tuo posto.'),
     ('This is a special price, just for you.', 'Questo è un prezzo speciale, solo per te.'),
     ('You were approved early, so you get the lowest price.',
@@ -73,10 +76,6 @@ PAIRS = [
      'Sei stato approvato vicino alla serata, quindi vale il prezzo late.'),
     ('Special price', 'Prezzo speciale'),
     ('Your ticket is on us.', 'Il biglietto te lo offriamo noi.'),
-    ('One euro more', 'Un euro in più'),
-    ('One euro less', 'Un euro in meno'),
-    ('You supported the crew, and the whole team thanks you.',
-     'Hai sostenuto la crew, e tutto il team ti ringrazia.'),
 
     # ---------- the ticket itself ----------
     ('Your entry QR code', "Il tuo codice QR d'ingresso"),
@@ -200,7 +199,6 @@ PAIRS = [
     ('<h1>My ticket</h1>', '<h1>Il mio biglietto</h1>'),
     ('${line("1X", "MUSIC", "INCL.")}', '${line("1X", "MUSICA", "INCL.")}'),
     ('${line("1X", "ALL NIGHT", "INCL.")}', '${line("1X", "TUTTA LA NOTTE", "INCL.")}'),
-    ('>SUPPORT US<', '>SOSTIENICI<'),
     ('<span>TOTAL</span>', '<span>TOTALE</span>'),
     # 'Special price' is already Italian by the time this runs, so match what is there
     ('const names = { early: "Early bird", normal: "Normal", late: "Late", special: "Prezzo speciale" };',
