@@ -854,7 +854,8 @@ function previewEvent(){
   if (items && EVENT.fee_now > 0 && !$("pv-fee")) {
     const li = document.createElement("li");
     li.id = "pv-fee";
-    li.innerHTML = `<span>1x</span><span>SERVICE FEE</span><span>${euro(EVENT.fee_now)}</span>`;
+    const FEE_LABEL = { early: "EARLY SERVICE FEE", normal: "SERVICE FEE", late: "LAST MINUTE SERVICE FEE" };
+    li.innerHTML = `<span>1x</span><span>${FEE_LABEL[EVENT.tier_now] || FEE_LABEL.normal}</span><span>${euro(EVENT.fee_now)}</span>`;
     items.appendChild(li);
   }
 }

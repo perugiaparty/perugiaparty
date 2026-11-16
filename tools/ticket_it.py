@@ -7,7 +7,10 @@ import os, re, sys
 ROOT = os.path.join(os.path.dirname(__file__), "..", "public")
 
 PAIRS = [
-    ("SERVICE FEE<button", "COSTI DI SERVIZIO<button"),
+    ('"EARLY SERVICE FEE"', '"COSTI DI SERVIZIO EARLY"'),
+    ('"LAST MINUTE SERVICE FEE"', '"COSTI DI SERVIZIO LAST MINUTE"'),
+    ('"SERVICE FEE"', '"COSTI DI SERVIZIO"'),
+
     ("What the service fee is for", "A cosa servono i costi di servizio"),
     ("Ticketing, the website and running the night itself.", "Il sistema dei biglietti, il sito e l'organizzazione della serata."),
 

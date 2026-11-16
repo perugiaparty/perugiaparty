@@ -893,6 +893,7 @@ function whenWhereHTML(d){
   </section>`;
 }
 // ---- the receipt: what you get, what you pay ----
+const FEE_LABEL = { early: "EARLY SERVICE FEE", normal: "SERVICE FEE", late: "LAST MINUTE SERVICE FEE" };
 function receiptHTML(d, tierName, fee, country){
   const total = (Number(d.price) || 0) + fee;
   const line = (q, item, v) => `<div class="rc-l"><span class="q">${q}</span><span class="i">${item}</span><span class="v">${v}</span></div>`;
@@ -903,7 +904,7 @@ function receiptHTML(d, tierName, fee, country){
     ${line("1X", "MUSIC", "INCL.")}
     ${line("1X", "ALL NIGHT", "INCL.")}
     ${line("1X", "TICKET · " + esc(String(tierName).toUpperCase()), euro(d.price))}
-    ${fee > 0 ? `<div class="rc-l"><span class="q">1X</span><span class="i">SERVICE FEE<button class="rc-i" type="button" id="fee-i" aria-expanded="false" aria-controls="fee-info" aria-label="What the service fee is for">i</button></span><span class="v">${euro(fee)}</span></div>
+    ${fee > 0 ? `<div class="rc-l"><span class="q">1X</span><span class="i">${FEE_LABEL[d.ticket] || FEE_LABEL.normal}<button class="rc-i" type="button" id="fee-i" aria-expanded="false" aria-controls="fee-info" aria-label="What the service fee is for">i</button></span><span class="v">${euro(fee)}</span></div>
     <p class="rc-info" id="fee-info" hidden>Ticketing, the website and running the night itself.</p>` : ""}
     <div class="rc-d"></div>
     <button class="rc-tot" type="button" id="tot-copy" data-copy="${String(total).replace(".", ",")}"><span>TOTAL</span><b id="rc-tot-v">${euro(total)}</b></button>

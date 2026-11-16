@@ -451,6 +451,7 @@ async function apiEvent(env) {
     // what the next person to be approved pays right now (rounds move on numbers, not dates)
     price_now: tierTotal(ev, await tierNow(env, ev)),
     fee_now: feeOf(ev, await tierNow(env, ev)),
+    tier_now: await tierNow(env, ev),
     requests_open: !!ev.requests_open,
     sold_out: await soldOut(env, ev),
     pair_free: Number(ev.pair_free) || 0,
