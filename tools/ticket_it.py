@@ -7,9 +7,9 @@ import os, re, sys
 ROOT = os.path.join(os.path.dirname(__file__), "..", "public")
 
 PAIRS = [
-    ('It pays for the ticket system and the website we built ourselves, and for the night: the door, the bar, the people working it. No ticketing platform takes a cut here.',
-     'Paga il sistema dei biglietti e il sito che abbiamo fatto noi, e la serata: la porta, il bar, le persone che ci lavorano. Qui nessuna piattaforma di biglietti prende una percentuale.'),
-    ('" This is the lowest fee of the night, because booking early is what lets us plan the bar."',
+    ('It is what makes the night possible: the venue, the music, the people working the door and the bar, and the system that gets you in. No ticketing platform takes a cut here.',
+     'E\u0300 quello che rende possibile la serata: il locale, la musica, le persone alla porta e al bar, e il sistema che ti fa entrare. Qui nessuna piattaforma di biglietti prende una percentuale.'),
+    ('" This is the lowest fee of the night, because booking early is what lets us book all of that."',
      '" \u00c8 il costo pi\u00f9 basso della serata, perch\u00e9 prenotare presto \u00e8 quello che ci permette di organizzare il bar."'),
     ('" It is the highest now, because a place this close to the night is the most work to arrange."',
      '" Adesso \u00e8 il pi\u00f9 alto, perch\u00e9 un posto cos\u00ec vicino alla serata \u00e8 quello che costa pi\u00f9 lavoro."'),
