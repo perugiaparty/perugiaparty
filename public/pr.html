@@ -51,23 +51,23 @@ button.send[disabled]{opacity:.6}
   <section class="box" id="box">
     <p class="when" id="when">PerugiaParty</p>
     <h1>Be a PR.</h1>
-    <p class="lead" id="deal"><b>Bring 4 new friends who pay and €5 comes off your own ticket.</b> They pay, you come fifth.</p>
+    <p class="lead" id="deal"><b>4 new friends who pay, €5 off your ticket.</b> You come fifth.</p>
     <form id="f">
       <label>Full name<input type="text" id="name" maxlength="60" autocomplete="name" placeholder="As on your ID" required></label>
       <label>Instagram<input type="text" id="ig" maxlength="40" placeholder="@yourhandle" required></label>
-      <label>How many new people can you bring<input type="text" id="bring" maxlength="20" placeholder="4, 8, more"></label>
+      <label>How many can you bring<input type="text" id="bring" maxlength="20" placeholder="4, 8, more"></label>
       <label>Who are they<input type="text" id="who" maxlength="120" placeholder="Erasmus, my course, the gym, ..."></label>
       <p class="err" id="err" hidden></p>
       <button class="send" type="submit" id="send">Ask Miltiad</button>
     </form>
-    <p class="fine">New means they have never been to a PerugiaParty. They pay the normal price, you pay less, once per party. Miltiad answers on Instagram.</p>
+    <p class="fine">New means never been before. Once per party. Miltiad answers on Instagram.</p>
   </section>
 
   <div class="how">
-    <div><i>01</i><span>You ask here. Miltiad says yes or no.</span></div>
-    <div><i>02</i><span>You get your own link and a QR to share.</span></div>
-    <div><i>03</i><span>Every friend who pays shows up on your ticket page.</span></div>
-    <div><i>04</i><span>You pay last, with the discount already off.</span></div>
+    <div><i>01</i><span>You ask. Miltiad answers.</span></div>
+    <div><i>02</i><span>You get a link and a QR.</span></div>
+    <div><i>03</i><span>Who paid shows on your ticket.</span></div>
+    <div><i>04</i><span>You pay last, €5 already off.</span></div>
   </div>
 </div>
 
@@ -79,7 +79,7 @@ const euro = n => "€" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", ","
 fetch("/api/event").then(r => r.json()).then(ev => {
   if (ev && ev.name) $("when").textContent = [ev.name, ev.date_label].filter(Boolean).join(" · ");
   if (ev && ev.pr_need && ev.pr_off) {
-    $("deal").innerHTML = `<b>Bring ${ev.pr_need} new friends who pay and ${euro(ev.pr_off)} comes off your own ticket.</b> They pay, you come fifth.`;
+    $("deal").innerHTML = `<b>${ev.pr_need} new friends who pay, ${euro(ev.pr_off)} off your ticket.</b> You come fifth.`;
   }
 }).catch(() => {});
 
@@ -94,7 +94,7 @@ $("f").addEventListener("submit", async (e) => {
     const d = await r.json();
     if (!r.ok || d.error) throw new Error(d.error || "Something went wrong.");
     $("box").innerHTML = `<div class="done"><b>Miltiad has your request.</b>
-      <p>He answers in the Instagram chat, usually the same day. Once he says yes you get your own link and everything shows up on your ticket page.</p></div>`;
+      <p>He answers on Instagram, usually the same day. Your link then appears on your ticket.</p></div>`;
   } catch (ex) {
     err.textContent = ex.message || "Something went wrong.";
     err.hidden = false;

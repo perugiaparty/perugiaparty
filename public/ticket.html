@@ -994,22 +994,22 @@ function langSwap(d){
 const PR_STATE = { bring: "4" };
 function prMiniHTML(d){
   const off = (d.pr_rules && d.pr_rules.off) || 5, need = (d.pr_rules && d.pr_rules.need) || 4;
-  return `<div class="prmini"><p><b>Bring ${need} new friends, pay ${euro(off)} less.</b>They pay, you come fifth.</p>
+  return `<div class="prmini"><p><b>${need} new friends, ${euro(off)} off.</b>They pay, you come fifth.</p>
     <button type="button" id="pr-open">Ask to be a PR</button></div>`;
 }
 function prAskHTML(d){
   const off = (d.pr_rules && d.pr_rules.off) || 5, need = (d.pr_rules && d.pr_rules.need) || 4;
   return `<div class="prask" id="pr-ask"><p class="k">Bring your people</p>
     <h3>${need} new friends,<br>${euro(off)} off.</h3>
-    <p>They pay the normal price and you come fifth, for ${euro(off)} less. Once per party. Miltiad says yes or no.</p>
+    <p>They pay full, you come fifth. Once per party.</p>
     <div class="num" role="group" aria-label="How many you think you can bring">
       ${["4","8","12+"].map(n => `<button type="button" data-bring="${n}" aria-pressed="${n === PR_STATE.bring}">${n}</button>`).join("")}
     </div>
-    <p class="k">How many you think you can bring</p>
+    <p class="k">How many can you bring</p>
     <button class="go" type="button" id="pr-send">Ask to be a PR</button></div>`;
 }
 const prWaitHTML = () => `<div class="prwait"><b>Miltiad has your request.</b>
-  <p>He answers in the Instagram chat, usually the same day. Your link appears here once he says yes.</p></div>`;
+  <p>He answers on Instagram, usually the same day.</p></div>`;
 function prCardHTML(d){
   const pr = d.pr, need = pr.need, done = Math.min(pr.counted, need), full = pr.blocks > 0;
   const first = esc(String(d.name || "").split(" ")[0]);
@@ -1022,13 +1022,13 @@ function prCardHTML(d){
     <div class="pr-goal">
       <div class="pr-bar">${Array.from({length: need}, (_, i) => `<i class="${i < done ? "on" : ""}"></i>`).join("")}</div>
       <p>${full
-        ? `<b>${need} of ${need} paid.</b> ${euro(pr.blocks * pr.off)} is off your own ticket. You're the fifth.`
-        : `<b>${pr.counted} of ${need} paid.</b> ${need - pr.counted} more and ${euro(pr.off)} comes off your own ticket.`}</p>
+        ? `<b>${need} of ${need} paid.</b> ${euro(pr.blocks * pr.off)} off. You're the fifth.`
+        : `<b>${pr.counted} of ${need} paid.</b> ${need - pr.counted} more and ${euro(pr.off)} is off.`}</p>
     </div>
     ${pr.friends.length ? `<div class="pr-list">${pr.friends.map(f => {
       const c = chip(f);
       return `<div class="pr-row"><div><b>${esc(f.name || f.ig)}</b><span>${esc(f.ig)}</span></div><span class="pr-chip ${c[0]}">${c[1]}</span></div>`;
-    }).join("")}</div>` : `<p class="lbl">Nobody has used your link yet.</p>`}
+    }).join("")}</div>` : `<p class="lbl">Nobody used your link yet.</p>`}
     <div class="pr-act"><button type="button" id="pr-copy" data-copy="${esc(pr.url)}">Copy link</button>
       <button class="g" type="button" id="pr-share">Share</button></div></div>`;
 }
@@ -1041,8 +1041,8 @@ function prHTML(d){
 }
 function prLastHTML(d){
   if (!d.pr || d.pr.state !== "ok" || d.status !== "approved") return "";
-  return `<div class="prlast"><span>You pay last</span><b>Your amount is still moving.</b>
-    <p>When your ${d.pr.need} have paid, ${euro(d.pr.off)} comes off. Pay before your deadline with whatever it says here.</p></div>`;
+  return `<div class="prlast"><span>You pay last</span><b>Your amount still moves.</b>
+    <p>${euro(d.pr.off)} comes off when your ${d.pr.need} have paid. Pay before your deadline.</p></div>`;
 }
 
 /* PR: open the panel, pick a number, send the request, copy or share the link */

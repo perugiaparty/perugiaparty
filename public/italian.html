@@ -791,7 +791,7 @@ async function setupInvite(ev){
   if (PRREF) {
     try {
       const r = await fetch("/api/pr/who?pr=" + encodeURIComponent(PRREF)).then(x => x.json());
-      if (r.ok) { reqNote(`<b>${esc(r.first)} put you on the list.</b><span>Fill in the form below. ${esc(r.first)}'s name travels with your request.</span>`, "invite"); return; }
+      if (r.ok) { reqNote(`<b>${esc(r.first)} ti ha messo in lista.</b><span>Il suo nome viaggia con la tua richiesta.</span>`, "invite"); return; }
     } catch(e){}
   }
   if (INVITE) {
