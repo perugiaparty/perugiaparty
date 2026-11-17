@@ -802,7 +802,7 @@ async function setupInvite(ev){
   if (PRREF) {
     try {
       const r = await fetch("/api/pr/who?pr=" + encodeURIComponent(PRREF)).then(x => x.json());
-      if (r.ok) { reqNote(`<b>${esc(r.first)} put you on the list.</b><span>Her name travels with your request.</span>`, "invite"); return; }
+      if (r.ok) { reqNote(`<b>${esc(r.first)} put you on the list.</b><span>Their name travels with your request.</span>`, "invite"); return; }
     } catch(e){}
   }
   if (INVITE) {

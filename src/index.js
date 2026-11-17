@@ -71,7 +71,7 @@ async function prStateFor(env, ev, ig) {
   if (cap > 0) blocks = Math.min(blocks, cap);
   return {
     state: "ok", slug: row.slug, url: `https://perugiaparty.com/pr/${row.slug}`,
-    need, off, counted, blocks, toGo: need - (counted % need || (counted ? need : 0)) || need,
+    need, off, counted, blocks,
     friends,
   };
 }

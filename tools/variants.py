@@ -89,7 +89,7 @@ def italian_post(s):
     for a, b in ((">Student night", ">Serata studenti"), (">REAL DJS<", ">DJ VERI<"),
                  (">CENTRAL LOCATION<", ">IN CENTRO<"), (">ALL NIGHT<", ">TUTTA LA NOTTE<"),
                  (">Total<", ">Totale<"), (">Student price<", ">Prezzo studenti<"),
-                 ("Her name travels with your request.", "Il suo nome viaggia con la tua richiesta."),
+                 ("Their name travels with your request.", "Il suo nome viaggia con la tua richiesta."),
                  ("put you on the list.", "ti ha messo in lista."),
                  ('"EARLY SERVICE FEE"', '"COSTI DI SERVIZIO EARLY"'),
                  ('"LAST MINUTE SERVICE FEE"', '"COSTI DI SERVIZIO LAST MINUTE"'),

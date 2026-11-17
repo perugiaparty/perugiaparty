@@ -727,7 +727,7 @@ function inviteHTML(d){
   if (v.left <= 0) return `<section class="invite"><span class="left">Invito usato</span><h2>Il tuo amico ci sta.</h2><p>Il tuo invito per ${esc(event)} è stato usato. Controlleremo la sua richiesta come tutte le altre.</p></section>`;
   return `<section class="invite"><span class="left">${v.left} of ${v.limit} invite${v.limit > 1 ? "s" : ""} left</span>
     <h2>Porta un amico.</h2>
-    <p>You già venuto, so you can invite ${v.limit > 1 ? "friends" : "a friend"} to ${esc(event)}. Send them this link. They still need our approval, and we'll see they're with you.</p>
+    <p>You came before, so you can invite ${v.limit > 1 ? "friends" : "a friend"} to ${esc(event)}. Send them this link. They still need our approval, and we'll see they're with you.</p>
     <div class="lnk">${esc(v.url)}</div>
     <div class="row2"><button class="btn ink" type="button" id="inv-share" data-url="${esc(v.url)}" data-ev="${esc(event)}">Manda l'invito</button><button class="btn outline" type="button" data-copy="${esc(v.url)}">Copia link</button></div></section>`;
 }
@@ -1013,7 +1013,8 @@ const prWaitHTML = () => `<div class="prwait"><b>Miltiad ha la tua richiesta.</b
 function prCardHTML(d){
   const pr = d.pr, need = pr.need, done = Math.min(pr.counted, need), full = pr.blocks > 0;
   const first = esc(String(d.name || "").split(" ")[0]);
-  const chip = (f) => f.old ? ["", "già venuto"] : f.paid ? ["ok", "paid"] : f.status === "approved" ? ["wait", "da pagare"] : ["", esc(f.status)];
+  const PR_ST = { old: "già venuto", paid: "pagato", approved: "da pagare", requested: "richiesta", waitlist: "lista d'attesa" };
+  const chip = (f) => f.old ? ["", PR_ST.old] : f.paid ? ["ok", PR_ST.paid] : f.status === "approved" ? ["wait", PR_ST.approved] : ["", PR_ST[f.status] || esc(f.status)];
   return `<div class="prcard"><div class="pr-top">
       <div><p class="lbl">Il tuo link PR</p><b class="pr-code">${esc(String(pr.slug || "").toUpperCase())}</b>
         <p class="pr-url">${esc(pr.url.replace("https://", ""))}</p></div>

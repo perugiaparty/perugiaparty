@@ -1013,7 +1013,8 @@ const prWaitHTML = () => `<div class="prwait"><b>Miltiad has your request.</b>
 function prCardHTML(d){
   const pr = d.pr, need = pr.need, done = Math.min(pr.counted, need), full = pr.blocks > 0;
   const first = esc(String(d.name || "").split(" ")[0]);
-  const chip = (f) => f.old ? ["", "came before"] : f.paid ? ["ok", "paid"] : f.status === "approved" ? ["wait", "to pay"] : ["", esc(f.status)];
+  const PR_ST = { old: "came before", paid: "paid", approved: "to pay", requested: "requested", waitlist: "waitlist" };
+  const chip = (f) => f.old ? ["", PR_ST.old] : f.paid ? ["ok", PR_ST.paid] : f.status === "approved" ? ["wait", PR_ST.approved] : ["", PR_ST[f.status] || esc(f.status)];
   return `<div class="prcard"><div class="pr-top">
       <div><p class="lbl">Your PR link</p><b class="pr-code">${esc(String(pr.slug || "").toUpperCase())}</b>
         <p class="pr-url">${esc(pr.url.replace("https://", ""))}</p></div>

@@ -76,10 +76,50 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const euro = n => "€" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", ",") : Number(n));
 
+/* Italian browsers get the page in Italian: same words as the Italian ticket page */
+const IT = {
+  "Be a PR.": "Fai il PR.",
+  "Full name": "Nome e cognome",
+  "As on your ID": "Come sul documento",
+  "Instagram": "Instagram",
+  "How many can you bring": "Quanti ne puoi portare",
+  "4, 8, more": "4, 8, di pi\u00f9",
+  "Who are they": "Chi sono",
+  "Erasmus, my course, the gym, ...": "Erasmus, il mio corso, la palestra, ...",
+  "Ask Miltiad": "Chiedi a Miltiad",
+  "New means never been before. Once per party. Miltiad answers on Instagram.":
+    "Nuovi vuol dire mai venuti prima. Una volta a serata. Miltiad risponde su Instagram.",
+  "You ask. Miltiad answers.": "Chiedi tu. Miltiad risponde.",
+  "You get a link and a QR.": "Ricevi un link e un QR.",
+  "Who paid shows on your ticket.": "Chi ha pagato appare sul tuo biglietto.",
+  "You pay last, \u20ac5 already off.": "Paghi per ultimo, \u20ac5 gi\u00e0 tolti.",
+  "Back to the party": "Torna alla festa",
+  "Sending...": "Invio...",
+};
+const isIt = (navigator.language || "en").toLowerCase().startsWith("it");
+function itify(){
+  if (!isIt) return;
+  document.documentElement.lang = "it";
+  document.title = "Fai il PR \u00b7 PerugiaParty";
+  document.querySelectorAll("h1, label, button, p, span, a").forEach(el => {
+    el.childNodes.forEach(n => { if (n.nodeType === 3 && IT[n.nodeValue.trim()]) n.nodeValue = IT[n.nodeValue.trim()]; });
+    if (el.placeholder && IT[el.placeholder]) el.placeholder = IT[el.placeholder];
+  });
+  const d = document.getElementById("deal");
+  if (d) d.innerHTML = d.innerHTML
+    .replace(/new friends who pay,/, "amici nuovi che pagano,")
+    .replace(/off your ticket\./, "in meno sul tuo biglietto.")
+    .replace(/You come fifth\./, "Sei il quinto.")
+    .replace(/Bring /, "");
+}
+itify();
+
 fetch("/api/event").then(r => r.json()).then(ev => {
   if (ev && ev.name) $("when").textContent = [ev.name, ev.date_label].filter(Boolean).join(" · ");
   if (ev && ev.pr_need && ev.pr_off) {
-    $("deal").innerHTML = `<b>${ev.pr_need} new friends who pay, ${euro(ev.pr_off)} off your ticket.</b> You come fifth.`;
+    $("deal").innerHTML = isIt
+      ? `<b>${ev.pr_need} amici nuovi che pagano, ${euro(ev.pr_off)} in meno sul tuo biglietto.</b> Sei il quinto.`
+      : `<b>${ev.pr_need} new friends who pay, ${euro(ev.pr_off)} off your ticket.</b> You come fifth.`;
   }
 }).catch(() => {});
 
@@ -90,11 +130,12 @@ $("f").addEventListener("submit", async (e) => {
   send.disabled = true; send.textContent = "Sending...";
   try {
     const r = await fetch("/api/pr/ask", { method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name: $("name").value.trim(), ig: $("ig").value.trim(), bring: $("bring").value.trim(), who: $("who").value.trim() }) });
+      body: JSON.stringify({ name: $("name").value.trim(), ig: $("ig").value.trim(), bring: $("bring").value.trim(), who: $("who").value.trim(), lang: isIt ? "it" : "en" }) });
     const d = await r.json();
     if (!r.ok || d.error) throw new Error(d.error || "Something went wrong.");
-    $("box").innerHTML = `<div class="done"><b>Miltiad has your request.</b>
-      <p>He answers on Instagram, usually the same day. Your link then appears on your ticket.</p></div>`;
+    $("box").innerHTML = isIt
+      ? `<div class="done"><b>Miltiad ha la tua richiesta.</b><p>Ti risponde su Instagram, di solito in giornata. Il tuo link appare poi sul biglietto.</p></div>`
+      : `<div class="done"><b>Miltiad has your request.</b><p>He answers on Instagram, usually the same day. Your link then appears on your ticket.</p></div>`;
   } catch (ex) {
     err.textContent = ex.message || "Something went wrong.";
     err.hidden = false;

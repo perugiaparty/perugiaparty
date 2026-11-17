@@ -7,6 +7,9 @@ import os, re, sys
 ROOT = os.path.join(os.path.dirname(__file__), "..", "public")
 
 PAIRS = [
+    ('{ old: "came before", paid: "paid", approved: "to pay", requested: "requested", waitlist: "waitlist" }',
+     '{ old: "gi\u00e0 venuto", paid: "pagato", approved: "da pagare", requested: "richiesta", waitlist: "lista d\'attesa" }'),
+
     ("${need} new friends, ${euro(off)} off.", "${need} amici nuovi, ${euro(off)} in meno."),
     ("They pay, you come fifth.", "Loro pagano, tu sei il quinto."),
     (">Ask to be a PR<", ">Chiedi di fare il PR<"),
@@ -31,8 +34,6 @@ PAIRS = [
     ("${euro(d.pr.off)} comes off when your ${d.pr.need} have paid. Pay before your deadline.",
      "${euro(d.pr.off)} in meno quando i tuoi ${d.pr.need} hanno pagato. Paga entro la scadenza."),
     ("FRIENDS PAID", "AMICI HANNO PAGATO"),
-    ("came before", "gi\u00e0 venuto"),
-    ('"to pay"', '"da pagare"'),
     ("Come to ${(window.__d && window.__d.event) || \"PerugiaParty\"} with me: ${url}",
      "Vieni a ${(window.__d && window.__d.event) || \"PerugiaParty\"} con me: ${url}"),
 
