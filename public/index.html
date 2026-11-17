@@ -795,8 +795,16 @@ let tsWidget = null;
 function sendLabel(){ return EVENT && EVENT.sold_out ? "Join the waitlist" : "Send request"; }
 /* invites from returning guests (?invite=CODE) and the early-access window */
 const INVITE = (() => { const c = new URLSearchParams(location.search).get("invite"); return c && /^[a-z0-9]{8}$/.test(c) ? c : null; })();
+/* a PR link (?pr=slug): their name rides along with the request */
+const PRREF = (() => { const c = (new URLSearchParams(location.search).get("pr") || "").toLowerCase(); return /^[a-z0-9]{1,20}$/.test(c) ? c : null; })();
 function reqNote(html, tone){ const n = $("req-note"); n.innerHTML = html; n.className = "req-note" + (tone ? " " + tone : ""); n.hidden = false; }
 async function setupInvite(ev){
+  if (PRREF) {
+    try {
+      const r = await fetch("/api/pr/who?pr=" + encodeURIComponent(PRREF)).then(x => x.json());
+      if (r.ok) { reqNote(`<b>${esc(r.first)} put you on the list.</b><span>Fill in the form below. ${esc(r.first)}'s name travels with your request.</span>`, "invite"); return; }
+    } catch(e){}
+  }
   if (INVITE) {
     try {
       const r = await fetch("/api/invite?c=" + INVITE).then(x => x.json());
@@ -890,6 +898,7 @@ $("req-form").addEventListener("submit", async e => {
     // the page they signed up on decides the language of their ticket and our messages
     lang: (document.documentElement.lang || "en").slice(0, 2),
     invite: INVITE || undefined,
+    pr: PRREF || undefined,
   };
   const missing = [], bad = [];
   const igClean = body.ig.replace(/^@+/, "");

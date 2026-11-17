@@ -46,6 +46,42 @@ export async function crewDm(env, ev, igsid, code, { igSend, igUsername, igLog }
     : `Confirmed, ${first}! Your Instagram is verified. Matt still has to approve you as crew. You'll get a message here when you're in.`);
 }
 // once Matt approves someone in the admin panel: tell them on Instagram (runs with the minute tick)
+/* the PR board: who asked, who is active, and how their people are doing. PR manager (or a lead) only. */
+async function prBoard(env, ev) {
+  if (Number(ev.pr_on) !== 1) return null;
+  const rows = (await env.DB.prepare("SELECT * FROM pr WHERE event = ? ORDER BY created_at").bind(ev.tag).all()).results || [];
+  if (!rows.length) return { asked: [], active: [], need: Number(ev.pr_need), off: Number(ev.pr_off), friends: 0, given: 0 };
+  const guests = (await env.DB.prepare(
+    "SELECT name, ig, invited_by, status FROM guests WHERE event = ? AND invited_by IS NOT NULL AND status NOT IN ('declined','removed')"
+  ).bind(ev.tag).all()).results || [];
+  const past = (await env.DB.prepare("SELECT DISTINCT lower(ig) AS ig FROM guests WHERE event <> ? AND status IN ('paid','in')").bind(ev.tag).all()).results || [];
+  const old = new Set(past.map((r) => r.ig));
+  const need = Number(ev.pr_need), off = Number(ev.pr_off), cap = Number(ev.pr_max) || 0;
+  const asked = [], active = [];
+  let friends = 0, given = 0;
+  for (const r of rows) {
+    const mine = guests.filter((g) => String(g.invited_by).toLowerCase() === String(r.ig).toLowerCase());
+    const seen = new Set();
+    const kids = [];
+    for (const g of mine) {
+      const ig = String(g.ig || "").toLowerCase();
+      if (!ig || seen.has(ig)) continue;
+      seen.add(ig);
+      const paid = g.status === "paid" || g.status === "in";
+      kids.push({ name: clean(g.name, 40), ig, status: g.status, paid, counts: paid && !old.has(ig), old: old.has(ig) });
+    }
+    const counted = kids.filter((k) => k.counts).length;
+    let blocks = Math.floor(counted / need);
+    if (cap > 0) blocks = Math.min(blocks, cap);
+    const base = { id: r.id, name: clean(r.name, 60), ig: r.ig, slug: r.slug, bring: clean(r.bring, 20), who: clean(r.who, 120), at: r.created_at };
+    if (r.status === "ok") {
+      friends += counted; given += blocks * off;
+      active.push({ ...base, counted, blocks, kids, toGo: need - (counted % need), url: r.slug ? `perugiaparty.com/pr/${r.slug}` : "" });
+    } else if (r.status === "asked") asked.push(base);
+  }
+  return { asked, active, need, off, friends, given };
+}
+
 export async function crewApprovedDms(env, ev, igSend) {
   if (!ev || !ev.ig_token || Number(ev.ig_dms_off) === 1) return;
   const rows = (await env.DB.prepare("SELECT id, name, user, igsid FROM crew WHERE approved = 1 AND ig_ok = 1 AND igsid IS NOT NULL AND COALESCE(notified, 1) = 0 LIMIT 10").all()).results || [];
@@ -91,7 +127,7 @@ function newToken() {
 
 async function onCrew(env, crewId, tag) {
   if (!tag) return null;
-  return env.DB.prepare("SELECT c.id, c.name, c.user, c.lead, p.role, p.going, p.arrive FROM crew c JOIN crew_party p ON p.crew_id = c.id WHERE c.id = ? AND p.event = ?").bind(crewId, tag).first();
+  return env.DB.prepare("SELECT c.id, c.name, c.user, c.lead, c.pr_mgr, p.role, p.going, p.arrive FROM crew c JOIN crew_party p ON p.crew_id = c.id WHERE c.id = ? AND p.event = ?").bind(crewId, tag).first();
 }
 
 async function session(env, ev, token) {
@@ -143,7 +179,7 @@ async function bilancio(env, ev) {
 async function state(env, ev, me) {
   const tag = ev.tag;
   const [crew, spends, needs, st, news, note, shifts, risks, decisions, retro, plans, pjobs] = await Promise.all([
-    env.DB.prepare("SELECT c.id, c.name, c.lead, p.role, p.going, p.arrive, p.here_at FROM crew c JOIN crew_party p ON p.crew_id = c.id WHERE p.event = ? ORDER BY c.lead DESC, c.name").bind(tag).all(),
+    env.DB.prepare("SELECT c.id, c.name, c.lead, c.pr_mgr, p.role, p.going, p.arrive, p.here_at FROM crew c JOIN crew_party p ON p.crew_id = c.id WHERE p.event = ? ORDER BY c.lead DESC, c.name").bind(tag).all(),
     env.DB.prepare("SELECT id, item, amount, cat, shop, repaid, repaid_at, created_at FROM crew_spend WHERE event = ? AND crew_id = ? ORDER BY created_at DESC").bind(tag, me.id).all(),
     env.DB.prepare("SELECT id, COALESCE(kind,'buy') AS kind, phase, due, doff, COALESCE(blocker,0) AS blocker, item, qty, cat, shop, owner, done, done_by, done_at, created_at, created_by FROM crew_need WHERE event = ? ORDER BY done, created_at").bind(tag).all(),
     env.DB.prepare(
@@ -161,7 +197,7 @@ async function state(env, ev, me) {
   const a = st || {};
   const out = {
     event: { name: ev.name || "", tag, date: ev.date_label || "", starts_at: ev.starts_at || "", doors: ev.doors || "", capacity: Number(ev.capacity) || null, palette: palette(ev.crew_palette), starts_at: ev.starts_at || "", info: String(ev.crew_info || "").slice(0, 2000) },
-    me: { id: me.id, name: me.name, lead: Number(me.lead) === 1, role: me.role || "", going: me.going || "", arrive: me.arrive || "" },
+    me: { id: me.id, name: me.name, lead: Number(me.lead) === 1, pr_mgr: Number(me.pr_mgr) === 1 || Number(me.lead) === 1, role: me.role || "", going: me.going || "", arrive: me.arrive || "" },
     crew: crew.results || [],
     spends: spends.results || [],
     needs: needs.results || [],
@@ -176,6 +212,7 @@ async function state(env, ev, me) {
     attendance: { requested: a.requested || 0, approved: a.approved || 0, paid: a.paid || 0, inside: a.inside || 0, crew_tickets: a.crew_tickets || 0 },
   };
   if (Number(me.lead) === 1) out.bilancio = await bilancio(env, ev);
+  if (Number(me.lead) === 1 || Number(me.pr_mgr) === 1) out.pr = await prBoard(env, ev);
   return out;
 }
 
@@ -241,6 +278,38 @@ export async function apiCrew(req, env, action, { getEvent, json }) {
     case "logout":
       await env.DB.prepare("DELETE FROM crew_sess WHERE token = ?").bind(body.token).run();
       return json({ ok: true });
+
+    case "pr_ok":
+    case "pr_no": {
+      if (!(lead || Number(me.pr_mgr) === 1)) return json({ error: "Only the PR manager can do that." }, 403);
+      const row = await env.DB.prepare("SELECT * FROM pr WHERE id = ? AND event = ?").bind(Number(body.id) || 0, tag).first();
+      if (!row) return json({ error: "Not found." }, 404);
+      if (action === "pr_no") {
+        await env.DB.prepare("UPDATE pr SET status = 'no', decided_at = ?, decided_by = ? WHERE id = ?").bind(Date.now(), me.id, row.id).run();
+        return ok();
+      }
+      let slug = row.slug;
+      if (!slug) {
+        const base = String(row.name || row.ig).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(" ")[0].replace(/[^a-z0-9]/g, "").slice(0, 20) || "pr";
+        slug = base;
+        for (let i = 1; i < 20; i++) {
+          const taken = await env.DB.prepare("SELECT 1 FROM pr WHERE event = ? AND slug = ? AND id <> ?").bind(tag, slug, row.id).first();
+          if (!taken) break;
+          slug = base + i;
+        }
+      }
+      await env.DB.prepare("UPDATE pr SET status = 'ok', slug = ?, decided_at = ?, decided_by = ? WHERE id = ?").bind(slug, Date.now(), me.id, row.id).run();
+      return ok();
+    }
+    case "pr_add": {
+      if (!(lead || Number(me.pr_mgr) === 1)) return json({ error: "Only the PR manager can do that." }, 403);
+      const name = clean(body.name, 60), raw = String(body.ig || "").trim().toLowerCase().replace(/^@+/, "");
+      const ig = raw ? "@" + raw : "";
+      if (!name || !ig) return json({ error: "Name and Instagram." }, 400);
+      await env.DB.prepare("INSERT OR IGNORE INTO pr (event, name, ig, status, created_at) VALUES (?, ?, ?, 'asked', ?)")
+        .bind(tag, name, ig, Date.now()).run();
+      return ok();
+    }
 
     case "spend_add": {
       const item = clean(body.item, 120), amount = money(body.amount);

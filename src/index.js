@@ -21,6 +21,68 @@ function newToken() {
 
 const clean = (v, max) => String(v ?? "").replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, max);
 
+/* ---- PR: a guest brings new friends, every N who pay takes a fixed amount off their own ticket ---- */
+const prOn = (ev) => Number(ev.pr_on) === 1 && Number(ev.pr_need) > 0 && Number(ev.pr_off) > 0;
+const prSlugify = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  .replace(/[^a-z0-9]+/g, "").slice(0, 20);
+async function prFreeSlug(env, ev, name, ig) {
+  let base = prSlugify(name.split(" ")[0]) || prSlugify(ig) || "pr";
+  for (let i = 0; i < 20; i++) {
+    const tryIt = i ? base + i : base;
+    const taken = await env.DB.prepare("SELECT 1 FROM pr WHERE event = ? AND slug = ?").bind(ev.tag, tryIt).first();
+    if (!taken) return tryIt;
+  }
+  return base + newToken().slice(0, 4);
+}
+const prRow = (env, ev, ig) => env.DB.prepare("SELECT * FROM pr WHERE event = ? AND ig = ?").bind(ev.tag, normIg(ig)).first();
+/* who this PR brought, and which of them count: paid, new to PerugiaParty, not themselves */
+async function prFriends(env, ev, ig) {
+  const rows = (await env.DB.prepare(
+    "SELECT name, ig, status, deadline FROM guests WHERE event = ? AND invited_by = ? AND status NOT IN ('declined','removed') ORDER BY created_at"
+  ).bind(ev.tag, normIg(ig)).all()).results || [];
+  const out = [];
+  const seen = new Set();
+  for (const r of rows) {
+    const f = normIg(r.ig);
+    if (!f || f === normIg(ig) || seen.has(f)) continue;
+    seen.add(f);
+    const paid = r.status === "paid" || r.status === "in";
+    const old = await prCameBefore(env, ev, f);
+    out.push({ name: clean(r.name, 40), ig: f, status: r.status, paid, counts: paid && !old, old });
+  }
+  return out;
+}
+/* new to PerugiaParty: no paid place at any earlier party, and not flagged as a returner */
+async function prCameBefore(env, ev, ig) {
+  const p = await env.DB.prepare("SELECT came_before FROM people WHERE ig = ?").bind(ig).first();
+  if (p && p.came_before) return true;
+  const r = await env.DB.prepare("SELECT 1 FROM guests WHERE lower(ig) = ? AND event <> ? AND status IN ('paid','in') LIMIT 1").bind(ig, ev.tag).first();
+  return !!r;
+}
+async function prStateFor(env, ev, ig) {
+  if (!prOn(ev) || !ig) return null;
+  const row = await prRow(env, ev, ig);
+  if (!row) return { state: "none" };
+  if (row.status !== "ok") return { state: row.status === "no" ? "no" : "asked" };
+  const friends = await prFriends(env, ev, ig);
+  const counted = friends.filter((f) => f.counts).length;
+  const need = Number(ev.pr_need), off = Number(ev.pr_off), cap = Number(ev.pr_max) || 0;
+  let blocks = Math.floor(counted / need);
+  if (cap > 0) blocks = Math.min(blocks, cap);
+  return {
+    state: "ok", slug: row.slug, url: `https://perugiaparty.com/pr/${row.slug}`,
+    need, off, counted, blocks, toGo: need - (counted % need || (counted ? need : 0)) || need,
+    friends,
+  };
+}
+/* what comes off this guest's ticket, never more than the ticket itself */
+async function prDiscount(env, ev, g) {
+  if (!prOn(ev) || !g || !(Number(g.price) > 0)) return 0;
+  const st = await prStateFor(env, ev, g.ig);
+  if (!st || st.state !== "ok" || !st.blocks) return 0;
+  return Math.min(Number(g.price), st.blocks * Number(ev.pr_off));
+}
+
 /* the booking fee per round. It rides on top of the ticket: guests.price stays the ticket alone,
    so the venue receipt and the rounds keep working, and every amount we ask for adds the fee. */
 const feeOf = (ev, tier) => (ev && Number(ev["fee_" + tier])) || 0;
@@ -28,11 +90,12 @@ const tierTotal = (ev, tier) => {
   const p = Number(ev["price_" + tier]);
   return Number.isFinite(p) && p > 0 ? p + feeOf(ev, tier) : null;
 };
-/* what this guest has to transfer: ticket plus the fee of their round, nothing on a free place */
-const payable = (ev, g) => {
+/* what this guest has to transfer: ticket plus the fee of their round, less what they earned as a PR */
+const payable = (ev, g, discount) => {
   const p = Number(g.price) || 0;
-  return p > 0 ? p + feeOf(ev, g.ticket) : p;
+  return p > 0 ? Math.max(0, p - (Number(discount) || 0)) + feeOf(ev, g.ticket) : p;
 };
+const payableNow = async (env, ev, g) => payable(ev, g, await prDiscount(env, ev, g));
 
 function priceRange(ev) {
   const p = ["early", "normal", "late"].map((t) => tierTotal(ev, t)).filter((n) => Number.isFinite(n) && n > 0);
@@ -451,6 +514,9 @@ async function apiEvent(env) {
     // what the next person to be approved pays right now (rounds move on numbers, not dates)
     price_now: tierTotal(ev, await tierNow(env, ev)),
     fee_now: feeOf(ev, await tierNow(env, ev)),
+    pr_on: prOn(ev) ? 1 : 0,
+    pr_need: prOn(ev) ? Number(ev.pr_need) : null,
+    pr_off: prOn(ev) ? Number(ev.pr_off) : null,
     tier_now: await tierNow(env, ev),
     requests_open: !!ev.requests_open,
     sold_out: await soldOut(env, ev),
@@ -531,6 +597,10 @@ async function apiRequest(req, env) {
     if (inv && inv.left > 0 && inv.ig !== ig) inviter = inv.ig;
     else if (returnersOnly(ev) && !returning) return json({ error: say("This invite link has already been used or isn't valid anymore.", lang) }, 409);
   }
+  if (!inviter && body.pr) {
+    const row = await env.DB.prepare("SELECT ig FROM pr WHERE event = ? AND slug = ? AND status = 'ok'").bind(ev.tag, prSlugify(body.pr)).first();
+    if (row && normIg(row.ig) !== ig) inviter = normIg(row.ig);
+  }
   if (returnersOnly(ev) && !returning && !inviter) {
     return json({ error: say("Right now only guests who came before, and the friends they invite, can request a place. Requests open for everyone soon.", lang) }, 409);
   }
@@ -581,6 +651,45 @@ async function apiTip(req, env) {
   const r = await env.DB.prepare("UPDATE guests SET tip = ? WHERE token = ? AND status = 'approved'").bind(tip, t).run();
   return json({ ok: !!(r.meta && r.meta.changes), tip });
 }
+/* ---- PR: asking to become one, from the ticket or from /pr ---- */
+async function prAsk(req, env) {
+  const ev = await getEvent(env);
+  if (!ev || !prOn(ev)) return json({ error: "Not open right now." }, 409);
+  let body = {};
+  try { body = await req.json(); } catch (e) { return json({ error: "Bad request." }, 400); }
+  const lang = body.lang === "it" ? "it" : "en";
+  let ig = normIg(body.ig || ""), name = clean(body.name || "", 60);
+  // from the ticket we already know who they are
+  if (body.token && TOKEN_RE.test(String(body.token))) {
+    const g = await env.DB.prepare("SELECT name, ig FROM guests WHERE token = ?").bind(String(body.token)).first();
+    if (g) { ig = normIg(g.ig); name = clean(g.name, 60); }
+  }
+  if (!ig || !name) return json({ error: say("Fill in your name and your Instagram.", lang) }, 400);
+  const row = await prRow(env, ev, ig);
+  if (row) return json({ ok: true, state: row.status === "ok" ? "ok" : row.status === "no" ? "no" : "asked" });
+  await env.DB.prepare("INSERT INTO pr (event, name, ig, bring, who, status, created_at) VALUES (?, ?, ?, ?, ?, 'asked', ?)")
+    .bind(ev.tag, name, ig, clean(body.bring || "", 20), clean(body.who || "", 120), Date.now()).run();
+  return json({ ok: true, state: "asked" });
+}
+/* a PR link: /pr/<slug> drops you on the form with their name attached */
+async function prLink(url, env) {
+  const slug = prSlugify(url.pathname.slice(4));
+  const ev = await getEvent(env);
+  if (!ev || !slug) return Response.redirect("https://perugiaparty.com/", 302);
+  const row = await env.DB.prepare("SELECT slug FROM pr WHERE event = ? AND slug = ? AND status = 'ok'").bind(ev.tag, slug).first();
+  const to = row ? `/?pr=${row.slug}#request` : "/";
+  return new Response(null, { status: 302, headers: { location: to, "cache-control": "no-store" } });
+}
+/* the name behind a PR link, so the form can say who sent you */
+async function prWho(url, env) {
+  const ev = await getEvent(env);
+  const slug = prSlugify(url.searchParams.get("pr") || "");
+  if (!ev || !slug) return json({ ok: false });
+  const row = await env.DB.prepare("SELECT name FROM pr WHERE event = ? AND slug = ? AND status = 'ok'").bind(ev.tag, slug).first();
+  if (!row) return json({ ok: false });
+  return json({ ok: true, first: String(row.name || "").split(" ")[0], slug });
+}
+
 async function apiTicket(url, env) {
   const t = url.searchParams.get("t") || "";
   if (!TOKEN_RE.test(t)) return json({ error: "This link isn't valid." }, 404);
@@ -593,6 +702,7 @@ async function apiTicket(url, env) {
   if (g.status === "approved") {
     Object.assign(out, {
       code: g.code, price: g.price, ticket: g.ticket, fee: sameEvent && Number(g.price) > 0 ? feeOf(ev, g.ticket) : 0,
+      discount: sameEvent ? await prDiscount(env, ev, g) : 0,
       iban: sameEvent ? ev.iban : null, beneficiary: sameEvent ? ev.beneficiary : null,
       reference: `${g.name} ${g.code}`,
       approved_at: g.approved_at,
@@ -612,6 +722,12 @@ async function apiTicket(url, env) {
       in_at: g.in_at,
       program: sameEvent ? parseProgram(ev.program) : [],
     });
+  }
+  // the PR programme: their own link, who they brought, and what it has earned them
+  if (sameEvent && prOn(ev)) {
+    const st = await prStateFor(env, ev, g.ig);
+    if (st) out.pr = st;
+    out.pr_rules = { need: Number(ev.pr_need), off: Number(ev.pr_off) };
   }
   // returning guests: early access, one-tap request for the next edition, and an invite for a friend
   const ig = normIg(g.ig);
@@ -949,9 +1065,9 @@ const romeDay = (t) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome
 const isPartyDay = (ev) => { const st = Date.parse(ev.starts_at); return Number.isFinite(st) && romeDay(st) === romeDay(Date.now()); };
 // Every automatic message follows the language the guest signed up in.
 const isIt = (g) => g && g.lang === "it";
-const payNowText = (ev, g) => isIt(g)
-  ? `Oggi è la serata, quindi paga ${euro(payable(ev, g))} subito con un bonifico istantaneo.\n\nPoi manda qui in chat lo screenshot del bonifico.`
-  : `Today is the party, so please pay ${euro(payable(ev, g))} right now with a bonifico istantaneo.\n\nThen send the screenshot of the bonifico here in this chat.`;
+const payNowText = (ev, g, pay) => isIt(g)
+  ? `Oggi è la serata, quindi paga ${euro(pay)} subito con un bonifico istantaneo.\n\nPoi manda qui in chat lo screenshot del bonifico.`
+  : `Today is the party, so please pay ${euro(pay)} right now with a bonifico istantaneo.\n\nThen send the screenshot of the bonifico here in this chat.`;
 async function igStatusDms(env) {
   const ev = await getEvent(env);
   if (!ev || !ev.ig_token) return;
@@ -962,13 +1078,14 @@ async function igStatusDms(env) {
   ).all()).results || [];
   for (const g of rows) {
     const first = String(g.name || "").split(" ")[0];
+    const pay = await payableNow(env, ev, g);
     const free = g.status === "paid" && Number(g.price) === 0 && g.ig_sent !== "paid";
     const text = (isIt(g) ? {
-      approved: isPartyDay(ev) ? `Sei dentro, ${first}! ${payNowText(ev, g)}` : `Sei dentro, ${first}! Paga ${euro(payable(ev, g))} per bloccare il tuo posto.`,
+      approved: isPartyDay(ev) ? `Sei dentro, ${first}! ${payNowText(ev, g, pay)}` : `Sei dentro, ${first}! Paga ${euro(pay)} per bloccare il tuo posto.`,
       released: g.event === ev.tag ? `Il tuo posto è stato riassegnato, il pagamento non è arrivato entro la scadenza.\nRichiedi di nuovo per tornare in lista d'attesa.` : null,
       paid: g.ticket === "crew" ? `Sei nella crew, ${first}.` : free ? `Sei dentro, ${first}. Ingresso gratis.` : `Pagamento ricevuto. Ci sei, ${first}!`,
     } : {
-      approved: isPartyDay(ev) ? `You're in, ${first}! ${payNowText(ev, g)}` : `You're in, ${first}! Pay ${euro(payable(ev, g))} to lock in your place.`,
+      approved: isPartyDay(ev) ? `You're in, ${first}! ${payNowText(ev, g, pay)}` : `You're in, ${first}! Pay ${euro(pay)} to lock in your place.`,
       released: g.event === ev.tag ? `Your spot has been reassigned, payment was not received before the deadline.\nSign up again to get back on the waitlist.` : null,
       paid: g.ticket === "crew" ? `You're on the crew, ${first}.` : free ? `You're in, ${first}. Free entry.` : `Payment received. You're going, ${first}!`,
     })[g.status] || null;
@@ -1001,16 +1118,17 @@ async function igReminders(env) {
   for (const g of rows) {
     const c = await env.DB.prepare("UPDATE guests SET remind_sent = ? WHERE token = ? AND remind_req > COALESCE(remind_sent, 0)").bind(g.remind_req, g.token).run();
     if (!(c.meta && c.meta.changes)) continue;
+    const pay = await payableNow(env, ev, g);
     const ms = Number(g.deadline) - Date.now();
     const mins = Math.max(1, Math.floor(ms / 6e4)), left = mins >= 60 ? `${Math.floor(mins / 60)}h` : `${mins} min`;
     const up = Number(ev.price_late) > Number(g.price) && ["early", "normal"].includes(g.ticket);
     const text = isIt(g)
-      ? (isPartyDay(ev) ? `Pagamento non ancora ricevuto. ${payNowText(ev, g)}` : ms > 0
-        ? `Pagamento non ancora ricevuto. Hai ancora ${left} per pagare ${euro(payable(ev, g))}.\n${up ? `Dopo la scadenza il prezzo sale a ${euro(tierTotal(ev, "late"))}.` : "Dopo la scadenza il posto viene liberato."}`
-        : `Pagamento non ancora ricevuto. La scadenza per pagare ${euro(payable(ev, g))} è passata.\nPaga ora per tenere il posto, altrimenti viene liberato.`)
-      : (isPartyDay(ev) ? `Payment not received yet. ${payNowText(ev, g)}` : ms > 0
-        ? `Payment not received yet. You still have ${left} to pay ${euro(payable(ev, g))}.\n${up ? `After the deadline the price goes up to ${euro(tierTotal(ev, "late"))}.` : "After the deadline your spot will be released."}`
-        : `Payment not received yet. The deadline to pay ${euro(payable(ev, g))} has passed.\nPay now to keep your spot, otherwise it will be released.`);
+      ? (isPartyDay(ev) ? `Pagamento non ancora ricevuto. ${payNowText(ev, g, pay)}` : ms > 0
+        ? `Pagamento non ancora ricevuto. Hai ancora ${left} per pagare ${euro(pay)}.\n${up ? `Dopo la scadenza il prezzo sale a ${euro(tierTotal(ev, "late"))}.` : "Dopo la scadenza il posto viene liberato."}`
+        : `Pagamento non ancora ricevuto. La scadenza per pagare ${euro(pay)} è passata.\nPaga ora per tenere il posto, altrimenti viene liberato.`)
+      : (isPartyDay(ev) ? `Payment not received yet. ${payNowText(ev, g, pay)}` : ms > 0
+        ? `Payment not received yet. You still have ${left} to pay ${euro(pay)}.\n${up ? `After the deadline the price goes up to ${euro(tierTotal(ev, "late"))}.` : "After the deadline your spot will be released."}`
+        : `Payment not received yet. The deadline to pay ${euro(pay)} has passed.\nPay now to keep your spot, otherwise it will be released.`);
     const sent = await igSend(env, ev, g.igsid, text);
     if (!sent) await env.DB.prepare("UPDATE guests SET ig_fail = 1 WHERE token = ?").bind(g.token).run();
   }
@@ -1076,6 +1194,7 @@ async function route(req, env) {
       url.hostname = "perugiaparty.com";
       return Response.redirect(url.toString(), 301); // one address for search engines
     }
+    if (/^\/pr\/[A-Za-z0-9]+$/.test(url.pathname)) return secure(await prLink(url, env));
     if (url.pathname.startsWith("/t/")) {
       if (await tooMany(req, env, "short")) return slowDown();
       const r = await shortRedirect(url, env);
@@ -1104,6 +1223,8 @@ async function route(req, env) {
         if (url.pathname === "/api/invite" && (await tooMany(req, env, "invite"))) return slowDown();
         if (url.pathname === "/api/request" && req.method === "POST") return await apiRequest(req, env);
         if (url.pathname === "/api/ticket" && req.method === "GET") return await apiTicket(url, env);
+        if (url.pathname === "/api/pr/ask" && req.method === "POST") { if (await tooMany(req, env, "request")) return slowDown(); return await prAsk(req, env); }
+        if (url.pathname === "/api/pr/who" && req.method === "GET") return await prWho(url, env);
         if (url.pathname === "/api/ticket/tip" && req.method === "POST") { if (await tooMany(req, env, "tip")) return slowDown(); return await apiTip(req, env); }
         if (url.pathname === "/api/poster" && req.method === "GET") return await apiPoster(env);
         if (url.pathname === "/api/invite" && req.method === "GET") return await apiInvite(url, env);

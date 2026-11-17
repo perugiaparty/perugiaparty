@@ -422,6 +422,53 @@ h1{font-size:clamp(40px,8vw,64px)}
 .auth-note a{color:var(--ink);font-weight:700}
 .tkfoot{max-width:560px;margin:26px auto 0;text-align:center;font-size:13px;line-height:1.5;color:#6b5f52}
 .tkfoot a{color:inherit}
+
+/* PR: bring new friends, your own ticket drops */
+.prmini{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  border:1.5px solid var(--line);border-radius:14px;padding:13px 15px;background:var(--paper);margin-top:14px}
+.prmini p{margin:0;font-size:14px;line-height:1.4;color:#6b6155}
+.prmini p b{color:var(--ink);font-weight:700;display:block}
+.prmini button{font:700 13px var(--f-body);border:1.5px solid var(--ink);background:none;color:var(--ink);
+  border-radius:99px;padding:8px 14px;white-space:nowrap;cursor:pointer}
+.prask{background:var(--ink);color:var(--cream);border-radius:18px;padding:20px;display:grid;gap:12px;margin-top:14px}
+.prask .k{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#b9ab98;margin:0}
+.prask h3{font-family:var(--f-display);font-weight:400;font-size:26px;line-height:1.08;margin:0}
+.prask p{margin:0;font-size:14.5px;line-height:1.45;color:#cdbfa9}
+.prask .num{display:flex;gap:8px;flex-wrap:wrap}
+.prask .num button{font:700 14px var(--f-body);border-radius:99px;padding:9px 15px;border:1.5px solid #3a322d;background:transparent;color:#f4ead7;cursor:pointer}
+.prask .num button[aria-pressed="true"]{background:#f4ead7;color:#141210;border-color:#f4ead7}
+.prask .go{font:700 15px var(--f-body);border-radius:99px;padding:13px 20px;border:0;background:var(--red);color:#fff;cursor:pointer}
+.prwait{background:#f6f2e8;border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;display:grid;gap:6px;margin-top:14px}
+.prwait b{font-family:var(--f-display);font-weight:400;font-size:22px}
+.prwait p{margin:0;font-size:14.5px;color:#6b6155;line-height:1.45}
+.prcard{background:var(--paper);border:1.5px solid var(--line);border-radius:20px;padding:20px;display:grid;gap:14px;margin-top:14px}
+.prcard .lbl{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#7a7268;margin:0}
+.pr-top{display:flex;gap:16px;align-items:center;justify-content:space-between}
+.pr-code{display:block;font-family:var(--f-display);font-weight:400;font-size:28px;line-height:1.05;margin-top:5px}
+.pr-url{font-family:var(--f-mono);font-size:12px;color:#7a7268;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr-qr{width:84px;height:84px;border-radius:14px;background:#fff;border:1.5px solid var(--line);padding:7px;flex:none}
+.pr-qr canvas,.pr-qr img{width:100%;height:100%;display:block}
+.pr-goal{background:#f6f2e8;border-radius:14px;padding:14px 16px;display:grid;gap:10px}
+.pr-goal p{margin:0;font-size:14.5px;line-height:1.45;color:#555}
+.pr-goal p b{color:var(--ink)}
+.pr-bar{height:11px;border-radius:99px;display:flex;gap:3px}
+.pr-bar i{display:block;height:100%;background:var(--red);flex:1;border-radius:99px;opacity:.18}
+.pr-bar i.on{opacity:1}
+.pr-list{display:grid}
+.pr-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.pr-row:last-child{border-bottom:0}
+.pr-row b{font-weight:700}
+.pr-row span{display:block;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#8e8578;margin-top:3px}
+.pr-chip{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:5px 11px;border-radius:99px;background:#e9e3d6;color:#6b6155;white-space:nowrap}
+.pr-chip.ok{background:#dcefdc;color:#1f7a3d}
+.pr-chip.wait{background:#fbe7c4;color:#9a5b00}
+.pr-act{display:flex;gap:10px;flex-wrap:wrap}
+.pr-act button{font:700 14px var(--f-body);border:1.5px solid var(--ink);background:var(--ink);color:var(--cream);border-radius:999px;padding:11px 18px;cursor:pointer}
+.pr-act button.g{background:transparent;color:var(--ink)}
+.prlast{background:#f6f2e8;border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;display:grid;gap:6px;margin-top:14px}
+.prlast b{font-family:var(--f-display);font-weight:400;font-size:22px;line-height:1.1}
+.prlast p{margin:0;font-size:14.5px;line-height:1.45;color:#6b6155}
+.prlast span{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#9a8f80}
 </style>
 </head>
 <body>
@@ -467,12 +514,12 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-copy]"); if (!b) return;
   const v = b.dataset.copy;
   const pill = b.querySelector(".pill");
-  if (pill) { const done = () => { b.classList.add("got"); pill.textContent = "Copied"; note && note("Copied", "ok"); setTimeout(() => pill.textContent = "Copy", 1800); };
+  if (pill) { const done = () => { b.classList.add("got"); pill.textContent = "Copiato"; note && note("Copiato", "ok"); setTimeout(() => pill.textContent = "Copy", 1800); };
     try { navigator.clipboard.writeText(v).then(done, () => note("Tieni premuto per copiare", "warn")); } catch(x){ note("Tieni premuto per copiare", "warn"); } return; }
   if (b.classList.contains("rc-c") || b.classList.contains("rc-tot")) { // receipt lines: keep the layout, flash and toast
-    const ok = () => { b.classList.add("got"); note && note("Copied", "ok"); setTimeout(() => b.classList.remove("got"), 1200); };
+    const ok = () => { b.classList.add("got"); note && note("Copiato", "ok"); setTimeout(() => b.classList.remove("got"), 1200); };
     try { navigator.clipboard.writeText(v).then(ok, () => note("Tieni premuto per copiare", "warn")); } catch(x){ note("Tieni premuto per copiare", "warn"); } return; }
-  const label = b.textContent; const done = () => { b.textContent = "Copied"; setTimeout(() => b.textContent = label, 1500); };
+  const label = b.textContent; const done = () => { b.textContent = "Copiato"; setTimeout(() => b.textContent = label, 1500); };
   const fail = () => { b.textContent = "Tieni premuto per copiare"; note("Tieni premuto per copiare", "warn"); };
   try { navigator.clipboard.writeText(v).then(done, fail); } catch(x){ fail(); }
 });
@@ -680,7 +727,7 @@ function inviteHTML(d){
   if (v.left <= 0) return `<section class="invite"><span class="left">Invito usato</span><h2>Il tuo amico ci sta.</h2><p>Il tuo invito per ${esc(event)} è stato usato. Controlleremo la sua richiesta come tutte le altre.</p></section>`;
   return `<section class="invite"><span class="left">${v.left} of ${v.limit} invite${v.limit > 1 ? "s" : ""} left</span>
     <h2>Porta un amico.</h2>
-    <p>Sei già venuto, quindi puoi invitare ${v.limit > 1 ? "amici" : "un amico"} a ${esc(event)}. Manda loro questo link. Devono comunque passare dalla nostra approvazione, e vedremo che sono con te.</p>
+    <p>You già venuto, so you can invite ${v.limit > 1 ? "friends" : "a friend"} to ${esc(event)}. Send them this link. They still need our approval, and we'll see they're with you.</p>
     <div class="lnk">${esc(v.url)}</div>
     <div class="row2"><button class="btn ink" type="button" id="inv-share" data-url="${esc(v.url)}" data-ev="${esc(event)}">Manda l'invito</button><button class="btn outline" type="button" data-copy="${esc(v.url)}">Copia link</button></div></section>`;
 }
@@ -901,8 +948,9 @@ const FEE_INFO = {
   normal: FEE_WHY,
   late: FEE_WHY + " Adesso è il più alto, perché un posto così vicino alla serata è quello che costa più lavoro.",
 };
-function receiptHTML(d, tierName, fee, country){
-  const total = (Number(d.price) || 0) + fee;
+function receiptHTML(d, tierName, fee, country, off){
+  off = Math.max(0, Number(off) || 0);
+  const total = Math.max(0, (Number(d.price) || 0) - off) + fee;
   const line = (q, item, v) => `<div class="rc-l"><span class="q">${q}</span><span class="i">${item}</span><span class="v">${v}</span></div>`;
   return `<section class="rcpt" aria-label="Il tuo scontrino">
     <div class="rc-h"><b>PerugiaParty</b><span>${esc(d.event || "")}${d.date_label ? " · " + esc(d.date_label) : ""}</span></div>
@@ -913,6 +961,7 @@ function receiptHTML(d, tierName, fee, country){
     ${line("1X", "BIGLIETTO · " + esc(String(tierName).toUpperCase()), euro(d.price))}
     ${fee > 0 ? `<div class="rc-l"><span class="q">1X</span><span class="i">${FEE_LABEL[d.ticket] || FEE_LABEL.normal}<button class="rc-i" type="button" id="fee-i" aria-expanded="false" aria-controls="fee-info" aria-label="A cosa servono i costi di servizio">i</button></span><span class="v">${euro(fee)}</span></div>
     <p class="rc-info" id="fee-info" hidden>${FEE_INFO[d.ticket] || FEE_INFO.normal}</p>` : ""}
+    ${off > 0 ? `<div class="rc-l"><span class="q">1X</span><span class="i">PR \u00b7 ${(d.pr && d.pr.counted) || ""} AMICI HANNO PAGATO</span><span class="v">-${euro(off)}</span></div>` : ""}
     <div class="rc-d"></div>
     <button class="rc-tot" type="button" id="tot-copy" data-copy="${String(total).replace(".", ",")}"><span>TOTALE</span><b id="rc-tot-v">${euro(total)}</b></button>
     <div class="rc-d"></div>
@@ -940,8 +989,96 @@ function langSwap(d){
   location.replace((want === "it" ? "/biglietto.html" : "/ticket.html") + location.search + location.hash);
   return true;
 }
+
+/* ---- PR: the quiet line, the ask, and the card with their own people ---- */
+const PR_STATE = { bring: "4" };
+function prMiniHTML(d){
+  const off = (d.pr_rules && d.pr_rules.off) || 5, need = (d.pr_rules && d.pr_rules.need) || 4;
+  return `<div class="prmini"><p><b>Porta ${need} amici nuovi, paghi ${euro(off)} in meno.</b>Loro pagano, tu sei il quinto.</p>
+    <button type="button" id="pr-open">Chiedi di fare il PR</button></div>`;
+}
+function prAskHTML(d){
+  const off = (d.pr_rules && d.pr_rules.off) || 5, need = (d.pr_rules && d.pr_rules.need) || 4;
+  return `<div class="prask" id="pr-ask"><p class="k">Porta la tua gente</p>
+    <h3>${need} amici nuovi,<br>${euro(off)} in meno.</h3>
+    <p>Loro pagano il prezzo normale e tu sei il quinto, per ${euro(off)} in meno. Una volta a serata. Miltiad dice sì o no.</p>
+    <div class="num" role="group" aria-label="Quanti pensi di poterne portare">
+      ${["4","8","12+"].map(n => `<button type="button" data-bring="${n}" aria-pressed="${n === PR_STATE.bring}">${n}</button>`).join("")}
+    </div>
+    <p class="k">Quanti pensi di poterne portare</p>
+    <button class="go" type="button" id="pr-send">Chiedi di fare il PR</button></div>`;
+}
+const prWaitHTML = () => `<div class="prwait"><b>Miltiad ha la tua richiesta.</b>
+  <p>Ti risponde nella chat di Instagram, di solito in giornata. Il tuo link appare qui quando dice sì.</p></div>`;
+function prCardHTML(d){
+  const pr = d.pr, need = pr.need, done = Math.min(pr.counted, need), full = pr.blocks > 0;
+  const first = esc(String(d.name || "").split(" ")[0]);
+  const chip = (f) => f.old ? ["", "già venuto"] : f.paid ? ["ok", "paid"] : f.status === "approved" ? ["wait", "da pagare"] : ["", esc(f.status)];
+  return `<div class="prcard"><div class="pr-top">
+      <div><p class="lbl">Il tuo link PR</p><b class="pr-code">${esc(String(pr.slug || "").toUpperCase())}</b>
+        <p class="pr-url">${esc(pr.url.replace("https://", ""))}</p></div>
+      <div class="pr-qr"><canvas id="pr-qr" aria-label="QR del tuo link PR"></canvas></div>
+    </div>
+    <div class="pr-goal">
+      <div class="pr-bar">${Array.from({length: need}, (_, i) => `<i class="${i < done ? "on" : ""}"></i>`).join("")}</div>
+      <p>${full
+        ? `<b>${need} di ${need} hanno pagato.</b> ${euro(pr.blocks * pr.off)} in meno sul tuo biglietto. Sei il quinto.`
+        : `<b>${pr.counted} di ${need} hanno pagato.</b> Altri ${need - pr.counted} e ${euro(pr.off)} va via dal tuo biglietto.`}</p>
+    </div>
+    ${pr.friends.length ? `<div class="pr-list">${pr.friends.map(f => {
+      const c = chip(f);
+      return `<div class="pr-row"><div><b>${esc(f.name || f.ig)}</b><span>${esc(f.ig)}</span></div><span class="pr-chip ${c[0]}">${c[1]}</span></div>`;
+    }).join("")}</div>` : `<p class="lbl">Nessuno ha ancora usato il tuo link.</p>`}
+    <div class="pr-act"><button type="button" id="pr-copy" data-copy="${esc(pr.url)}">Copia il link</button>
+      <button class="g" type="button" id="pr-share">Condividi</button></div></div>`;
+}
+function prHTML(d){
+  if (!d.pr_rules) return "";
+  if (!d.pr || d.pr.state === "none") return (d.status === "approved" ? prMiniHTML(d) : prMiniHTML(d));
+  if (d.pr.state === "asked") return prWaitHTML();
+  if (d.pr.state === "no") return "";
+  return prCardHTML(d);
+}
+function prLastHTML(d){
+  if (!d.pr || d.pr.state !== "ok" || d.status !== "approved") return "";
+  return `<div class="prlast"><span>Paghi per ultimo</span><b>Il tuo importo si sta ancora muovendo.</b>
+    <p>Quando i tuoi ${d.pr.need} hanno pagato, ${euro(d.pr.off)} va via. Paga entro la scadenza quello che vedi qui.</p></div>`;
+}
+
+/* PR: open the panel, pick a number, send the request, copy or share the link */
+document.addEventListener("click", async (e) => {
+  const open = e.target.closest("#pr-open");
+  if (open) { const box = open.closest(".prmini"); box.outerHTML = prAskHTML(window.__d || {}); return; }
+  const n = e.target.closest("[data-bring]");
+  if (n) {
+    PR_STATE.bring = n.dataset.bring;
+    n.parentElement.querySelectorAll("[data-bring]").forEach(b => b.setAttribute("aria-pressed", String(b === n)));
+    return;
+  }
+  const send = e.target.closest("#pr-send");
+  if (send) {
+    send.disabled = true; send.textContent = "Sending...";
+    try {
+      const r = await fetch("/api/pr/ask", { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ token: token, bring: PR_STATE.bring, lang: LANG }) });
+      const d = await r.json();
+      const box = document.getElementById("pr-ask");
+      if (box) box.outerHTML = prWaitHTML();
+    } catch (err) { send.disabled = false; send.textContent = "Ask to be a PR"; }
+    return;
+  }
+  const sh = e.target.closest("#pr-share");
+  if (sh) {
+    const url = (window.__d && window.__d.pr && window.__d.pr.url) || location.href;
+    const text = `Vieni a ${(window.__d && window.__d.event) || "PerugiaParty"} con me: ${url}`;
+    if (navigator.share) { try { await navigator.share({ text }); } catch (err) {} }
+    else { try { await navigator.clipboard.writeText(text); sh.textContent = "Copiato"; } catch (err) {} }
+  }
+});
 function render(d){
   if (langSwap(d)) return;
+  window.__d = d;
+  setTimeout(() => { const c = $("pr-qr"); if (c && d.pr && d.pr.url) { try { drawQR(d.pr.url, c); } catch (e) {} } }, 0);
   const P = $("page"), first = esc(String(d.name || "").split(" ")[0]);
   if (d.status === "requested" || d.status === "waitlist") {
     // same page for both: the waitlist is only a tag, the steps don't change
@@ -988,15 +1125,18 @@ function render(d){
     const ibanCC = (d.iban || "").replace(/\s+/g, "").slice(0, 2).toUpperCase();
     const CC = {IT:"Italia",LT:"Lituania",DE:"Germania",NL:"Paesi Bassi",BE:"Belgio",FR:"Francia",ES:"Spagna",IE:"Irlanda",GB:"Regno Unito",AT:"Austria",LU:"Lussemburgo",PT:"Portogallo",EE:"Estonia",LV:"Lettonia",FI:"Finlandia",MT:"Malta",SM:"San Marino",CH:"Svizzera",PL:"Polonia"};
     const bankCountry = /^[A-Z]{2}$/.test(ibanCC) ? (CC[ibanCC] ? `${CC[ibanCC]} (${ibanCC})` : ibanCC) : "";
-    const fee = Math.max(0, Number(d.fee) || 0);
-    const total = (Number(d.price) || 0) + fee;
+      const fee = Math.max(0, Number(d.fee) || 0);
+    const off = Math.max(0, Number(d.discount) || 0);
+    const total = Math.max(0, (Number(d.price) || 0) - off) + fee;
     const allText = `Importo: ${euro(total)}\nIBAN: ${d.iban || ""}\nBeneficiario: ${d.beneficiary || ""}${bankCountry ? `\nPaese banca: ${bankCountry}` : ""}\nCausale: ${d.reference}`;
     P.innerHTML = `<div class="hero-ok"><span class="state">Accettato</span>
         <h1>Ci sei, ${first}.</h1>
         <p class="lead"><b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " · " + esc(d.date_label) : ""}. Paga qui sotto per bloccare il posto.</p>
         ${stepsHTML(2, "on-red")}</div>
-      ${receiptHTML(d, tierName, fee, bankCountry)}
+      ${receiptHTML(d, tierName, fee, bankCountry, off)}
       <button class="btn pay-all" id="pay-all" type="button" data-copy="${esc(allText)}">Copia tutti i dati</button>
+      ${prLastHTML(d)}
+      ${prHTML(d)}
 `;
     celebrate({ vcode: "ok-" + (d.code || "") }, 45);
     clearInterval(window.__payTimer);
@@ -1035,7 +1175,8 @@ function render(d){
         <button class="btn outline" type="button" id="share">Dillo agli amici</button>
         <button class="btn outline wide" type="button" id="pdf">${IN_APP ? "Salva una copia" : "Salva una copia (PDF)"}</button>
       </div>
-      <p class="note">Il QR resta su questa pagina: apri il link all'ingresso. Porta un documento.</p>`}`;
+      <p class="note">Il QR resta su questa pagina: apri il link all'ingresso. Porta un documento.</p>`}
+      ${prHTML(d)}`;
     if (!inside && !over) unlocked(d, first);
     try { drawQR(d.qr, $("qr")); } catch (e) { $("qr").parentElement.innerHTML = `<p style="color:#111;padding:20px;font-family:var(--f-mono)">${esc(d.code)}</p>`; }
     if ($("pdf")) $("pdf").addEventListener("click", e => downloadTicket(d, e.currentTarget));

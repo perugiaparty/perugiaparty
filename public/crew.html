@@ -194,6 +194,37 @@ textarea{font:inherit;resize:vertical;line-height:1.5}
 .shop{display:flex;align-items:center;gap:8px;margin:18px 0 8px;font-weight:800;font-size:15px}
 .shop .pill{font-size:10px}
 .me{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-6px 0 4px}
+
+/* PR board */
+.prsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+.prsum div{background:var(--card);border:1.5px solid var(--hair);border-radius:14px;padding:12px 13px}
+.prsum b{display:block;font-family:var(--f-display);font-weight:400;font-size:25px;line-height:1.05}
+.prsum span{display:block;font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);margin-top:4px}
+.prask2{border:1.5px solid var(--hair);border-radius:16px;padding:14px;display:grid;gap:12px;background:var(--card)}
+.prask2 .row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}
+.prask2 b{font-size:16px;display:block}
+.prask2 .sub{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.07em;color:var(--soft);margin-top:3px;line-height:1.5}
+.prask2 .acts{display:flex;gap:7px;padding-top:2px}
+.prask2 button{font:700 13px var(--f-body);border-radius:99px;padding:9px 15px;border:1.5px solid #f4ead7;background:#f4ead7;color:#141210;cursor:pointer}
+.prask2 button.no{background:none;color:var(--soft);border-color:var(--hair)}
+.prrow{border:1.5px solid var(--hair);border-radius:16px;background:var(--card);overflow:hidden;margin-bottom:10px}
+.prrow>summary{list-style:none;cursor:pointer;padding:14px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.prrow>summary::-webkit-details-marker{display:none}
+.prrow .nm{font-weight:800;font-size:16px}
+.prrow .sub{font-family:var(--f-mono);font-size:11px;letter-spacing:.07em;color:var(--soft);margin-top:4px;display:block;word-break:break-all}
+.prbar{height:9px;border-radius:99px;display:flex;gap:2px;margin-top:9px;max-width:190px}
+.prbar i{flex:1;background:var(--red);border-radius:99px;opacity:.2}
+.prbar i.on{opacity:1}
+.prtag{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:99px;background:#efe9dc;color:#6b6155;white-space:nowrap}
+.prtag.ok{background:#dcefdc;color:#1f7a3d}
+.prtag.go{background:#fbe7c4;color:#9a5b00}
+.prkids{padding:0 14px 14px;display:grid}
+.prkid{display:grid;grid-template-columns:1fr auto;gap:10px;padding:9px 0;border-bottom:1px solid var(--hair);font-size:14.5px;align-items:center}
+.prkid:last-child{border-bottom:0}
+.prkid em{font-style:normal;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);display:block;margin-top:2px}
+.prnote{font-size:13px;color:var(--soft);padding:0 14px 14px;line-height:1.45;margin:0}
+.pradd{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:10px}
+@media (max-width:520px){.pradd{grid-template-columns:1fr 1fr}.pradd button{grid-column:1/-1}}
 </style>
 </head>
 <body class="auth">
@@ -314,6 +345,8 @@ $("#lockbtn").addEventListener("click", () => { try { localStorage.removeItem("p
 /* ---------- sign up: own password, Instagram code, then Matt approves ---------- */
 function screen(id) { document.body.classList.add("auth"); for (const x of ["login", "signup", "pending"]) $("#" + x).classList.toggle("hide", x !== id); const f = $("#" + id + " input"); if (f) f.focus(); }
 document.addEventListener("click", (e) => {
+  const prok = e.target.closest("[data-prok]"); if (prok) return act("pr_ok", { id: Number(prok.dataset.prok) }, "Accepted \u00b7 they get their link");
+  const prno = e.target.closest("[data-prno]"); if (prno) return act("pr_no", { id: Number(prno.dataset.prno) }, "Declined");
   if (e.target.closest("[data-go-signup]")) { history.replaceState(null, "", "#join"); screen("signup"); }
   if (e.target.closest("[data-go-login]")) { history.replaceState(null, "", location.pathname); screen("login"); }
 });
@@ -522,9 +555,9 @@ function notesView() {
 }
 
 function moreView() {
-  const tabs = [["night", "Nights"], ...(S.bilancio ? [["bil", "Bilancio"]] : []), ["spend", "Money"], ["notes", "Notes"], ["info", "Info"], ["risk", "Plan B"], ["dec", "Decisions"], ["retro", "Retro"]];
+  const tabs = [["night", "Nights"], ...(S.pr ? [["pr", "PR"]] : []), ...(S.bilancio ? [["bil", "Bilancio"]] : []), ["spend", "Money"], ["notes", "Notes"], ["info", "Info"], ["risk", "Plan B"], ["dec", "Decisions"], ["retro", "Retro"]];
   if (!tabs.some(([k]) => k === sub)) sub = "night";
-  const v = sub === "night" ? nightView() : sub === "bil" ? bilView() : sub === "spend" ? spendView() : sub === "info" ? infoView() : sub === "risk" ? riskView() : sub === "dec" ? decView() : sub === "retro" ? retroView() :notesView();
+  const v = sub === "night" ? nightView() : sub === "pr" ? prView() : sub === "bil" ? bilView() : sub === "spend" ? spendView() : sub === "info" ? infoView() : sub === "risk" ? riskView() : sub === "dec" ? decView() : sub === "retro" ? retroView() :notesView();
   return `<h2>More</h2>
   <div class="chips" style="margin-top:8px;margin-bottom:14px">${tabs.map(([k, l]) => `<button class="chip ${sub === k ? "on" : ""}" data-sub="${k}">${l}</button>`).join("")}</div>${v}`;
 }
@@ -590,6 +623,47 @@ function bilView() {
   ${B.groups.map((g) => `<details><summary>${esc(g.grp ? g.cat + " · " + g.grp : g.cat)} · ${eur(g.b)}${g.r ? " · reëel " + eur(g.r) : ""} ▾</summary>
     <div class="card list">${g.lines.map((l) => row(l.n, [l.q ? l.q + "×" : "", l.r ? "begroot " + eur(l.b) : ""].filter(Boolean).join(" · "), l.r || l.b)).join("")}</div></details>`).join("")}
   ${spentTot ? `<h3>What the crew paid</h3><div class="card list">${B.spent.map((s) => row(s.cat, "", s.a)).join("")}${row("Together", "", spentTot)}</div>` : ""}`;
+}
+function prView() {
+  const P = S.pr;
+  if (!P) return `<h3 style="margin-top:0">PR</h3><div class="card"><div class="empty">The PR programme is off for this night</div></div>`;
+  const eur = n => "\u20ac" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", ",") : Number(n));
+  const chip = k => k.old ? ["", "came before, does not count"] : k.paid ? ["ok", "paid \u00b7 new"] : ["go", esc(k.status)];
+  return `<h3 style="margin-top:0">PR \u00b7 ${esc(S.event.name || "")}</h3>
+  <div class="prsum">
+    <div><b>${P.active.length}</b><span>PRs active</span></div>
+    <div><b>${P.friends}</b><span>friends paid</span></div>
+    <div><b>${eur(P.given)}</b><span>given back</span></div>
+  </div>
+  ${P.asked.length ? `<p class="lbl" style="margin:14px 0 8px">Waiting for you</p>
+  <div class="prask2">${P.asked.map(a => `<div class="row">
+      <div><b>${esc(a.name)}</b><span class="sub">${esc(a.ig)}${a.bring ? " \u00b7 brings " + esc(a.bring) : ""}${a.who ? " \u00b7 " + esc(a.who) : ""}</span></div>
+      <div class="acts"><button type="button" data-prok="${a.id}">Accept</button><button class="no" type="button" data-prno="${a.id}">No</button></div>
+    </div>`).join("")}</div>` : ""}
+
+  <p class="lbl" style="margin:18px 0 8px">Active PRs</p>
+  ${P.active.length ? P.active.map(p => {
+    const done = p.counted % P.need, full = p.blocks > 0 && done === 0;
+    return `<details class="prrow">
+      <summary>
+        <div><span class="nm">${esc(p.name)}</span><span class="sub">${esc(p.ig)}${p.url ? " \u00b7 " + esc(p.url) : ""}</span>
+          <div class="prbar">${Array.from({length: P.need}, (_, i) => `<i class="${i < (full ? P.need : done) ? "on" : ""}"></i>`).join("")}</div>
+        </div>
+        <span class="prtag ${p.blocks ? "ok" : "go"}">${p.blocks ? eur(p.blocks * P.off) + " off" : (P.need - p.counted) + " to go"}</span>
+      </summary>
+      ${p.kids.length ? `<div class="prkids">${p.kids.map(k => { const c = chip(k);
+        return `<div class="prkid"><div><b>${esc(k.name || k.ig)}</b><em>${esc(k.ig)}</em></div><em>${c[1]}</em></div>`; }).join("")}</div>`
+        : `<p class="prnote">Nobody has used the link yet.</p>`}
+      <p class="prnote">${p.counted} of their friends count. ${p.blocks ? `They get ${eur(p.blocks * P.off)} off.` : `${P.need - p.counted} more for ${eur(P.off)}.`}</p>
+    </details>`;
+  }).join("") : `<div class="card"><div class="empty">Nobody is a PR yet</div></div>`}
+
+  <p class="lbl" style="margin:18px 0 8px">Add one yourself</p>
+  <form class="pradd" data-f="pradd">
+    <input type="text" name="name" placeholder="Name" maxlength="60" required>
+    <input type="text" name="ig" placeholder="@handle" maxlength="40" required>
+    <button class="chip" type="submit">Add</button>
+  </form>`;
 }
 function spendView() {
   const mine = S.spends, open = mine.filter((x) => !Number(x.repaid)), owed = open.reduce((a, x) => a + Number(x.amount || 0), 0);
@@ -704,6 +778,7 @@ document.addEventListener("submit", (e) => {
   if (k === "got") { openId = null; return act("need_done", { id: Number(f.dataset.id), v: true, price: v.price }, v.price ? "Got it · added to your receipts" : "Got it"); }
   if (k === "risk") { if (!need(v.risk)) return; adding = null; return act("risk_add", v, "Added"); }
   if (k === "dec") { if (!need(v.body)) return; adding = null; return act("decision_add", v, "Logged"); }
+  if (k === "pradd") { if (!need(v.name) || !need(v.ig)) return; f.reset(); return act("pr_add", v, "Added, now accept them"); }
   if (k === "retro") return act("retro", v, "Thanks! Sent to Matt");
   if (k === "shift") { if (!need(v.role)) return; if (!v.start) { toast("Add the start time", true); return; } adding = null; return act("shift_add", { ...v, crew_id: Number(v.crew_id) }, "Shift added"); }
   if (k === "arrive") return act("me", { going: S.me.going, arrive: v.arrive }, "Saved");

@@ -422,6 +422,53 @@ h1{font-size:clamp(40px,8vw,64px)}
 .auth-note a{color:var(--ink);font-weight:700}
 .tkfoot{max-width:560px;margin:26px auto 0;text-align:center;font-size:13px;line-height:1.5;color:#6b5f52}
 .tkfoot a{color:inherit}
+
+/* PR: bring new friends, your own ticket drops */
+.prmini{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  border:1.5px solid var(--line);border-radius:14px;padding:13px 15px;background:var(--paper);margin-top:14px}
+.prmini p{margin:0;font-size:14px;line-height:1.4;color:#6b6155}
+.prmini p b{color:var(--ink);font-weight:700;display:block}
+.prmini button{font:700 13px var(--f-body);border:1.5px solid var(--ink);background:none;color:var(--ink);
+  border-radius:99px;padding:8px 14px;white-space:nowrap;cursor:pointer}
+.prask{background:var(--ink);color:var(--cream);border-radius:18px;padding:20px;display:grid;gap:12px;margin-top:14px}
+.prask .k{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#b9ab98;margin:0}
+.prask h3{font-family:var(--f-display);font-weight:400;font-size:26px;line-height:1.08;margin:0}
+.prask p{margin:0;font-size:14.5px;line-height:1.45;color:#cdbfa9}
+.prask .num{display:flex;gap:8px;flex-wrap:wrap}
+.prask .num button{font:700 14px var(--f-body);border-radius:99px;padding:9px 15px;border:1.5px solid #3a322d;background:transparent;color:#f4ead7;cursor:pointer}
+.prask .num button[aria-pressed="true"]{background:#f4ead7;color:#141210;border-color:#f4ead7}
+.prask .go{font:700 15px var(--f-body);border-radius:99px;padding:13px 20px;border:0;background:var(--red);color:#fff;cursor:pointer}
+.prwait{background:#f6f2e8;border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;display:grid;gap:6px;margin-top:14px}
+.prwait b{font-family:var(--f-display);font-weight:400;font-size:22px}
+.prwait p{margin:0;font-size:14.5px;color:#6b6155;line-height:1.45}
+.prcard{background:var(--paper);border:1.5px solid var(--line);border-radius:20px;padding:20px;display:grid;gap:14px;margin-top:14px}
+.prcard .lbl{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#7a7268;margin:0}
+.pr-top{display:flex;gap:16px;align-items:center;justify-content:space-between}
+.pr-code{display:block;font-family:var(--f-display);font-weight:400;font-size:28px;line-height:1.05;margin-top:5px}
+.pr-url{font-family:var(--f-mono);font-size:12px;color:#7a7268;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr-qr{width:84px;height:84px;border-radius:14px;background:#fff;border:1.5px solid var(--line);padding:7px;flex:none}
+.pr-qr canvas,.pr-qr img{width:100%;height:100%;display:block}
+.pr-goal{background:#f6f2e8;border-radius:14px;padding:14px 16px;display:grid;gap:10px}
+.pr-goal p{margin:0;font-size:14.5px;line-height:1.45;color:#555}
+.pr-goal p b{color:var(--ink)}
+.pr-bar{height:11px;border-radius:99px;display:flex;gap:3px}
+.pr-bar i{display:block;height:100%;background:var(--red);flex:1;border-radius:99px;opacity:.18}
+.pr-bar i.on{opacity:1}
+.pr-list{display:grid}
+.pr-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.pr-row:last-child{border-bottom:0}
+.pr-row b{font-weight:700}
+.pr-row span{display:block;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:#8e8578;margin-top:3px}
+.pr-chip{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:5px 11px;border-radius:99px;background:#e9e3d6;color:#6b6155;white-space:nowrap}
+.pr-chip.ok{background:#dcefdc;color:#1f7a3d}
+.pr-chip.wait{background:#fbe7c4;color:#9a5b00}
+.pr-act{display:flex;gap:10px;flex-wrap:wrap}
+.pr-act button{font:700 14px var(--f-body);border:1.5px solid var(--ink);background:var(--ink);color:var(--cream);border-radius:999px;padding:11px 18px;cursor:pointer}
+.pr-act button.g{background:transparent;color:var(--ink)}
+.prlast{background:#f6f2e8;border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;display:grid;gap:6px;margin-top:14px}
+.prlast b{font-family:var(--f-display);font-weight:400;font-size:22px;line-height:1.1}
+.prlast p{margin:0;font-size:14.5px;line-height:1.45;color:#6b6155}
+.prlast span{font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#9a8f80}
 </style>
 </head>
 <body>
@@ -901,8 +948,9 @@ const FEE_INFO = {
   normal: FEE_WHY,
   late: FEE_WHY + " It is the highest now, because a place this close to the night is the most work to arrange.",
 };
-function receiptHTML(d, tierName, fee, country){
-  const total = (Number(d.price) || 0) + fee;
+function receiptHTML(d, tierName, fee, country, off){
+  off = Math.max(0, Number(off) || 0);
+  const total = Math.max(0, (Number(d.price) || 0) - off) + fee;
   const line = (q, item, v) => `<div class="rc-l"><span class="q">${q}</span><span class="i">${item}</span><span class="v">${v}</span></div>`;
   return `<section class="rcpt" aria-label="Your receipt">
     <div class="rc-h"><b>PerugiaParty</b><span>${esc(d.event || "")}${d.date_label ? " · " + esc(d.date_label) : ""}</span></div>
@@ -913,6 +961,7 @@ function receiptHTML(d, tierName, fee, country){
     ${line("1X", "TICKET · " + esc(String(tierName).toUpperCase()), euro(d.price))}
     ${fee > 0 ? `<div class="rc-l"><span class="q">1X</span><span class="i">${FEE_LABEL[d.ticket] || FEE_LABEL.normal}<button class="rc-i" type="button" id="fee-i" aria-expanded="false" aria-controls="fee-info" aria-label="What the service fee is for">i</button></span><span class="v">${euro(fee)}</span></div>
     <p class="rc-info" id="fee-info" hidden>${FEE_INFO[d.ticket] || FEE_INFO.normal}</p>` : ""}
+    ${off > 0 ? `<div class="rc-l"><span class="q">1X</span><span class="i">PR \u00b7 ${(d.pr && d.pr.counted) || ""} FRIENDS PAID</span><span class="v">-${euro(off)}</span></div>` : ""}
     <div class="rc-d"></div>
     <button class="rc-tot" type="button" id="tot-copy" data-copy="${String(total).replace(".", ",")}"><span>TOTAL</span><b id="rc-tot-v">${euro(total)}</b></button>
     <div class="rc-d"></div>
@@ -940,8 +989,96 @@ function langSwap(d){
   location.replace((want === "it" ? "/biglietto.html" : "/ticket.html") + location.search + location.hash);
   return true;
 }
+
+/* ---- PR: the quiet line, the ask, and the card with their own people ---- */
+const PR_STATE = { bring: "4" };
+function prMiniHTML(d){
+  const off = (d.pr_rules && d.pr_rules.off) || 5, need = (d.pr_rules && d.pr_rules.need) || 4;
+  return `<div class="prmini"><p><b>Bring ${need} new friends, pay ${euro(off)} less.</b>They pay, you come fifth.</p>
+    <button type="button" id="pr-open">Ask to be a PR</button></div>`;
+}
+function prAskHTML(d){
+  const off = (d.pr_rules && d.pr_rules.off) || 5, need = (d.pr_rules && d.pr_rules.need) || 4;
+  return `<div class="prask" id="pr-ask"><p class="k">Bring your people</p>
+    <h3>${need} new friends,<br>${euro(off)} off.</h3>
+    <p>They pay the normal price and you come fifth, for ${euro(off)} less. Once per party. Miltiad says yes or no.</p>
+    <div class="num" role="group" aria-label="How many you think you can bring">
+      ${["4","8","12+"].map(n => `<button type="button" data-bring="${n}" aria-pressed="${n === PR_STATE.bring}">${n}</button>`).join("")}
+    </div>
+    <p class="k">How many you think you can bring</p>
+    <button class="go" type="button" id="pr-send">Ask to be a PR</button></div>`;
+}
+const prWaitHTML = () => `<div class="prwait"><b>Miltiad has your request.</b>
+  <p>He answers in the Instagram chat, usually the same day. Your link appears here once he says yes.</p></div>`;
+function prCardHTML(d){
+  const pr = d.pr, need = pr.need, done = Math.min(pr.counted, need), full = pr.blocks > 0;
+  const first = esc(String(d.name || "").split(" ")[0]);
+  const chip = (f) => f.old ? ["", "came before"] : f.paid ? ["ok", "paid"] : f.status === "approved" ? ["wait", "to pay"] : ["", esc(f.status)];
+  return `<div class="prcard"><div class="pr-top">
+      <div><p class="lbl">Your PR link</p><b class="pr-code">${esc(String(pr.slug || "").toUpperCase())}</b>
+        <p class="pr-url">${esc(pr.url.replace("https://", ""))}</p></div>
+      <div class="pr-qr"><canvas id="pr-qr" aria-label="QR of your PR link"></canvas></div>
+    </div>
+    <div class="pr-goal">
+      <div class="pr-bar">${Array.from({length: need}, (_, i) => `<i class="${i < done ? "on" : ""}"></i>`).join("")}</div>
+      <p>${full
+        ? `<b>${need} of ${need} paid.</b> ${euro(pr.blocks * pr.off)} is off your own ticket. You're the fifth.`
+        : `<b>${pr.counted} of ${need} paid.</b> ${need - pr.counted} more and ${euro(pr.off)} comes off your own ticket.`}</p>
+    </div>
+    ${pr.friends.length ? `<div class="pr-list">${pr.friends.map(f => {
+      const c = chip(f);
+      return `<div class="pr-row"><div><b>${esc(f.name || f.ig)}</b><span>${esc(f.ig)}</span></div><span class="pr-chip ${c[0]}">${c[1]}</span></div>`;
+    }).join("")}</div>` : `<p class="lbl">Nobody has used your link yet.</p>`}
+    <div class="pr-act"><button type="button" id="pr-copy" data-copy="${esc(pr.url)}">Copy link</button>
+      <button class="g" type="button" id="pr-share">Share</button></div></div>`;
+}
+function prHTML(d){
+  if (!d.pr_rules) return "";
+  if (!d.pr || d.pr.state === "none") return (d.status === "approved" ? prMiniHTML(d) : prMiniHTML(d));
+  if (d.pr.state === "asked") return prWaitHTML();
+  if (d.pr.state === "no") return "";
+  return prCardHTML(d);
+}
+function prLastHTML(d){
+  if (!d.pr || d.pr.state !== "ok" || d.status !== "approved") return "";
+  return `<div class="prlast"><span>You pay last</span><b>Your amount is still moving.</b>
+    <p>When your ${d.pr.need} have paid, ${euro(d.pr.off)} comes off. Pay before your deadline with whatever it says here.</p></div>`;
+}
+
+/* PR: open the panel, pick a number, send the request, copy or share the link */
+document.addEventListener("click", async (e) => {
+  const open = e.target.closest("#pr-open");
+  if (open) { const box = open.closest(".prmini"); box.outerHTML = prAskHTML(window.__d || {}); return; }
+  const n = e.target.closest("[data-bring]");
+  if (n) {
+    PR_STATE.bring = n.dataset.bring;
+    n.parentElement.querySelectorAll("[data-bring]").forEach(b => b.setAttribute("aria-pressed", String(b === n)));
+    return;
+  }
+  const send = e.target.closest("#pr-send");
+  if (send) {
+    send.disabled = true; send.textContent = "Sending...";
+    try {
+      const r = await fetch("/api/pr/ask", { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ token: token, bring: PR_STATE.bring, lang: LANG }) });
+      const d = await r.json();
+      const box = document.getElementById("pr-ask");
+      if (box) box.outerHTML = prWaitHTML();
+    } catch (err) { send.disabled = false; send.textContent = "Ask to be a PR"; }
+    return;
+  }
+  const sh = e.target.closest("#pr-share");
+  if (sh) {
+    const url = (window.__d && window.__d.pr && window.__d.pr.url) || location.href;
+    const text = `Come to ${(window.__d && window.__d.event) || "PerugiaParty"} with me: ${url}`;
+    if (navigator.share) { try { await navigator.share({ text }); } catch (err) {} }
+    else { try { await navigator.clipboard.writeText(text); sh.textContent = "Copied"; } catch (err) {} }
+  }
+});
 function render(d){
   if (langSwap(d)) return;
+  window.__d = d;
+  setTimeout(() => { const c = $("pr-qr"); if (c && d.pr && d.pr.url) { try { drawQR(d.pr.url, c); } catch (e) {} } }, 0);
   const P = $("page"), first = esc(String(d.name || "").split(" ")[0]);
   if (d.status === "requested" || d.status === "waitlist") {
     // same page for both: the waitlist is only a tag, the steps don't change
@@ -988,15 +1125,18 @@ function render(d){
     const ibanCC = (d.iban || "").replace(/\s+/g, "").slice(0, 2).toUpperCase();
     const CC = {IT:"Italy",LT:"Lithuania",DE:"Germany",NL:"Netherlands",BE:"Belgium",FR:"France",ES:"Spain",IE:"Ireland",GB:"United Kingdom",AT:"Austria",LU:"Luxembourg",PT:"Portugal",EE:"Estonia",LV:"Latvia",FI:"Finland",MT:"Malta",SM:"San Marino",CH:"Switzerland",PL:"Poland"};
     const bankCountry = /^[A-Z]{2}$/.test(ibanCC) ? (CC[ibanCC] ? `${CC[ibanCC]} (${ibanCC})` : ibanCC) : "";
-    const fee = Math.max(0, Number(d.fee) || 0);
-    const total = (Number(d.price) || 0) + fee;
+      const fee = Math.max(0, Number(d.fee) || 0);
+    const off = Math.max(0, Number(d.discount) || 0);
+    const total = Math.max(0, (Number(d.price) || 0) - off) + fee;
     const allText = `Amount: ${euro(total)}\nIBAN: ${d.iban || ""}\nBeneficiary: ${d.beneficiary || ""}${bankCountry ? `\nBank country: ${bankCountry}` : ""}\nReference: ${d.reference}`;
     P.innerHTML = `<div class="hero-ok"><span class="state">Accepted</span>
         <h1>You're in, ${first}.</h1>
         <p class="lead"><b style="color:var(--cream)">${esc(d.event)}</b>${d.date_label ? " · " + esc(d.date_label) : ""}. Pay below to lock your place.</p>
         ${stepsHTML(2, "on-red")}</div>
-      ${receiptHTML(d, tierName, fee, bankCountry)}
+      ${receiptHTML(d, tierName, fee, bankCountry, off)}
       <button class="btn pay-all" id="pay-all" type="button" data-copy="${esc(allText)}">Copy all payment details</button>
+      ${prLastHTML(d)}
+      ${prHTML(d)}
 `;
     celebrate({ vcode: "ok-" + (d.code || "") }, 45);
     clearInterval(window.__payTimer);
@@ -1035,7 +1175,8 @@ function render(d){
         <button class="btn outline" type="button" id="share">Tell friends</button>
         <button class="btn outline wide" type="button" id="pdf">${IN_APP ? "Save a copy" : "Save a copy (PDF)"}</button>
       </div>
-      <p class="note">Your QR stays on this page: open the link at the door. Bring your photo ID.</p>`}`;
+      <p class="note">Your QR stays on this page: open the link at the door. Bring your photo ID.</p>`}
+      ${prHTML(d)}`;
     if (!inside && !over) unlocked(d, first);
     try { drawQR(d.qr, $("qr")); } catch (e) { $("qr").parentElement.innerHTML = `<p style="color:#111;padding:20px;font-family:var(--f-mono)">${esc(d.code)}</p>`; }
     if ($("pdf")) $("pdf").addEventListener("click", e => downloadTicket(d, e.currentTarget));
