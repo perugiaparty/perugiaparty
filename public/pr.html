@@ -92,7 +92,7 @@ const IT = {
   "You ask. Miltiad answers.": "Chiedi tu. Miltiad risponde.",
   "You get a link and a QR.": "Ricevi un link e un QR.",
   "Who paid shows on your ticket.": "Chi ha pagato appare sul tuo biglietto.",
-  "You pay last, \u20ac5 already off.": "Paghi per ultimo, \u20ac5 gi\u00e0 tolti.",
+  "You pay last, \u20ac5 already off.": "Paghi alla fine, \u20ac5 gi\u00e0 tolti.",
   "Back to the party": "Torna alla festa",
   "Sending...": "Invio...",
 };
@@ -109,7 +109,7 @@ function itify(){
   if (d) d.innerHTML = d.innerHTML
     .replace(/new friends who pay,/, "amici nuovi che pagano,")
     .replace(/off your ticket\./, "in meno sul tuo biglietto.")
-    .replace(/You come fifth\./, "Sei il quinto.")
+    .replace(/You come fifth\./, "Entri con loro.")
     .replace(/Bring /, "");
 }
 itify();
@@ -118,7 +118,7 @@ fetch("/api/event").then(r => r.json()).then(ev => {
   if (ev && ev.name) $("when").textContent = [ev.name, ev.date_label].filter(Boolean).join(" · ");
   if (ev && ev.pr_need && ev.pr_off) {
     $("deal").innerHTML = isIt
-      ? `<b>${ev.pr_need} amici nuovi che pagano, ${euro(ev.pr_off)} in meno sul tuo biglietto.</b> Sei il quinto.`
+      ? `<b>${ev.pr_need} amici nuovi che pagano, ${euro(ev.pr_off)} in meno sul tuo biglietto.</b> Entri con loro.`
       : `<b>${ev.pr_need} new friends who pay, ${euro(ev.pr_off)} off your ticket.</b> You come fifth.`;
   }
 }).catch(() => {});

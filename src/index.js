@@ -1,5 +1,6 @@
 import { pushTick, apiPush } from "./push.js";
 import { apiCrew, crewDm, crewApprovedDms, crewNewsPush } from "./crew.js";
+import { nameGender, ita } from "./names.js";
 // PerugiaParty site worker: serves the static site and a small JSON API.
 // Guests only ever see their own record, looked up by a long random token.
 // All organizer actions happen in the private admin panel, never through this API.
@@ -48,7 +49,7 @@ async function prFriends(env, ev, ig) {
     seen.add(f);
     const paid = r.status === "paid" || r.status === "in";
     const old = await prCameBefore(env, ev, f);
-    out.push({ name: clean(r.name, 40), ig: f, status: r.status, paid, counts: paid && !old, old });
+    out.push({ name: clean(r.name, 40), ig: f, status: r.status, paid, counts: paid && !old, old, g: nameGender(r.name) });
   }
   return out;
 }
@@ -434,8 +435,15 @@ async function igHandleDm(env, ev, igsid, text) {
     const back = Number(g.is_returning) === 1 || (await isReturner(env, normIg(g.ig), ev && ev.tag));
     await igSend(env, ev, igsid, [
       isIt(g)
-        ? (back ? `Bentornato su @perugiaparty, ${first}! La tua richiesta è arrivata.`
-                : `Benvenuto su @perugiaparty, ${first}! La tua richiesta è arrivata.`)
+        ? (back
+            ? ita(nameGender(g.name),
+                `Bentornata su @perugiaparty, ${first}! La tua richiesta è arrivata.`,
+                `Bentornato su @perugiaparty, ${first}! La tua richiesta è arrivata.`,
+                `Di nuovo qui, ${first}! La tua richiesta su @perugiaparty è arrivata.`)
+            : ita(nameGender(g.name),
+                `Benvenuta su @perugiaparty, ${first}! La tua richiesta è arrivata.`,
+                `Benvenuto su @perugiaparty, ${first}! La tua richiesta è arrivata.`,
+                `Ciao ${first}! La tua richiesta su @perugiaparty è arrivata.`))
         : (back ? `Welcome back to @perugiaparty, ${first}! Your request is received.`
                 : `Welcome to @perugiaparty, ${first}! Your request is received.`),
       ``,
@@ -703,6 +711,7 @@ async function apiTicket(url, env) {
     Object.assign(out, {
       code: g.code, price: g.price, ticket: g.ticket, fee: sameEvent && Number(g.price) > 0 ? feeOf(ev, g.ticket) : 0,
       discount: sameEvent ? await prDiscount(env, ev, g) : 0,
+      g: nameGender(g.name),
       iban: sameEvent ? ev.iban : null, beneficiary: sameEvent ? ev.beneficiary : null,
       reference: `${g.name} ${g.code}`,
       approved_at: g.approved_at,

@@ -840,6 +840,7 @@ function keepPushOnThisTicket(){
   try { if (APP.push && Notification.permission === "granted" && localStorage.getItem("pp_push") && localStorage.getItem("pp_push") !== token) pushSubscribe(false).then(() => LAST && renderApp(LAST)).catch(() => {}); } catch(e){}
 }
 
+const HI = { f: "Welcome back", m: "Welcome back", n: "Welcome back" };
 function prioHTML(lead, text){ return `<div class="prio" role="note"><b>${lead}</b><p>${text}</p></div>`; }
 function decorate(d){
   const P = $("page");
@@ -850,7 +851,7 @@ function decorate(d){
   }
   if (d.priority && !d.next && (d.status === "requested" || d.status === "waitlist")) {
     const h = P.querySelector(".rq") || P.querySelector("h1");
-    if (h) h.insertAdjacentHTML("afterend", prioHTML("Welcome back, " + esc(String(d.name || "").split(" ")[0] || "friend") + ".", d.status === "waitlist" ? "You go first the moment a place opens up." : "We look at your request before the new ones."));
+    if (h) h.insertAdjacentHTML("afterend", prioHTML(HI[d.g || "n"] + ", " + esc(String(d.name || "").split(" ")[0] || "friend") + ".", d.status === "waitlist" ? "You go first the moment a place opens up." : "We look at your request before the new ones."));
   }
   if (d.next) P.insertAdjacentHTML("afterbegin", nextHTML(d) + inviteHTML(d)); // older ticket: the next party comes first
   else if (d.status === "approved") { /* paying: nothing else on the screen */ }
@@ -940,6 +941,7 @@ function whenWhereHTML(d){
   </section>`;
 }
 // ---- the receipt: what you get, what you pay ----
+const FIFTH = { f: "You're the fifth.", m: "You're the fifth.", n: "You're the fifth." };
 const FEE_LABEL = { early: "EARLY SERVICE FEE", normal: "SERVICE FEE", late: "LAST MINUTE SERVICE FEE" };
 /* why there is a fee at all, said plainly, with the reason this round costs what it costs */
 const FEE_WHY = "It is what makes the night possible: the venue, the music, the people working the door and the bar, and the system that gets you in. No ticketing platform takes a cut here.";
@@ -1013,8 +1015,8 @@ const prWaitHTML = () => `<div class="prwait"><b>Miltiad has your request.</b>
 function prCardHTML(d){
   const pr = d.pr, need = pr.need, done = Math.min(pr.counted, need), full = pr.blocks > 0;
   const first = esc(String(d.name || "").split(" ")[0]);
-  const PR_ST = { old: "came before", paid: "paid", approved: "to pay", requested: "requested", waitlist: "waitlist" };
-  const chip = (f) => f.old ? ["", PR_ST.old] : f.paid ? ["ok", PR_ST.paid] : f.status === "approved" ? ["wait", PR_ST.approved] : ["", PR_ST[f.status] || esc(f.status)];
+  const PR_ST = { old: "came before", oldF: "came before", oldN: "came before", paid: "paid", approved: "to pay", requested: "requested", waitlist: "waitlist" };
+  const chip = (f) => f.old ? ["", f.g === "f" ? PR_ST.oldF : f.g === "m" ? PR_ST.old : PR_ST.oldN] : f.paid ? ["ok", PR_ST.paid] : f.status === "approved" ? ["wait", PR_ST.approved] : ["", PR_ST[f.status] || esc(f.status)];
   return `<div class="prcard"><div class="pr-top">
       <div><p class="lbl">Your PR link</p><b class="pr-code">${esc(String(pr.slug || "").toUpperCase())}</b>
         <p class="pr-url">${esc(pr.url.replace("https://", ""))}</p></div>
@@ -1023,7 +1025,7 @@ function prCardHTML(d){
     <div class="pr-goal">
       <div class="pr-bar">${Array.from({length: need}, (_, i) => `<i class="${i < done ? "on" : ""}"></i>`).join("")}</div>
       <p>${full
-        ? `<b>${need} of ${need} paid.</b> ${euro(pr.blocks * pr.off)} off. You're the fifth.`
+        ? `<b>${need} of ${need} paid.</b> ${euro(pr.blocks * pr.off)} off. ${FIFTH[d.g || "n"]}`
         : `<b>${pr.counted} of ${need} paid.</b> ${need - pr.counted} more and ${euro(pr.off)} is off.`}</p>
     </div>
     ${pr.friends.length ? `<div class="pr-list">${pr.friends.map(f => {

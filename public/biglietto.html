@@ -840,6 +840,7 @@ function keepPushOnThisTicket(){
   try { if (APP.push && Notification.permission === "granted" && localStorage.getItem("pp_push") && localStorage.getItem("pp_push") !== token) pushSubscribe(false).then(() => LAST && renderApp(LAST)).catch(() => {}); } catch(e){}
 }
 
+const HI = { f: "Bentornata", m: "Bentornato", n: "Di nuovo qui" };
 function prioHTML(lead, text){ return `<div class="prio" role="note"><b>${lead}</b><p>${text}</p></div>`; }
 function decorate(d){
   const P = $("page");
@@ -850,7 +851,7 @@ function decorate(d){
   }
   if (d.priority && !d.next && (d.status === "requested" || d.status === "waitlist")) {
     const h = P.querySelector(".rq") || P.querySelector("h1");
-    if (h) h.insertAdjacentHTML("afterend", prioHTML("Bentornato, " + esc(String(d.name || "").split(" ")[0] || "friend") + ".", d.status === "waitlist" ? "Sei il primo appena si libera un posto." : "Guardiamo la tua richiesta prima delle nuove."));
+    if (h) h.insertAdjacentHTML("afterend", prioHTML(HI[d.g || "n"] + ", " + esc(String(d.name || "").split(" ")[0] || "friend") + ".", d.status === "waitlist" ? "Sei il primo appena si libera un posto." : "Guardiamo la tua richiesta prima delle nuove."));
   }
   if (d.next) P.insertAdjacentHTML("afterbegin", nextHTML(d) + inviteHTML(d)); // older ticket: the next party comes first
   else if (d.status === "approved") { /* paying: nothing else on the screen */ }
@@ -940,6 +941,7 @@ function whenWhereHTML(d){
   </section>`;
 }
 // ---- the receipt: what you get, what you pay ----
+const FIFTH = { f: "Sei la quinta.", m: "Sei il quinto.", n: "Entri con loro." };
 const FEE_LABEL = { early: "COSTI DI SERVIZIO EARLY", normal: "COSTI DI SERVIZIO", late: "COSTI DI SERVIZIO LAST MINUTE" };
 /* why there is a fee at all, said plainly, with the reason this round costs what it costs */
 const FEE_WHY = "È quello che rende possibile la serata: il locale, la musica, le persone alla porta e al bar, e il sistema che ti fa entrare. Qui nessuna piattaforma di biglietti prende una percentuale.";
@@ -994,14 +996,14 @@ function langSwap(d){
 const PR_STATE = { bring: "4" };
 function prMiniHTML(d){
   const off = (d.pr_rules && d.pr_rules.off) || 5, need = (d.pr_rules && d.pr_rules.need) || 4;
-  return `<div class="prmini"><p><b>${need} amici nuovi, ${euro(off)} in meno.</b>Loro pagano, tu sei il quinto.</p>
+  return `<div class="prmini"><p><b>${need} amici nuovi, ${euro(off)} in meno.</b>Loro pagano, tu entri con loro.</p>
     <button type="button" id="pr-open">Chiedi di fare il PR</button></div>`;
 }
 function prAskHTML(d){
   const off = (d.pr_rules && d.pr_rules.off) || 5, need = (d.pr_rules && d.pr_rules.need) || 4;
   return `<div class="prask" id="pr-ask"><p class="k">Porta la tua gente</p>
     <h3>${need} amici nuovi,<br>${euro(off)} in meno.</h3>
-    <p>Loro pagano pieno, tu sei il quinto. Una volta a serata.</p>
+    <p>Loro pagano pieno, tu entri con loro. Una volta a serata.</p>
     <div class="num" role="group" aria-label="How many you think you can bring">
       ${["4","8","12+"].map(n => `<button type="button" data-bring="${n}" aria-pressed="${n === PR_STATE.bring}">${n}</button>`).join("")}
     </div>
@@ -1013,8 +1015,8 @@ const prWaitHTML = () => `<div class="prwait"><b>Miltiad ha la tua richiesta.</b
 function prCardHTML(d){
   const pr = d.pr, need = pr.need, done = Math.min(pr.counted, need), full = pr.blocks > 0;
   const first = esc(String(d.name || "").split(" ")[0]);
-  const PR_ST = { old: "già venuto", paid: "pagato", approved: "da pagare", requested: "richiesta", waitlist: "lista d'attesa" };
-  const chip = (f) => f.old ? ["", PR_ST.old] : f.paid ? ["ok", PR_ST.paid] : f.status === "approved" ? ["wait", PR_ST.approved] : ["", PR_ST[f.status] || esc(f.status)];
+  const PR_ST = { old: "già venuto", oldF: "già venuta", oldN: "c'era già", paid: "pagato", approved: "da pagare", requested: "richiesta", waitlist: "lista d'attesa" };
+  const chip = (f) => f.old ? ["", f.g === "f" ? PR_ST.oldF : f.g === "m" ? PR_ST.old : PR_ST.oldN] : f.paid ? ["ok", PR_ST.paid] : f.status === "approved" ? ["wait", PR_ST.approved] : ["", PR_ST[f.status] || esc(f.status)];
   return `<div class="prcard"><div class="pr-top">
       <div><p class="lbl">Il tuo link PR</p><b class="pr-code">${esc(String(pr.slug || "").toUpperCase())}</b>
         <p class="pr-url">${esc(pr.url.replace("https://", ""))}</p></div>
@@ -1023,7 +1025,7 @@ function prCardHTML(d){
     <div class="pr-goal">
       <div class="pr-bar">${Array.from({length: need}, (_, i) => `<i class="${i < done ? "on" : ""}"></i>`).join("")}</div>
       <p>${full
-        ? `<b>${need} di ${need} hanno pagato.</b> ${euro(pr.blocks * pr.off)} in meno. Sei il quinto.`
+        ? `<b>${need} di ${need} hanno pagato.</b> ${euro(pr.blocks * pr.off)} in meno. ${FIFTH[d.g || "n"]}`
         : `<b>${pr.counted} di ${need} hanno pagato.</b> Altri ${need - pr.counted} e ${euro(pr.off)} in meno.`}</p>
     </div>
     ${pr.friends.length ? `<div class="pr-list">${pr.friends.map(f => {
@@ -1042,7 +1044,7 @@ function prHTML(d){
 }
 function prLastHTML(d){
   if (!d.pr || d.pr.state !== "ok" || d.status !== "approved") return "";
-  return `<div class="prlast"><span>Paghi per ultimo</span><b>Il tuo importo si muove ancora.</b>
+  return `<div class="prlast"><span>Paghi alla fine</span><b>Il tuo importo si muove ancora.</b>
     <p>${euro(d.pr.off)} in meno quando i tuoi ${d.pr.need} hanno pagato. Paga entro la scadenza.</p></div>`;
 }
 
