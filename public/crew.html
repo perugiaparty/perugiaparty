@@ -223,6 +223,8 @@ textarea{font:inherit;resize:vertical;line-height:1.5}
 .prkid:last-child{border-bottom:0}
 .prkid em{font-style:normal;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);display:block;margin-top:2px}
 .prnote{font-size:13px;color:var(--soft);padding:0 14px 14px;line-height:1.45;margin:0}
+.prdel{padding:0 14px 14px}
+.prdel button{font-size:12.5px;padding:7px 12px}
 .pradd{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:10px}
 @media (max-width:520px){.pradd{grid-template-columns:1fr 1fr}.pradd button{grid-column:1/-1}}
 </style>
@@ -655,6 +657,7 @@ function prView() {
         return `<div class="prkid"><div><b>${esc(k.name || k.ig)}</b><em>${esc(k.ig)}</em></div><em>${c[1]}</em></div>`; }).join("")}</div>`
         : `<p class="prnote">Nobody has used the link yet.</p>`}
       <p class="prnote">${p.counted} of their friends count. ${p.blocks ? `They get ${eur(p.blocks * P.off)} off.` : `${P.need - p.counted} more for ${eur(P.off)}.`}</p>
+      <div class="prdel"><button class="ghost bad" type="button" data-prdel="${p.id}">Remove PR</button></div>
     </details>`;
   }).join("") : `<div class="card"><div class="empty">Nobody is a PR yet</div></div>`}
 
@@ -757,6 +760,7 @@ document.addEventListener("click", (e) => {
   if (d.del) { if (confirmTwice(t)) { openId = null; act("need_del", { id: d.del }, "Removed"); } return; }
   if (d.delspend) { if (confirmTwice(t)) act("spend_del", { id: d.delspend }, "Removed"); return; }
   if (d.delnews) { if (confirmTwice(t)) act("news_del", { id: d.delnews }, "Removed"); return; }
+  if (d.prdel) { if (confirmTwice(t)) act("pr_del", { id: Number(d.prdel) }, "PR removed"); return; }
 });
 // tap twice to delete (no pop-ups)
 function confirmTwice(t) {

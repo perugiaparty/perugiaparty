@@ -306,8 +306,16 @@ export async function apiCrew(req, env, action, { getEvent, json }) {
       const name = clean(body.name, 60), raw = String(body.ig || "").trim().toLowerCase().replace(/^@+/, "");
       const ig = raw ? "@" + raw : "";
       if (!name || !ig) return json({ error: "Name and Instagram." }, 400);
-      await env.DB.prepare("INSERT OR IGNORE INTO pr (event, name, ig, status, created_at) VALUES (?, ?, ?, 'asked', ?)")
+      /* someone who was declined or removed before can be added again */
+      await env.DB.prepare("INSERT INTO pr (event, name, ig, status, created_at) VALUES (?, ?, ?, 'asked', ?) ON CONFLICT (event, ig) DO UPDATE SET name = excluded.name, status = 'asked', decided_at = NULL, decided_by = NULL")
         .bind(tag, name, ig, Date.now()).run();
+      return ok();
+    }
+    case "pr_del": {
+      if (!(lead || Number(me.pr_mgr) === 1)) return json({ error: "Only the PR manager can do that." }, 403);
+      const row = await env.DB.prepare("SELECT * FROM pr WHERE id = ? AND event = ?").bind(id, tag).first();
+      if (!row) return json({ error: "Not found." }, 404);
+      await env.DB.prepare("DELETE FROM pr WHERE id = ?").bind(row.id).run();
       return ok();
     }
 
