@@ -428,16 +428,8 @@ h1{font-size:clamp(40px,8vw,64px)}
   border:1.5px solid var(--line);border-radius:14px;padding:13px 15px;background:var(--paper);margin-top:14px}
 .prmini p{margin:0;font-size:14px;line-height:1.4;color:#6b6155}
 .prmini p b{color:var(--ink);font-weight:700;display:block}
-.prmini button{font:700 13px var(--f-body);border:1.5px solid var(--ink);background:none;color:var(--ink);
+.prmini a{font:700 13px var(--f-body);border:1.5px solid var(--ink);background:none;color:var(--ink);text-decoration:none;
   border-radius:99px;padding:8px 14px;white-space:nowrap;cursor:pointer}
-.prask{background:var(--ink);color:var(--cream);border-radius:18px;padding:20px;display:grid;gap:12px;margin-top:14px}
-.prask .k{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#b9ab98;margin:0}
-.prask h3{font-family:var(--f-display);font-weight:400;font-size:26px;line-height:1.08;margin:0}
-.prask p{margin:0;font-size:14.5px;line-height:1.45;color:#cdbfa9}
-.prask .num{display:flex;gap:8px;flex-wrap:wrap}
-.prask .num button{font:700 14px var(--f-body);border-radius:99px;padding:9px 15px;border:1.5px solid #3a322d;background:transparent;color:#f4ead7;cursor:pointer}
-.prask .num button[aria-pressed="true"]{background:#f4ead7;color:#141210;border-color:#f4ead7}
-.prask .go{font:700 15px var(--f-body);border-radius:99px;padding:13px 20px;border:0;background:var(--red);color:#fff;cursor:pointer}
 .prwait{background:#f6f2e8;border:1.5px solid var(--line);border-radius:16px;padding:16px 18px;display:grid;gap:6px;margin-top:14px}
 .prwait b{font-family:var(--f-display);font-weight:400;font-size:22px}
 .prwait p{margin:0;font-size:14.5px;color:#6b6155;line-height:1.45}
@@ -993,22 +985,10 @@ function langSwap(d){
 }
 
 /* ---- PR: the quiet line, the ask, and the card with their own people ---- */
-const PR_STATE = { bring: "4" };
 function prMiniHTML(d){
   const off = (d.pr_rules && d.pr_rules.off) || 5, need = (d.pr_rules && d.pr_rules.need) || 4;
   return `<div class="prmini"><p><b>${need} new friends, ${euro(off)} off.</b>They pay, you come fifth.</p>
-    <button type="button" id="pr-open">Ask to be a PR</button></div>`;
-}
-function prAskHTML(d){
-  const off = (d.pr_rules && d.pr_rules.off) || 5, need = (d.pr_rules && d.pr_rules.need) || 4;
-  return `<div class="prask" id="pr-ask"><p class="k">Bring your people</p>
-    <h3>${need} new friends,<br>${euro(off)} off.</h3>
-    <p>They pay full, you come fifth. Once per party.</p>
-    <div class="num" role="group" aria-label="How many you think you can bring">
-      ${["4","8","12+"].map(n => `<button type="button" data-bring="${n}" aria-pressed="${n === PR_STATE.bring}">${n}</button>`).join("")}
-    </div>
-    <p class="k">How many can you bring</p>
-    <button class="go" type="button" id="pr-send">Ask to be a PR</button></div>`;
+    <a href="/pr">Sign up as a PR</a></div>`;
 }
 const prWaitHTML = () => `<div class="prwait"><b>Miltiad has your request.</b>
   <p>He answers on Instagram, usually the same day.</p></div>`;
@@ -1048,28 +1028,8 @@ function prLastHTML(d){
     <p>${euro(d.pr.off)} comes off when your ${d.pr.need} have paid. Pay before your deadline.</p></div>`;
 }
 
-/* PR: open the panel, pick a number, send the request, copy or share the link */
+/* PR: copy or share the link */
 document.addEventListener("click", async (e) => {
-  const open = e.target.closest("#pr-open");
-  if (open) { const box = open.closest(".prmini"); box.outerHTML = prAskHTML(window.__d || {}); return; }
-  const n = e.target.closest("[data-bring]");
-  if (n) {
-    PR_STATE.bring = n.dataset.bring;
-    n.parentElement.querySelectorAll("[data-bring]").forEach(b => b.setAttribute("aria-pressed", String(b === n)));
-    return;
-  }
-  const send = e.target.closest("#pr-send");
-  if (send) {
-    send.disabled = true; send.textContent = "Sending...";
-    try {
-      const r = await fetch("/api/pr/ask", { method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ token: token, bring: PR_STATE.bring, lang: LANG }) });
-      const d = await r.json();
-      const box = document.getElementById("pr-ask");
-      if (box) box.outerHTML = prWaitHTML();
-    } catch (err) { send.disabled = false; send.textContent = "Ask to be a PR"; }
-    return;
-  }
   const sh = e.target.closest("#pr-share");
   if (sh) {
     const url = (window.__d && window.__d.pr && window.__d.pr.url) || location.href;
@@ -1107,7 +1067,8 @@ function render(d){
           : `We're checking your request for <b>${esc(d.event)}</b>. You'll see your price here.`}</p>
         ${stepsHTML(1)}
       </div>
-      ${d.verified ? `<div class="card savep"><div><b>Save this page</b><span>The link is also in your DMs.</span></div>${copyBtn(d.link || location.href)}</div>` : ""}`;
+      ${d.verified ? `<div class="card savep"><div><b>Save this page</b><span>The link is also in your DMs.</span></div>${copyBtn(d.link || location.href)}</div>` : ""}
+      ${d.verified ? prHTML(d) : ""}`;
     celebrate(d);
     }
   } else if (d.status === "approved") {

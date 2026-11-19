@@ -16,11 +16,7 @@ PAIRS = [
 
     ("${need} new friends, ${euro(off)} off.", "${need} amici nuovi, ${euro(off)} in meno."),
     ("They pay, you come fifth.", "Loro pagano, tu entri con loro."),
-    (">Ask to be a PR<", ">Chiedi di fare il PR<"),
-    ("Bring your people", "Porta la tua gente"),
-    ("${need} new friends,<br>${euro(off)} off.", "${need} amici nuovi,<br>${euro(off)} in meno."),
-    ("They pay full, you come fifth. Once per party.", "Loro pagano pieno, tu entri con loro. Una volta a serata."),
-    ("How many can you bring", "Quanti ne puoi portare"),
+    ('<a href="/pr">Sign up as a PR</a>', '<a href="/pr">Fai il PR</a>'),
     ("Miltiad has your request.", "Miltiad ha la tua richiesta."),
     ("He answers on Instagram, usually the same day.", "Ti risponde su Instagram, di solito in giornata."),
     ("Your PR link", "Il tuo link PR"),

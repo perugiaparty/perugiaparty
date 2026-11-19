@@ -27,18 +27,23 @@ body{background:var(--cream);color:var(--ink);font-family:var(--f-body)}
 .box p.lead b{color:var(--cream)}
 form{display:grid;gap:15px}
 label{display:grid;gap:7px;font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#b9ab98}
-input{font:500 16px var(--f-body);color:var(--cream);background:#1d1815;border:1.5px solid rgba(244,234,215,.2);border-radius:14px;padding:14px 16px}
-input:focus{outline:none;border-color:var(--red-glow,#ff4a3d);box-shadow:0 0 0 3px rgba(255,74,61,.18)}
+input[type=text]{font:500 16px var(--f-body);color:var(--cream);background:#1d1815;border:1.5px solid rgba(244,234,215,.2);border-radius:14px;padding:14px 16px}
+input[type=text]:focus{outline:none;border-color:var(--red-glow,#ff4a3d);box-shadow:0 0 0 3px rgba(255,74,61,.18)}
+label.check{grid-template-columns:auto 1fr;align-items:start;gap:10px;font-family:var(--f-body);font-size:14px;letter-spacing:0;text-transform:none;color:#cdbfa9;line-height:1.45}
+label.check input{width:20px;height:20px;accent-color:var(--red);margin-top:1px}
+label.check a{color:var(--cream)}
 button.send{justify-self:start;font:700 16px var(--f-body);border:0;border-radius:999px;padding:14px 26px;background:var(--red);color:#fff;cursor:pointer}
 button.send[disabled]{opacity:.6}
 .fine{font-size:13.5px;color:#b9ab98;line-height:1.5;margin:0}
 .done{background:#f6f2e8;color:var(--ink);border-radius:20px;padding:24px;display:grid;gap:8px}
 .done b{font-family:var(--f-display);font-weight:400;font-size:26px}
 .done p{margin:0;font-size:15px;color:#6b6155;line-height:1.5}
+.done a.go{justify-self:start;font:700 15px var(--f-body);text-decoration:none;border-radius:999px;padding:12px 20px;background:var(--ink);color:var(--cream);margin-top:4px}
 .how{display:grid;gap:12px;margin-top:26px}
 .how div{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:baseline;font-size:15.5px;line-height:1.45}
 .how i{font-style:normal;font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;color:var(--red)}
 .err{color:#ff7a6e;font-size:14px;margin:0}
+#ts{min-height:1px}
 </style>
 </head>
 <body>
@@ -52,22 +57,14 @@ button.send[disabled]{opacity:.6}
     <p class="when" id="when">PerugiaParty</p>
     <h1>Be a PR.</h1>
     <p class="lead" id="deal"><b>4 new friends who pay, €5 off your ticket.</b> You come fifth.</p>
-    <form id="f">
-      <label>Full name<input type="text" id="name" maxlength="60" autocomplete="name" placeholder="As on your ID" required></label>
-      <label>Instagram<input type="text" id="ig" maxlength="40" placeholder="@yourhandle" required></label>
-      <label>How many can you bring<input type="text" id="bring" maxlength="20" placeholder="4, 8, more"></label>
-      <label>Who are they<input type="text" id="who" maxlength="120" placeholder="Erasmus, my course, the gym, ..."></label>
-      <p class="err" id="err" hidden></p>
-      <button class="send" type="submit" id="send">Ask Miltiad</button>
-    </form>
-    <p class="fine">New means never been before. Once per party. Miltiad answers on Instagram.</p>
+    <div id="slot"></div>
   </section>
 
   <div class="how">
-    <div><i>01</i><span>You ask. Miltiad answers.</span></div>
-    <div><i>02</i><span>You get a link and a QR.</span></div>
-    <div><i>03</i><span>Who paid shows on your ticket.</span></div>
-    <div><i>04</i><span>You pay last, €5 already off.</span></div>
+    <div><i>01</i><span>You request your place and verify on Instagram.</span></div>
+    <div><i>02</i><span>Miltiad accepts you as a PR.</span></div>
+    <div><i>03</i><span>Your link and QR appear on your ticket.</span></div>
+    <div><i>04</i><span>Your friends pay, you pay last with €5 off.</span></div>
   </div>
 </div>
 
@@ -75,73 +72,141 @@ button.send[disabled]{opacity:.6}
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const euro = n => "€" + (Number(n) % 1 ? Number(n).toFixed(2).replace(".", ",") : Number(n));
-
-/* Italian browsers get the page in Italian: same words as the Italian ticket page */
-const IT = {
-  "Be a PR.": "Fai il PR.",
-  "Full name": "Nome e cognome",
-  "As on your ID": "Come sul documento",
-  "Instagram": "Instagram",
-  "How many can you bring": "Quanti ne puoi portare",
-  "4, 8, more": "4, 8, di pi\u00f9",
-  "Who are they": "Chi sono",
-  "Erasmus, my course, the gym, ...": "Erasmus, il mio corso, la palestra, ...",
-  "Ask Miltiad": "Chiedi a Miltiad",
-  "New means never been before. Once per party. Miltiad answers on Instagram.":
-    "Nuovi vuol dire mai venuti prima. Una volta a serata. Miltiad risponde su Instagram.",
-  "You ask. Miltiad answers.": "Chiedi tu. Miltiad risponde.",
-  "You get a link and a QR.": "Ricevi un link e un QR.",
-  "Who paid shows on your ticket.": "Chi ha pagato appare sul tuo biglietto.",
-  "You pay last, \u20ac5 already off.": "Paghi alla fine, \u20ac5 gi\u00e0 tolti.",
-  "Back to the party": "Torna alla festa",
-  "Sending...": "Invio...",
-};
 const isIt = (navigator.language || "en").toLowerCase().startsWith("it");
-function itify(){
-  if (!isIt) return;
-  document.documentElement.lang = "it";
-  document.title = "Fai il PR \u00b7 PerugiaParty";
-  document.querySelectorAll("h1, label, button, p, span, a").forEach(el => {
-    el.childNodes.forEach(n => { if (n.nodeType === 3 && IT[n.nodeValue.trim()]) n.nodeValue = IT[n.nodeValue.trim()]; });
-    if (el.placeholder && IT[el.placeholder]) el.placeholder = IT[el.placeholder];
-  });
-  const d = document.getElementById("deal");
-  if (d) d.innerHTML = d.innerHTML
-    .replace(/new friends who pay,/, "amici nuovi che pagano,")
-    .replace(/off your ticket\./, "in meno sul tuo biglietto.")
-    .replace(/You come fifth\./, "Entri con loro.")
-    .replace(/Bring /, "");
+const T = (en, it) => isIt ? it : en;
+const savedToken = () => { try { return localStorage.getItem("pp_token"); } catch(e){ return null; } };
+let EV = null, tsWidget = null;
+
+if (isIt) { document.documentElement.lang = "it"; document.title = "Fai il PR · PerugiaParty"; }
+
+/* the page in two languages, same words as the Italian ticket page */
+const WORDS = {
+  back: ["Back to the party", "Torna alla festa"],
+  h1: ["Be a PR.", "Fai il PR."],
+  s01: ["You request your place and verify on Instagram.", "Chiedi il tuo posto e verifichi su Instagram."],
+  s02: ["Miltiad accepts you as a PR.", "Miltiad ti accetta come PR."],
+  s03: ["Your link and QR appear on your ticket.", "Link e QR appaiono sul tuo biglietto."],
+  s04: ["Your friends pay, you pay last with €5 off.", "I tuoi amici pagano, tu paghi alla fine con €5 in meno."],
+};
+if (isIt) {
+  document.querySelector(".top a:last-child").textContent = WORDS.back[1];
+  document.querySelector("h1").textContent = WORDS.h1[1];
+  [...document.querySelectorAll(".how span")].forEach((el, i) => { el.textContent = WORDS["s0" + (i + 1)][1]; });
 }
-itify();
 
-fetch("/api/event").then(r => r.json()).then(ev => {
-  if (ev && ev.name) $("when").textContent = [ev.name, ev.date_label].filter(Boolean).join(" · ");
-  if (ev && ev.pr_need && ev.pr_off) {
-    $("deal").innerHTML = isIt
-      ? `<b>${ev.pr_need} amici nuovi che pagano, ${euro(ev.pr_off)} in meno sul tuo biglietto.</b> Entri con loro.`
-      : `<b>${ev.pr_need} new friends who pay, ${euro(ev.pr_off)} off your ticket.</b> You come fifth.`;
+function deal(need, off) {
+  $("deal").innerHTML = isIt
+    ? `<b>${need} amici nuovi che pagano, ${euro(off)} in meno sul tuo biglietto.</b> Entri con loro.`
+    : `<b>${need} new friends who pay, ${euro(off)} off your ticket.</b> You come fifth.`;
+}
+
+/* 1. the form for someone without a place: one form for both, the place and the PR */
+function formHTML() {
+  return `<form id="f">
+    <label>${T("Full name", "Nome e cognome")}<input type="text" id="name" maxlength="60" autocomplete="name" placeholder="${T("As on your ID", "Come sul documento")}" required></label>
+    <label>Instagram<input type="text" id="ig" maxlength="40" placeholder="@yourhandle" required></label>
+    <label>${T("How many can you bring", "Quanti ne puoi portare")}<input type="text" id="bring" maxlength="20" placeholder="4, 8, ${T("more", "di più")}"></label>
+    <label>${T("Who are they", "Chi sono")}<input type="text" id="who" maxlength="120" placeholder="${T("Erasmus, my course, the gym, ...", "Erasmus, il mio corso, la palestra, ...")}"></label>
+    <label class="check"><input type="checkbox" id="age"> <span>${T("I'm 18+, I'll bring photo ID and I accept the", "Ho 18+, porto un documento e accetto le")} <a href="/#rules">${T("house rules", "regole della casa")}</a> ${T("and the", "e i")} <a href="/terms">${T("terms", "termini")}</a>.</span></label>
+    <div id="ts"></div>
+    <p class="err" id="err" hidden></p>
+    <button class="send" type="submit" id="send">${T("Request my place", "Chiedi il mio posto")}</button>
+  </form>
+  <p class="fine">${T("You get your place first, like everyone. Miltiad then decides on the PR. New means never been before, once per party.", "Prima ottieni il posto, come tutti. Poi Miltiad decide sul PR. Nuovi vuol dire mai venuti prima, una volta a serata.")}</p>`;
+}
+
+/* 2. they already have a place for this party: one tap */
+function haveHTML(d) {
+  const first = esc(String(d.name || "").split(" ")[0]);
+  return `<div class="done"><b>${T("You have your place", "Hai il tuo posto")}, ${first}.</b>
+    <p>${T("Ask Miltiad to make you a PR. Your link then appears on your ticket.", "Chiedi a Miltiad di farti PR. Il link appare poi sul tuo biglietto.")}</p></div>
+    <button class="send" type="button" id="one">${T("Ask Miltiad", "Chiedi a Miltiad")}</button>
+    <p class="err" id="err" hidden></p>`;
+}
+const waitHTML = (t) => `<div class="done"><b>${T("Miltiad has your request.", "Miltiad ha la tua richiesta.")}</b>
+  <p>${T("He answers on Instagram, usually the same day. Your link then appears on your ticket.", "Ti risponde su Instagram, di solito in giornata. Il link appare poi sul tuo biglietto.")}</p>
+  ${t ? `<a class="go" href="${T("/ticket.html", "/biglietto.html")}?t=${encodeURIComponent(t)}">${T("My ticket", "Il mio biglietto")}</a>` : ""}</div>`;
+const okHTML = (t) => `<div class="done"><b>${T("You are a PR.", "Sei PR.")}</b>
+  <p>${T("Your link, your QR and who paid are on your ticket.", "Link, QR e chi ha pagato sono sul tuo biglietto.")}</p>
+  ${t ? `<a class="go" href="${T("/ticket.html", "/biglietto.html")}?t=${encodeURIComponent(t)}">${T("My ticket", "Il mio biglietto")}</a>` : ""}</div>`;
+/* their ticket is from an older party: a place for this one comes first */
+const againHTML = () => `<div class="done"><b>${T("Request your place first", "Prima chiedi il tuo posto")}.</b>
+  <p>${T("Being a PR starts with your own place for this night. Request it, then come back here.", "Il PR parte dal tuo posto per questa serata. Chiedilo e poi torna qui.")}</p>
+  <a class="go" href="/#request">${T("Request a place", "Chiedi un posto")}</a></div>`;
+
+function mountForm() {
+  $("slot").innerHTML = formHTML();
+  if (EV && EV.turnstile) {
+    window.onTs = () => { try { tsWidget = turnstile.render("#ts", { sitekey: EV.turnstile, theme: "dark", size: "flexible" }); } catch(e){} };
+    const sc = document.createElement("script");
+    sc.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTs&render=explicit";
+    sc.async = true; document.head.appendChild(sc);
   }
-}).catch(() => {});
+  $("f").addEventListener("submit", submitNew);
+}
 
-$("f").addEventListener("submit", async (e) => {
+async function submitNew(e) {
   e.preventDefault();
   const send = $("send"), err = $("err");
   err.hidden = true;
-  send.disabled = true; send.textContent = "Sending...";
+  if (!$("age").checked) { err.textContent = T("Confirm you're 18+ and accept the house rules.", "Conferma che hai 18+ e accetti le regole."); err.hidden = false; return; }
+  send.disabled = true; send.textContent = T("Sending...", "Invio...");
+  const bring = $("bring").value.trim(), who = $("who").value.trim();
+  try {
+    const r = await fetch("/api/request", { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: $("name").value.trim(), ig: $("ig").value.trim(), phone: "",
+        intro: [T("Wants to be a PR", "Vuole fare il PR"), bring && T("can bring ", "può portare ") + bring, who].filter(Boolean).join(". "),
+        bring, who, pr_ask: true, age: true, rules: true, lang: isIt ? "it" : "en",
+        turnstile: (window.turnstile && tsWidget !== null) ? turnstile.getResponse(tsWidget) : "" }) });
+    const d = await r.json();
+    if (!r.ok || d.error) throw new Error(d.error || T("Something went wrong.", "Qualcosa è andato storto."));
+    try { localStorage.setItem("pp_token", d.token); } catch(e){}
+    location.href = (isIt ? "/biglietto.html?t=" : "/ticket.html?t=") + encodeURIComponent(d.token);
+  } catch (ex) {
+    err.textContent = ex.message || T("Something went wrong.", "Qualcosa è andato storto.");
+    err.hidden = false;
+    send.disabled = false; send.textContent = T("Request my place", "Chiedi il mio posto");
+    try { if (window.turnstile && tsWidget !== null) turnstile.reset(tsWidget); } catch(e){}
+  }
+}
+
+async function askWithToken(t) {
+  const btn = $("one"), err = $("err");
+  if (btn) { btn.disabled = true; btn.textContent = T("Sending...", "Invio..."); }
   try {
     const r = await fetch("/api/pr/ask", { method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name: $("name").value.trim(), ig: $("ig").value.trim(), bring: $("bring").value.trim(), who: $("who").value.trim(), lang: isIt ? "it" : "en" }) });
+      body: JSON.stringify({ token: t, lang: isIt ? "it" : "en" }) });
     const d = await r.json();
-    if (!r.ok || d.error) throw new Error(d.error || "Something went wrong.");
-    $("box").innerHTML = isIt
-      ? `<div class="done"><b>Miltiad ha la tua richiesta.</b><p>Ti risponde su Instagram, di solito in giornata. Il tuo link appare poi sul biglietto.</p></div>`
-      : `<div class="done"><b>Miltiad has your request.</b><p>He answers on Instagram, usually the same day. Your link then appears on your ticket.</p></div>`;
+    if (!r.ok || d.error) throw new Error(d.error);
+    $("slot").innerHTML = d.state === "ok" ? okHTML(d.token || t) : waitHTML(d.token || t);
   } catch (ex) {
-    err.textContent = ex.message || "Something went wrong.";
-    err.hidden = false;
-    send.disabled = false; send.textContent = "Ask Miltiad";
+    if (err) { err.textContent = ex.message || T("Something went wrong.", "Qualcosa è andato storto."); err.hidden = false; }
+    if (btn) { btn.disabled = false; btn.textContent = T("Ask Miltiad", "Chiedi a Miltiad"); }
   }
-});
+}
+
+(async () => {
+  try {
+    EV = await fetch("/api/event").then(r => r.json());
+    if (EV && EV.name) $("when").textContent = [EV.name, EV.date_label].filter(Boolean).join(" · ");
+    if (EV && EV.pr_need && EV.pr_off) deal(EV.pr_need, EV.pr_off);
+  } catch (e) {}
+  const t = savedToken();
+  if (t) {
+    try {
+      const d = await fetch("/api/ticket?t=" + encodeURIComponent(t)).then(r => r.json());
+      if (d && !d.error) {
+        if (d.next) { $("slot").innerHTML = againHTML(); return; }          // old ticket: place first
+        if (d.pr && d.pr.state === "ok") { $("slot").innerHTML = okHTML(t); return; }
+        if (d.pr && d.pr.state === "asked") { $("slot").innerHTML = waitHTML(t); return; }
+        $("slot").innerHTML = haveHTML(d);
+        $("one").addEventListener("click", () => askWithToken(t));
+        return;
+      }
+    } catch (e) {}
+  }
+  mountForm();
+})();
 </script>
 </body>
 </html>

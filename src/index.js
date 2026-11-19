@@ -618,7 +618,13 @@ async function apiRequest(req, env) {
   await env.DB.prepare("INSERT INTO guests (token, event, name, ig, phone, note, status, created_at, invited_by, is_returning, vcode, verified, with_ig, lang) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)")
     .bind(token, ev.tag, name, ig, phone, note, status, Date.now(), inviter, returning ? 1 : 0, vcode, withIg, lang).run();
   await upsertPerson(env, ig, name, phone);
-  return json({ ok: true, token, vcode, ig, waitlist: status === "waitlist" });
+  // asked to be a PR on the same form: their place is requested first, Miltiad decides after
+  let prAsked = false;
+  if (body.pr_ask && prOn(ev)) {
+    await prApply(env, ev, ig, name, body.bring, body.who);
+    prAsked = true;
+  }
+  return json({ ok: true, token, vcode, ig, waitlist: status === "waitlist", pr_asked: prAsked });
 }
 
 // One tap from an old ticket page: request a place for the current edition with the same details.
@@ -660,24 +666,37 @@ async function apiTip(req, env) {
   return json({ ok: !!(r.meta && r.meta.changes), tip });
 }
 /* ---- PR: asking to become one, from the ticket or from /pr ---- */
+/* one application per handle per party: someone declined or removed before can ask again */
+async function prApply(env, ev, ig, name, bring, who) {
+  await env.DB.prepare(
+    "INSERT INTO pr (event, name, ig, bring, who, status, created_at) VALUES (?, ?, ?, ?, ?, 'asked', ?) " +
+    "ON CONFLICT (event, ig) DO UPDATE SET name = excluded.name, bring = excluded.bring, who = excluded.who, status = 'asked', decided_at = NULL, decided_by = NULL"
+  ).bind(ev.tag, name, ig, clean(bring || "", 20), clean(who || "", 120), Date.now()).run();
+}
 async function prAsk(req, env) {
   const ev = await getEvent(env);
   if (!ev || !prOn(ev)) return json({ error: "Not open right now." }, 409);
   let body = {};
   try { body = await req.json(); } catch (e) { return json({ error: "Bad request." }, 400); }
   const lang = body.lang === "it" ? "it" : "en";
-  let ig = normIg(body.ig || ""), name = clean(body.name || "", 60);
+  let ig = normIg(body.ig || ""), name = clean(body.name || "", 60), token = null;
   // from the ticket we already know who they are
   if (body.token && TOKEN_RE.test(String(body.token))) {
-    const g = await env.DB.prepare("SELECT name, ig FROM guests WHERE token = ?").bind(String(body.token)).first();
-    if (g) { ig = normIg(g.ig); name = clean(g.name, 60); }
+    const g = await env.DB.prepare("SELECT token, name, ig FROM guests WHERE token = ?").bind(String(body.token)).first();
+    if (g) { ig = normIg(g.ig); name = clean(g.name, 60); token = g.token; }
   }
   if (!ig || !name) return json({ error: say("Fill in your name and your Instagram.", lang) }, 400);
+  // being a PR starts with having a place: no request for this party, no application
+  if (!token) {
+    const g = await env.DB.prepare("SELECT token, name FROM guests WHERE event = ? AND lower(ig) = ? AND status IN ('requested','waitlist','approved','paid','in') ORDER BY verified DESC, created_at DESC LIMIT 1")
+      .bind(ev.tag, ig).first();
+    if (!g) return json({ need_place: true, error: say("Request your place first, then you can be a PR.", lang) }, 409);
+    token = g.token; name = clean(g.name, 60) || name;
+  }
   const row = await prRow(env, ev, ig);
-  if (row) return json({ ok: true, state: row.status === "ok" ? "ok" : row.status === "no" ? "no" : "asked" });
-  await env.DB.prepare("INSERT INTO pr (event, name, ig, bring, who, status, created_at) VALUES (?, ?, ?, ?, ?, 'asked', ?)")
-    .bind(ev.tag, name, ig, clean(body.bring || "", 20), clean(body.who || "", 120), Date.now()).run();
-  return json({ ok: true, state: "asked" });
+  if (row && row.status !== "no") return json({ ok: true, token, state: row.status === "ok" ? "ok" : "asked" });
+  await prApply(env, ev, ig, name, body.bring, body.who);
+  return json({ ok: true, token, state: "asked" });
 }
 /* a PR link: /pr/<slug> drops you on the form with their name attached */
 async function prLink(url, env) {

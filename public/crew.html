@@ -639,7 +639,7 @@ function prView() {
   </div>
   ${P.asked.length ? `<p class="lbl" style="margin:14px 0 8px">Waiting for you</p>
   <div class="prask2">${P.asked.map(a => `<div class="row">
-      <div><b>${esc(a.name)}</b><span class="sub">${esc(a.ig)}${a.bring ? " \u00b7 brings " + esc(a.bring) : ""}${a.who ? " \u00b7 " + esc(a.who) : ""}</span></div>
+      <div><b>${esc(a.name)}</b><span class="sub">${esc(a.ig)}${a.bring ? " \u00b7 brings " + esc(a.bring) : ""}${a.who ? " \u00b7 " + esc(a.who) : ""}${a.placed ? "" : " \u00b7 no place yet"}</span></div>
       <div class="acts"><button type="button" data-prok="${a.id}">Accept</button><button class="no" type="button" data-prno="${a.id}">No</button></div>
     </div>`).join("")}</div>` : ""}
 
@@ -656,7 +656,7 @@ function prView() {
       ${p.kids.length ? `<div class="prkids">${p.kids.map(k => { const c = chip(k);
         return `<div class="prkid"><div><b>${esc(k.name || k.ig)}</b><em>${esc(k.ig)}</em></div><em>${c[1]}</em></div>`; }).join("")}</div>`
         : `<p class="prnote">Nobody has used the link yet.</p>`}
-      <p class="prnote">${p.counted} of their friends count. ${p.blocks ? `They get ${eur(p.blocks * P.off)} off.` : `${P.need - p.counted} more for ${eur(P.off)}.`}</p>
+      <p class="prnote">${p.counted} of their friends count. ${p.blocks ? `They get ${eur(p.blocks * P.off)} off.` : `${P.need - p.counted} more for ${eur(P.off)}.`}${p.placed ? "" : ` <b>No place of their own yet, so nothing comes off. Tell them to request one on the site.</b>`}</p>
       <div class="prdel"><button class="ghost bad" type="button" data-prdel="${p.id}">Remove PR</button></div>
     </details>`;
   }).join("") : `<div class="card"><div class="empty">Nobody is a PR yet</div></div>`}

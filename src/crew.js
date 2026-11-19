@@ -56,6 +56,9 @@ async function prBoard(env, ev) {
   ).bind(ev.tag).all()).results || [];
   const past = (await env.DB.prepare("SELECT DISTINCT lower(ig) AS ig FROM guests WHERE event <> ? AND status IN ('paid','in')").bind(ev.tag).all()).results || [];
   const old = new Set(past.map((r) => r.ig));
+  /* a PR needs a place of their own for this night, so we can see who still has to request one */
+  const here = (await env.DB.prepare("SELECT DISTINCT lower(ig) AS ig FROM guests WHERE event = ? AND status IN ('requested','waitlist','approved','paid','in')").bind(ev.tag).all()).results || [];
+  const placed = new Set(here.map((r) => r.ig));
   const need = Number(ev.pr_need), off = Number(ev.pr_off), cap = Number(ev.pr_max) || 0;
   const asked = [], active = [];
   let friends = 0, given = 0;
@@ -73,7 +76,7 @@ async function prBoard(env, ev) {
     const counted = kids.filter((k) => k.counts).length;
     let blocks = Math.floor(counted / need);
     if (cap > 0) blocks = Math.min(blocks, cap);
-    const base = { id: r.id, name: clean(r.name, 60), ig: r.ig, slug: r.slug, bring: clean(r.bring, 20), who: clean(r.who, 120), at: r.created_at };
+    const base = { id: r.id, name: clean(r.name, 60), ig: r.ig, slug: r.slug, bring: clean(r.bring, 20), who: clean(r.who, 120), at: r.created_at, placed: placed.has(String(r.ig || "").toLowerCase()) };
     if (r.status === "ok") {
       friends += counted; given += blocks * off;
       active.push({ ...base, counted, blocks, kids, toGo: need - (counted % need), url: r.slug ? `perugiaparty.com/pr/${r.slug}` : "" });
