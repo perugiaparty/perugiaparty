@@ -438,7 +438,18 @@ h1{font-size:clamp(40px,8vw,64px)}
 .pr-top{display:flex;gap:16px;align-items:center;justify-content:space-between}
 .pr-code{display:block;font-family:var(--f-display);font-weight:400;font-size:28px;line-height:1.05;margin-top:5px}
 .pr-url{font-family:var(--f-mono);font-size:12px;color:#7a7268;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pr-qr{width:84px;height:84px;border-radius:14px;background:#fff;border:1.5px solid var(--line);padding:7px;flex:none}
+/* a QR on the whole screen: the entry code at the door, or a PR's own link */
+.qrfs{position:fixed;inset:0;z-index:999;background:rgba(20,18,16,.97);display:grid;place-items:center;padding:24px;overflow:auto}
+.qrfs-in{display:grid;gap:12px;justify-items:center;text-align:center;max-width:min(92vw,520px)}
+.qrfs img{width:min(78vw,400px);height:auto;background:#fff;border-radius:18px;padding:14px;image-rendering:pixelated}
+.qrfs-c{font-family:var(--f-display);font-weight:400;font-size:clamp(24px,7vw,34px);line-height:1;color:var(--cream);margin:0}
+.qrfs-n{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:#b9ab98;margin:0;word-break:break-all}
+.qrfs-b{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+.qrfs-b .btn.outline{color:var(--cream);border-color:var(--cream)}
+.qrfs-h{font-size:13px;line-height:1.45;color:#b9ab98;margin:0}
+body.noscroll{overflow:hidden}
+.pr-qr{width:84px;height:84px;border-radius:14px;background:#fff;border:1.5px solid var(--line);padding:7px;flex:none;cursor:pointer}
+.pr-qr:active{transform:scale(.97)}
 .pr-qr canvas,.pr-qr img{width:100%;height:100%;display:block}
 .pr-goal{background:#f6f2e8;border-radius:14px;padding:14px 16px;display:grid;gap:10px}
 .pr-goal p{margin:0;font-size:14.5px;line-height:1.45;color:#555}
@@ -1000,7 +1011,7 @@ function prCardHTML(d){
   return `<div class="prcard"><div class="pr-top">
       <div><p class="lbl">Your PR link</p><b class="pr-code">${esc(String(pr.slug || "").toUpperCase())}</b>
         <p class="pr-url">${esc(pr.url.replace("https://", ""))}</p></div>
-      <div class="pr-qr"><canvas id="pr-qr" aria-label="QR of your PR link"></canvas></div>
+      <button class="pr-qr" type="button" aria-label="QR of your PR link, tap to enlarge"><canvas id="pr-qr"></canvas></button>
     </div>
     <div class="pr-goal">
       <div class="pr-bar">${Array.from({length: need}, (_, i) => `<i class="${i < done ? "on" : ""}"></i>`).join("")}</div>
@@ -1028,8 +1039,32 @@ function prLastHTML(d){
     <p>${euro(d.pr.off)} comes off when your ${d.pr.need} have paid. Pay before your deadline.</p></div>`;
 }
 
-/* PR: copy or share the link */
+/* the PR link as a big QR: hold it up and let them scan it */
+function openPrQR(d){
+  const pr = d && d.pr;
+  if (!pr || !pr.url) return;
+  const img = qrBigCanvas(pr.url, 3).toDataURL("image/png");
+  const o = document.createElement("div"); o.className = "qrfs"; o.setAttribute("role", "dialog"); o.setAttribute("aria-label", "Your PR QR");
+  o.innerHTML = `<div class="qrfs-in">
+      <img src="${img}" alt="PR QR" draggable="false">
+      <p class="qrfs-c">${esc(String(pr.slug || "").toUpperCase())}</p>
+      <p class="qrfs-n">${esc(pr.url.replace("https://", ""))}</p>
+      <div class="qrfs-b"><button class="btn" type="button" data-save>Save image</button><button class="btn outline" type="button" data-close>Done</button></div>
+      <p class="qrfs-h">They scan it, they land on your link.</p>
+    </div>`;
+  const close = () => { document.body.classList.remove("noscroll"); o.remove(); document.removeEventListener("keydown", esckey); };
+  const esckey = e => { if (e.key === "Escape") close(); };
+  o.addEventListener("click", e => { if (e.target === o || e.target.closest("[data-close]")) close(); });
+  o.querySelector("[data-save]").addEventListener("click", e => {
+    const a = document.createElement("a"); a.href = img; a.download = `PerugiaParty-PR-${pr.slug || "link"}.png`;
+    document.body.appendChild(a); a.click(); a.remove(); e.currentTarget.textContent = "Saved";
+  });
+  document.addEventListener("keydown", esckey);
+  document.body.classList.add("noscroll"); document.body.appendChild(o);
+}
+/* PR: the QR full screen, copy or share the link */
 document.addEventListener("click", async (e) => {
+  if (e.target.closest(".pr-qr")) { openPrQR(window.__d || {}); return; }
   const sh = e.target.closest("#pr-share");
   if (sh) {
     const url = (window.__d && window.__d.pr && window.__d.pr.url) || location.href;
