@@ -735,6 +735,9 @@ async function apiTicket(url, env) {
       reference: `${g.name} ${g.code}`,
       approved_at: g.approved_at,
       deadline: Number(g.deadline) || null,
+      // what happens when the clock runs out: the next round's total, or nothing after the last one
+      next_total: sameEvent && NEXT_TIER[g.ticket] && tierTotal(ev, NEXT_TIER[g.ticket]) > Number(g.price) ? tierTotal(ev, NEXT_TIER[g.ticket]) : null,
+      next_hours: sameEvent && NEXT_TIER[g.ticket] ? tierHours(ev, NEXT_TIER[g.ticket]) : null,
       date_label: sameEvent ? ev.date_label : null,
       tiers: sameEvent ? { early: ev.price_early, normal: ev.price_normal, late: ev.price_late } : null, // expiry dates stay admin-only
     });
@@ -1149,35 +1152,42 @@ async function igReminders(env) {
     const pay = await payableNow(env, ev, g);
     const ms = Number(g.deadline) - Date.now();
     const mins = Math.max(1, Math.floor(ms / 6e4)), left = mins >= 60 ? `${Math.floor(mins / 60)}h` : `${mins} min`;
-    const up = Number(ev.price_late) > Number(g.price) && ["early", "normal"].includes(g.ticket);
+    const nx = NEXT_TIER[g.ticket], up = nx && Number(ev["price_" + nx]) > Number(g.price);
     const text = isIt(g)
       ? (isPartyDay(ev) ? `Pagamento non ancora ricevuto. ${payNowText(ev, g, pay)}` : ms > 0
-        ? `Pagamento non ancora ricevuto. Hai ancora ${left} per pagare ${euro(pay)}.\n${up ? `Dopo la scadenza il prezzo sale a ${euro(tierTotal(ev, "late"))}.` : "Dopo la scadenza il posto viene liberato."}`
+        ? `Pagamento non ancora ricevuto. Hai ancora ${left} per pagare ${euro(pay)}.\n${up ? `Dopo la scadenza il prezzo sale a ${euro(tierTotal(ev, nx))}.` : "Dopo la scadenza il posto viene liberato."}`
         : `Pagamento non ancora ricevuto. La scadenza per pagare ${euro(pay)} è passata.\nPaga ora per tenere il posto, altrimenti viene liberato.`)
       : (isPartyDay(ev) ? `Payment not received yet. ${payNowText(ev, g, pay)}` : ms > 0
-        ? `Payment not received yet. You still have ${left} to pay ${euro(pay)}.\n${up ? `After the deadline the price goes up to ${euro(tierTotal(ev, "late"))}.` : "After the deadline your spot will be released."}`
+        ? `Payment not received yet. You still have ${left} to pay ${euro(pay)}.\n${up ? `After the deadline the price goes up to ${euro(tierTotal(ev, nx))}.` : "After the deadline your spot will be released."}`
         : `Payment not received yet. The deadline to pay ${euro(pay)} has passed.\nPay now to keep your spot, otherwise it will be released.`);
     const sent = await igSend(env, ev, g.igsid, text);
     if (!sent) await env.DB.prepare("UPDATE guests SET ig_fail = 1 WHERE token = ?").bind(g.token).run();
   }
 }
 
-// Last round: once the late price applies, anyone still unpaid at an earlier price moves to the late price
-// when their deadline has passed. They get a reminder with the new amount and a new deadline (never after the party starts).
-async function repriceLate(env) {
+// A place is held for a round, not forever: early 72h, normal 48h, late 24h, a week in total.
+// When a deadline passes the price moves up one round and they get a new deadline with a reminder.
+// After the late round nothing moves any more: the place is released by hand from the admin.
+const NEXT_TIER = { early: "normal", normal: "late" };
+const tierHours = (ev, t) => Number(ev["hours_" + t]) || { early: 72, normal: 48, late: 24 }[t] || 24;
+async function repriceStep(env) {
   const ev = await getEvent(env);
-  if (!ev || !ev.tag || (await tierNow(env, ev)) !== "late" || !(Number(ev.price_late) > 0)) return;
+  if (!ev || !ev.tag) return;
   const now = Date.now(), start = Date.parse(ev.starts_at);
-  let dl = now + (Number(ev.hours_late) || 24) * 36e5;
-  if (Number.isFinite(start) && start > now) dl = Math.min(dl, start);
-  await env.DB.prepare("UPDATE guests SET ticket = 'late', price = ?, deadline = ?, remind_req = ? WHERE event = ? AND status = 'approved' AND ticket IN ('early','normal') AND deadline IS NOT NULL AND deadline < ? AND COALESCE(price, 0) < ?")
-    .bind(Number(ev.price_late), dl, now, ev.tag, now, Number(ev.price_late)).run();
+  for (const from of ["early", "normal"]) {
+    const to = NEXT_TIER[from], price = Number(ev["price_" + to]);
+    if (!(price > 0)) continue;
+    let dl = now + tierHours(ev, to) * 36e5;
+    if (Number.isFinite(start) && start > now) dl = Math.min(dl, start);
+    await env.DB.prepare("UPDATE guests SET ticket = ?, price = ?, deadline = ?, remind_req = ? WHERE event = ? AND status = 'approved' AND ticket = ? AND deadline IS NOT NULL AND deadline < ? AND COALESCE(price, 0) < ?")
+      .bind(to, price, dl, now, ev.tag, from, now, price).run();
+  }
 }
 
 async function tickIfDue(env) {
   const now = Date.now();
   const r = await env.DB.prepare("UPDATE event SET tick_at = ? WHERE id = 1 AND (tick_at IS NULL OR tick_at < ?)").bind(now, now - 55000).run();
-  if (r.meta && r.meta.changes) { await pushTick(env, getEvent, parseProgram); await repriceLate(env); await igStatusDms(env); await igReminders(env); const evNow = await getEvent(env); await crewApprovedDms(env, evNow, igSend).catch(() => {}); await crewNewsPush(env, evNow).catch(() => {}); }
+  if (r.meta && r.meta.changes) { await pushTick(env, getEvent, parseProgram); await repriceStep(env); await igStatusDms(env); await igReminders(env); const evNow = await getEvent(env); await crewApprovedDms(env, evNow, igSend).catch(() => {}); await crewNewsPush(env, evNow).catch(() => {}); }
 }
 
 // Security headers on every response the site sends.
