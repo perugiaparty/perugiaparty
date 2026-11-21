@@ -1184,10 +1184,22 @@ async function repriceStep(env) {
   }
 }
 
+/* One warning per deadline, a day before it runs out. The late round is only 24h long,
+   so it gets no warning: those guests were just told the price when they landed on it. */
+async function warnSoon(env) {
+  const ev = await getEvent(env);
+  if (!ev || !ev.tag) return;
+  const now = Date.now();
+  await env.DB.prepare(
+    "UPDATE guests SET warned = deadline, remind_req = ? WHERE event = ? AND status = 'approved' AND ticket IN ('early','normal') " +
+    "AND deadline IS NOT NULL AND deadline > ? AND deadline <= ? AND COALESCE(warned, 0) <> deadline"
+  ).bind(now, ev.tag, now, now + 24 * 36e5).run();
+}
+
 async function tickIfDue(env) {
   const now = Date.now();
   const r = await env.DB.prepare("UPDATE event SET tick_at = ? WHERE id = 1 AND (tick_at IS NULL OR tick_at < ?)").bind(now, now - 55000).run();
-  if (r.meta && r.meta.changes) { await pushTick(env, getEvent, parseProgram); await repriceStep(env); await igStatusDms(env); await igReminders(env); const evNow = await getEvent(env); await crewApprovedDms(env, evNow, igSend).catch(() => {}); await crewNewsPush(env, evNow).catch(() => {}); }
+  if (r.meta && r.meta.changes) { await pushTick(env, getEvent, parseProgram); await repriceStep(env); await warnSoon(env); await igStatusDms(env); await igReminders(env); const evNow = await getEvent(env); await crewApprovedDms(env, evNow, igSend).catch(() => {}); await crewNewsPush(env, evNow).catch(() => {}); }
 }
 
 // Security headers on every response the site sends.
