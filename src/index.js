@@ -1165,11 +1165,11 @@ async function igReminders(env) {
   }
 }
 
-// A place is held for a round, not forever: early 72h, normal 48h, late 24h, a week in total.
+// A place is held for a round, not forever: early 84h, normal 60h, late 24h, a week in total.
 // When a deadline passes the price moves up one round and they get a new deadline with a reminder.
 // After the late round nothing moves any more: the place is released by hand from the admin.
 const NEXT_TIER = { early: "normal", normal: "late" };
-const tierHours = (ev, t) => Number(ev["hours_" + t]) || { early: 72, normal: 48, late: 24 }[t] || 24;
+const tierHours = (ev, t) => Number(ev["hours_" + t]) || { early: 84, normal: 60, late: 24 }[t] || 24;
 async function repriceStep(env) {
   const ev = await getEvent(env);
   if (!ev || !ev.tag) return;
