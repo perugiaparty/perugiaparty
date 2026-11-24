@@ -281,6 +281,15 @@ textarea{font:inherit;resize:vertical;line-height:1.5}
 let token = null, S = null, tab = "home", sub = "spend", phase = "all", busy = false, openId = null, adding = null, hiddenAt = 0, timer = null;
 let noteTimer = null, noteDirty = false, noteSaving = false;
 const $ = (s) => document.querySelector(s);
+function igCopy(el, code){
+  let ok = false;
+  try { navigator.clipboard.writeText(code); ok = true; } catch(e){}
+  if (!ok) { try { const t = document.createElement("textarea"); t.value = code;
+    t.style.cssText = "position:fixed;top:0;left:0;opacity:0"; document.body.appendChild(t);
+    t.focus(); t.select(); ok = document.execCommand("copy"); t.remove(); } catch(e){} }
+  if (ok) el.textContent = "Code copied, paste it in the chat";
+  return true;
+}
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const eur = (n) => "€" + (Math.round((Number(n) || 0) * 100) / 100).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const who = (id) => { const c = S && S.crew.find((x) => x.id === id); return c ? c.name : "Ex crew"; };
@@ -383,7 +392,7 @@ if (location.hash === "#join") screen("signup");
 function showCode(vcode, ig) {
   $("#pend-body").innerHTML = `<p class="sub" style="margin:-8px 0 14px">Send this code to <b style="color:var(--txt)">@perugiaparty</b> from ${esc(ig)}</p>
     <div class="code">${esc(vcode)}</div>
-    <a class="big" style="text-align:center;text-decoration:none;display:block;box-sizing:border-box" href="https://ig.me/m/perugiaparty?text=${encodeURIComponent(vcode)}" target="_blank" rel="noopener" id="sendcode">Send code on Instagram</a>`;
+    <a class="big" style="text-align:center;text-decoration:none;display:block;box-sizing:border-box" href="https://ig.me/m/perugiaparty" target="_blank" rel="noopener" id="sendcode" onclick="igCopy(this, ${JSON.stringify(vcode)})">Copy code and open Instagram</a>`;
   const b = $("#sendcode"); if (b) b.addEventListener("click", () => { try { navigator.clipboard.writeText(vcode); } catch (x) {} });
   screen("pending");
 }

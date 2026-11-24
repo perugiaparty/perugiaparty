@@ -1096,6 +1096,16 @@ const romeDay = (t) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome
 const isPartyDay = (ev) => { const st = Date.parse(ev.starts_at); return Number.isFinite(st) && romeDay(st) === romeDay(Date.now()); };
 // Every automatic message follows the language the guest signed up in.
 const isIt = (g) => g && g.lang === "it";
+/* why the clock matters: we pay everything before the night out of our own pocket */
+const payFastText = (ev, g) => {
+  const nx = NEXT_TIER[g.ticket], h = tierHours(ev, g.ticket);
+  const up = nx && tierTotal(ev, nx) > Number(g.price);
+  return isIt(g)
+    ? (up ? `Hai ${h}h: dopo la scadenza il prezzo sale a ${euro(tierTotal(ev, nx))}.\nPaghiamo tutto in anticipo di tasca nostra, quindi ci serve puntuale.`
+          : `Hai ${h}h, poi il posto torna in lista.`)
+    : (up ? `You have ${h}h: after that the price goes up to ${euro(tierTotal(ev, nx))}.\nWe pay for everything up front ourselves, so we really need it on time.`
+          : `You have ${h}h, then your place goes back to the list.`);
+};
 const payNowText = (ev, g, pay) => isIt(g)
   ? `Oggi è la serata, quindi paga ${euro(pay)} subito con un bonifico istantaneo.\n\nPoi manda qui in chat lo screenshot del bonifico.`
   : `Today is the party, so please pay ${euro(pay)} right now with a bonifico istantaneo.\n\nThen send the screenshot of the bonifico here in this chat.`;
@@ -1112,11 +1122,11 @@ async function igStatusDms(env) {
     const pay = await payableNow(env, ev, g);
     const free = g.status === "paid" && Number(g.price) === 0 && g.ig_sent !== "paid";
     const text = (isIt(g) ? {
-      approved: isPartyDay(ev) ? `Sei dentro, ${first}! ${payNowText(ev, g, pay)}` : `Sei dentro, ${first}! Paga ${euro(pay)} per bloccare il tuo posto.`,
+      approved: isPartyDay(ev) ? `Sei dentro, ${first}! ${payNowText(ev, g, pay)}` : `Sei dentro, ${first}! Paga ${euro(pay)} per bloccare il tuo posto.\n${payFastText(ev, g)}`,
       released: g.event === ev.tag ? `Il tuo posto è stato riassegnato, il pagamento non è arrivato entro la scadenza.\nRichiedi di nuovo per tornare in lista d'attesa.` : null,
       paid: g.ticket === "crew" ? `Sei nella crew, ${first}.` : free ? `Sei dentro, ${first}. Ingresso gratis.` : `Pagamento ricevuto. Ci sei, ${first}!`,
     } : {
-      approved: isPartyDay(ev) ? `You're in, ${first}! ${payNowText(ev, g, pay)}` : `You're in, ${first}! Pay ${euro(pay)} to lock in your place.`,
+      approved: isPartyDay(ev) ? `You're in, ${first}! ${payNowText(ev, g, pay)}` : `You're in, ${first}! Pay ${euro(pay)} to lock in your place.\n${payFastText(ev, g)}`,
       released: g.event === ev.tag ? `Your spot has been reassigned, payment was not received before the deadline.\nSign up again to get back on the waitlist.` : null,
       paid: g.ticket === "crew" ? `You're on the crew, ${first}.` : free ? `You're in, ${first}. Free entry.` : `Payment received. You're going, ${first}!`,
     })[g.status] || null;
@@ -1153,6 +1163,17 @@ async function igReminders(env) {
     const ms = Number(g.deadline) - Date.now();
     const mins = Math.max(1, Math.floor(ms / 6e4)), left = mins >= 60 ? `${Math.floor(mins / 60)}h` : `${mins} min`;
     const nx = NEXT_TIER[g.ticket], up = nx && Number(ev["price_" + nx]) > Number(g.price);
+    // an accepted PR who is still recruiting gets pushed on the invites, not on the money: they pay last
+    const st = await prStateFor(env, ev, g.ig);
+    if (st && st.state === "ok" && st.counted < st.need) {
+      const url = `perugiaparty.com/pr/${st.slug}`;
+      const prText = isIt(g)
+        ? `Sei PR, ${String(g.name || "").split(" ")[0]}. Ti mancano ${st.need - st.counted} amici nuovi che pagano e hai ${euro(st.off)} in meno sul biglietto.\nIl tuo link: ${url} (${st.counted}/${st.need})\nPaghi tu alla fine.`
+        : `You're a PR, ${String(g.name || "").split(" ")[0]}. ${st.need - st.counted} more new friends who pay and ${euro(st.off)} comes off your ticket.\nYour link: ${url} (${st.counted}/${st.need})\nYou pay last.`;
+      const okPr = await igSend(env, ev, g.igsid, prText);
+      if (!okPr) await env.DB.prepare("UPDATE guests SET ig_fail = 1 WHERE token = ?").bind(g.token).run();
+      continue;
+    }
     const text = isIt(g)
       ? (isPartyDay(ev) ? `Pagamento non ancora ricevuto. ${payNowText(ev, g, pay)}` : ms > 0
         ? `Pagamento non ancora ricevuto. Hai ancora ${left} per pagare ${euro(pay)}.\n${up ? `Dopo la scadenza il prezzo sale a ${euro(tierTotal(ev, nx))}.` : "Dopo la scadenza il posto viene liberato."}`
@@ -1169,6 +1190,8 @@ async function igReminders(env) {
 // When a deadline passes the price moves up one round and they get a new deadline with a reminder.
 // After the late round nothing moves any more: the place is released by hand from the admin.
 const NEXT_TIER = { early: "normal", normal: "late" };
+/* accepted PRs are left alone by the automatic chase: their job is to bring four, and they pay last */
+const NOT_A_PR = "AND lower(ig) NOT IN (SELECT lower(ig) FROM pr WHERE event = ? AND status = 'ok')";
 const tierHours = (ev, t) => Number(ev["hours_" + t]) || { early: 84, normal: 60, late: 24 }[t] || 24;
 async function repriceStep(env) {
   const ev = await getEvent(env);
@@ -1179,8 +1202,8 @@ async function repriceStep(env) {
     if (!(price > 0)) continue;
     let dl = now + tierHours(ev, to) * 36e5;
     if (Number.isFinite(start) && start > now) dl = Math.min(dl, start);
-    await env.DB.prepare("UPDATE guests SET ticket = ?, price = ?, deadline = ?, remind_req = ? WHERE event = ? AND status = 'approved' AND ticket = ? AND deadline IS NOT NULL AND deadline < ? AND COALESCE(price, 0) < ?")
-      .bind(to, price, dl, now, ev.tag, from, now, price).run();
+    await env.DB.prepare("UPDATE guests SET ticket = ?, price = ?, deadline = ?, remind_req = ? WHERE event = ? AND status = 'approved' AND ticket = ? AND deadline IS NOT NULL AND deadline < ? AND COALESCE(price, 0) < ? " + NOT_A_PR)
+      .bind(to, price, dl, now, ev.tag, from, now, price, ev.tag).run();
   }
 }
 
@@ -1192,8 +1215,8 @@ async function warnSoon(env) {
   const now = Date.now();
   await env.DB.prepare(
     "UPDATE guests SET warned = deadline, remind_req = ? WHERE event = ? AND status = 'approved' AND ticket IN ('early','normal') " +
-    "AND deadline IS NOT NULL AND deadline > ? AND deadline <= ? AND COALESCE(warned, 0) <> deadline"
-  ).bind(now, ev.tag, now, now + 24 * 36e5).run();
+    "AND deadline IS NOT NULL AND deadline > ? AND deadline <= ? AND COALESCE(warned, 0) <> deadline " + NOT_A_PR
+  ).bind(now, ev.tag, now, now + 24 * 36e5, ev.tag).run();
 }
 
 async function tickIfDue(env) {

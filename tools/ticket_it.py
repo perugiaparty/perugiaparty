@@ -167,12 +167,14 @@ PAIRS = [
 
     # ---------- confirming the Instagram account ----------
     ('DM this code to', 'Manda questo codice a'),
-    ("Send us this code on Instagram. Until then your request doesn't count.",
-     'Mandaci questo codice su Instagram. Fino ad allora la richiesta non vale.'),
+    ("Copy this code and paste it to us on Instagram. Until then your request doesn't count.",
+     'Copia questo codice e mandacelo su Instagram. Fino ad allora la richiesta non vale.'),
     ('Send us your code on Instagram.', 'Mandaci il tuo codice su Instagram.'),
     ('You get an automatic reply within a minute.', 'Ricevi una risposta automatica entro un minuto.'),
     ('We confirm it as soon as we see it.', 'Confermiamo appena lo vediamo.'),
-    ('Send code on Instagram', 'Manda il codice su Instagram'),
+    ('Copy code and open Instagram', 'Copia il codice e apri Instagram'),
+    ('"Code copied, paste it in the chat"', '"Codice copiato, incollalo in chat"'),
+    ('"Opening Instagram..."', '"Apro Instagram..."'),
     ('Instagram confirmed', 'Instagram confermato'),
     ('Wrong Instagram or code', 'Instagram o codice sbagliato'),
     ('We got this code from a different Instagram account. Send it from',
