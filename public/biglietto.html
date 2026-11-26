@@ -992,7 +992,9 @@ function receiptHTML(d, tierName, fee, country, off){
     ${country ? copyLine("BANCA", country, country.replace(/ \([A-Z]{2}\)$/, "")) : ""}
     ${copyLine("CAUSALE", d.reference, d.reference, true)}
     ${d.deadline ? `<div class="rc-dl${d.deadline < Date.now() ? " late" : ""}" id="pay-left" data-dl="${d.deadline}">${payLeftHTML(d.deadline)}</div>` : ""}
-    ${d.deadline ? `<p class="rc-after">${d.next_total ? `Poi il prezzo sale a ${euro(d.next_total)}, con altre ${d.next_hours}h per pagare.` : `Poi il posto torna in lista.`}</p>` : ""}
+    ${d.deadline ? `<p class="rc-after">${d.next_total ? `Poi il prezzo sale a ${euro(d.next_total)}, con altre ${d.next_hours}h per pagare.`
+      : d.price_held ? `Il tuo prezzo resta questo. Quando i tuoi amici hanno pagato, hai ${euro((d.pr_rules && d.pr_rules.off) || 5)} in meno.`
+      : `Poi il posto torna in lista.`}</p>` : ""}
   </section>`;
 }
 function copyLine(k, shown, value, wrap){

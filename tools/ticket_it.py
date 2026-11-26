@@ -128,6 +128,8 @@ PAIRS = [
     ("After that the price goes to ${euro(d.next_total)}, with ${d.next_hours}h more to pay.",
      "Poi il prezzo sale a ${euro(d.next_total)}, con altre ${d.next_hours}h per pagare."),
     ("After that your place goes back to the list.", "Poi il posto torna in lista."),
+    ("Your price stays as it is. When your friends have paid, ${euro((d.pr_rules && d.pr_rules.off) || 5)} comes off.",
+     "Il tuo prezzo resta questo. Quando i tuoi amici hanno pagato, hai ${euro((d.pr_rules && d.pr_rules.off) || 5)} in meno."),
     ('Saved to your photos, it works without signal at the door.',
      "Salvato nelle foto, funziona anche senza rete all'ingresso."),
     ('Hold the ticket, then tap', 'Tieni premuto sul biglietto, poi tocca'),

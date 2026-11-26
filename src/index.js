@@ -725,6 +725,9 @@ async function apiTicket(url, env) {
   const ev = (await getEvent(env)) || {};
   const sameEvent = ev.tag === g.event;
   if (!g.vcode) { g.vcode = newVcode(g.event); await env.DB.prepare("UPDATE guests SET vcode = ? WHERE token = ? AND vcode IS NULL").bind(g.vcode, g.token).run(); }
+  // an accepted PR keeps the price they were given: nothing steps up for them
+  const prHere = sameEvent ? await prStateFor(env, ev, g.ig) : null;
+  const prOk = !!(prHere && prHere.state === "ok");
   const out = { lang: g.lang === "it" ? "it" : "en", status: g.status, name: g.name, event: sameEvent ? ev.name : g.event, ig: g.ig, vcode: g.vcode, link: shortUrl(await shortFor(env, g), g.token), verified: Number(g.verified) === 1, mismatch: !!g.ig_mismatch, ig_auto: !!(ev.ig_token && ev.ig_app_secret) };
   if (g.status === "approved") {
     Object.assign(out, {
@@ -736,8 +739,9 @@ async function apiTicket(url, env) {
       approved_at: g.approved_at,
       deadline: Number(g.deadline) || null,
       // what happens when the clock runs out: the next round's total, or nothing after the last one
-      next_total: sameEvent && NEXT_TIER[g.ticket] && tierTotal(ev, NEXT_TIER[g.ticket]) > Number(g.price) ? tierTotal(ev, NEXT_TIER[g.ticket]) : null,
-      next_hours: sameEvent && NEXT_TIER[g.ticket] ? tierHours(ev, NEXT_TIER[g.ticket]) : null,
+      next_total: !prOk && sameEvent && NEXT_TIER[g.ticket] && tierTotal(ev, NEXT_TIER[g.ticket]) > Number(g.price) ? tierTotal(ev, NEXT_TIER[g.ticket]) : null,
+      next_hours: !prOk && sameEvent && NEXT_TIER[g.ticket] ? tierHours(ev, NEXT_TIER[g.ticket]) : null,
+      price_held: prOk,
       date_label: sameEvent ? ev.date_label : null,
       tiers: sameEvent ? { early: ev.price_early, normal: ev.price_normal, late: ev.price_late } : null, // expiry dates stay admin-only
     });
@@ -1097,9 +1101,13 @@ const isPartyDay = (ev) => { const st = Date.parse(ev.starts_at); return Number.
 // Every automatic message follows the language the guest signed up in.
 const isIt = (g) => g && g.lang === "it";
 /* why the clock matters: we pay everything before the night out of our own pocket */
-const payFastText = (ev, g) => {
+const payFastText = (ev, g, pr) => {
   const nx = NEXT_TIER[g.ticket], h = tierHours(ev, g.ticket);
   const up = nx && tierTotal(ev, nx) > Number(g.price);
+  // a PR keeps their price whatever happens: they are chased on the invites, not on the clock
+  if (pr && pr.state === "ok") return isIt(g)
+    ? `Il tuo prezzo resta questo. Quando ${pr.need} amici nuovi hanno pagato, hai ${euro(pr.off)} in meno.`
+    : `Your price stays as it is. When ${pr.need} new friends have paid, ${euro(pr.off)} comes off.`;
   return isIt(g)
     ? (up ? `Hai ${h}h: dopo la scadenza il prezzo sale a ${euro(tierTotal(ev, nx))}.\nPaghiamo tutto in anticipo di tasca nostra, quindi ci serve puntuale.`
           : `Hai ${h}h, poi il posto torna in lista.`)
@@ -1120,13 +1128,14 @@ async function igStatusDms(env) {
   for (const g of rows) {
     const first = String(g.name || "").split(" ")[0];
     const pay = await payableNow(env, ev, g);
+    const prSt = await prStateFor(env, ev, g.ig);
     const free = g.status === "paid" && Number(g.price) === 0 && g.ig_sent !== "paid";
     const text = (isIt(g) ? {
-      approved: isPartyDay(ev) ? `Sei dentro, ${first}! ${payNowText(ev, g, pay)}` : `Sei dentro, ${first}! Paga ${euro(pay)} per bloccare il tuo posto.\n${payFastText(ev, g)}`,
+      approved: isPartyDay(ev) ? `Sei dentro, ${first}! ${payNowText(ev, g, pay)}` : `Sei dentro, ${first}! Paga ${euro(pay)} per bloccare il tuo posto.\n${payFastText(ev, g, prSt)}`,
       released: g.event === ev.tag ? `Il tuo posto è stato riassegnato, il pagamento non è arrivato entro la scadenza.\nRichiedi di nuovo per tornare in lista d'attesa.` : null,
       paid: g.ticket === "crew" ? `Sei nella crew, ${first}.` : free ? `Sei dentro, ${first}. Ingresso gratis.` : `Pagamento ricevuto. Ci sei, ${first}!`,
     } : {
-      approved: isPartyDay(ev) ? `You're in, ${first}! ${payNowText(ev, g, pay)}` : `You're in, ${first}! Pay ${euro(pay)} to lock in your place.\n${payFastText(ev, g)}`,
+      approved: isPartyDay(ev) ? `You're in, ${first}! ${payNowText(ev, g, pay)}` : `You're in, ${first}! Pay ${euro(pay)} to lock in your place.\n${payFastText(ev, g, prSt)}`,
       released: g.event === ev.tag ? `Your spot has been reassigned, payment was not received before the deadline.\nSign up again to get back on the waitlist.` : null,
       paid: g.ticket === "crew" ? `You're on the crew, ${first}.` : free ? `You're in, ${first}. Free entry.` : `Payment received. You're going, ${first}!`,
     })[g.status] || null;
