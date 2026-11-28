@@ -39,12 +39,10 @@ PAIRS = [
     ("Come to ${(window.__d && window.__d.event) || \"PerugiaParty\"} with me: ${url}",
      "Vieni a ${(window.__d && window.__d.event) || \"PerugiaParty\"} con me: ${url}"),
 
-    ('It is what makes the night possible: the venue, the music, the people working the door and the bar, and the system that gets you in. No ticketing platform takes a cut here.',
-     'E\u0300 quello che rende possibile la serata: il locale, la musica, le persone alla porta e al bar, e il sistema che ti fa entrare. Qui nessuna piattaforma di biglietti prende una percentuale.'),
-    ('" This is the lowest fee of the night, because booking early is what lets us book all of that."',
-     '" \u00c8 il costo pi\u00f9 basso della serata, perch\u00e9 prenotare presto \u00e8 quello che ci permette di organizzare il bar."'),
-    ('" It is the highest now, because a place this close to the night is the most work to arrange."',
-     '" Adesso \u00e8 il pi\u00f9 alto, perch\u00e9 un posto cos\u00ec vicino alla serata \u00e8 quello che costa pi\u00f9 lavoro."'),
+    ('Service costs: the booking, the site and the payment. None of it is profit, it goes into the night.',
+     'Costi di servizio: la prenotazione, il sito e il pagamento. Non ci guadagniamo niente, va tutto nella serata.'),
+    ('" This round has the lowest one."', '" In questo turno \u00e8 il pi\u00f9 basso."'),
+    ('" This round has the highest one."', '" In questo turno \u00e8 il pi\u00f9 alto."'),
 
     ('"EARLY SERVICE FEE"', '"COSTI DI SERVIZIO EARLY"'),
     ('"LAST MINUTE SERVICE FEE"', '"COSTI DI SERVIZIO LAST MINUTE"'),

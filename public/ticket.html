@@ -963,11 +963,11 @@ function whenWhereHTML(d){
 const FIFTH = { f: "You're the fifth.", m: "You're the fifth.", n: "You're the fifth." };
 const FEE_LABEL = { early: "EARLY SERVICE FEE", normal: "SERVICE FEE", late: "LAST MINUTE SERVICE FEE" };
 /* why there is a fee at all, said plainly, with the reason this round costs what it costs */
-const FEE_WHY = "It is what makes the night possible: the venue, the music, the people working the door and the bar, and the system that gets you in. No ticketing platform takes a cut here.";
+const FEE_WHY = "Service costs: the booking, the site and the payment. None of it is profit, it goes into the night.";
 const FEE_INFO = {
-  early: FEE_WHY + " This is the lowest fee of the night, because booking early is what lets us book all of that.",
+  early: FEE_WHY + " This round has the lowest one.",
   normal: FEE_WHY,
-  late: FEE_WHY + " It is the highest now, because a place this close to the night is the most work to arrange.",
+  late: FEE_WHY + " This round has the highest one.",
 };
 function receiptHTML(d, tierName, fee, country, off){
   off = Math.max(0, Number(off) || 0);
